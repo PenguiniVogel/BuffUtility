@@ -168,7 +168,7 @@ module BuffUtility {
      * @private
      */
     function convertMarketPrice(): void {
-        let elements: NodeListOf<Element> = document.querySelectorAll('li p:not([converted]) strong.f_Strong, td div:not([converted]) strong.f_Strong');
+        let elements: NodeListOf<Element> = document.querySelectorAll('li p:not([converted]) strong.f_Strong, td div:not([converted]) strong.f_Strong, .list_tb_csgo td:not([converted]) strong.f_Strong');
 
         for (let i = 0, l = elements.length; i < l; i ++) {
             let strong: HTMLElement = <HTMLElement>elements.item(i);
