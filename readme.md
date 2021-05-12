@@ -2,6 +2,14 @@
 
 ---
 
+Supported browsers
+* Chrome
+* Opera
+
+and any others that support chrome extensions.
+
+---
+
 Have you ever looked at your selling page and wondered, how much am I getting for this?
 Yes me neither, yet I still made this.
 
