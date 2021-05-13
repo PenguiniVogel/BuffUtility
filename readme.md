@@ -58,3 +58,5 @@ If you wish your currency was added to this, please open a GitHub Issue.
 List of currently supported currencies:
 * USD
 * EUR
+* AUD
+* INR
