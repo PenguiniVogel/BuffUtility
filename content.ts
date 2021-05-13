@@ -31,8 +31,10 @@ module BuffUtility {
      * @private
      */
     const currencyTable: { [name: string]: [string, number] } = {
-        'USD': ['$', 0.16],
-        'EUR': ['€', 0.13]
+        'USD': ['$' ,  0.16],
+        'EUR': ['€' ,  0.13],
+        'AUD': ['A$',  0.20],
+        'INR': ['₹' , 11.39]
     };
 
     /**
@@ -168,7 +170,15 @@ module BuffUtility {
      * @private
      */
     function convertMarketPrice(): void {
-        let elements: NodeListOf<Element> = document.querySelectorAll('li p:not([converted]) strong.f_Strong, td div:not([converted]) strong.f_Strong, .list_tb_csgo td:not([converted]) strong.f_Strong');
+        const selectors: string[] = [
+            'li p:not([converted]) strong.f_Strong',
+            'td div:not([converted]) strong.f_Strong',
+            '.list_tb_csgo td:not([converted]) strong.f_Strong',
+            'h4:not([converted]) #navbar-cash-amount',
+            'div:not([converted]) > #alipay_amount'
+        ];
+
+        let elements: NodeListOf<Element> = document.querySelectorAll(selectors.join(', '));
 
         for (let i = 0, l = elements.length; i < l; i ++) {
             let strong: HTMLElement = <HTMLElement>elements.item(i);
