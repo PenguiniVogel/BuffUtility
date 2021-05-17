@@ -26,22 +26,106 @@ module Cookie {
  */
 module BuffUtility {
 
+    interface CurrencyRates {
+        date: string,
+        rates: {
+            [name: string]: number
+        }
+    }
+
+    const CONVERTED: string = 'converted';
+    const NOT: string = `:not([${CONVERTED}])`;
+
+    const _BuffUtility_HOVER = 'data-buff-utility-target="converted-hover-currency"';
+
     /**
-     * The currency symbol and conversion table
+     * pattern: the url pattern
+     * queries: the queries to convert
      * @private
      */
-    const currencyTable: { [name: string]: [string, number] } = {
-        'USD': ['$' ,  0.16],
-        'EUR': ['€' ,  0.13],
-        'AUD': ['A$',  0.20],
-        'INR': ['₹' , 11.39]
-    };
+    const selectors: { pattern: RegExp, queries: string[], ignoreLog?: boolean }[] = [
+        {
+            pattern: /^.*buff.163.com.*$/,
+            queries: [
+                `h4${NOT} > #navbar-cash-amount`
+            ]
+        },
+        {
+            pattern: /^.*buff.163.com\/user-center\/asset\/recharge.*$/,
+            queries: [
+                `div${NOT} > #alipay_amount`,
+                `div${NOT} > #cash_amount`,
+                `div${NOT} > #frozen_amount`
+            ]
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/(buy_order\/to_create)?\?game=.*$/,
+            queries: [
+                `#j_list_card > ul > li > p${NOT} > strong.f_Strong`
+            ]
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/buy_order\/to_create\?game=.*$/,
+            queries: [
+                `td > ul > li${NOT} > strong.f_Strong.sell-MinPrice`,
+                `td > ul > li${NOT} > strong.f_Strong.buy-MaxPrice`
+            ]
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/buy_order\/to_create\?game=.*$/,
+            queries: [
+                `tr > td > span.f_Strong.total_amount`
+            ],
+            ignoreLog: true
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/goods\?.*tab=(?:selling|buying).*$/,
+            queries: [
+                `.list_tb_csgo > tr > td > div${NOT} > strong.f_Strong`
+            ]
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/(?:goods\?.*tab=history.*|sell_order\/history.*|buy_order\/(?:wait_supply|supplied).*)$/,
+            queries: [
+                `.list_tb_csgo > tr > td${NOT} > strong.f_Strong`
+            ]
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/sell_order\/to_deliver.*$/,
+            queries: [
+                `.list_tb_csgo > tr > td${NOT} > strong.f_Strong`
+            ],
+            ignoreLog: true
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/sell_order\/stat.*$/,
+            queries: [
+                `#j_sold-count > div.count-item > ul > li${NOT}:first-child > h5`
+            ]
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/steam_inventory.*$/,
+            queries: [
+                `#j_list_card > ul > li > p${NOT} > strong.f_Strong`
+            ]
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/steam_inventory.*$/,
+            queries: [
+                `.list_tb-body tr > td${NOT} > strong.f_Strong`,
+                `p > span.f_Strong.real_income`
+            ],
+            ignoreLog: true
+        }
+    ];
 
     /**
      * Stores the currently selected currency
      * @private
      */
-    let selectedCurrency: number = 0;
+    let selectedCurrency: string = 'USD';
+
+    let cachedCurrencyRates: CurrencyRates;
 
     /**
      * Stores the select element
@@ -51,14 +135,14 @@ module BuffUtility {
     export function init(): void {
         console.info('[BuffUtility] Initialized.');
 
-        let cookieValue: number = 0;
+        let cookieValue: string = 'USD';
 
         try {
-            cookieValue = parseInt(Cookie.read(Cookie.KEY_BUFF_UTILITY_SELECTED_CURRENCY));
+            cookieValue = Cookie.read(Cookie.KEY_BUFF_UTILITY_SELECTED_CURRENCY);
         } catch {
             console.info('[BuffUtility] Cookie was not found.');
 
-            Cookie.write(Cookie.KEY_BUFF_UTILITY_SELECTED_CURRENCY, '0');
+            Cookie.write(Cookie.KEY_BUFF_UTILITY_SELECTED_CURRENCY, 'USD');
         }
 
         selectedCurrency = cookieValue;
@@ -66,10 +150,10 @@ module BuffUtility {
         addCurrencySelection();
 
         setInterval(() => {
+            convertSelectors();
+
             if (window.location.href.indexOf('/sell_order/on_sale') > -1) {
                 convertSellPrice();
-            } else {
-                convertMarketPrice();
             }
         }, 1000);
     }
@@ -79,33 +163,48 @@ module BuffUtility {
      * @private
      */
     function addCurrencySelection(): void {
-        let nav: HTMLElement = <HTMLElement>document.querySelector('div.nav.nav_entries');
+        let req = new XMLHttpRequest();
 
-        let currencyDiv: HTMLElement = document.createElement('div');
-        currencyDiv.setAttribute('style', 'position: relative; float: right;');
+        req.onreadystatechange = () => {
+            if (req.readyState == 4 && req.status == 200) {
+                if (typeof req.response == 'object') {
+                    cachedCurrencyRates = req.response;
+                } else {
+                    cachedCurrencyRates = JSON.parse(req.responseText);
+                }
 
-        let options: string = '';
+                let options: string = '';
 
-        let currencies: string[] = Object.keys(currencyTable);
-        for (let i = 0, l = currencies.length; i < l; i ++) {
-            options += `<option${(i == selectedCurrency ? ' selected' : '')}>${currencies[i]}</option>`;
+                let keys = Object.keys(cachedCurrencyRates.rates);
+                for (let l_Key of keys) {
+                    options += `<option${(l_Key.indexOf(selectedCurrency) > -1 ? ' selected' : '')}>${l_Key}</option>`;
+                }
+
+                let nav: HTMLElement = <HTMLElement>document.querySelector('div.nav.nav_entries');
+
+                let currencyDiv: HTMLElement = document.createElement('div');
+                currencyDiv.setAttribute('style', 'position: relative; float: right;');
+
+                currencySelection = document.createElement('select');
+
+                currencySelection.innerHTML = options;
+
+                currencySelection.onchange = () => {
+                    console.info(`[BuffUtility] Currency changed -> ${currencySelection.selectedOptions.item(0).innerText}`);
+
+                    Cookie.write(Cookie.KEY_BUFF_UTILITY_SELECTED_CURRENCY, `${currencySelection.selectedOptions.item(0).innerText}`);
+
+                    updateConvertedCurrency();
+                };
+
+                currencyDiv.append(currencySelection);
+
+                nav.prepend(currencyDiv);
+            }
         }
 
-        currencySelection = document.createElement('select');
-
-        currencySelection.innerHTML = options;
-
-        currencySelection.onchange = () => {
-            console.info(`[BuffUtility] Currency changed -> ${currencySelection.selectedOptions.item(0).innerText}`);
-
-            Cookie.write(Cookie.KEY_BUFF_UTILITY_SELECTED_CURRENCY, `${currencySelection.selectedIndex}`);
-
-            updateConvertedCurrency();
-        };
-
-        currencyDiv.append(currencySelection);
-
-        nav.prepend(currencyDiv);
+        req.open('GET', 'https://felixvogel.github.io/currency-repository/rates.json');
+        req.send();
     }
 
     /**
@@ -116,7 +215,7 @@ module BuffUtility {
     function convertCurrency(yuan: number): string {
         let selectedCur: string = currencySelection.selectedOptions?.item(0)?.innerText ?? 'USD';
 
-        return `~${currencyTable[selectedCur][0]} ${(yuan * currencyTable[selectedCur][1]).toFixed(2)}`;
+        return `~${selectedCur} ${(yuan * cachedCurrencyRates.rates[selectedCur])}`;
     }
 
     /**
@@ -126,7 +225,7 @@ module BuffUtility {
      * @private
      */
     function createCurrencyHoverContainer(text: string, yuan: number): string {
-        return `<e title="${convertCurrency(yuan)}" data-du-target="converted-hover-currency">${text}</e>`;
+        return `<e title="${convertCurrency(yuan)}" ${_BuffUtility_HOVER}>${text}</e>`;
     }
 
     /**
@@ -135,7 +234,7 @@ module BuffUtility {
      * @private
      */
     function readYuan(element: HTMLElement): number {
-        let priceString: string = element.innerHTML.replace(/¥|<small>|<\/small>/g, '').trim();
+        let priceString: string = element.innerHTML.replace(/¥|<\/?small>|<\/?big>/g, '').trim();
 
         let price: number = 0.0;
         try {
@@ -152,7 +251,7 @@ module BuffUtility {
      * @private
      */
     function convertSellPrice(): void {
-        let elements: NodeListOf<Element> = document.querySelectorAll('p:not([converted]) strong.sell_order_price');
+        let elements: NodeListOf<Element> = document.querySelectorAll('#j_list_card p:not([converted]) > strong.sell_order_price');
 
         for (let i = 0, l = elements.length; i < l; i ++) {
             let priceElement: HTMLElement = <HTMLElement>elements.item(i);
@@ -160,7 +259,10 @@ module BuffUtility {
 
             let price: number = readYuan(priceElement) * 0.975;
 
-            parent.setAttribute('converted', '');
+            parent.setAttribute(CONVERTED, '');
+
+            parent.setAttribute('style', 'margin-top: -5px; display: grid; grid-template-columns: auto; grid-template-rows: auto auto;');
+
             parent.innerHTML += `<strong style="color: #eea20e; font-size: 11px;">${createCurrencyHoverContainer(`(¥ ${price.toFixed(2)})`, price)}</strong>`;
         }
     }
@@ -169,26 +271,30 @@ module BuffUtility {
      * Adds the converted currency to each listing on the market
      * @private
      */
-    function convertMarketPrice(): void {
-        const selectors: string[] = [
-            'li p:not([converted]) strong.f_Strong',
-            'td div:not([converted]) strong.f_Strong',
-            '.list_tb_csgo td:not([converted]) strong.f_Strong',
-            'h4:not([converted]) #navbar-cash-amount',
-            'div:not([converted]) > #alipay_amount'
-        ];
+    function convertSelectors(): void {
+        for (let l_Selector of selectors) {
+            if (l_Selector.pattern.test(window.location.href)) {
+                let elements: NodeListOf<Element> = document.querySelectorAll(l_Selector.queries.join(', '));
 
-        let elements: NodeListOf<Element> = document.querySelectorAll(selectors.join(', '));
+                if (elements.length > 0) {
+                    if (!l_Selector.ignoreLog) {
+                        console.info(`[BuffUtility] Converting ${elements.length} element(s).`, l_Selector);
+                    }
+                } else {
+                    continue;
+                }
 
-        for (let i = 0, l = elements.length; i < l; i ++) {
-            let strong: HTMLElement = <HTMLElement>elements.item(i);
-            let parent: HTMLElement = strong.parentElement;
+                for (let i = 0, l = elements.length; i < l; i ++) {
+                    let strong: HTMLElement = <HTMLElement>elements.item(i);
+                    let parent: HTMLElement = strong.parentElement;
 
-            parent.setAttribute('converted', '');
+                    parent.setAttribute(CONVERTED, '');
 
-            let price: number = readYuan(strong);
+                    let price: number = readYuan(strong);
 
-            strong.innerHTML = createCurrencyHoverContainer(strong.innerHTML, price);
+                    strong.innerHTML = createCurrencyHoverContainer(strong.innerHTML, price);
+                }
+            }
         }
     }
 
@@ -198,9 +304,9 @@ module BuffUtility {
      */
     function updateConvertedCurrency(): void {
         convertSellPrice();
-        convertMarketPrice();
+        convertSelectors();
 
-        let hovers: NodeListOf<Element> = document.querySelectorAll('e[data-du-target="converted-hover-currency"]');
+        let hovers: NodeListOf<Element> = document.querySelectorAll(`e[${_BuffUtility_HOVER}]`);
 
         for (let i = 0, l = hovers.length; i < l; i ++) {
             let e: HTMLElement = <HTMLElement>hovers.item(i);
