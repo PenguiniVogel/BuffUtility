@@ -125,6 +125,14 @@ module BuffUtility {
                 `p > span.f_Strong.real_income`
             ],
             ignoreLog: true
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/sell_order\/on_sale.*$/,
+            queries: [
+                `p > span.f_Strong.real_income`,
+                `#popup-container .list_tb_csgo td${NOT} > strong.f_Strong`
+            ],
+            ignoreLog: true
         }
     ];
 
@@ -161,8 +169,12 @@ module BuffUtility {
         setInterval(() => {
             convertSelectors();
 
-            if (window.location.href.indexOf('/sell_order/on_sale') > -1) {
-                convertSellPrice();
+            if (/^.*buff.163.com\/market\/sell_order\/on_sale.*$/.test(window.location.href)) {
+                addAfterFeeGain();
+            }
+
+            if (/^.*buff.163.com\/market\/goods\?.*tab=buying.*$/.test(window.location.href)) {
+                addBuyOrderGain();
             }
         }, 1000);
     }
@@ -261,8 +273,8 @@ module BuffUtility {
      * Converts the selling price to the actual sum you receive with included conversion
      * @private
      */
-    function convertSellPrice(): void {
-        let elements: NodeListOf<Element> = document.querySelectorAll('#j_list_card p:not([converted]) > strong.sell_order_price');
+    function addAfterFeeGain(): void {
+        let elements: NodeListOf<Element> = document.querySelectorAll(`#j_list_card p${NOT} > strong.sell_order_price`);
 
         for (let i = 0, l = elements.length; i < l; i ++) {
             let priceElement: HTMLElement = <HTMLElement>elements.item(i);
@@ -275,6 +287,23 @@ module BuffUtility {
             parent.setAttribute('style', 'margin-top: -5px; display: grid; grid-template-columns: auto; grid-template-rows: auto auto;');
 
             parent.innerHTML += `<strong style="color: #eea20e; font-size: 11px;">${createCurrencyHoverContainer(`(¥ ${price.toFixed(2)})`, price)}</strong>`;
+        }
+    }
+
+    function addBuyOrderGain(): void {
+        const NOT_BO = 'data-buff-utility-bo-converted';
+        let elements: NodeListOf<Element> = document.querySelectorAll(`.list_tb_csgo > tr > td > div:not([${NOT_BO}]) > strong.f_Strong`);
+
+        for (let i = 0, l = elements.length; i < l; i ++) {
+            let baseElement: HTMLElement = <HTMLElement>elements.item(i);
+            let priceElement: HTMLElement = baseElement.querySelector('e');
+            let parent: HTMLElement = baseElement.parentElement;
+
+            let price: number = readYuan(priceElement) * 0.975;
+
+            parent.setAttribute(NOT_BO, '');
+
+            parent.innerHTML += `<div style="font-size: 12px; margin-top: 3px;" class="f_Strong">${createCurrencyHoverContainer(`(¥ ${price.toFixed(2)})`, price)}</div>`;
         }
     }
 
@@ -314,7 +343,7 @@ module BuffUtility {
      * @private
      */
     function updateConvertedCurrency(): void {
-        convertSellPrice();
+        addAfterFeeGain();
         convertSelectors();
 
         let hovers: NodeListOf<Element> = document.querySelectorAll(`e[${_BuffUtility_HOVER}]`);
