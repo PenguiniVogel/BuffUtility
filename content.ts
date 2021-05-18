@@ -29,7 +29,8 @@ module BuffUtility {
     interface CurrencyRates {
         date: string,
         rates: {
-            [name: string]: number
+            //symbol: [rate, decimals]
+            [name: string]: [number, number]
         }
     }
 
@@ -79,10 +80,18 @@ module BuffUtility {
             ignoreLog: true
         },
         {
-            pattern: /^.*buff.163.com\/market\/goods\?.*tab=(?:selling|buying).*$/,
+            pattern: /^.*buff.163.com\/market\/goods\?.*(?:tab=(?:selling|buying))?.*$/,
             queries: [
-                `.list_tb_csgo > tr > td > div${NOT} > strong.f_Strong`
+                `.list_tb_csgo > tr > td > div${NOT} > strong.f_Strong`,
+                `#j_popup_supply_sell_preview td > ul > li:nth-child(2) > span${NOT}.f_Strong > span`
             ]
+        },
+        {
+            pattern: /^.*buff.163.com\/market\/goods\?.*(?:tab=(?:selling|buying))?.*$/,
+            queries: [
+                `#supply_sell_total_price`
+            ],
+            ignoreLog: true
         },
         {
             pattern: /^.*buff.163.com\/market\/(?:goods\?.*tab=history.*|sell_order\/history.*|buy_order\/(?:wait_supply|supplied).*)$/,
@@ -190,9 +199,11 @@ module BuffUtility {
                 currencySelection.innerHTML = options;
 
                 currencySelection.onchange = () => {
-                    console.info(`[BuffUtility] Currency changed -> ${currencySelection.selectedOptions.item(0).innerText}`);
+                    selectedCurrency = currencySelection?.selectedOptions?.item(0)?.innerText ?? 'USD';
 
-                    Cookie.write(Cookie.KEY_BUFF_UTILITY_SELECTED_CURRENCY, `${currencySelection.selectedOptions.item(0).innerText}`);
+                    console.info(`[BuffUtility] Currency changed -> ${selectedCurrency}`, cachedCurrencyRates.rates[selectedCurrency]);
+
+                    Cookie.write(Cookie.KEY_BUFF_UTILITY_SELECTED_CURRENCY, `${selectedCurrency}`);
 
                     updateConvertedCurrency();
                 };
@@ -201,7 +212,7 @@ module BuffUtility {
 
                 nav.prepend(currencyDiv);
             }
-        }
+        };
 
         req.open('GET', 'https://felixvogel.github.io/currency-repository/rates.json');
         req.send();
@@ -213,9 +224,9 @@ module BuffUtility {
      * @private
      */
     function convertCurrency(yuan: number): string {
-        let selectedCur: string = currencySelection.selectedOptions?.item(0)?.innerText ?? 'USD';
+        let selectedRate: [number, number] = cachedCurrencyRates.rates[selectedCurrency];
 
-        return `~${selectedCur} ${(yuan * cachedCurrencyRates.rates[selectedCur])}`;
+        return `~${selectedCurrency} ${(yuan * selectedRate[0]).toFixed(selectedRate[1])}`;
     }
 
     /**
@@ -278,7 +289,7 @@ module BuffUtility {
 
                 if (elements.length > 0) {
                     if (!l_Selector.ignoreLog) {
-                        console.info(`[BuffUtility] Converting ${elements.length} element(s).`, l_Selector);
+                        console.info(`[BuffUtility] Converting ${elements.length} element(s).`, l_Selector, selectedCurrency, cachedCurrencyRates.rates[selectedCurrency]);
                     }
                 } else {
                     continue;
