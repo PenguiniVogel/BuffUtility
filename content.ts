@@ -94,7 +94,7 @@ module BuffUtility {
             ignoreLog: true
         },
         {
-            pattern: /^.*buff.163.com\/market\/(?:goods\?.*tab=history.*|sell_order\/history.*|buy_order\/(?:wait_supply|supplied).*)$/,
+            pattern: /^.*buff.163.com\/market\/(?:goods\?.*tab=history.*|sell_order\/history.*|buy_order\/(?:wait_supply|supplied|history).*)$/,
             queries: [
                 `.list_tb_csgo > tr > td${NOT} > strong.f_Strong`
             ]
