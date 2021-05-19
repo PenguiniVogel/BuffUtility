@@ -2,9 +2,13 @@
   "compilerOptions": {
     "target": "es3",
     "sourceMap": false,
-    "removeComments": true
+    "removeComments": true,
+    "outFile": "content.js"
   },
   "files": [
+    "sources/fRequest.ts",
+    "sources/Cookie.ts",
+    "sources/BuffUtility.ts",
     "content.ts"
   ]
 }
