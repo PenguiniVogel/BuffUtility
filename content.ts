@@ -34,10 +34,12 @@ module BuffUtility {
         }
     }
 
-    const CONVERTED: string = 'converted';
-    const NOT: string = `:not([${CONVERTED}])`;
+    const ATTR_CONVERTED_CURRENCY: string = 'data-buff-utility-converted-currency';
+    const ATTR_CONVERTED_BUY_ORDER: string = 'data-buff-utility-converted-buy-order';
+    const NOT_CONVERTED_CURRENCY: string = `:not([${ATTR_CONVERTED_CURRENCY}])`;
+    const NOT_CONVERTED_BUY_ORDER: string = `:not([${ATTR_CONVERTED_BUY_ORDER}])`;
 
-    const _BuffUtility_HOVER = 'data-buff-utility-target="converted-hover-currency"';
+    const BUFF_UTILITY_HOVER = 'data-buff-utility-target="converted-hover-currency"';
 
     /**
      * pattern: the url pattern
@@ -48,28 +50,28 @@ module BuffUtility {
         {
             pattern: /^.*buff.163.com.*$/,
             queries: [
-                `h4${NOT} > #navbar-cash-amount`
+                `h4${NOT_CONVERTED_CURRENCY} > #navbar-cash-amount`
             ]
         },
         {
             pattern: /^.*buff.163.com\/user-center\/asset\/recharge.*$/,
             queries: [
-                `div${NOT} > #alipay_amount`,
-                `div${NOT} > #cash_amount`,
-                `div${NOT} > #frozen_amount`
+                `div${NOT_CONVERTED_CURRENCY} > #alipay_amount`,
+                `div${NOT_CONVERTED_CURRENCY} > #cash_amount`,
+                `div${NOT_CONVERTED_CURRENCY} > #frozen_amount`
             ]
         },
         {
             pattern: /^.*buff.163.com\/market\/(buy_order\/to_create)?\?game=.*$/,
             queries: [
-                `#j_list_card > ul > li > p${NOT} > strong.f_Strong`
+                `#j_list_card > ul > li > p${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ]
         },
         {
             pattern: /^.*buff.163.com\/market\/buy_order\/to_create\?game=.*$/,
             queries: [
-                `td > ul > li${NOT} > strong.f_Strong.sell-MinPrice`,
-                `td > ul > li${NOT} > strong.f_Strong.buy-MaxPrice`
+                `td > ul > li${NOT_CONVERTED_CURRENCY} > strong.f_Strong.sell-MinPrice`,
+                `td > ul > li${NOT_CONVERTED_CURRENCY} > strong.f_Strong.buy-MaxPrice`
             ]
         },
         {
@@ -82,8 +84,8 @@ module BuffUtility {
         {
             pattern: /^.*buff.163.com\/market\/goods\?.*(?:tab=(?:selling|buying))?.*$/,
             queries: [
-                `.list_tb_csgo > tr > td > div${NOT} > strong.f_Strong`,
-                `#j_popup_supply_sell_preview td > ul > li:nth-child(2) > span${NOT}.f_Strong > span`
+                `.list_tb_csgo > tr > td > div${NOT_CONVERTED_CURRENCY} > strong.f_Strong`,
+                `#j_popup_supply_sell_preview td > ul > li:nth-child(2) > span${NOT_CONVERTED_CURRENCY}.f_Strong > span`
             ]
         },
         {
@@ -96,32 +98,32 @@ module BuffUtility {
         {
             pattern: /^.*buff.163.com\/market\/(?:goods\?.*tab=history.*|sell_order\/history.*|buy_order\/(?:wait_supply|supplied|history).*)$/,
             queries: [
-                `.list_tb_csgo > tr > td${NOT} > strong.f_Strong`
+                `.list_tb_csgo > tr > td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ]
         },
         {
             pattern: /^.*buff.163.com\/market\/sell_order\/to_deliver.*$/,
             queries: [
-                `.list_tb_csgo > tr > td${NOT} > strong.f_Strong`
+                `.list_tb_csgo > tr > td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ],
             ignoreLog: true
         },
         {
             pattern: /^.*buff.163.com\/market\/sell_order\/stat.*$/,
             queries: [
-                `#j_sold-count > div.count-item > ul > li${NOT}:first-child > h5`
+                `#j_sold-count > div.count-item > ul > li${NOT_CONVERTED_CURRENCY}:first-child > h5`
             ]
         },
         {
             pattern: /^.*buff.163.com\/market\/steam_inventory.*$/,
             queries: [
-                `#j_list_card > ul > li > p${NOT} > strong.f_Strong`
+                `#j_list_card > ul > li > p${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ]
         },
         {
             pattern: /^.*buff.163.com\/market\/steam_inventory.*$/,
             queries: [
-                `.list_tb-body tr > td${NOT} > strong.f_Strong`,
+                `.list_tb-body tr > td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`,
                 `p > span.f_Strong.real_income`
             ],
             ignoreLog: true
@@ -130,7 +132,7 @@ module BuffUtility {
             pattern: /^.*buff.163.com\/market\/sell_order\/on_sale.*$/,
             queries: [
                 `p > span.f_Strong.real_income`,
-                `#popup-container .list_tb_csgo td${NOT} > strong.f_Strong`
+                `#popup-container .list_tb_csgo td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ],
             ignoreLog: true
         }
@@ -170,7 +172,11 @@ module BuffUtility {
             convertSelectors();
 
             if (/^.*buff.163.com\/market\/sell_order\/on_sale.*$/.test(window.location.href)) {
-                addAfterFeeGain();
+                addSellingAfterFeeGain();
+            }
+
+            if (/^.*buff.163.com\/market\/sell_order\/history.*$/.test(window.location.href)) {
+                addBuyOrderGain();
             }
 
             if (/^.*buff.163.com\/market\/goods\?.*tab=buying.*$/.test(window.location.href)) {
@@ -248,7 +254,7 @@ module BuffUtility {
      * @private
      */
     function createCurrencyHoverContainer(text: string, yuan: number): string {
-        return `<e title="${convertCurrency(yuan)}" ${_BuffUtility_HOVER}>${text}</e>`;
+        return `<e title="${convertCurrency(yuan)}" ${BUFF_UTILITY_HOVER}>${text}</e>`;
     }
 
     /**
@@ -273,8 +279,8 @@ module BuffUtility {
      * Converts the selling price to the actual sum you receive with included conversion
      * @private
      */
-    function addAfterFeeGain(): void {
-        let elements: NodeListOf<Element> = document.querySelectorAll(`#j_list_card p${NOT} > strong.sell_order_price`);
+    function addSellingAfterFeeGain(): void {
+        let elements: NodeListOf<Element> = document.querySelectorAll(`#j_list_card p${NOT_CONVERTED_CURRENCY} > strong.sell_order_price`);
 
         for (let i = 0, l = elements.length; i < l; i ++) {
             let priceElement: HTMLElement = <HTMLElement>elements.item(i);
@@ -282,7 +288,7 @@ module BuffUtility {
 
             let price: number = readYuan(priceElement) * 0.975;
 
-            parent.setAttribute(CONVERTED, '');
+            parent.setAttribute(ATTR_CONVERTED_CURRENCY, '');
 
             parent.setAttribute('style', 'margin-top: -5px; display: grid; grid-template-columns: auto; grid-template-rows: auto auto;');
 
@@ -291,8 +297,7 @@ module BuffUtility {
     }
 
     function addBuyOrderGain(): void {
-        const NOT_BO = 'data-buff-utility-bo-converted';
-        let elements: NodeListOf<Element> = document.querySelectorAll(`.list_tb_csgo > tr > td > div:not([${NOT_BO}]) > strong.f_Strong`);
+        let elements: NodeListOf<Element> = document.querySelectorAll(`.list_tb_csgo > tr > td > div${NOT_CONVERTED_BUY_ORDER} > strong.f_Strong, .list_tb_csgo > tr > td${NOT_CONVERTED_BUY_ORDER} > strong.f_Strong`);
 
         for (let i = 0, l = elements.length; i < l; i ++) {
             let baseElement: HTMLElement = <HTMLElement>elements.item(i);
@@ -301,7 +306,7 @@ module BuffUtility {
 
             let price: number = readYuan(priceElement) * 0.975;
 
-            parent.setAttribute(NOT_BO, '');
+            parent.setAttribute(ATTR_CONVERTED_BUY_ORDER, '');
 
             parent.innerHTML += `<div style="font-size: 12px; margin-top: 3px;" class="f_Strong">${createCurrencyHoverContainer(`(¥ ${price.toFixed(2)})`, price)}</div>`;
         }
@@ -328,7 +333,7 @@ module BuffUtility {
                     let strong: HTMLElement = <HTMLElement>elements.item(i);
                     let parent: HTMLElement = strong.parentElement;
 
-                    parent.setAttribute(CONVERTED, '');
+                    parent.setAttribute(ATTR_CONVERTED_CURRENCY, '');
 
                     let price: number = readYuan(strong);
 
@@ -343,10 +348,10 @@ module BuffUtility {
      * @private
      */
     function updateConvertedCurrency(): void {
-        addAfterFeeGain();
+        addSellingAfterFeeGain();
         convertSelectors();
 
-        let hovers: NodeListOf<Element> = document.querySelectorAll(`e[${_BuffUtility_HOVER}]`);
+        let hovers: NodeListOf<Element> = document.querySelectorAll(`e[${BUFF_UTILITY_HOVER}]`);
 
         for (let i = 0, l = hovers.length; i < l; i ++) {
             let e: HTMLElement = <HTMLElement>hovers.item(i);
