@@ -11,6 +11,10 @@ module BuffUtility {
         }
     }
 
+    interface BuffUtilityOptions {
+        selectedCurrency: string
+    }
+
     const ATTR_CONVERTED_CURRENCY: string = 'data-buff-utility-converted-currency';
     const ATTR_CONVERTED_BUY_ORDER: string = 'data-buff-utility-converted-buy-order';
     const NOT_CONVERTED_CURRENCY: string = `:not([${ATTR_CONVERTED_CURRENCY}])`;
@@ -127,10 +131,12 @@ module BuffUtility {
     let loaded: boolean = false;
 
     /**
-     * Stores the currently selected currency
+     * The stored options
      * @private
      */
-    let selectedCurrency: string = 'USD';
+    let programOptions: BuffUtilityOptions = {
+        selectedCurrency: 'USD'
+    };
 
     /**
      * Stores the current currency rates
@@ -142,24 +148,20 @@ module BuffUtility {
      */
     let currencySelection: HTMLSelectElement;
 
-    let retryCount: {
-        [id: string]: number
-    } = {};
-
     export function init(): void {
         console.info('[BuffUtility] Initialized.');
 
-        let cookieValue: string = 'USD';
+        let cookieValue: string;
 
         try {
-            cookieValue = Cookie.read(Cookie.COOKIE_BUFF_UTILITY_SELECTED_CURRENCY);
+            cookieValue = Cookie.read(Cookie.COOKIE_BUFF_UTILITY_OPTIONS);
         } catch {
             console.info('[BuffUtility] Cookie was not found.');
 
-            Cookie.write(Cookie.COOKIE_BUFF_UTILITY_SELECTED_CURRENCY, 'USD');
+            Cookie.write(Cookie.COOKIE_BUFF_UTILITY_OPTIONS, JSON.stringify(programOptions));
         }
 
-        selectedCurrency = cookieValue;
+        programOptions = !!cookieValue ? JSON.parse(cookieValue) : programOptions;
 
         addCurrencySelection();
 
@@ -175,11 +177,9 @@ module BuffUtility {
             if (/^.*buff.163.com\/market\/sell_order\/history.*$/.test(window.location.href) || /^.*buff.163.com\/market\/goods\?.*tab=buying.*$/.test(window.location.href)) {
                 addBuyOrderGain();
             }
-
-            if (/^.*buff.163.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href) || /^.*buff.163.com\/\?game=.*$/.test(window.location.href)) {
-                addReferencePriceDifference();
-            }
         }, 1000);
+
+        addReferencePriceDifference();
     }
 
     /**
@@ -196,7 +196,7 @@ module BuffUtility {
 
             let keys = Object.keys(cachedCurrencyRates.rates);
             for (let l_Key of keys) {
-                options += `<option${(l_Key.indexOf(selectedCurrency) > -1 ? ' selected' : '')}>${l_Key}</option>`;
+                options += `<option${(l_Key.indexOf(programOptions.selectedCurrency) > -1 ? ' selected' : '')}>${l_Key}</option>`;
             }
 
             let nav: HTMLElement = <HTMLElement>document.querySelector('div.nav.nav_entries');
@@ -209,11 +209,11 @@ module BuffUtility {
             currencySelection.innerHTML = options;
 
             currencySelection.onchange = () => {
-                selectedCurrency = currencySelection?.selectedOptions?.item(0)?.innerText ?? 'USD';
+                programOptions.selectedCurrency = currencySelection?.selectedOptions?.item(0)?.innerText ?? 'USD';
 
-                console.info(`[BuffUtility] Currency changed -> ${selectedCurrency}`, cachedCurrencyRates.rates[selectedCurrency]);
+                console.info(`[BuffUtility] Currency changed -> ${programOptions.selectedCurrency}`, cachedCurrencyRates.rates[programOptions.selectedCurrency]);
 
-                Cookie.write(Cookie.COOKIE_BUFF_UTILITY_SELECTED_CURRENCY, `${selectedCurrency}`);
+                Cookie.write(Cookie.COOKIE_BUFF_UTILITY_OPTIONS, JSON.stringify(programOptions));
 
                 updateConvertedCurrency();
             };
@@ -232,9 +232,9 @@ module BuffUtility {
      * @private
      */
     function convertCurrency(yuan: number): string {
-        let selectedRate: [number, number] = cachedCurrencyRates.rates[selectedCurrency];
+        let selectedRate: [number, number] = cachedCurrencyRates.rates[programOptions.selectedCurrency];
 
-        return `~${selectedCurrency} ${(yuan * selectedRate[0]).toFixed(selectedRate[1])}`;
+        return `~${programOptions.selectedCurrency} ${(yuan * selectedRate[0]).toFixed(selectedRate[1])}`;
     }
 
     /**
@@ -311,84 +311,86 @@ module BuffUtility {
      * Adds the percent difference of the cheapest listing to the reference price
      * @private
      */
-    function addReferencePriceDifference(): void {
-        let listings: NodeListOf<Element> = document.querySelectorAll(`#j_market_card li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="], .index-goods-list > li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="]`);
+    function addReferencePriceDifference(lastRequestStamp?: number): void | number {
+        // Don't start the function if we arent on the right sites
+        if (!(/^.*buff.163.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href) ||
+            /^.*buff.163.com\/\?game=.*$/.test(window.location.href))) return;
 
-        for (let i = 0, l = listings.length; i < l; i ++) {
-            let listing = <HTMLElement>listings.item(i);
+        let listing = document.querySelector(`#j_market_card li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="], .index-goods-list.card_csgo > li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="]`);
 
-            listing.setAttribute(ATTR_REQUESTED_REFERENCE_PRICE, '');
+        if (!listing) return setTimeout(() => addReferencePriceDifference(), 500);
 
-            let href = listing.getAttribute('href');
-            let goodsId = (/goods_id=\d+/.exec(href)[0] ?? 'goods_id=-1').substr('goods_id='.length);
+        listing.setAttribute(ATTR_REQUESTED_REFERENCE_PRICE, '');
 
-            if (goodsId == '-1') {
-                console.info(`[BuffUtility] Unable to get goodsId for ${href}`);
-                return;
-            }
+        // ask for another one to work in parallel - 250ms delay
+        setTimeout(() => addReferencePriceDifference(), 250);
 
-            let apiUrl = `https://buff.163.com/api/market/goods/sell_order?game=csgo&goods_id=${goodsId}`;
+        let href = listing.getAttribute('href');
+        let goodsId = (/goods_id=\d+/.exec(href)[0] ?? 'goods_id=-1').substr('goods_id='.length);
 
-            // add offsets to requests to avoid rate limits as much as possible
-            setTimeout(() => {
-                fRequest.get(apiUrl, [goodsId], (req, args, e?) => {
-                    if (req.readyState != 4) return;
+        if (goodsId == '-1') {
+            console.info(`[BuffUtility] Unable to get goodsId for ${href}`);
+            return;
+        }
 
-                    if (!(req.readyState == 4 && req.status == 200)) {
-                        if(!retryCount[args[0]]) retryCount[args[0]] = 0;
+        let apiUrl = `https://buff.163.com/api/market/goods/sell_order?game=csgo&goods_id=${goodsId}`;
 
-                        retryCount[args[0]] += 1;
+        let lastRequest = Date.now();
+        let timeDiff = !!lastRequestStamp ? Math.max(1, 500 - lastRequest - lastRequestStamp) : 500;
 
-                        let retryTime = 2 * retryCount[args[0]];
+        // add offsets to requests to avoid rate limits as much as possible
+        setTimeout(() => {
+            fRequest.get(apiUrl, [goodsId, lastRequest], (req, args, e?) => {
+                if (req.readyState != 4) return;
 
-                        console.debug(`[BuffUtility] Failed to fetch ${args[0]}, reason: ${req.status}. Retrying in ${retryTime} seconds.`);
+                if (req.status != 200) {
+                    console.debug(`[BuffUtility] Failed to fetch ${args[0]}, reason: ${req.status}. Retrying in 2 seconds.`);
 
-                        setTimeout(() => {
-                            let retryListings = <HTMLElement>document.querySelector(`#j_market_card li > a[href^="/market/goods?goods_id=${args[0]}"], .index-goods-list > li > a[href^="/market/goods?goods_id=${args[0]}"]`);
+                    setTimeout(() => {
+                        let retryListings = <HTMLElement>document.querySelector(`#j_market_card li > a[href^="/market/goods?goods_id=${args[0]}"], .index-goods-list.card_csgo > li > a[href^="/market/goods?goods_id=${args[0]}"]`);
 
-                            retryListings?.removeAttribute(ATTR_REQUESTED_REFERENCE_PRICE);
-                        }, 1000 * retryTime);
+                        retryListings?.removeAttribute(ATTR_REQUESTED_REFERENCE_PRICE);
+                    }, 2000);
 
-                        return;
-                    }
+                    return setTimeout(() => addReferencePriceDifference(args[1]), 1);
+                }
 
-                    let marketDetails: {
-                        data?: {
-                            goods_infos?: {
-                                [id: string]: {
-                                    steam_price_cny?: string
-                                }
+                let marketDetails: {
+                    data?: {
+                        goods_infos?: {
+                            [id: string]: {
+                                steam_price_cny?: string
                             }
                         }
-                    } = fRequest.parseJson(req);
-
-                    let referencePrice = parseFloat(marketDetails.data?.goods_infos[args[0]]?.steam_price_cny ?? '-1');
-
-                    if (referencePrice == -1) {
-                        console.info(`[BuffUtility] Unable to fetch reference price for ${args[0]}`);
-                        return;
                     }
+                } = fRequest.parseJson(req);
 
-                    let listing = <HTMLElement>document.querySelector(`#j_market_card li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${args[0]}"], .index-goods-list > li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${args[0]}"]`);
+                let referencePrice = parseFloat(marketDetails.data?.goods_infos[args[0]]?.steam_price_cny ?? '-1');
 
-                    if (!listing) return;
+                if (referencePrice == -1) {
+                    console.debug(`[BuffUtility] Unable to fetch reference price for ${args[0]}`);
 
-                    listing.setAttribute(ATTR_REQUESTED_REFERENCE_PRICE, '1');
+                    return setTimeout(() => addReferencePriceDifference(args[1]), 1);
+                }
 
-                    retryCount[args[0]] = 0;
+                let listing = <HTMLElement>document.querySelector(`#j_market_card li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${args[0]}"], .index-goods-list.card_csgo > li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${args[0]}"]`);
 
-                    let li_parent: HTMLElement = listing.parentElement;
-                    let p = <HTMLElement>li_parent.querySelector(`p[${ATTR_CONVERTED_CURRENCY}]`);
-                    let price = readYuan(<HTMLElement>p.querySelector('strong > e'));
+                if (!listing) return setTimeout(() => addReferencePriceDifference(args[1]), 1);
 
-                    let diff = ((referencePrice - price) / referencePrice) * -1;
+                listing.setAttribute(ATTR_REQUESTED_REFERENCE_PRICE, '1');
 
-                    p.innerHTML += `<span style="color: ${diff < 0 ? '#f00' : '#00dd00'}; font-size: 11px; margin-top: -8px;">(${diff.toFixed(2)}%)</span>`;
+                let li_parent: HTMLElement = listing.parentElement;
+                let p = <HTMLElement>li_parent.querySelector(`p[${ATTR_CONVERTED_CURRENCY}]`);
+                let price = readYuan(<HTMLElement>p.querySelector('strong > e'));
 
-                    // console.log(`Reference price for ${args[0]} is ¥ ${referencePrice}`);
-                });
-            }, 1000 + Math.ceil(1000 * Math.random()));
-        }
+                let diff = ((referencePrice - price) / referencePrice) * -1 * 100;
+
+                p.style['margin-top'] = '-12px';
+                p.innerHTML += `<div style="color: ${diff < 0 ? '#f00' : '#009800'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+
+                setTimeout(() => addReferencePriceDifference(args[1]), 1);
+            });
+        }, timeDiff);
     }
 
     /**
@@ -402,7 +404,7 @@ module BuffUtility {
 
                 if (elements.length > 0) {
                     if (!l_Selector.ignoreLog) {
-                        console.info(`[BuffUtility] Converting ${elements.length} element(s).`, l_Selector, selectedCurrency, cachedCurrencyRates.rates[selectedCurrency]);
+                        console.info(`[BuffUtility] Converting ${elements.length} element(s).`, l_Selector, programOptions.selectedCurrency, cachedCurrencyRates.rates[programOptions.selectedCurrency]);
                     }
                 } else {
                     continue;
