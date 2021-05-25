@@ -32,19 +32,14 @@ module BuffUtility {
      */
     const selectors: { pattern: RegExp, queries: string[], ignoreLog?: boolean }[] = [
         {
-            pattern: /^.*buff.163.com.*$/,
+            pattern: /^.*buff\.163\.com.*$/,
             queries: [
-                `h4${NOT_CONVERTED_CURRENCY} > #navbar-cash-amount`
-            ]
-        },
-        {
-            pattern: /^.*buff.163.com\/\?game=.*$/,
-            queries: [
+                `h4${NOT_CONVERTED_CURRENCY} > #navbar-cash-amount`,
                 `.index-goods-list > li > p${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ]
         },
         {
-            pattern: /^.*buff.163.com\/user-center\/asset\/recharge.*$/,
+            pattern: /^.*buff\.163\.com\/user-center\/asset\/recharge.*$/,
             queries: [
                 `div${NOT_CONVERTED_CURRENCY} > #alipay_amount`,
                 `div${NOT_CONVERTED_CURRENCY} > #cash_amount`,
@@ -52,66 +47,66 @@ module BuffUtility {
             ]
         },
         {
-            pattern: /^.*buff.163.com\/market\/(buy_order\/to_create)?\?game=.*$/,
+            pattern: /^.*buff\.163\.com\/market\/(buy_order\/to_create)?\?game=.*$/,
             queries: [
                 `#j_list_card > ul > li > p${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ]
         },
         {
-            pattern: /^.*buff.163.com\/market\/buy_order\/to_create\?game=.*$/,
+            pattern: /^.*buff\.163\.com\/market\/goods\?.*(?:tab=(?:selling|buying|top-bookmarked))?.*$/,
+            queries: [
+                `.list_tb > tbody > tr > td > div${NOT_CONVERTED_CURRENCY} > strong.f_Strong`,
+                `#j_popup_supply_sell_preview td > ul > li:nth-child(2) > span${NOT_CONVERTED_CURRENCY}.f_Strong > span`
+            ]
+        },
+        {
+            pattern: /^.*buff\.163\.com\/market\/(?:goods\?.*tab=history.*|sell_order\/history.*|buy_order\/(?:wait_supply|supplied|history).*)$/,
+            queries: [
+                `.list_tb > tbody > tr > td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
+            ]
+        },
+        {
+            pattern: /^.*buff\.163\.com\/market\/sell_order\/stat.*$/,
+            queries: [
+                `#j_sold-count > div.count-item > ul > li${NOT_CONVERTED_CURRENCY}:first-child > h5`
+            ]
+        },
+        {
+            pattern: /^.*buff\.163\.com\/market\/steam_inventory.*$/,
+            queries: [
+                `#j_list_card > ul > li > p${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
+            ]
+        },
+        {
+            pattern: /^.*buff\.163\.com\/market\/buy_order\/to_create\?game=.*$/,
             queries: [
                 `td > ul > li${NOT_CONVERTED_CURRENCY} > strong.f_Strong.sell-MinPrice`,
                 `td > ul > li${NOT_CONVERTED_CURRENCY} > strong.f_Strong.buy-MaxPrice`
             ]
         },
         {
-            pattern: /^.*buff.163.com\/market\/buy_order\/to_create\?game=.*$/,
+            pattern: /^.*buff\.163\.com\/market\/buy_order\/to_create\?game=.*$/,
             queries: [
                 `tr > td > span.f_Strong.total_amount`
             ],
             ignoreLog: true
         },
         {
-            pattern: /^.*buff.163.com\/market\/goods\?.*(?:tab=(?:selling|buying|top-bookmarked))?.*$/,
-            queries: [
-                `.list_tb_csgo > tr > td > div${NOT_CONVERTED_CURRENCY} > strong.f_Strong`,
-                `#j_popup_supply_sell_preview td > ul > li:nth-child(2) > span${NOT_CONVERTED_CURRENCY}.f_Strong > span`
-            ]
-        },
-        {
-            pattern: /^.*buff.163.com\/market\/goods\?.*(?:tab=(?:selling|buying|top-bookmarked))?.*$/,
+            pattern: /^.*buff\.163\.com\/market\/goods\?.*(?:tab=(?:selling|buying|top-bookmarked))?.*$/,
             queries: [
                 `#supply_sell_total_price`
             ],
             ignoreLog: true
         },
         {
-            pattern: /^.*buff.163.com\/market\/(?:goods\?.*tab=history.*|sell_order\/history.*|buy_order\/(?:wait_supply|supplied|history).*)$/,
+            pattern: /^.*buff\.163\.com\/market\/sell_order\/to_deliver.*$/,
             queries: [
-                `.list_tb_csgo > tr > td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
-            ]
-        },
-        {
-            pattern: /^.*buff.163.com\/market\/sell_order\/to_deliver.*$/,
-            queries: [
-                `.list_tb_csgo > tr > td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
+                `.list_tb > tbody > tr > td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ],
             ignoreLog: true
         },
         {
-            pattern: /^.*buff.163.com\/market\/sell_order\/stat.*$/,
-            queries: [
-                `#j_sold-count > div.count-item > ul > li${NOT_CONVERTED_CURRENCY}:first-child > h5`
-            ]
-        },
-        {
-            pattern: /^.*buff.163.com\/market\/steam_inventory.*$/,
-            queries: [
-                `#j_list_card > ul > li > p${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
-            ]
-        },
-        {
-            pattern: /^.*buff.163.com\/market\/steam_inventory.*$/,
+            pattern: /^.*buff\.163\.com\/market\/steam_inventory.*$/,
             queries: [
                 `.list_tb-body tr > td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`,
                 `p > span.f_Strong.real_income`
@@ -119,10 +114,10 @@ module BuffUtility {
             ignoreLog: true
         },
         {
-            pattern: /^.*buff.163.com\/market\/sell_order\/on_sale.*$/,
+            pattern: /^.*buff\.163\.com\/market\/sell_order\/on_sale.*$/,
             queries: [
                 `p > span.f_Strong.real_income`,
-                `#popup-container .list_tb_csgo td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
+                `#popup-container .list_tb > tbody td${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ],
             ignoreLog: true
         }
@@ -165,16 +160,29 @@ module BuffUtility {
 
         addCurrencySelection();
 
+        if (/^.*buff\.163\.com.*goods_id=\d+/.test(window.location.href)) {
+            let goodsId = (/goods_id=\d+/.exec(window.location.href)[0] ?? 'goods_id=-1').substr('goods_id='.length);
+
+            if (goodsId != '-1') {
+                BuffApi.getSellOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored sell_order ${goodsId}.`), () => { /* honestly */ });
+                BuffApi.getBuyOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored buy_order ${goodsId}.`), () => { /* honestly */ });
+            }
+        }
+
         setInterval(() => {
             if (!loaded) return;
 
             convertSelectors();
 
-            if (/^.*buff.163.com\/market\/sell_order\/on_sale.*$/.test(window.location.href)) {
+            if (/^.*buff\.163\.com\/market\/sell_order\/on_sale.*$/.test(window.location.href)) {
                 addSellingAfterFeeGain();
             }
 
-            if (/^.*buff.163.com\/market\/sell_order\/history.*$/.test(window.location.href) || /^.*buff.163.com\/market\/goods\?.*tab=buying.*$/.test(window.location.href)) {
+            if (/^.*buff\.163\.com\/market\/goods\?goods_id=\d+(?:#tab=selling)?$/.test(window.location.href)) {
+                addHighestBuyOrderDifference();
+            }
+
+            if (/^.*buff\.163\.com\/market\/sell_order\/history.*$/.test(window.location.href) || /^.*buff\.163\.com\/market\/goods\?.*tab=buying.*$/.test(window.location.href)) {
                 addBuyOrderGain();
             }
         }, 1000);
@@ -190,7 +198,7 @@ module BuffUtility {
         fRequest.get('https://felixvogel.github.io/currency-repository/rates.json', null, (req, args, e?) => {
             if (!(req.readyState == 4 && req.status == 200)) return;
 
-            cachedCurrencyRates = fRequest.parseJson(req);
+            cachedCurrencyRates = Util.parseJson(req);
 
             let options: string = '';
 
@@ -220,7 +228,7 @@ module BuffUtility {
 
             currencyDiv.append(currencySelection);
 
-            nav.prepend(currencyDiv);
+            if (nav) nav.prepend(currencyDiv);
 
             loaded = true;
         });
@@ -282,8 +290,12 @@ module BuffUtility {
 
             parent.setAttribute('style', 'margin-top: -5px; display: grid; grid-template-columns: auto; grid-template-rows: auto auto;');
 
-            parent.innerHTML += `<strong style="color: #eea20e; font-size: 11px;">${createCurrencyHoverContainer(`(¥ ${price.toFixed(2)})`, price)}</strong>`;
+            parent.innerHTML += `<strong style="color: #eea20e; font-size: 11px;">${createCurrencyHoverContainer(`(${Util.SYMBOL_YUAN} ${price.toFixed(2)})`, price)}</strong>`;
         }
+    }
+
+    function addHighestBuyOrderDifference(): void {
+
     }
 
     /**
@@ -292,7 +304,7 @@ module BuffUtility {
      * @private
      */
     function addBuyOrderGain(): void {
-        let elements: NodeListOf<Element> = document.querySelectorAll(`.list_tb_csgo > tr > td > div${NOT_CONVERTED_BUY_ORDER} > strong.f_Strong, .list_tb_csgo > tr > td${NOT_CONVERTED_BUY_ORDER} > strong.f_Strong`);
+        let elements: NodeListOf<Element> = document.querySelectorAll(`.list_tb > tbody > tr > td > div${NOT_CONVERTED_BUY_ORDER} > strong.f_Strong, .list_tb > tbody > tr > td${NOT_CONVERTED_BUY_ORDER} > strong.f_Strong`);
 
         for (let i = 0, l = elements.length; i < l; i ++) {
             let baseElement: HTMLElement = <HTMLElement>elements.item(i);
@@ -303,7 +315,7 @@ module BuffUtility {
 
             parent.setAttribute(ATTR_CONVERTED_BUY_ORDER, '');
 
-            parent.innerHTML += `<div style="font-size: 12px; margin-top: 3px;" class="f_Strong">${createCurrencyHoverContainer(`(¥ ${price.toFixed(2)})`, price)}</div>`;
+            parent.innerHTML += `<div style="font-size: 12px; margin-top: 3px;" class="f_Strong">${createCurrencyHoverContainer(`(${Util.SYMBOL_YUAN} ${price.toFixed(2)})`, price)}</div>`;
         }
     }
 
@@ -311,12 +323,12 @@ module BuffUtility {
      * Adds the percent difference of the cheapest listing to the reference price
      * @private
      */
-    function addReferencePriceDifference(lastRequestStamp?: number): void | number {
+    function addReferencePriceDifference(): any {
         // Don't start the function if we arent on the right sites
-        if (!(/^.*buff.163.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href) ||
-            /^.*buff.163.com(?:\/\?game=.*)?$/.test(window.location.href))) return;
+        if (!(/^.*buff\.163\.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href) ||
+            /^.*buff\.163\.com\/(?:\?game=.*)?$/.test(window.location.href))) return;
 
-        let listing = document.querySelector(`#j_market_card li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="], .index-goods-list.card_csgo > li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="]`);
+        let listing = document.querySelector(`#j_list_card > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="], .list_card > .index-goods-list > li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="]`);
 
         if (!listing) return setTimeout(() => addReferencePriceDifference(), 500);
 
@@ -333,17 +345,17 @@ module BuffUtility {
             return;
         }
 
-        BuffApi.getMarketInformation(goodsId, (marketDetails) => {
+        BuffApi.getSellOrderInformation(goodsId, (marketDetails) => {
             // max retry was reached
             if (marketDetails == null) {
                 console.debug(`[BuffUtility] Failed to fetch ${goodsId}, reason: MAX_RETRY_LIMIT. Retrying in 4 seconds.`);
                 return setTimeout(() => {
-                    let retryListings = <HTMLElement>document.querySelector(`#j_market_card li > a[href^="/market/goods?goods_id=${goodsId}"], .index-goods-list.card_csgo > li > a[href^="/market/goods?goods_id=${goodsId}"]`);
+                    let retryListings = <HTMLElement>document.querySelector(`#j_market_card li > a[href^="/market/goods?goods_id=${goodsId}"], .list_card > .index-goods-list > li > a[href^="/market/goods?goods_id=${goodsId}"]`);
                     retryListings?.removeAttribute(ATTR_REQUESTED_REFERENCE_PRICE);
                 }, 4000);
             }
 
-            let referencePrice = parseFloat(marketDetails.data?.goods_infos[goodsId]?.steam_price_cny ?? '-1');
+            let referencePrice = parseFloat(marketDetails.data ?? '-1');
 
             if (referencePrice == -1) {
                 console.debug(`[BuffUtility] Unable to fetch reference price for ${goodsId}`);
@@ -351,20 +363,20 @@ module BuffUtility {
                 return setTimeout(() => addReferencePriceDifference(), 1);
             }
 
-            let listing = <HTMLElement>document.querySelector(`#j_market_card li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${goodsId}"], .index-goods-list.card_csgo > li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${goodsId}"]`);
+            let listing = <HTMLElement>document.querySelector(`#j_market_card li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${goodsId}"], .list_card > .index-goods-list > li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${goodsId}"]`);
 
             if (!listing) return setTimeout(() => addReferencePriceDifference(), 1);
 
             listing.setAttribute(ATTR_REQUESTED_REFERENCE_PRICE, '1');
 
             let li_parent: HTMLElement = listing.parentElement;
-            let p = <HTMLElement>li_parent.querySelector(`p[${ATTR_CONVERTED_CURRENCY}]`);
-            let price = readYuan(<HTMLElement>p.querySelector('strong > e'));
+            let p = <HTMLElement>li_parent.querySelector(`p`);
+            let price = readYuan(<HTMLElement>p.querySelector('strong.f_Strong > e') ?? <HTMLElement>p.querySelector('strong.f_Strong'));
 
             let diff = ((referencePrice - price) / referencePrice) * -1 * 100;
 
             p.style['margin-top'] = '-12px';
-            p.innerHTML += `<div style="color: ${diff < 0 ? '#f00' : '#009800'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+            p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
         }, (status) => {
             console.debug(`[BuffUtility] Failed to fetch ${goodsId}, reason: ${status}. Retrying in 2.5 seconds.`);
         });
