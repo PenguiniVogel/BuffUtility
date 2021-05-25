@@ -328,7 +328,7 @@ module BuffUtility {
         if (!(/^.*buff\.163\.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href) ||
             /^.*buff\.163\.com\/(?:\?game=.*)?$/.test(window.location.href))) return;
 
-        let listing = document.querySelector(`#j_list_card > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="], .list_card > .index-goods-list > li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="]`);
+        let listing = document.querySelector(`#j_list_card > ul > li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="], .list_card > .index-goods-list > li > a${NOT_REQUESTED_REFERENCE_PRICE}[href^="/market/goods?goods_id="]`);
 
         if (!listing) return setTimeout(() => addReferencePriceDifference(), 500);
 
@@ -350,7 +350,7 @@ module BuffUtility {
             if (marketDetails == null) {
                 console.debug(`[BuffUtility] Failed to fetch ${goodsId}, reason: MAX_RETRY_LIMIT. Retrying in 4 seconds.`);
                 return setTimeout(() => {
-                    let retryListings = <HTMLElement>document.querySelector(`#j_market_card li > a[href^="/market/goods?goods_id=${goodsId}"], .list_card > .index-goods-list > li > a[href^="/market/goods?goods_id=${goodsId}"]`);
+                    let retryListings = <HTMLElement>document.querySelector(`#j_list_card > ul > li > a[href^="/market/goods?goods_id=${goodsId}"], .list_card > .index-goods-list > li > a[href^="/market/goods?goods_id=${goodsId}"]`);
                     retryListings?.removeAttribute(ATTR_REQUESTED_REFERENCE_PRICE);
                 }, 4000);
             }
@@ -363,7 +363,7 @@ module BuffUtility {
                 return setTimeout(() => addReferencePriceDifference(), 1);
             }
 
-            let listing = <HTMLElement>document.querySelector(`#j_market_card li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${goodsId}"], .list_card > .index-goods-list > li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${goodsId}"]`);
+            let listing = <HTMLElement>document.querySelector(`#j_list_card > ul > li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${goodsId}"], .list_card > .index-goods-list > li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${goodsId}"]`);
 
             if (!listing) return setTimeout(() => addReferencePriceDifference(), 1);
 
@@ -380,65 +380,6 @@ module BuffUtility {
         }, (status) => {
             console.debug(`[BuffUtility] Failed to fetch ${goodsId}, reason: ${status}. Retrying in 2.5 seconds.`);
         });
-
-        // let apiUrl = `https://buff.163.com/api/market/goods/sell_order?game=csgo&goods_id=${goodsId}`;
-        //
-        // let lastRequest = Date.now();
-        // let timeDiff = !!lastRequestStamp ? Math.max(1, 500 - lastRequest - lastRequestStamp) : 500;
-        //
-        // // add offsets to requests to avoid rate limits as much as possible
-        // setTimeout(() => {
-        //     fRequest.get(apiUrl, [goodsId, lastRequest], (req, args, e?) => {
-        //         if (req.readyState != 4) return;
-        //
-        //         if (req.status != 200) {
-        //             console.debug(`[BuffUtility] Failed to fetch ${args[0]}, reason: ${req.status}. Retrying in 4.5 seconds.`);
-        //
-        //             setTimeout(() => {
-        //                 let retryListings = <HTMLElement>document.querySelector(`#j_market_card li > a[href^="/market/goods?goods_id=${args[0]}"], .index-goods-list.card_csgo > li > a[href^="/market/goods?goods_id=${args[0]}"]`);
-        //
-        //                 retryListings?.removeAttribute(ATTR_REQUESTED_REFERENCE_PRICE);
-        //             }, 2000);
-        //
-        //             return setTimeout(() => addReferencePriceDifference(args[1]), 1);
-        //         }
-        //
-        //         let marketDetails: {
-        //             data?: {
-        //                 goods_infos?: {
-        //                     [id: string]: {
-        //                         steam_price_cny?: string
-        //                     }
-        //                 }
-        //             }
-        //         } = fRequest.parseJson(req);
-        //
-        //         let referencePrice = parseFloat(marketDetails.data?.goods_infos[args[0]]?.steam_price_cny ?? '-1');
-        //
-        //         if (referencePrice == -1) {
-        //             console.debug(`[BuffUtility] Unable to fetch reference price for ${args[0]}`);
-        //
-        //             return setTimeout(() => addReferencePriceDifference(args[1]), 1);
-        //         }
-        //
-        //         let listing = <HTMLElement>document.querySelector(`#j_market_card li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${args[0]}"], .index-goods-list.card_csgo > li > a:not([${ATTR_REQUESTED_REFERENCE_PRICE}="1"])[href^="/market/goods?goods_id=${args[0]}"]`);
-        //
-        //         if (!listing) return setTimeout(() => addReferencePriceDifference(args[1]), 1);
-        //
-        //         listing.setAttribute(ATTR_REQUESTED_REFERENCE_PRICE, '1');
-        //
-        //         let li_parent: HTMLElement = listing.parentElement;
-        //         let p = <HTMLElement>li_parent.querySelector(`p[${ATTR_CONVERTED_CURRENCY}]`);
-        //         let price = readYuan(<HTMLElement>p.querySelector('strong > e'));
-        //
-        //         let diff = ((referencePrice - price) / referencePrice) * -1 * 100;
-        //
-        //         p.style['margin-top'] = '-12px';
-        //         p.innerHTML += `<div style="color: ${diff < 0 ? '#f00' : '#009800'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
-        //
-        //         setTimeout(() => addReferencePriceDifference(args[1]), 1);
-        //     });
-        // }, timeDiff);
     }
 
     /**
