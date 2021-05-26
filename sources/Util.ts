@@ -19,4 +19,8 @@ module Util {
         return result;
     }
 
+    export function getGoodsId(_in: string): string {
+        return (/goods_id=\d+/.exec(_in)[0] ?? 'goods_id=-1').substr('goods_id='.length);
+    }
+
 }

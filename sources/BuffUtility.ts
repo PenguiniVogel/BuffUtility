@@ -21,7 +21,10 @@ module BuffUtility {
     const NOT_CONVERTED_BUY_ORDER: string = `:not([${ATTR_CONVERTED_BUY_ORDER}])`;
 
     const ATTR_REQUESTED_REFERENCE_PRICE: string = 'data-buff-utility-requested-reference-price';
-    const NOT_REQUESTED_REFERENCE_PRICE: string = ':not([data-buff-utility-requested-reference-price])';
+    const NOT_REQUESTED_REFERENCE_PRICE: string = `:not([${ATTR_REQUESTED_REFERENCE_PRICE}])`;
+
+    const ATTR_REQUESTED_BO_PRICE: string = 'data-buff-utility-requested-buy-order-price';
+    const NOT_REQUESTED_BO_PRICE: string = `:not([${ATTR_REQUESTED_BO_PRICE}])`;
 
     const BUFF_UTILITY_HOVER = 'data-buff-utility-target="converted-hover-currency"';
 
@@ -295,7 +298,27 @@ module BuffUtility {
     }
 
     function addHighestBuyOrderDifference(): void {
+        let listings = document.querySelectorAll(`.list_tb > tbody > tr > td > div${NOT_REQUESTED_BO_PRICE} > strong.f_Strong`);
 
+        for (let i = 0, l = listings.length; i < l; i ++) {
+            let listing = <HTMLElement>listings.item(i);
+            let div = listing.parentElement;
+
+            div.setAttribute(ATTR_REQUESTED_BO_PRICE, '');
+
+            let price = readYuan(listing.querySelector('e') ?? listing);
+
+            let goodsId = Util.getGoodsId(window.location.href);
+
+            if (goodsId == '-1') {
+                console.info('[BuffUtility] Unable to parse price.', listing);
+                continue;
+            }
+
+            let bo = MarketDB.get(goodsId, MarketDB.MarketStoreID.BUY);
+
+            div.innerHTML += `<div></div>`;
+        }
     }
 
     /**
