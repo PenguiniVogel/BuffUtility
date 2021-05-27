@@ -223,7 +223,19 @@ module BuffApi {
                 }
 
                 let result = <BuyOrderResponse>Util.parseJson(req);
-                let buyOrderInfo = <BuyOrderInfo>(result.data.items[0] ?? {});
+
+                let buyOrderInfo: BuyOrderInfo;
+
+                for (let i = 0, l = result.data.items.length; i < l; i ++) {
+                    let it = <BuyOrderInfo>result.data.items[i] ?? {};
+
+                    // ignore specific buy orders
+                    if ((it.specific ?? []).length > 0) continue;
+
+                    buyOrderInfo = it;
+
+                    break;
+                }
 
                 let data: MarketDB.MarketDBStoreData = {
                     gid: id,
