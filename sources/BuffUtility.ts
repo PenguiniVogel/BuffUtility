@@ -164,7 +164,7 @@ module BuffUtility {
         addCurrencySelection();
 
         if (/^.*buff\.163\.com.*goods_id=\d+/.test(window.location.href)) {
-            let goodsId = (/goods_id=\d+/.exec(window.location.href)[0] ?? 'goods_id=-1').substr('goods_id='.length);
+            let goodsId = Util.getGoodsId(window.location.href);
 
             if (goodsId != '-1') {
                 BuffApi.getSellOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored sell_order ${goodsId}.`), () => { /* honestly */ });
@@ -181,7 +181,7 @@ module BuffUtility {
                 addSellingAfterFeeGain();
             }
 
-            if (/^.*buff\.163\.com\/market\/goods\?goods_id=\d+(?:#tab=selling)?$/.test(window.location.href)) {
+            if (/^.*buff\.163\.com\/market\/goods\?goods_id=\d+(?:.*#tab=selling.*)?$/.test(window.location.href)) {
                 addHighestBuyOrderDifference();
             }
 
@@ -306,8 +306,6 @@ module BuffUtility {
 
             div.setAttribute(ATTR_REQUESTED_BO_PRICE, '');
 
-            let price = readYuan(listing.querySelector('e') ?? listing);
-
             let goodsId = Util.getGoodsId(window.location.href);
 
             if (goodsId == '-1') {
@@ -315,9 +313,24 @@ module BuffUtility {
                 continue;
             }
 
-            let bo = MarketDB.get(goodsId, MarketDB.MarketStoreID.BUY);
+            BuffApi.getBuyOrderInformation(goodsId, (json) => {
+                let price = readYuan(listing.querySelector('e') ?? listing);
+                let bo = -1;
 
-            div.innerHTML += `<div></div>`;
+                try {
+                    bo = parseFloat(json.data);
+                } catch {}
+
+                if (bo == -1) {
+                    console.debug('[BuffUtility] Failed to get buy order price.', listing);
+                } else {
+                    let diff = price - bo;
+
+                    div.innerHTML += `<div style="color: ${(diff < 0 ? '#137800' : '#950000')}; font-size: 12px;">(${(diff < 0 ? Util.SYMBOL_ARROW_DOWN : Util.SYMBOL_ARROW_UP)} ${(diff < 0 ? diff * -1 : diff).toFixed(2)})</div>`;
+                }
+            }, (status) => {
+
+            });
         }
     }
 
@@ -361,7 +374,7 @@ module BuffUtility {
         setTimeout(() => addReferencePriceDifference(), 250);
 
         let href = listing.getAttribute('href');
-        let goodsId = (/goods_id=\d+/.exec(href)[0] ?? 'goods_id=-1').substr('goods_id='.length);
+        let goodsId = Util.getGoodsId(href);
 
         if (goodsId == '-1') {
             console.info(`[BuffUtility] Unable to get goodsId for ${href}`);
