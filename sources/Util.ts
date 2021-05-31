@@ -1,6 +1,7 @@
 /**
  * Author: Felix Vogel
  */
+/** */
 module Util {
 
     export const SYMBOL_YUAN = '¥';

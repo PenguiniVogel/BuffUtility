@@ -1,6 +1,7 @@
 /**
  * Author: Felix Vogel
  */
+/** */
 module BuffUtility {
 
     interface CurrencyRates {
@@ -190,7 +191,8 @@ module BuffUtility {
             }
         }, 1000);
 
-        addReferencePriceDifference();
+        // addReferencePriceDifference();
+        BuffApi.getGoodsPageData(() => {});
     }
 
     /**
@@ -313,12 +315,12 @@ module BuffUtility {
                 continue;
             }
 
-            BuffApi.getBuyOrderInformation(goodsId, (json) => {
+            BuffApi.getBuyOrderInformation(goodsId, (info) => {
                 let price = readYuan(listing.querySelector('e') ?? listing);
                 let bo = -1;
 
                 try {
-                    bo = parseFloat(json.data);
+                    bo = parseFloat(info.price);
                 } catch {}
 
                 if (bo == -1) {
@@ -381,9 +383,9 @@ module BuffUtility {
             return;
         }
 
-        BuffApi.getSellOrderInformation(goodsId, (marketDetails) => {
+        BuffApi.getSellOrderInformation(goodsId, (info) => {
             // max retry was reached
-            if (marketDetails == null) {
+            if (info == null) {
                 console.debug(`[BuffUtility] Failed to fetch ${goodsId}, reason: MAX_RETRY_LIMIT. Retrying in 4 seconds.`);
                 return setTimeout(() => {
                     let retryListings = <HTMLElement>document.querySelector(`#j_list_card > ul > li > a[href^="/market/goods?goods_id=${goodsId}"], .list_card > .index-goods-list > li > a[href^="/market/goods?goods_id=${goodsId}"]`);
@@ -391,7 +393,7 @@ module BuffUtility {
                 }, 4000);
             }
 
-            let referencePrice = parseFloat(marketDetails.data ?? '-1');
+            let referencePrice = parseFloat(info.steam_price_cny ?? '-1');
 
             if (referencePrice == -1) {
                 console.debug(`[BuffUtility] Unable to fetch reference price for ${goodsId}`);

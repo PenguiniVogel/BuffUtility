@@ -4,10 +4,10 @@
  *
  * Author: Felix Vogel
  */
+/** */
 module BuffApi {
 
-    import MarketDBStoreData = MarketDB.MarketDBStoreData;
-    export type GoodsInfoRaw = {
+    export type GoodsInfo = {
         'appid'?: number,
         'description'?: any,
         'game'?: string,
@@ -80,7 +80,7 @@ module BuffApi {
         'code'?: string,
         'data'?: {
             'goods_infos'?: {
-                [goods_id: string]: GoodsInfoRaw
+                [goods_id: string]: GoodsInfo
             }
         }
     };
@@ -130,21 +130,7 @@ module BuffApi {
      * @param onretry The failure callback
      * @param maxRetry The max amount or retries before waiting 4.5 seconds
      */
-    export function getSellOrderInformation(id: string, callback: (json: MarketDB.MarketDBStoreData) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
-        let getReq = MarketDB.get(id, MarketDB.MarketStoreID.SELL);
-
-        getReq.onsuccess = () => {
-            // if the cached entry is older than 60 minutes throw it away
-            if (!getReq.result || getReq.result.timestamp + (60 * 60 * 1000) < Date.now()) {
-                call();
-            } else {
-                callback(getReq.result);
-            }
-        };
-
-        getReq.onerror = () => {
-            call();
-        };
+    export function getSellOrderInformation(id: string, callback: (goodsInfo: GoodsInfo) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
 
         let url = `https://buff.163.com/api/market/goods/sell_order?game=${getSelectedGame()}&goods_id=${id}`;
 
@@ -161,23 +147,17 @@ module BuffApi {
 
                     onretry(req.status);
 
-                    return setTimeout(() => call(), 2500);
+                    return setTimeout(() => call(), 2_500);
                 }
 
-                let result = <SellOrderResponse>Util.parseJson(req, );
-                let goodsInfo = <GoodsInfoRaw>(result.data.goods_infos[id] ?? {});
+                let result = <SellOrderResponse>Util.parseJson(req);
+                let goodsInfo = <GoodsInfo>(result.data.goods_infos[id] ?? {});
 
-                let data: MarketDBStoreData = {
-                    gid: id,
-                    timestamp: Date.now(),
-                    data: goodsInfo.steam_price_cny
-                };
-
-                MarketDB.put(data, MarketDB.MarketStoreID.SELL);
-
-                callback(data);
+                callback(goodsInfo);
             });
         }
+
+        call();
     }
 
     /**
@@ -188,21 +168,7 @@ module BuffApi {
      * @param onretry The failure callback
      * @param maxRetry The max amount or retries before waiting 4.5 seconds
      */
-    export function getBuyOrderInformation(id: string, callback: (json: MarketDB.MarketDBStoreData) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
-        let getReq = MarketDB.get(id, MarketDB.MarketStoreID.BUY);
-
-        getReq.onsuccess = () => {
-            // if the cached entry is older than 10 minutes throw it away
-            if (!getReq.result || getReq.result.timestamp + (10 * 60 * 1000) < Date.now()) {
-                call();
-            } else {
-                callback(getReq.result);
-            }
-        };
-
-        getReq.onerror = () => {
-            call();
-        };
+    export function getBuyOrderInformation(id: string, callback: (json: BuyOrderInfo) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
 
         let url = `https://buff.163.com/api/market/goods/buy_order?game=${getSelectedGame()}&goods_id=${id}`;
 
@@ -237,17 +203,26 @@ module BuffApi {
                     break;
                 }
 
-                let data: MarketDB.MarketDBStoreData = {
-                    gid: id,
-                    timestamp: Date.now(),
-                    data: buyOrderInfo.price
-                };
-
-                MarketDB.put(data, MarketDB.MarketStoreID.BUY);
-
-                callback(data);
+                callback(buyOrderInfo);
             });
         }
+
+        call();
+    }
+
+    export function getGoodsPageData(callback: () => void): void {
+        let query = window.location.href.split('?')[1];
+
+        fRequest.get(`https://buff.163.com/api/market/goods?${query}`, null, (req, args, e) => {
+            if (req.readyState != 4) return;
+
+            let response;
+            try {
+                response = Util.parseJson(req);
+            } catch { }
+
+            console.log(response);
+        });
     }
 
 }

@@ -1,6 +1,7 @@
 /**
  * Author: Felix Vogel
  */
+/** */
 module Cookie {
 
     export const COOKIE_BUFF_UTILITY_OPTIONS: string = 'buff_utility_options';

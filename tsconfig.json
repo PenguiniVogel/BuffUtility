@@ -9,7 +9,6 @@
     "sources/Util.ts",
     "sources/Cookie.ts",
     "sources/fRequest.ts",
-    "sources/MarketDB.ts",
     "sources/BuffApi.ts",
     "sources/BuffUtility.ts",
     "content.ts"

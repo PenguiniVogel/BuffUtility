@@ -1,6 +1,7 @@
 /**
  * Author: Felix Vogel
  */
+/** */
 module fRequest {
 
     export function get(url: string, args: any[], callback: (request: XMLHttpRequest, args: any[], e: Event) => void): void {
