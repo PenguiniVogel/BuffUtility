@@ -2,6 +2,16 @@
  * Author: Felix Vogel
  */
 
+function removeIndexedDB() {
+    try {
+        indexedDB.deleteDatabase('buff_utility_db');
+    } catch {
+        // ignore lol who cares
+    }
+}
+
+removeIndexedDB();
+
 /**
  * Initialize BuffUtility
  */

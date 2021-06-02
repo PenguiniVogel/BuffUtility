@@ -128,6 +128,7 @@ module BuffUtility {
     ];
 
     let loaded: boolean = false;
+    let url: string = '';
 
     /**
      * The stored options
@@ -188,6 +189,10 @@ module BuffUtility {
 
             if (/^.*buff\.163\.com\/market\/sell_order\/history.*$/.test(window.location.href) || /^.*buff\.163\.com\/market\/goods\?.*tab=buying.*$/.test(window.location.href)) {
                 addBuyOrderGain();
+            }
+
+            if (/^.*buff\.163\.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href)) {
+                addReferencePriceDifferenceBatch();
             }
         }, 1000);
 
@@ -330,9 +335,7 @@ module BuffUtility {
 
                     div.innerHTML += `<div style="color: ${(diff < 0 ? '#137800' : '#950000')}; font-size: 12px;">(${(diff < 0 ? Util.SYMBOL_ARROW_DOWN : Util.SYMBOL_ARROW_UP)} ${(diff < 0 ? diff * -1 : diff).toFixed(2)})</div>`;
                 }
-            }, (status) => {
-
-            });
+            }, (status) => { });
         }
     }
 
@@ -417,6 +420,16 @@ module BuffUtility {
             p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
         }, (status) => {
             console.debug(`[BuffUtility] Failed to fetch ${goodsId}, reason: ${status}. Retrying in 2.5 seconds.`);
+        });
+    }
+
+    function addReferencePriceDifferenceBatch(): void {
+        if (url == window.location.href) return;
+
+        url = window.location.href;
+
+        BuffApi.getGoodsPageData(() => {
+
         });
     }
 

@@ -23,52 +23,7 @@ module BuffApi {
         'steam_price_cny'?: string,
         'steam_price_custom'?: string,
         'tags'?: {
-            'category'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'category_group'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'custom'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'exterior'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'itemset'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'quality'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'rarity'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'type'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'weapon'?: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            },
-            'weaponcase'?: {
+            [name: string]: {
                 'category'?: string,
                 'internal_name'?: string,
                 'localized_name'?: string
@@ -113,6 +68,14 @@ module BuffApi {
         'data'?: {
             'items'?: BuyOrderInfo[]
         }
+    }
+
+    export type GoodsPageResponse = {
+        
+    }
+
+    export type GoodsPageItem = {
+
     }
 
     /**
@@ -212,8 +175,21 @@ module BuffApi {
 
     export function getGoodsPageData(callback: () => void): void {
         let query = window.location.href.split('?')[1];
+        let tab = (/#tab=(selling|buying|top-bookmarked)/.exec(window.location.href)[1] ?? 'selling');
 
-        fRequest.get(`https://buff.163.com/api/market/goods?${query}`, null, (req, args, e) => {
+        switch (tab) {
+            case 'selling':
+                tab = 'goods';
+                break;
+            case 'buying':
+                tab = 'goods/buying';
+                break;
+            case 'top-bookmarked':
+                tab = 'sell_order/top_bookmarked';
+                break;
+        }
+
+        fRequest.get(`https://buff.163.com/api/market/${tab}?${query}`, null, (req, args, e) => {
             if (req.readyState != 4) return;
 
             let response;
