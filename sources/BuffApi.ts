@@ -71,11 +71,54 @@ module BuffApi {
     }
 
     export type GoodsPageResponse = {
-        
+        'code'?: string,
+        'data'?: {
+            'items'?: GoodsPageItem[],
+            'page_num'?: number,
+            'page_size'?: number,
+            'total_count'?: number,
+            'total_page'?: number,
+        },
+        'msg'?: any
     }
 
     export type GoodsPageItem = {
-
+        'appid'?: number,
+        'bookmarked'?: boolean,
+        'buy_max_price'?: string,
+        'buy_num'?: number,
+        'can_bargain'?: boolean,
+        'can_search_by_tournament'?: boolean,
+        'description'?: any,
+        'game'?: string,
+        'goods_info'?: {
+            'icon_url'?: string,
+            'info'?: {
+                'tags'?: {
+                    [name: string]: {
+                        'category'?: string,
+                        'internal_name'?: string,
+                        'localized_name'?: string
+                    }
+                }
+            },
+            'item_id'?: any,
+            'original_icon_url'?: string,
+            'steam_price'?: string,
+            'steam_price_cny'?: string,
+        },
+        'has_buff_price_history'?: boolean,
+        'id'?: number,
+        'market_hash_name'?: string,
+        'market_min_price'?: string,
+        'name'?: string,
+        'quick_price'?: string,
+        'sell_min_price'?: string,
+        'sell_num'?: number,
+        'sell_reference_price'?: string,
+        'short_name'?: string,
+        'steam_market_url'?: string,
+        'transacted_num'?: number,
     }
 
     /**
@@ -173,7 +216,7 @@ module BuffApi {
         call();
     }
 
-    export function getGoodsPageData(callback: () => void): void {
+    export function getGoodsPageData(callback: (json: GoodsPageResponse) => void): void {
         let query = window.location.href.split('?')[1];
         let tab = (/#tab=(selling|buying|top-bookmarked)/.exec(window.location.href)[1] ?? 'selling');
 
@@ -189,15 +232,20 @@ module BuffApi {
                 break;
         }
 
+        // remove page ref tab cuz it breaks buff queries, fucking what
+        query = query.replace(/#tab=(?:selling|buying|top-bookmarked)/, '');
+
         fRequest.get(`https://buff.163.com/api/market/${tab}?${query}`, null, (req, args, e) => {
             if (req.readyState != 4) return;
 
-            let response;
+            let response: GoodsPageResponse;
             try {
                 response = Util.parseJson(req);
             } catch { }
 
             console.log(response);
+
+            callback(response);
         });
     }
 

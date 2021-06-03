@@ -53,7 +53,7 @@ module BuffUtility {
         {
             pattern: /^.*buff\.163\.com\/market\/(buy_order\/to_create)?\?game=.*$/,
             queries: [
-                `#j_list_card > ul > li > p${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
+                // `#j_list_card > ul > li > p${NOT_CONVERTED_CURRENCY} > strong.f_Strong`
             ]
         },
         {
@@ -174,6 +174,8 @@ module BuffUtility {
             }
         }
 
+
+
         setInterval(() => {
             if (!loaded) return;
 
@@ -197,7 +199,6 @@ module BuffUtility {
         }, 1000);
 
         // addReferencePriceDifference();
-        BuffApi.getGoodsPageData(() => {});
     }
 
     /**
@@ -270,14 +271,14 @@ module BuffUtility {
      * @param element The element to read from
      * @private
      */
-    function readYuan(element: HTMLElement): number {
-        let priceString: string = element.innerHTML.replace(/¥|<\/?small>|<\/?big>/g, '').trim();
+    function readYuan(element: HTMLElement | string): number {
+        let priceString: string = (typeof element == 'string' ? element : element.innerHTML).replace(/¥|<\/?small>|<\/?big>/g, '').trim();
 
         let price: number = 0.0;
         try {
             price = parseFloat(priceString);
         } catch {
-            console.error(`[BuffUtility] Price parsing failed for: ${element.innerHTML}`);
+            console.error(`[BuffUtility] Price parsing failed for: ${element}`);
         }
 
         return price;
@@ -321,7 +322,7 @@ module BuffUtility {
             }
 
             BuffApi.getBuyOrderInformation(goodsId, (info) => {
-                let price = readYuan(listing.querySelector('e') ?? listing);
+                let price = readYuan(<HTMLElement>(listing.querySelector('e') ?? listing));
                 let bo = -1;
 
                 try {
@@ -428,8 +429,45 @@ module BuffUtility {
 
         url = window.location.href;
 
-        BuffApi.getGoodsPageData(() => {
+        BuffApi.getGoodsPageData((json) => {
+            let liCollection = document.querySelectorAll('#j_list_card > ul > li');
 
+            for (let i = 0, l = liCollection.length; i < l; i ++) {
+                let item = json.data.items[i];
+
+                let li = <HTMLElement>liCollection.item(i);
+
+                let a = <HTMLElement>li.querySelector('a');
+                let a_img = <HTMLElement>li.querySelector('a > img');
+                let h3a = <HTMLElement>li.querySelector('h3 > a');
+                let p = <HTMLElement>li.querySelector('p');
+                let p_strong = <HTMLElement>li.querySelector('p > strong');
+                let p_span = <HTMLElement>li.querySelector('p > span');
+
+                a.setAttribute('href', `/market/goods?goods_id=${item.id}&from=market#tab=selling`);
+                a.setAttribute('title', item.short_name);
+
+                a_img.setAttribute('src', item.goods_info.icon_url);
+                a_img.setAttribute('data-original', item.goods_info.original_icon_url);
+
+                h3a.setAttribute('href', `/market/goods?goods_id=${item.id}&from=market#tab=selling`);
+                h3a.setAttribute('title', item.short_name);
+                h3a.innerText = item.short_name;
+
+                let priceStr = item.sell_min_price.split('.');
+
+                let price = readYuan(item.sell_min_price);
+                let scm_price = readYuan(item.goods_info.steam_price_cny);
+                let diff = ((scm_price - price) / scm_price) * -1 * 100;
+
+                p.style['marginTop'] = '-12px';
+
+                p_strong.innerHTML = createCurrencyHoverContainer(`${Util.SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
+
+                p_span.innerHTML = `<e title="${item.sell_num.toLocaleString('de-DE')} on sale">${item.sell_num > 1_000 ? '1.000+' : item.sell_num} on sale</e>`;
+
+                p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+            }
         });
     }
 
@@ -439,7 +477,7 @@ module BuffUtility {
      */
     function convertSelectors(): void {
         for (let l_Selector of selectors) {
-            if (l_Selector.pattern.test(window.location.href)) {
+            if (l_Selector.pattern.test(window.location.href) && l_Selector.queries.length > 0) {
                 let elements: NodeListOf<Element> = document.querySelectorAll(l_Selector.queries.join(', '));
 
                 if (elements.length > 0) {
