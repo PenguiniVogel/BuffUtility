@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es3",
+    "sourceMap": false,
+    "removeComments": true,
+    "outFile": "../../out/buff_utility.js"
+  },
+  "files": [
+    "../../sources/Buff/BuffConstants.ts",
+    "../../sources/Util.ts",
+    "../../sources/Cookie.ts",
+    "../../sources/fRequest.ts",
+    "../../sources/Buff/BuffApi.ts",
+    "../../sources/Buff/BuffUtility.ts",
+    "../../sources/Buff/content.ts"
+  ]
+}

@@ -1,5 +1,11 @@
+///<reference path="BuffConstants.ts"/>
+///<reference path="../Util.ts"/>
+///<reference path="../Cookie.ts"/>
+///<reference path="BuffApi.ts"/>
+
 /**
- * Author: Felix Vogel
+ * Copyright 2021 Felix Vogel
+ * BuffUtility is not affiliated with buff.163.com or NetEase
  */
 /** */
 module BuffUtility {
@@ -154,11 +160,11 @@ module BuffUtility {
         let cookieValue: string;
 
         try {
-            cookieValue = Cookie.read(Cookie.COOKIE_BUFF_UTILITY_OPTIONS);
+            cookieValue = Cookie.read(COOKIE_BUFF_UTILITY_OPTIONS);
         } catch {
             console.info('[BuffUtility] Cookie was not found.');
 
-            Cookie.write(Cookie.COOKIE_BUFF_UTILITY_OPTIONS, JSON.stringify(programOptions));
+            Cookie.write(COOKIE_BUFF_UTILITY_OPTIONS, JSON.stringify(programOptions));
         }
 
         programOptions = !!cookieValue ? JSON.parse(cookieValue) : programOptions;
@@ -173,8 +179,6 @@ module BuffUtility {
                 BuffApi.getBuyOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored buy_order ${goodsId}.`), () => { /* honestly */ });
             }
         }
-
-
 
         setInterval(() => {
             if (!loaded) return;
@@ -232,7 +236,7 @@ module BuffUtility {
 
                 console.info(`[BuffUtility] Currency changed -> ${programOptions.selectedCurrency}`, cachedCurrencyRates.rates[programOptions.selectedCurrency]);
 
-                Cookie.write(Cookie.COOKIE_BUFF_UTILITY_OPTIONS, JSON.stringify(programOptions));
+                Cookie.write(COOKIE_BUFF_UTILITY_OPTIONS, JSON.stringify(programOptions));
 
                 updateConvertedCurrency();
             };
@@ -301,7 +305,7 @@ module BuffUtility {
 
             parent.setAttribute('style', 'margin-top: -5px; display: grid; grid-template-columns: auto; grid-template-rows: auto auto;');
 
-            parent.innerHTML += `<strong style="color: #eea20e; font-size: 11px;">${createCurrencyHoverContainer(`(${Util.SYMBOL_YUAN} ${price.toFixed(2)})`, price)}</strong>`;
+            parent.innerHTML += `<strong style="color: #eea20e; font-size: 11px;">${createCurrencyHoverContainer(`(${SYMBOL_YUAN} ${price.toFixed(2)})`, price)}</strong>`;
         }
     }
 
@@ -334,7 +338,7 @@ module BuffUtility {
                 } else {
                     let diff = price - bo;
 
-                    div.innerHTML += `<div style="color: ${(diff < 0 ? '#137800' : '#950000')}; font-size: 12px;">(${(diff < 0 ? Util.SYMBOL_ARROW_DOWN : Util.SYMBOL_ARROW_UP)} ${(diff < 0 ? diff * -1 : diff).toFixed(2)})</div>`;
+                    div.innerHTML += `<div style="color: ${(diff < 0 ? '#137800' : '#950000')}; font-size: 12px;">(${(diff < 0 ? SYMBOL_ARROW_DOWN : SYMBOL_ARROW_UP)} ${(diff < 0 ? diff * -1 : diff).toFixed(2)})</div>`;
                 }
             }, (status) => { });
         }
@@ -357,14 +361,14 @@ module BuffUtility {
 
             parent.setAttribute(ATTR_CONVERTED_BUY_ORDER, '');
 
-            parent.innerHTML += `<div style="font-size: 12px; margin-top: 3px;" class="f_Strong">${createCurrencyHoverContainer(`(${Util.SYMBOL_YUAN} ${price.toFixed(2)})`, price)}</div>`;
+            parent.innerHTML += `<div style="font-size: 12px; margin-top: 3px;" class="f_Strong">${createCurrencyHoverContainer(`(${SYMBOL_YUAN} ${price.toFixed(2)})`, price)}</div>`;
         }
     }
 
-    /**
+    /*
      * Adds the percent difference of the cheapest listing to the reference price
      * @private
-     */
+     *
     function addReferencePriceDifference(): any {
         // Don't start the function if we arent on the right sites
         if (!(/^.*buff\.163\.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href) ||
@@ -422,8 +426,12 @@ module BuffUtility {
         }, (status) => {
             console.debug(`[BuffUtility] Failed to fetch ${goodsId}, reason: ${status}. Retrying in 2.5 seconds.`);
         });
-    }
+    } */
 
+    /**
+     * Adds the reference price difference to scm and converts to the selected currency
+     * @private
+     */
     function addReferencePriceDifferenceBatch(): void {
         if (url == window.location.href) return;
 
@@ -462,7 +470,7 @@ module BuffUtility {
 
                 p.style['marginTop'] = '-12px';
 
-                p_strong.innerHTML = createCurrencyHoverContainer(`${Util.SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
+                p_strong.innerHTML = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
 
                 p_span.innerHTML = `<e title="${item.sell_num.toLocaleString('de-DE')} on sale">${item.sell_num > 1_000 ? '1.000+' : item.sell_num} on sale</e>`;
 

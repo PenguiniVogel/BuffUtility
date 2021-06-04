@@ -1,8 +1,12 @@
+///<reference path="../Util.ts"/>
+///<reference path="../fRequest.ts"/>
+
 /**
  * Provide a interface to the Buff API
  * with automatic retry on 429 whilst avoiding getting constantly limited
  *
- * Author: Felix Vogel
+ * Copyright 2021 Felix Vogel
+ * BuffUtility is not affiliated with buff.163.com or NetEase
  */
 /** */
 module BuffApi {
@@ -121,6 +125,8 @@ module BuffApi {
         'transacted_num'?: number,
     }
 
+    export type GoodsPageTab = 'selling'|'goods'|'buying'|'goods/buying'|'top-bookmarked'|'sell_order/top_bookmarked';
+
     /**
      * Gets the currently selected game for the api call
      */
@@ -137,7 +143,6 @@ module BuffApi {
      * @param maxRetry The max amount or retries before waiting 4.5 seconds
      */
     export function getSellOrderInformation(id: string, callback: (goodsInfo: GoodsInfo) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
-
         let url = `https://buff.163.com/api/market/goods/sell_order?game=${getSelectedGame()}&goods_id=${id}`;
 
         let retryCount = 0;
@@ -175,7 +180,6 @@ module BuffApi {
      * @param maxRetry The max amount or retries before waiting 4.5 seconds
      */
     export function getBuyOrderInformation(id: string, callback: (json: BuyOrderInfo) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
-
         let url = `https://buff.163.com/api/market/goods/buy_order?game=${getSelectedGame()}&goods_id=${id}`;
 
         let retryCount = 0;
@@ -220,20 +224,35 @@ module BuffApi {
         let query = window.location.href.split('?')[1];
         let tab = (/#tab=(selling|buying|top-bookmarked)/.exec(window.location.href)[1] ?? 'selling');
 
+        // remove page ref cuz it breaks buff queries, fucking what
+        query = query.replace(/#tab=(?:selling|buying|top-bookmarked)/, '');
+
+        queryMarket(<GoodsPageTab>tab, query, callback);
+    }
+
+    export function queryMarket(tab: GoodsPageTab, query: string, callback: (json: GoodsPageResponse) => void): void {
+        if (!tab) {
+            return console.error('[BuffApi] No tab specified.');
+        }
+
         switch (tab) {
             case 'selling':
+            case 'goods':
                 tab = 'goods';
                 break;
             case 'buying':
+            case 'goods/buying':
                 tab = 'goods/buying';
                 break;
             case 'top-bookmarked':
+            case 'sell_order/top_bookmarked':
                 tab = 'sell_order/top_bookmarked';
                 break;
+            default:
+                return console.error('[BuffApi] The specified tab does not match selling, buying or top-bookmarked');
         }
 
-        // remove page ref tab cuz it breaks buff queries, fucking what
-        query = query.replace(/#tab=(?:selling|buying|top-bookmarked)/, '');
+        query = query ?? '';
 
         fRequest.get(`https://buff.163.com/api/market/${tab}?${query}`, null, (req, args, e) => {
             if (req.readyState != 4) return;
@@ -243,7 +262,7 @@ module BuffApi {
                 response = Util.parseJson(req);
             } catch { }
 
-            console.log(response);
+            console.info(`[BuffUtility] Loaded ${tab}?${query} with ${(response?.data?.items?.length ?? 0)} items.`);
 
             callback(response);
         });

@@ -4,8 +4,6 @@
 /** */
 module Cookie {
 
-    export const COOKIE_BUFF_UTILITY_OPTIONS: string = 'buff_utility_options';
-
     export function read(name: string): string {
         let result = new RegExp(`(?:^|; )${encodeURIComponent(name)}=([^;]*)`).exec(document.cookie);
 

@@ -1,20 +1,22 @@
-/**
- * Author: Felix Vogel
- */
+///<reference path="BuffUtility.ts"/>
 
-function removeIndexedDB() {
+/**
+ * Copyright 2021 Felix Vogel
+ * BuffUtility is not affiliated with buff.163.com or NetEase
+ */
+/** */
+
+// Removes the indexedDB that was added with 1.0.5
+// Encapsulated so the whole script doesnt break down just in case.
+(() => {
     try {
         indexedDB.deleteDatabase('buff_utility_db');
     } catch {
         // ignore lol who cares
     }
-}
+})();
 
-removeIndexedDB();
-
-/**
- * Initialize BuffUtility
- */
+// Initialize BuffUtility
 BuffUtility.init();
 
 // pasting disclaimer
