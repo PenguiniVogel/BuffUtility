@@ -134,7 +134,9 @@ module BuffUtility {
     ];
 
     let loaded: boolean = false;
-    let url: string = '';
+    let pageLoading: boolean = true;
+
+    // let url: string = '';
 
     /**
      * The stored options
@@ -171,17 +173,38 @@ module BuffUtility {
 
         addCurrencySelection();
 
-        if (/^.*buff\.163\.com.*goods_id=\d+/.test(window.location.href)) {
-            let goodsId = Util.getGoodsId(window.location.href);
-
-            if (goodsId != '-1') {
-                BuffApi.getSellOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored sell_order ${goodsId}.`), () => { /* honestly */ });
-                BuffApi.getBuyOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored buy_order ${goodsId}.`), () => { /* honestly */ });
-            }
-        }
+        // if (/^.*buff\.163\.com.*goods_id=\d+/.test(window.location.href)) {
+        //     let goodsId = Util.getGoodsId(window.location.href);
+        //
+        //     if (goodsId != '-1') {
+        //         BuffApi.getSellOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored sell_order ${goodsId}.`), () => { /* honestly */ });
+        //         BuffApi.getBuyOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored buy_order ${goodsId}.`), () => { /* honestly */ });
+        //     }
+        // }
 
         setInterval(() => {
-            if (!loaded) return;
+            let loading = document.querySelector('#j_market_card > div.spinner.showLoading');
+
+            if (loading && !pageLoading) {
+                pageLoading = true;
+            }
+
+            if (!loading && pageLoading) {
+                pageLoading = false;
+                console.debug('[BuffUtility] Buff page loaded.');
+
+                (<HTMLElement>document.querySelector('#j_market_card')).style['display'] = 'none';
+
+                if (/^.*buff\.163\.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href)) {
+                    setTimeout(() => {
+                        addReferencePriceDifferenceBatch();
+                    }, 100);
+                }
+            }
+        }, 50);
+
+        setInterval(() => {
+            if (!loaded || pageLoading) return;
 
             convertSelectors();
 
@@ -195,10 +218,6 @@ module BuffUtility {
 
             if (/^.*buff\.163\.com\/market\/sell_order\/history.*$/.test(window.location.href) || /^.*buff\.163\.com\/market\/goods\?.*tab=buying.*$/.test(window.location.href)) {
                 addBuyOrderGain();
-            }
-
-            if (/^.*buff\.163\.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href)) {
-                addReferencePriceDifferenceBatch();
             }
         }, 1000);
 
@@ -310,22 +329,23 @@ module BuffUtility {
     }
 
     function addHighestBuyOrderDifference(): void {
+        let goodsId = Util.getGoodsId(window.location.href);
+
+        if (goodsId == '-1') {
+            return console.info('[BuffUtility] Unable to parse id.');
+        }
+
         let listings = document.querySelectorAll(`.list_tb > tbody > tr > td > div${NOT_REQUESTED_BO_PRICE} > strong.f_Strong`);
 
-        for (let i = 0, l = listings.length; i < l; i ++) {
-            let listing = <HTMLElement>listings.item(i);
-            let div = listing.parentElement;
+        if (listings.length <= 0) return;
 
-            div.setAttribute(ATTR_REQUESTED_BO_PRICE, '');
+        BuffApi.getBuyOrderInformation(goodsId, (info) => {
+            for (let i = 0, l = listings.length; i < l; i ++) {
+                let listing = <HTMLElement>listings.item(i);
+                let div = listing.parentElement;
 
-            let goodsId = Util.getGoodsId(window.location.href);
+                div.setAttribute(ATTR_REQUESTED_BO_PRICE, '');
 
-            if (goodsId == '-1') {
-                console.info('[BuffUtility] Unable to parse price.', listing);
-                continue;
-            }
-
-            BuffApi.getBuyOrderInformation(goodsId, (info) => {
                 let price = readYuan(<HTMLElement>(listing.querySelector('e') ?? listing));
                 let bo = -1;
 
@@ -340,8 +360,39 @@ module BuffUtility {
 
                     div.innerHTML += `<div style="color: ${(diff < 0 ? '#137800' : '#950000')}; font-size: 12px;">(${(diff < 0 ? SYMBOL_ARROW_DOWN : SYMBOL_ARROW_UP)} ${(diff < 0 ? diff * -1 : diff).toFixed(2)})</div>`;
                 }
-            }, (status) => { });
-        }
+            }
+        }, (status) => { });
+
+        // for (let i = 0, l = listings.length; i < l; i ++) {
+        //     let listing = <HTMLElement>listings.item(i);
+        //     let div = listing.parentElement;
+        //
+        //     div.setAttribute(ATTR_REQUESTED_BO_PRICE, '');
+        //
+        //     let goodsId = Util.getGoodsId(window.location.href);
+        //
+        //     if (goodsId == '-1') {
+        //         console.info('[BuffUtility] Unable to parse price.', listing);
+        //         continue;
+        //     }
+        //
+        //     BuffApi.getBuyOrderInformation(goodsId, (info) => {
+        //         let price = readYuan(<HTMLElement>(listing.querySelector('e') ?? listing));
+        //         let bo = -1;
+        //
+        //         try {
+        //             bo = parseFloat(info.price);
+        //         } catch {}
+        //
+        //         if (bo == -1) {
+        //             console.debug('[BuffUtility] Failed to get buy order price.', listing);
+        //         } else {
+        //             let diff = price - bo;
+        //
+        //             div.innerHTML += `<div style="color: ${(diff < 0 ? '#137800' : '#950000')}; font-size: 12px;">(${(diff < 0 ? SYMBOL_ARROW_DOWN : SYMBOL_ARROW_UP)} ${(diff < 0 ? diff * -1 : diff).toFixed(2)})</div>`;
+        //         }
+        //     }, (status) => { });
+        // }
     }
 
     /**
@@ -433,9 +484,8 @@ module BuffUtility {
      * @private
      */
     function addReferencePriceDifferenceBatch(): void {
-        if (url == window.location.href) return;
-
-        url = window.location.href;
+        // if (url == window.location.href) return;
+        // url = window.location.href;
 
         BuffApi.getGoodsPageData((json) => {
             let liCollection = document.querySelectorAll('#j_list_card > ul > li');
@@ -451,6 +501,7 @@ module BuffUtility {
                 let p = <HTMLElement>li.querySelector('p');
                 let p_strong = <HTMLElement>li.querySelector('p > strong');
                 let p_span = <HTMLElement>li.querySelector('p > span');
+                let span = <HTMLElement>li.querySelector('span.tag');
 
                 a.setAttribute('href', `/market/goods?goods_id=${item.id}&from=market#tab=selling`);
                 a.setAttribute('title', item.short_name);
@@ -466,7 +517,7 @@ module BuffUtility {
 
                 let price = readYuan(item.sell_min_price);
                 let scm_price = readYuan(item.goods_info.steam_price_cny);
-                let diff = ((scm_price - price) / scm_price) * -1 * 100;
+                let diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
 
                 p.style['marginTop'] = '-12px';
 
@@ -475,7 +526,24 @@ module BuffUtility {
                 p_span.innerHTML = `<e title="${item.sell_num.toLocaleString('de-DE')} on sale">${item.sell_num > 1_000 ? '1.000+' : item.sell_num} on sale</e>`;
 
                 p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+
+                let exterior = item.goods_info.info?.tags['exterior'];
+
+                if (exterior) {
+                    if (span) {
+                        span.setAttribute('class', `tag tag_csgo_${exterior.internal_name}`);
+                        span.innerHTML = exterior.localized_name;
+                    } else {
+                        li.innerHTML += `<span class="tag tag_csgo_${exterior.internal_name}">${exterior.localized_name}</span>`;
+                    }
+                } else {
+                    if (span) {
+                        span.style['display'] = 'none';
+                    }
+                }
             }
+
+            (<HTMLElement>document.querySelector('#j_market_card')).style['display'] = '';
         });
     }
 

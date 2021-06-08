@@ -11,7 +11,7 @@
 /** */
 module BuffApi {
 
-    export type GoodsInfo = {
+    export type SellOrderInfo = {
         'appid'?: number,
         'description'?: any,
         'game'?: string,
@@ -39,7 +39,7 @@ module BuffApi {
         'code'?: string,
         'data'?: {
             'goods_infos'?: {
-                [goods_id: string]: GoodsInfo
+                [goods_id: string]: SellOrderInfo
             }
         }
     };
@@ -127,6 +127,57 @@ module BuffApi {
 
     export type GoodsPageTab = 'selling'|'goods'|'buying'|'goods/buying'|'top-bookmarked'|'sell_order/top_bookmarked';
 
+    let cachedResponses: {
+        [game: string]: {
+            [id: string]: {
+                sell?: SellOrderInfo,
+                sell_timestamp?: number,
+                buy?: BuyOrderInfo
+                buy_timestamp?: number
+            }
+        }
+    } = {};
+
+    /**
+     * Put a response to be cached
+     *
+     * @param id
+     * @param type
+     * @param data
+     * @private
+     */
+    function putCachedResponse(id: string, type: 'sell'|'buy', data: SellOrderInfo | BuyOrderInfo): void {
+        let game = getSelectedGame();
+
+        if (!cachedResponses[game]) cachedResponses[game] = {};
+        if (!cachedResponses[game][id]) cachedResponses[game][id] = {};
+
+        cachedResponses[game][id][type] = data;
+        cachedResponses[game][id][`${type}_timestamp`] = Date.now();
+    }
+
+    /**
+     * Get a cached response
+     *
+     * @param id
+     * @param type
+     * @private
+     */
+    function getCachedResponse(id: string, type: 'sell' | 'buy'): SellOrderInfo | BuyOrderInfo {
+        let game = getSelectedGame();
+
+        if (cachedResponses[game] &&
+            cachedResponses[game][id] &&
+            cachedResponses[game][id][type] &&
+            cachedResponses[game][id][`${type}_timestamp`] &&
+            cachedResponses[game][id][`${type}_timestamp`] + 5 * 60 * 1_000 > Date.now()
+        ) {
+            return cachedResponses[game][id][type];
+        }
+
+        return null;
+    }
+
     /**
      * Gets the currently selected game for the api call
      */
@@ -142,7 +193,14 @@ module BuffApi {
      * @param onretry The failure callback
      * @param maxRetry The max amount or retries before waiting 4.5 seconds
      */
-    export function getSellOrderInformation(id: string, callback: (goodsInfo: GoodsInfo) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
+    export function getSellOrderInformation(id: string, callback: (goodsInfo: SellOrderInfo) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
+        let cached = getCachedResponse(id, 'sell');
+
+        if (cached) {
+            callback(cached);
+            return;
+        }
+
         let url = `https://buff.163.com/api/market/goods/sell_order?game=${getSelectedGame()}&goods_id=${id}`;
 
         let retryCount = 0;
@@ -162,7 +220,7 @@ module BuffApi {
                 }
 
                 let result = <SellOrderResponse>Util.parseJson(req);
-                let goodsInfo = <GoodsInfo>(result.data.goods_infos[id] ?? {});
+                let goodsInfo = <SellOrderInfo>(result.data.goods_infos[id] ?? {});
 
                 callback(goodsInfo);
             });
@@ -180,6 +238,13 @@ module BuffApi {
      * @param maxRetry The max amount or retries before waiting 4.5 seconds
      */
     export function getBuyOrderInformation(id: string, callback: (json: BuyOrderInfo) => void, onretry: (status: number) => void, maxRetry: number = 5): void {
+        let cached = getCachedResponse(id, 'buy');
+
+        if (cached) {
+            callback(cached);
+            return;
+        }
+
         let url = `https://buff.163.com/api/market/goods/buy_order?game=${getSelectedGame()}&goods_id=${id}`;
 
         let retryCount = 0;
