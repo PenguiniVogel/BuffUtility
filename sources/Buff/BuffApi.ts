@@ -285,7 +285,7 @@ module BuffApi {
         call();
     }
 
-    export function getGoodsPageData(callback: (json: GoodsPageResponse) => void): void {
+    export function getPageJsonData(callback: (json: GoodsPageResponse) => void): void {
         let query = window.location.href.split('?')[1];
         let tab = (/#tab=(selling|buying|top-bookmarked)/.exec(window.location.href)[1] ?? 'selling');
 

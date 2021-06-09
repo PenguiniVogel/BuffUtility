@@ -4,6 +4,8 @@
 /** */
 module Util {
 
+    let unique: number = 0;
+
     export function parseJson<T extends object>(_in: XMLHttpRequest | string): T {
         let result: T;
 

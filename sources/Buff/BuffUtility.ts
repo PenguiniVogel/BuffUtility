@@ -193,7 +193,7 @@ module BuffUtility {
                 pageLoading = false;
                 console.debug('[BuffUtility] Buff page loaded.');
 
-                (<HTMLElement>document.querySelector('#j_market_card')).style['display'] = 'none';
+                // (<HTMLElement>document.querySelector('#j_market_card')).style['display'] = 'none';
 
                 if (/^.*buff\.163\.com\/market\/\?game=.*tab=(?:selling|buying|top-bookmarked).*$/.test(window.location.href)) {
                     setTimeout(() => {
@@ -295,7 +295,7 @@ module BuffUtility {
      * @private
      */
     function readYuan(element: HTMLElement | string): number {
-        let priceString: string = (typeof element == 'string' ? element : element.innerHTML).replace(/¥|<\/?small>|<\/?big>/g, '').trim();
+        let priceString: string = (typeof element == 'string' ? element : element.innerHTML).replace(/\(|\)|¥|<\/?small>|<\/?big>/g, '').trim();
 
         let price: number = 0.0;
         try {
@@ -487,7 +487,7 @@ module BuffUtility {
         // if (url == window.location.href) return;
         // url = window.location.href;
 
-        BuffApi.getGoodsPageData((json) => {
+        BuffApi.getPageJsonData((json) => {
             let liCollection = document.querySelectorAll('#j_list_card > ul > li');
 
             for (let i = 0, l = liCollection.length; i < l; i ++) {
@@ -543,7 +543,7 @@ module BuffUtility {
                 }
             }
 
-            (<HTMLElement>document.querySelector('#j_market_card')).style['display'] = '';
+            // (<HTMLElement>document.querySelector('#j_market_card')).style['display'] = '';
         });
     }
 

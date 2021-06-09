@@ -29,10 +29,7 @@ module CSGOStashUtility {
 
         let itemQuery = `game=csgo&page_num=1&search=${encodeURIComponent(itemName)}`;
 
-        BuffApi.queryMarket('selling', itemQuery, (json) => {
-            console.log(json);
-
-            let pricesTab =
+        let pricesTab =
 `<div role="tabpanel" class="tab-pane" id="buffprices">
     <div class="btn-group-sm btn-group-justified price-bottom-space">
         <a href="https://buff.163.com/market/?${itemQuery}" target="_blank" rel="nofollow" class="btn btn-default btn-sm market-button-skin">Search buff (All)</a>
@@ -40,7 +37,6 @@ module CSGOStashUtility {
 </div>`;
 
             priceDetails.innerHTML += pricesTab;
-        });
     }
 
 }
