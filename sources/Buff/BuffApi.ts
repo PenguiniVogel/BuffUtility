@@ -11,6 +11,14 @@
 /** */
 module BuffApi {
 
+    export type InfoTags = {
+        [name: string]: {
+            'category'?: string,
+            'internal_name'?: string,
+            'localized_name'?: string
+        }
+    }
+
     export type SellOrderInfo = {
         'appid'?: number,
         'description'?: any,
@@ -26,13 +34,7 @@ module BuffApi {
         'steam_price'?: string,
         'steam_price_cny'?: string,
         'steam_price_custom'?: string,
-        'tags'?: {
-            [name: string]: {
-                'category'?: string,
-                'internal_name'?: string,
-                'localized_name'?: string
-            }
-        }
+        'tags'?: InfoTags
     }
 
     export type SellOrderResponse = {
@@ -98,13 +100,7 @@ module BuffApi {
         'goods_info'?: {
             'icon_url'?: string,
             'info'?: {
-                'tags'?: {
-                    [name: string]: {
-                        'category'?: string,
-                        'internal_name'?: string,
-                        'localized_name'?: string
-                    }
-                }
+                'tags'?: InfoTags
             },
             'item_id'?: any,
             'original_icon_url'?: string,
@@ -125,7 +121,125 @@ module BuffApi {
         'transacted_num'?: number,
     }
 
-    export type GoodsPageTab = 'selling'|'goods'|'buying'|'goods/buying'|'top-bookmarked'|'sell_order/top_bookmarked';
+    export type TopBookmarkedResponse = {
+        'code'?: string,
+        'data'?: {
+            'goods_infos'?: {
+                [id: number]: {
+                    'appid'?: number,
+                    'can_3d_inspect'?: boolean,
+                    'can_inspect'?: boolean,
+                    'description'?: any,
+                    'game'?: string,
+                    'goods_id'?: number,
+                    'icon_url'?: string,
+                    'item_id'?: any,
+                    'market_hash_name'?: string,
+                    'market_min_price'?: string,
+                    'name'?: string,
+                    'original_icon_url'?: string,
+                    'short_name'?: string,
+                    'steam_price'?: string,
+                    'steam_price_cny'?: string,
+                    'steam_price_custom'?: string,
+                    'tags'?: InfoTags
+                }
+            },
+            'items'?: {
+                'allow_bargain'?: boolean,
+                'appid'?: number,
+                'asset_info'?: {
+                    'action_link'?: string,
+                    'appid'?: number,
+                    'assetid'?: string,
+                    'classid'?: string,
+                    'contextid'?: number,
+                    'goods_id'?: number,
+                    'has_tradable_cooldown'?: boolean,
+                    'info'?: {
+                        'fraudwarnings'?: string,
+                        'icon_url'?: string,
+                        'inspect_en_size'?: string,
+                        'inspect_en_url'?: string,
+                        'inspect_mobile_size'?: string,
+                        'inspect_mobile_url'?: string,
+                        'inspect_size'?: string,
+                        'inspect_start_at'?: string,
+                        'inspect_state'?: number,
+                        'inspect_url'?: string,
+                        'inspect_version'?: number,
+                        'inspected_at'?: string,
+                        'metaphysic'?: {
+                            'data'?: {
+                                'color'?: string,
+                                'name'?: string
+                            },
+                            'title'?: string
+                        },
+                        'original_icon_url'?: string,
+                        'paintindex'?: number,
+                        'paintseed'?: number,
+                        'phase_data'?: {
+                            'color'?: string,
+                            'name'?: string
+                        }
+                        'stickers'?: {
+                            'category'?: string,
+                            'img_url'?: string,
+                            'name'?: string,
+                            'slot'?: number,
+                            'sticker_id'?: number,
+                            'wear'?: number
+                        }[],
+                        'tier_data'?: {
+                            'color'?: string,
+                            'name'?: string
+                        },
+                        'tournament_tags'?: {
+                            'category'?: string,
+                            'internal_name'?: string,
+                            'localized_name'?: string
+                        }[]
+                    },
+                    'instanceid'?: string,
+                    'paintwear'?: string,
+                    'tradable_cooldown_text'?: string,
+                    'tradable_unfrozen_time'?: any
+                },
+                'can_bargain'?: boolean,
+                'cannot_bargain_reason'?: string,
+                'created_at'?: number,
+                'description'?: string,
+                'featured'?: number,
+                'fee'?: string,
+                'game'?: string,
+                'goods_id'?: number,
+                'id'?: string,
+                'income'?: string,
+                'lowest_bargain_price'?: string,
+                'mode'?: number,
+                'price'?: string,
+                'recent_average_duration'?: any,
+                'recent_deliver_rate'?: any,
+                'state'?: number,
+                'tradable_cooldown'?: any,
+                'updated_at'?: number,
+                'user_id'?: string
+            }[],
+            'page_num'?: number,
+            'page_size'?: number,
+            'show_game_cms_icon'?: boolean,
+            'total_count'?: number,
+            'total_page'?: number,
+            // don't need these
+            'user_infos'?: {
+                [id: string]: any
+            }
+        },
+        'msg'?: any
+    }
+
+    export type MarketPageTabs = 'selling'|'goods'|'buying'|'goods/buying'|'top-bookmarked'|'sell_order/top_bookmarked';
 
     let cachedResponses: {
         [game: string]: {
@@ -222,6 +336,8 @@ module BuffApi {
                 let result = <SellOrderResponse>Util.parseJson(req);
                 let goodsInfo = <SellOrderInfo>(result.data.goods_infos[id] ?? {});
 
+                putCachedResponse(id, 'sell', goodsInfo);
+
                 callback(goodsInfo);
             });
         }
@@ -245,7 +361,7 @@ module BuffApi {
             return;
         }
 
-        let url = `https://buff.163.com/api/market/goods/buy_order?game=${getSelectedGame()}&goods_id=${id}`;
+        let url = `https://buff.163.com/api/market/goods/buy_order?game=${getSelectedGame()}&page_num=1&page_size=80&goods_id=${id}`;
 
         let retryCount = 0;
 
@@ -278,6 +394,8 @@ module BuffApi {
                     break;
                 }
 
+                putCachedResponse(id, 'buy', buyOrderInfo);
+
                 callback(buyOrderInfo);
             });
         }
@@ -285,17 +403,17 @@ module BuffApi {
         call();
     }
 
-    export function getPageJsonData(callback: (json: GoodsPageResponse) => void): void {
+    export function getMarketJsonData(callback: (json: GoodsPageResponse | TopBookmarkedResponse) => void): void {
         let query = window.location.href.split('?')[1];
-        let tab = (/#tab=(selling|buying|top-bookmarked)/.exec(window.location.href)[1] ?? 'selling');
+        let tab = getTab();
 
         // remove page ref cuz it breaks buff queries, fucking what
         query = query.replace(/#tab=(?:selling|buying|top-bookmarked)/, '');
 
-        queryMarket(<GoodsPageTab>tab, query, callback);
+        queryMarket(<MarketPageTabs>tab, query, callback);
     }
 
-    export function queryMarket(tab: GoodsPageTab, query: string, callback: (json: GoodsPageResponse) => void): void {
+    export function queryMarket(tab: MarketPageTabs, query: string, callback: (json: GoodsPageResponse | TopBookmarkedResponse) => void): void {
         if (!tab) {
             return console.error('[BuffApi] No tab specified.');
         }
@@ -322,7 +440,7 @@ module BuffApi {
         fRequest.get(`https://buff.163.com/api/market/${tab}?${query}`, null, (req, args, e) => {
             if (req.readyState != 4) return;
 
-            let response: GoodsPageResponse;
+            let response: GoodsPageResponse | TopBookmarkedResponse;
             try {
                 response = Util.parseJson(req);
             } catch { }
@@ -331,6 +449,10 @@ module BuffApi {
 
             callback(response);
         });
+    }
+
+    export function getTab(url: string = window.location.href): MarketPageTabs {
+        return <MarketPageTabs>(/#tab=(selling|buying|top-bookmarked)/.exec(url)[1] ?? 'selling');
     }
 
 }

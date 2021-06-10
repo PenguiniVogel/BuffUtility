@@ -135,6 +135,8 @@ module BuffUtility {
 
     let loaded: boolean = false;
     let pageLoading: boolean = true;
+    let soLoaded: boolean = false;
+    let boLoaded: boolean = false;
 
     // let url: string = '';
 
@@ -173,14 +175,23 @@ module BuffUtility {
 
         addCurrencySelection();
 
-        // if (/^.*buff\.163\.com.*goods_id=\d+/.test(window.location.href)) {
-        //     let goodsId = Util.getGoodsId(window.location.href);
-        //
-        //     if (goodsId != '-1') {
-        //         BuffApi.getSellOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored sell_order ${goodsId}.`), () => { /* honestly */ });
-        //         BuffApi.getBuyOrderInformation(goodsId, () => console.info(`[BuffUtility] Fetched and stored buy_order ${goodsId}.`), () => { /* honestly */ });
-        //     }
-        // }
+        if (/^.*buff\.163\.com.*goods_id=\d+/.test(window.location.href)) {
+            let goodsId = Util.getGoodsId(window.location.href);
+
+            if (goodsId != '-1') {
+                // BuffApi.getSellOrderInformation(goodsId, () => {
+                //     console.info(`[BuffUtility] Fetched and stored sell_order ${goodsId}.`);
+                //
+                //     soLoaded = true;
+                // }, () => { /* honestly */ });
+
+                BuffApi.getBuyOrderInformation(goodsId, () => {
+                    console.info(`[BuffUtility] Fetched and stored buy_order ${goodsId}.`);
+
+                    boLoaded = true;
+                }, () => { /* honestly */ });
+            }
+        }
 
         setInterval(() => {
             let loading = document.querySelector('#j_market_card > div.spinner.showLoading');
@@ -212,7 +223,7 @@ module BuffUtility {
                 addSellingAfterFeeGain();
             }
 
-            if (/^.*buff\.163\.com\/market\/goods\?goods_id=\d+(?:.*#tab=selling.*)?$/.test(window.location.href)) {
+            if (/^.*buff\.163\.com\/market\/goods\?goods_id=\d+(?:.*#tab=selling.*)?$/.test(window.location.href) && boLoaded) {
                 addHighestBuyOrderDifference();
             }
 
@@ -342,7 +353,9 @@ module BuffUtility {
         BuffApi.getBuyOrderInformation(goodsId, (info) => {
             for (let i = 0, l = listings.length; i < l; i ++) {
                 let listing = <HTMLElement>listings.item(i);
-                let div = listing.parentElement;
+                let div = listing?.parentElement;
+
+                if (!listing || !div) continue;
 
                 div.setAttribute(ATTR_REQUESTED_BO_PRICE, '');
 
@@ -356,7 +369,7 @@ module BuffUtility {
                 if (bo == -1) {
                     console.debug('[BuffUtility] Failed to get buy order price.', listing);
                 } else {
-                    let diff = price - bo;
+                    let diff = price - (bo * 0.975);
 
                     div.innerHTML += `<div style="color: ${(diff < 0 ? '#137800' : '#950000')}; font-size: 12px;">(${(diff < 0 ? SYMBOL_ARROW_DOWN : SYMBOL_ARROW_UP)} ${(diff < 0 ? diff * -1 : diff).toFixed(2)})</div>`;
                 }
@@ -486,60 +499,138 @@ module BuffUtility {
     function addReferencePriceDifferenceBatch(): void {
         // if (url == window.location.href) return;
         // url = window.location.href;
+        BuffApi.getTab();
 
-        BuffApi.getPageJsonData((json) => {
+        BuffApi.getMarketJsonData((json) => {
             let liCollection = document.querySelectorAll('#j_list_card > ul > li');
 
             for (let i = 0, l = liCollection.length; i < l; i ++) {
-                let item = json.data.items[i];
-
                 let li = <HTMLElement>liCollection.item(i);
 
                 let a = <HTMLElement>li.querySelector('a');
                 let a_img = <HTMLElement>li.querySelector('a > img');
-                let h3a = <HTMLElement>li.querySelector('h3 > a');
+                let h3 = <HTMLElement>li.querySelector('h3');
+                let h3_a = <HTMLElement>li.querySelector('h3 > a');
                 let p = <HTMLElement>li.querySelector('p');
                 let p_strong = <HTMLElement>li.querySelector('p > strong');
                 let p_span = <HTMLElement>li.querySelector('p > span');
-                let span = <HTMLElement>li.querySelector('span.tag');
+                let spansAdditional = li.querySelectorAll('span.tag');
 
-                a.setAttribute('href', `/market/goods?goods_id=${item.id}&from=market#tab=selling`);
-                a.setAttribute('title', item.short_name);
+                let priceStr: string[];
+                let price: number;
+                let scm_price: number;
+                let diff: number;
+                let exterior: BuffApi.InfoTags[keyof BuffApi.InfoTags];
 
-                a_img.setAttribute('src', item.goods_info.icon_url);
-                a_img.setAttribute('data-original', item.goods_info.original_icon_url);
+                switch (BuffApi.getTab()) {
+                    case 'selling':
+                    case 'goods':
+                    case 'buying':
+                    case 'goods/buying':
+                        let goodsItem = (<BuffApi.GoodsPageResponse>json).data.items[i];
 
-                h3a.setAttribute('href', `/market/goods?goods_id=${item.id}&from=market#tab=selling`);
-                h3a.setAttribute('title', item.short_name);
-                h3a.innerText = item.short_name;
+                        a.setAttribute('href', `/market/goods?goods_id=${goodsItem.id}&from=market#tab=selling`);
+                        a.setAttribute('title', goodsItem.short_name);
 
-                let priceStr = item.sell_min_price.split('.');
+                        a_img.setAttribute('src', goodsItem.goods_info.icon_url);
+                        a_img.setAttribute('data-original', goodsItem.goods_info.original_icon_url);
 
-                let price = readYuan(item.sell_min_price);
-                let scm_price = readYuan(item.goods_info.steam_price_cny);
-                let diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
+                        h3_a.setAttribute('href', `/market/goods?goods_id=${goodsItem.id}&from=market#tab=selling`);
+                        h3_a.setAttribute('title', goodsItem.short_name);
+                        h3_a.innerText = goodsItem.short_name;
 
-                p.style['marginTop'] = '-12px';
+                        priceStr = goodsItem.sell_min_price.split('.');
 
-                p_strong.innerHTML = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
+                        price = readYuan(goodsItem.sell_min_price);
+                        scm_price = readYuan(goodsItem.goods_info.steam_price_cny);
+                        diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
 
-                p_span.innerHTML = `<e title="${item.sell_num.toLocaleString('de-DE')} on sale">${item.sell_num > 1_000 ? '1.000+' : item.sell_num} on sale</e>`;
+                        p.style['marginTop'] = '-12px';
 
-                p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+                        p_strong.innerHTML = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
 
-                let exterior = item.goods_info.info?.tags['exterior'];
+                        p_span.innerHTML = `<e title="${goodsItem.sell_num.toLocaleString('de-DE')} on sale">${goodsItem.sell_num > 1_000 ? '1.000+' : goodsItem.sell_num} on sale</e>`;
 
-                if (exterior) {
-                    if (span) {
-                        span.setAttribute('class', `tag tag_csgo_${exterior.internal_name}`);
-                        span.innerHTML = exterior.localized_name;
-                    } else {
-                        li.innerHTML += `<span class="tag tag_csgo_${exterior.internal_name}">${exterior.localized_name}</span>`;
-                    }
-                } else {
-                    if (span) {
-                        span.style['display'] = 'none';
-                    }
+                        p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+
+                        exterior = goodsItem.goods_info.info?.tags['exterior'];
+
+                        let goods_span_wearcategory = <HTMLElement>spansAdditional.item(0);
+
+                        if (exterior) {
+                            if (goods_span_wearcategory) {
+                                goods_span_wearcategory.setAttribute('class', `tag tag_csgo_${exterior.internal_name}`);
+                                goods_span_wearcategory.innerHTML = exterior.localized_name;
+                            } else {
+                                li.innerHTML += `<span class="tag tag_csgo_${exterior.internal_name}">${exterior.localized_name}</span>`;
+                            }
+                        } else {
+                            if (goods_span_wearcategory) {
+                                goods_span_wearcategory.style['display'] = 'none';
+                            }
+                        }
+
+                        break;
+                    case 'sell_order/top_bookmarked':
+                    case 'top-bookmarked':
+                        let bookmarkedItem = (<BuffApi.TopBookmarkedResponse>json).data.items[i];
+                        let bookmarkedGoodsInfo = (<BuffApi.TopBookmarkedResponse>json).data.goods_infos[bookmarkedItem.goods_id];
+
+                        a.setAttribute('href', `/market/goods?goods_id=${bookmarkedItem.id}&from=market#tab=selling`);
+                        a.setAttribute('title', bookmarkedGoodsInfo.short_name);
+
+                        a_img.setAttribute('src', bookmarkedGoodsInfo.icon_url);
+                        a_img.setAttribute('data-original', bookmarkedGoodsInfo.original_icon_url);
+
+                        document.querySelector('div.wear > div.wear-value').innerHTML = `Float: ${bookmarkedItem.asset_info.paintwear}`;
+
+                        let floatP = parseFloat(bookmarkedItem.asset_info.paintwear) * 100;
+
+                        document.querySelector('div.wear > div.wear-pointer > div.wear-pointer-icon').setAttribute('style', `left: ${floatP}%`);
+
+                        h3.setAttribute('style', 'margin-top: 1px !important;');
+
+                        h3_a.setAttribute('href', `/market/goods?goods_id=${bookmarkedItem.goods_id}&from=market#tab=selling`);
+                        h3_a.setAttribute('title', bookmarkedGoodsInfo.short_name);
+                        h3_a.innerText = bookmarkedGoodsInfo.short_name;
+
+                        priceStr = bookmarkedItem.price.split('.');
+
+                        price = readYuan(bookmarkedItem.price);
+                        scm_price = readYuan(bookmarkedGoodsInfo.steam_price_cny);
+                        diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
+
+                        p.style['marginTop'] = '-3px';
+
+                        p_strong.innerHTML = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
+
+                        p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+
+                        let tagBox = (<HTMLElement>spansAdditional.item(0)).parentElement;
+
+                        // tagBox.innerHTML = '';
+
+                        let tagBoxBContent = `<a href="javascript:;" class="l_Right shalow-btn shalow-btn-green csgo-inspect-view" ` +
+                            `data-assetid="${bookmarkedItem.asset_info.assetid}" ` +
+                            `data-contextid="${bookmarkedItem.asset_info.contextid}" ` +
+                            `data-inspecturl="${bookmarkedItem.asset_info.info.inspect_en_url}" ` +
+                            `data-inspectversion="${bookmarkedItem.asset_info.info.inspect_version}" ` +
+                            `data-inspectsize="${bookmarkedItem.asset_info.info.inspect_en_size}" ` +
+                            `>Screenshot</a>`;
+
+                        for (let i = 0, l = bookmarkedItem.asset_info?.info?.stickers?.length ?? 0; i < l; i ++) {
+                            let sticker = bookmarkedItem.asset_info.info.stickers[i];
+                            tagBoxBContent += `<span ` +
+                                `class="icon icon_stickers j_tips_handler${(sticker.wear > 0 ? ' masked' : '')}" ` +
+                                `data-direction="top" ` +
+                                `data-title="${sticker.name}" ` +
+                                `data-content` +
+                                `><img src="${sticker.img_url}" /></span>`;
+                        }
+
+                        li.querySelector('div.tagBoxB').innerHTML = tagBoxBContent;
+
+                        break;
                 }
             }
 
