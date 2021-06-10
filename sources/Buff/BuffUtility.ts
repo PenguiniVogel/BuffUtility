@@ -579,14 +579,16 @@ module BuffUtility {
                         a.setAttribute('href', `/market/goods?goods_id=${bookmarkedItem.id}&from=market#tab=selling`);
                         a.setAttribute('title', bookmarkedGoodsInfo.short_name);
 
-                        a_img.setAttribute('src', bookmarkedGoodsInfo.icon_url);
-                        a_img.setAttribute('data-original', bookmarkedGoodsInfo.original_icon_url);
+                        a_img.setAttribute('src', bookmarkedItem.asset_info.info.icon_url ?? bookmarkedGoodsInfo.original_icon_url);
+                        a_img.setAttribute('data-original', bookmarkedItem.asset_info.info.icon_url ?? bookmarkedGoodsInfo.original_icon_url);
 
-                        document.querySelector('div.wear > div.wear-value').innerHTML = `Float: ${bookmarkedItem.asset_info.paintwear}`;
+                        if (li.querySelector('div.wear')) {
+                            li.querySelector('div.wear > div.wear-value').innerHTML = `Float: ${bookmarkedItem.asset_info.paintwear}`;
 
-                        let floatP = parseFloat(bookmarkedItem.asset_info.paintwear) * 100;
+                            let floatP = parseFloat(bookmarkedItem.asset_info.paintwear) * 100;
 
-                        document.querySelector('div.wear > div.wear-pointer > div.wear-pointer-icon').setAttribute('style', `left: ${floatP}%`);
+                            li.querySelector('div.wear > div.wear-pointer > div.wear-pointer-icon').setAttribute('style', `left: ${floatP}%`);
+                        }
 
                         h3.setAttribute('style', 'margin-top: 1px !important;');
 
@@ -602,21 +604,76 @@ module BuffUtility {
 
                         p.style['marginTop'] = '-3px';
 
+                        let p_span_a = p_span.querySelector('a');
+
+                        p_span_a.setAttribute('data-goodsid', `${bookmarkedGoodsInfo.goods_id}`);
+                        p_span_a.setAttribute('data-price', `${bookmarkedItem.price}`);
+                        p_span_a.setAttribute('data-orderid', `${bookmarkedItem.id}`);
+                        p_span_a.setAttribute('data-sellerid', `${bookmarkedItem.user_id}`);
+                        p_span_a.setAttribute('data-goods-name', `${bookmarkedGoodsInfo.name}`);
+                        p_span_a.setAttribute('data-goods-icon-url', `${bookmarkedGoodsInfo.icon_url}`);
+                        p_span_a.setAttribute('data-goods-sell-min-price', '');
+                        p_span_a.setAttribute('data-cooldown', `${bookmarkedItem.asset_info.has_tradable_cooldown}`);
+                        p_span_a.setAttribute('data-asset-info', `${JSON.stringify(bookmarkedItem.asset_info)}`);
+
                         p_strong.innerHTML = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
 
                         p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
 
-                        let tagBox = (<HTMLElement>spansAdditional.item(0)).parentElement;
+                        let tagBoxContent = '';
 
-                        // tagBox.innerHTML = '';
+                        if (/^sticker|type_customplayer$/.test(bookmarkedGoodsInfo.tags['category_group']?.internal_name) && bookmarkedGoodsInfo.tags['rarity']) {
+                            let rarity = bookmarkedGoodsInfo.tags['rarity'];
 
-                        let tagBoxBContent = `<a href="javascript:;" class="l_Right shalow-btn shalow-btn-green csgo-inspect-view" ` +
-                            `data-assetid="${bookmarkedItem.asset_info.assetid}" ` +
-                            `data-contextid="${bookmarkedItem.asset_info.contextid}" ` +
-                            `data-inspecturl="${bookmarkedItem.asset_info.info.inspect_en_url}" ` +
-                            `data-inspectversion="${bookmarkedItem.asset_info.info.inspect_version}" ` +
-                            `data-inspectsize="${bookmarkedItem.asset_info.info.inspect_en_size}" ` +
-                            `>Screenshot</a>`;
+                            tagBoxContent += `<div class="g_Right"> </div>` +
+                                `<span class="tag tag_black rarity_${rarity.internal_name}">${rarity.localized_name}</span>`;
+                        } else {
+                            tagBoxContent += `<div class="g_Right"><a href="javascript:;" style="cursor: pointer;">` +
+                                `<i ` +
+                                `class="icon icon_spect j_tips_handler btn_game_cms" ` +
+                                `data-assetid="${bookmarkedItem.asset_info.assetid}" ` +
+                                `data-direction="bottom" ` +
+                                `data-title="Inspect in server" ` +
+                                `data-content` +
+                                `></i>` +
+                                `</a>` +
+                                `<a style="cursor: pointer;" class="btn_3d" data-assetid="${bookmarkedItem.asset_info.assetid}">` +
+                                `<i ` +
+                                `class="icon icon_3dpersp j_tips_handler" ` +
+                                `data-direction="bottom" ` +
+                                `data-title="3D Inspect"` +
+                                `></i>` +
+                                `</a>` +
+                                `</div>`;
+
+                            if (bookmarkedGoodsInfo.tags['exterior']) {
+                                tagBoxContent += `<span class="tag tag tag_csgo_${bookmarkedGoodsInfo.tags['exterior'].internal_name}">${bookmarkedGoodsInfo.tags['exterior'].localized_name}</span>`;
+                            }
+
+                            if (/^unusual/.test(bookmarkedGoodsInfo.tags['quality']?.internal_name ?? '')) {
+                                tagBoxContent += `<span class="tag tag_black quality_${bookmarkedGoodsInfo.tags['quality'].internal_name}">${bookmarkedGoodsInfo.tags['quality'].localized_name}</span>`;
+                            }
+
+                            if (bookmarkedItem.asset_info?.info?.phase_data && bookmarkedItem.asset_info?.info?.metaphysic) {
+                                tagBoxContent += `<span class="tag tag_gray2 j_tips_handler" data-direction="bottom" data-title="${bookmarkedItem.asset_info.info.metaphysic.title}">${bookmarkedItem.asset_info.info.phase_data.name}</span>`;
+                            } else {
+                                tagBoxContent += `<span class="tag tag_gray2 j_tips_handler" data-direction="bottom" data-title="Paint seed">${bookmarkedItem.asset_info.info.paintseed}</span>`;
+                            }
+                        }
+
+                        li.querySelector('div.tagBox').innerHTML = tagBoxContent;
+
+                        let tagBoxBContent = '';
+
+                        if (bookmarkedItem.asset_info?.info?.inspect_en_url) {
+                            tagBoxBContent += `<a href="javascript:;" class="l_Right shalow-btn shalow-btn-green csgo-inspect-view" ` +
+                                `data-assetid="${bookmarkedItem.asset_info.assetid}" ` +
+                                `data-contextid="${bookmarkedItem.asset_info.contextid}" ` +
+                                `data-inspecturl="${bookmarkedItem.asset_info.info.inspect_en_url}" ` +
+                                `data-inspectversion="${bookmarkedItem.asset_info.info.inspect_version}" ` +
+                                `data-inspectsize="${bookmarkedItem.asset_info.info.inspect_en_size}" ` +
+                                `>Screenshot</a>`;
+                        }
 
                         for (let i = 0, l = bookmarkedItem.asset_info?.info?.stickers?.length ?? 0; i < l; i ++) {
                             let sticker = bookmarkedItem.asset_info.info.stickers[i];
