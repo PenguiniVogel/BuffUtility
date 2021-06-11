@@ -504,6 +504,8 @@ module BuffUtility {
         BuffApi.getMarketJsonData((json) => {
             let liCollection = document.querySelectorAll('#j_list_card > ul > li');
 
+            const tab = BuffApi.getTab();
+
             for (let i = 0, l = liCollection.length; i < l; i ++) {
                 let li = <HTMLElement>liCollection.item(i);
 
@@ -511,18 +513,19 @@ module BuffUtility {
                 let a_img = <HTMLElement>li.querySelector('a > img');
                 let h3 = <HTMLElement>li.querySelector('h3');
                 let h3_a = <HTMLElement>li.querySelector('h3 > a');
-                let p = <HTMLElement>li.querySelector('p');
-                let p_strong = <HTMLElement>li.querySelector('p > strong');
-                let p_span = <HTMLElement>li.querySelector('p > span');
+                // let p = <HTMLElement>li.querySelector('p');
+                // let p_strong = <HTMLElement>li.querySelector('p > strong');
+                // let p_span = <HTMLElement>li.querySelector('p > span');
                 let spansAdditional = li.querySelectorAll('span.tag');
 
                 let priceStr: string[];
                 let price: number;
                 let scm_price: number;
                 let diff: number;
-                let exterior: BuffApi.InfoTags[keyof BuffApi.InfoTags];
+                let hsl: string;
+                // let exterior: BuffApi.InfoTags[keyof BuffApi.InfoTags];
 
-                switch (BuffApi.getTab()) {
+                switch (tab) {
                     case 'selling':
                     case 'goods':
                     case 'buying':
@@ -539,30 +542,65 @@ module BuffUtility {
                         h3_a.setAttribute('title', goodsItem.short_name);
                         h3_a.innerText = goodsItem.short_name;
 
-                        priceStr = goodsItem.sell_min_price.split('.');
+                        let inner_p_strong: string;
+                        let inner_p_span: string;
+                        let inner_p: string;
 
-                        price = readYuan(goodsItem.sell_min_price);
-                        scm_price = readYuan(goodsItem.goods_info.steam_price_cny);
-                        diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
+                        switch (tab) {
+                            case 'selling':
+                            case 'goods':
+                                priceStr = goodsItem.sell_min_price.split('.');
 
-                        p.style['marginTop'] = '-12px';
+                                price = readYuan(goodsItem.sell_min_price);
+                                scm_price = readYuan(goodsItem.goods_info.steam_price_cny);
+                                diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
+                                hsl = `hsl(${Math.min(120, Math.max(0, 120 * (diff / 100)))}, 50%, 100%);`;
 
-                        p_strong.innerHTML = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
+                                inner_p_strong = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
+                                inner_p_span = `<e title="${goodsItem.sell_num.toLocaleString('de-DE')} on sale">${goodsItem.sell_num > 1_000 ? '1.000+' : goodsItem.sell_num} on sale</e>`;
+                                inner_p = `<div style="color: ${hsl}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
 
-                        p_span.innerHTML = `<e title="${goodsItem.sell_num.toLocaleString('de-DE')} on sale">${goodsItem.sell_num > 1_000 ? '1.000+' : goodsItem.sell_num} on sale</e>`;
+                                break;
+                            case 'buying':
+                            case 'goods/buying':
+                                priceStr = goodsItem.buy_max_price.split('.');
 
-                        p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+                                price = readYuan(goodsItem.buy_max_price);
+                                scm_price = readYuan(goodsItem.goods_info.steam_price_cny);
+                                diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
+                                hsl = `hsl(${Math.min(120, Math.max(0, 120 * (diff / 100))).toFixed(2)}deg, 100%, 25%);`;
 
-                        exterior = goodsItem.goods_info.info?.tags['exterior'];
+                                inner_p_strong = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
+                                inner_p_span = `<e title="${goodsItem.buy_num.toLocaleString('de-DE')} demand">${goodsItem.buy_num > 1_000 ? '1.000+' : goodsItem.buy_num} demand</e>`;
+                                inner_p = `<div style="color: ${hsl}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+
+                                break;
+                        }
+
+                        (<HTMLElement>li.querySelector('p')).style['marginTop'] = '-12px';
+                        (<HTMLElement>li.querySelector('p > strong')).innerHTML = inner_p_strong;
+                        (<HTMLElement>li.querySelector('p > span')).innerHTML = inner_p_span;
+                        (<HTMLElement>li.querySelector('p')).innerHTML += inner_p;
+
+                        console.log('Appended to', goodsItem.name, goodsItem.id, [li, li.querySelector('p > strong'), li.querySelector('p > span'), li.querySelector('p')]);
 
                         let goods_span_wearcategory = <HTMLElement>spansAdditional.item(0);
 
-                        if (exterior) {
+                        if (goodsItem.goods_info.info?.tags['exterior']) {
                             if (goods_span_wearcategory) {
-                                goods_span_wearcategory.setAttribute('class', `tag tag_csgo_${exterior.internal_name}`);
-                                goods_span_wearcategory.innerHTML = exterior.localized_name;
+                                goods_span_wearcategory.setAttribute('class', `tag tag_csgo_${goodsItem.goods_info.info.tags['exterior'].internal_name}`);
+                                goods_span_wearcategory.innerHTML = goodsItem.goods_info.info.tags['exterior'].localized_name;
                             } else {
-                                li.innerHTML += `<span class="tag tag_csgo_${exterior.internal_name}">${exterior.localized_name}</span>`;
+                                li.innerHTML = `${li.innerHTML}<span class="tag tag_csgo_${goodsItem.goods_info.info.tags['exterior'].internal_name}">${goodsItem.goods_info.info.tags['exterior'].localized_name}</span>`;
+                            }
+                        } else if (/^csgo_tool_sticker|type_customplayer$/.test(goodsItem.goods_info.info.tags['type']?.internal_name) && goodsItem.goods_info.info.tags['rarity']) {
+                            let rarity = goodsItem.goods_info.info.tags['rarity'];
+
+                            if (goods_span_wearcategory) {
+                                goods_span_wearcategory.setAttribute('class', `tag tag_black rarity_${rarity.internal_name}`);
+                                goods_span_wearcategory.innerHTML = rarity.localized_name;
+                            } else {
+                                li.innerHTML = `${li.innerHTML}<span class="tag tag_black rarity_${rarity.internal_name}">${rarity.localized_name}</span>`;
                             }
                         } else {
                             if (goods_span_wearcategory) {
@@ -602,9 +640,9 @@ module BuffUtility {
                         scm_price = readYuan(bookmarkedGoodsInfo.steam_price_cny);
                         diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
 
-                        p.style['marginTop'] = '-3px';
+                        (<HTMLElement>li.querySelector('p')).style['marginTop'] = '-3px';
 
-                        let p_span_a = p_span.querySelector('a');
+                        let p_span_a = <HTMLElement>li.querySelector('p > span > a');
 
                         p_span_a.setAttribute('data-goodsid', `${bookmarkedGoodsInfo.goods_id}`);
                         p_span_a.setAttribute('data-price', `${bookmarkedItem.price}`);
@@ -616,9 +654,9 @@ module BuffUtility {
                         p_span_a.setAttribute('data-cooldown', `${bookmarkedItem.asset_info.has_tradable_cooldown}`);
                         p_span_a.setAttribute('data-asset-info', `${JSON.stringify(bookmarkedItem.asset_info)}`);
 
-                        p_strong.innerHTML = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
+                        (<HTMLElement>li.querySelector('p > strong')).innerHTML = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
 
-                        p.innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+                        (<HTMLElement>li.querySelector('p')).innerHTML += `<div style="color: ${diff < 0 ? '#137800' : '#950000'}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
 
                         let tagBoxContent = '';
 
