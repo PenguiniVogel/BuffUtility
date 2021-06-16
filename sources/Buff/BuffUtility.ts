@@ -513,38 +513,26 @@ module BuffUtility {
                 let a_img = <HTMLElement>li.querySelector('a > img');
                 let h3 = <HTMLElement>li.querySelector('h3');
                 let h3_a = <HTMLElement>li.querySelector('h3 > a');
-                // let p = <HTMLElement>li.querySelector('p');
-                // let p_strong = <HTMLElement>li.querySelector('p > strong');
-                // let p_span = <HTMLElement>li.querySelector('p > span');
-                let spansAdditional = li.querySelectorAll('span.tag');
 
                 let priceStr: string[];
                 let price: number;
                 let scm_price: number;
                 let diff: number;
                 let hsl: string;
-                // let exterior: BuffApi.InfoTags[keyof BuffApi.InfoTags];
 
                 switch (tab) {
                     case 'selling':
                     case 'goods':
                     case 'buying':
                     case 'goods/buying':
+                        li.innerHTML = '';
+
                         let goodsItem = (<BuffApi.GoodsPageResponse>json).data.items[i];
-
-                        a.setAttribute('href', `/market/goods?goods_id=${goodsItem.id}&from=market#tab=selling`);
-                        a.setAttribute('title', goodsItem.short_name);
-
-                        a_img.setAttribute('src', goodsItem.goods_info.icon_url);
-                        a_img.setAttribute('data-original', goodsItem.goods_info.original_icon_url);
-
-                        h3_a.setAttribute('href', `/market/goods?goods_id=${goodsItem.id}&from=market#tab=selling`);
-                        h3_a.setAttribute('title', goodsItem.short_name);
-                        h3_a.innerText = goodsItem.short_name;
 
                         let inner_p_strong: string;
                         let inner_p_span: string;
                         let inner_p: string;
+                        let additional_info_span: string = '';
 
                         switch (tab) {
                             case 'selling':
@@ -554,11 +542,11 @@ module BuffUtility {
                                 price = readYuan(goodsItem.sell_min_price);
                                 scm_price = readYuan(goodsItem.goods_info.steam_price_cny);
                                 diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
-                                hsl = `hsl(${Math.min(120, Math.max(0, 120 * (diff / 100)))}, 50%, 100%);`;
+                                hsl = `hsl(${Math.min(120, Math.max(0, 120 * (diff / 100)))}, 100%, 25%)`;
 
                                 inner_p_strong = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
                                 inner_p_span = `<e title="${goodsItem.sell_num.toLocaleString('de-DE')} on sale">${goodsItem.sell_num > 1_000 ? '1.000+' : goodsItem.sell_num} on sale</e>`;
-                                inner_p = `<div style="color: ${hsl}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+                                inner_p = `<span style="color: ${hsl}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</span>`;
 
                                 break;
                             case 'buying':
@@ -568,45 +556,68 @@ module BuffUtility {
                                 price = readYuan(goodsItem.buy_max_price);
                                 scm_price = readYuan(goodsItem.goods_info.steam_price_cny);
                                 diff = scm_price <= 0 ? 100 : ((scm_price - price) / scm_price) * -1 * 100;
-                                hsl = `hsl(${Math.min(120, Math.max(0, 120 * (diff / 100))).toFixed(2)}deg, 100%, 25%);`;
+                                hsl = `hsl(${Math.min(120, Math.max(0, 120 * (diff / 100))).toFixed(2)}, 100%, 25%)`;
 
                                 inner_p_strong = createCurrencyHoverContainer(`${SYMBOL_YUAN} ${priceStr[0]}${(!!priceStr[1] ? `<small>.${priceStr[1]}</small>` : '')}`, price);
                                 inner_p_span = `<e title="${goodsItem.buy_num.toLocaleString('de-DE')} demand">${goodsItem.buy_num > 1_000 ? '1.000+' : goodsItem.buy_num} demand</e>`;
-                                inner_p = `<div style="color: ${hsl}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</div>`;
+                                inner_p = `<span style="color: ${hsl}; font-size: 11px; margin-left: 3px;">(${diff.toFixed(2)}%)</span>`;
 
                                 break;
                         }
 
-                        (<HTMLElement>li.querySelector('p')).style['marginTop'] = '-12px';
-                        (<HTMLElement>li.querySelector('p > strong')).innerHTML = inner_p_strong;
-                        (<HTMLElement>li.querySelector('p > span')).innerHTML = inner_p_span;
-                        (<HTMLElement>li.querySelector('p')).innerHTML += inner_p;
-
-                        console.log('Appended to', goodsItem.name, goodsItem.id, [li, li.querySelector('p > strong'), li.querySelector('p > span'), li.querySelector('p')]);
-
-                        let goods_span_wearcategory = <HTMLElement>spansAdditional.item(0);
-
                         if (goodsItem.goods_info.info?.tags['exterior']) {
-                            if (goods_span_wearcategory) {
-                                goods_span_wearcategory.setAttribute('class', `tag tag_csgo_${goodsItem.goods_info.info.tags['exterior'].internal_name}`);
-                                goods_span_wearcategory.innerHTML = goodsItem.goods_info.info.tags['exterior'].localized_name;
-                            } else {
-                                li.innerHTML = `${li.innerHTML}<span class="tag tag_csgo_${goodsItem.goods_info.info.tags['exterior'].internal_name}">${goodsItem.goods_info.info.tags['exterior'].localized_name}</span>`;
-                            }
+                            additional_info_span = Util.buildHTML('span', {
+                                class: `tag tag_csgo_${goodsItem.goods_info.info.tags['exterior'].internal_name}`,
+                                content: goodsItem.goods_info.info.tags['exterior'].localized_name
+                            });
                         } else if (/^csgo_tool_sticker|type_customplayer$/.test(goodsItem.goods_info.info.tags['type']?.internal_name) && goodsItem.goods_info.info.tags['rarity']) {
                             let rarity = goodsItem.goods_info.info.tags['rarity'];
 
-                            if (goods_span_wearcategory) {
-                                goods_span_wearcategory.setAttribute('class', `tag tag_black rarity_${rarity.internal_name}`);
-                                goods_span_wearcategory.innerHTML = rarity.localized_name;
-                            } else {
-                                li.innerHTML = `${li.innerHTML}<span class="tag tag_black rarity_${rarity.internal_name}">${rarity.localized_name}</span>`;
-                            }
-                        } else {
-                            if (goods_span_wearcategory) {
-                                goods_span_wearcategory.style['display'] = 'none';
-                            }
+                            additional_info_span = Util.buildHTML('span', {
+                                class: `tag tag_black rarity_${rarity.internal_name}`,
+                                content: rarity.localized_name
+                            });
                         }
+
+                        li.innerHTML = Util.buildHTML('a', {
+                            attributes: {
+                                'href': `/market/goods?goods_id=${goodsItem.id}&from=market#tab=selling`,
+                                'title': goodsItem.short_name
+                            },
+                            content: Util.buildHTML('img', {
+                                class: 'lazy',
+                                attributes: {
+                                    'src': goodsItem.goods_info.icon_url,
+                                    'data-original': goodsItem.goods_info.original_icon_url,
+                                    'width': '210',
+                                    'height': '138'
+                                }
+                            })
+                        }) + Util.buildHTML('h3', {
+                            content: Util.buildHTML('a', {
+                                attributes: {
+                                    'href': `/market/goods?goods_id=${goodsItem.id}&from=market#tab=selling`,
+                                    'title': goodsItem.short_name
+                                },
+                                content: goodsItem.short_name
+                            })
+                        }) + Util.buildHTML('p', {
+                            style: {
+                                'margin-top': '-12px'
+                            },
+                            content: [
+                                Util.buildHTML('strong', {
+                                    class: 'f_Strong',
+                                    content: inner_p_strong
+                                }),
+                                Util.buildHTML('span', {
+                                    class: 'l_Right f_12px f_Bold c_Gray',
+                                    content: inner_p_span
+                                }),
+                                '<br>',
+                                inner_p
+                            ]
+                        }) + additional_info_span;
 
                         break;
                     case 'sell_order/top_bookmarked':
@@ -663,39 +674,109 @@ module BuffUtility {
                         if (/^sticker|type_customplayer$/.test(bookmarkedGoodsInfo.tags['category_group']?.internal_name) && bookmarkedGoodsInfo.tags['rarity']) {
                             let rarity = bookmarkedGoodsInfo.tags['rarity'];
 
-                            tagBoxContent += `<div class="g_Right"> </div>` +
-                                `<span class="tag tag_black rarity_${rarity.internal_name}">${rarity.localized_name}</span>`;
+                            tagBoxContent += Util.buildHTML('div', {
+                                class: 'g_Right',
+                                content: ' '
+                            }) + Util.buildHTML('span', {
+                                class: `tag tag_black rarity_${rarity.internal_name}`,
+                                content: rarity.localized_name
+                            });
+
+                            // tagBoxContent += `<div class="g_Right"> </div>` +
+                            //     `<span class="tag tag_black rarity_${rarity.internal_name}">${rarity.localized_name}</span>`;
                         } else {
-                            tagBoxContent += `<div class="g_Right"><a href="javascript:;" style="cursor: pointer;">` +
-                                `<i ` +
-                                `class="icon icon_spect j_tips_handler btn_game_cms" ` +
-                                `data-assetid="${bookmarkedItem.asset_info.assetid}" ` +
-                                `data-direction="bottom" ` +
-                                `data-title="Inspect in server" ` +
-                                `data-content` +
-                                `></i>` +
-                                `</a>` +
-                                `<a style="cursor: pointer;" class="btn_3d" data-assetid="${bookmarkedItem.asset_info.assetid}">` +
-                                `<i ` +
-                                `class="icon icon_3dpersp j_tips_handler" ` +
-                                `data-direction="bottom" ` +
-                                `data-title="3D Inspect"` +
-                                `></i>` +
-                                `</a>` +
-                                `</div>`;
+                            tagBoxContent += Util.buildHTML('div', {
+                                class: 'g_Right',
+                                content: [
+                                    Util.buildHTML('a', {
+                                        style: {
+                                            'cursor': 'pointer'
+                                        },
+                                        attributes: {
+                                            'href': 'javascript:;'
+                                        },
+                                        content: Util.buildHTML('i', {
+                                            class: 'icon icon_spect j_tips_handler btn_game_cms',
+                                            attributes: {
+                                                'data-assetid': bookmarkedItem.asset_info.assetid,
+                                                'data-direction': 'bottom',
+                                                'data-title': 'Inspect in server',
+                                                'data-content': null
+                                            }
+                                        })
+                                    }),
+                                    Util.buildHTML('a', {
+                                        class: 'btn_3d',
+                                        style: {
+                                            'cursor': 'pointer'
+                                        },
+                                        attributes: {
+                                            'data-assetid': bookmarkedItem.asset_info.assetid
+                                        },
+                                        content: Util.buildHTML('i', {
+                                            class: 'icon icon_3dpersp j_tips_handler',
+                                            attributes: {
+                                                'data-direction': 'bottom',
+                                                'data-title': '3D Inspect'
+                                            }
+                                        })
+                                    })
+                                ]
+                            });
+                            // tagBoxContent += `<div class="g_Right"><a href="javascript:;" style="cursor: pointer;">` +
+                            //     `<i ` +
+                            //     `class="icon icon_spect j_tips_handler btn_game_cms" ` +
+                            //     `data-assetid="${bookmarkedItem.asset_info.assetid}" ` +
+                            //     `data-direction="bottom" ` +
+                            //     `data-title="Inspect in server" ` +
+                            //     `data-content` +
+                            //     `></i>` +
+                            //     `</a>` +
+                            //     `<a style="cursor: pointer;" class="btn_3d" data-assetid="${bookmarkedItem.asset_info.assetid}">` +
+                            //     `<i ` +
+                            //     `class="icon icon_3dpersp j_tips_handler" ` +
+                            //     `data-direction="bottom" ` +
+                            //     `data-title="3D Inspect"` +
+                            //     `></i>` +
+                            //     `</a>` +
+                            //     `</div>`;
 
                             if (bookmarkedGoodsInfo.tags['exterior']) {
-                                tagBoxContent += `<span class="tag tag tag_csgo_${bookmarkedGoodsInfo.tags['exterior'].internal_name}">${bookmarkedGoodsInfo.tags['exterior'].localized_name}</span>`;
+                                tagBoxContent += Util.buildHTML('span', {
+                                    class: `tag tag tag_csgo_${bookmarkedGoodsInfo.tags['exterior'].internal_name}`,
+                                    content: bookmarkedGoodsInfo.tags['exterior'].localized_name
+                                });
+                                // tagBoxContent += `<span class="tag tag tag_csgo_${bookmarkedGoodsInfo.tags['exterior'].internal_name}">${bookmarkedGoodsInfo.tags['exterior'].localized_name}</span>`;
                             }
 
                             if (/^unusual/.test(bookmarkedGoodsInfo.tags['quality']?.internal_name ?? '')) {
-                                tagBoxContent += `<span class="tag tag_black quality_${bookmarkedGoodsInfo.tags['quality'].internal_name}">${bookmarkedGoodsInfo.tags['quality'].localized_name}</span>`;
+                                tagBoxContent += Util.buildHTML('span', {
+                                    class: `tag tag_black quality_${bookmarkedGoodsInfo.tags['quality'].internal_name}`,
+                                    content: bookmarkedGoodsInfo.tags['quality'].localized_name
+                                });
+                                // tagBoxContent += `<span class="tag tag_black quality_${bookmarkedGoodsInfo.tags['quality'].internal_name}">${bookmarkedGoodsInfo.tags['quality'].localized_name}</span>`;
                             }
 
                             if (bookmarkedItem.asset_info?.info?.phase_data && bookmarkedItem.asset_info?.info?.metaphysic) {
-                                tagBoxContent += `<span class="tag tag_gray2 j_tips_handler" data-direction="bottom" data-title="${bookmarkedItem.asset_info.info.metaphysic.title}">${bookmarkedItem.asset_info.info.phase_data.name}</span>`;
+                                tagBoxContent += Util.buildHTML('span', {
+                                    class: 'tag tag_gray2 j_tips_handler',
+                                    attributes: {
+                                        'data-direction': 'bottom',
+                                        'data-title': bookmarkedItem.asset_info.info.metaphysic.title
+                                    },
+                                    content: bookmarkedItem.asset_info.info.phase_data.name
+                                });
+                                // tagBoxContent += `<span class="tag tag_gray2 j_tips_handler" data-direction="bottom" data-title="${bookmarkedItem.asset_info.info.metaphysic.title}">${bookmarkedItem.asset_info.info.phase_data.name}</span>`;
                             } else {
-                                tagBoxContent += `<span class="tag tag_gray2 j_tips_handler" data-direction="bottom" data-title="Paint seed">${bookmarkedItem.asset_info.info.paintseed}</span>`;
+                                tagBoxContent += Util.buildHTML('span', {
+                                    class: 'tag tag_gray2 j_tips_handler',
+                                    attributes: {
+                                        'data-direction': 'bottom',
+                                        'data-title': 'Paint seed'
+                                    },
+                                    content: `${bookmarkedItem.asset_info.info.paintseed}`
+                                });
+                                // tagBoxContent += `<span class="tag tag_gray2 j_tips_handler" data-direction="bottom" data-title="Paint seed">${bookmarkedItem.asset_info.info.paintseed}</span>`;
                             }
                         }
 
@@ -704,26 +785,89 @@ module BuffUtility {
                         let tagBoxBContent = '';
 
                         if (bookmarkedItem.asset_info?.info?.inspect_en_url) {
-                            tagBoxBContent += `<a href="javascript:;" class="l_Right shalow-btn shalow-btn-green csgo-inspect-view" ` +
-                                `data-assetid="${bookmarkedItem.asset_info.assetid}" ` +
-                                `data-contextid="${bookmarkedItem.asset_info.contextid}" ` +
-                                `data-inspecturl="${bookmarkedItem.asset_info.info.inspect_en_url}" ` +
-                                `data-inspectversion="${bookmarkedItem.asset_info.info.inspect_version}" ` +
-                                `data-inspectsize="${bookmarkedItem.asset_info.info.inspect_en_size}" ` +
-                                `>Screenshot</a>`;
+                            // tagBoxBContent += `<a href="javascript:;" class="l_Right shalow-btn shalow-btn-green csgo-inspect-view" ` +
+                            //     `data-assetid="${bookmarkedItem.asset_info.assetid}" ` +
+                            //     `data-contextid="${bookmarkedItem.asset_info.contextid}" ` +
+                            //     `data-inspecturl="${bookmarkedItem.asset_info.info.inspect_en_url}" ` +
+                            //     `data-inspectversion="${bookmarkedItem.asset_info.info.inspect_version}" ` +
+                            //     `data-inspectsize="${bookmarkedItem.asset_info.info.inspect_en_size}" ` +
+                            //     `>Screenshot</a>`;
+
+                            tagBoxBContent += Util.buildHTML('a', {
+                                class: 'l_Right shalow-btn shalow-btn-green csgo-inspect-view',
+                                attributes: {
+                                    'href': 'javascript:;',
+                                    'data-assetid': bookmarkedItem.asset_info.assetid,
+                                    'data-contextid': `${bookmarkedItem.asset_info.contextid}`,
+                                    'data-inspecturl': bookmarkedItem.asset_info.info.inspect_en_url,
+                                    'data-inspectversion': `${bookmarkedItem.asset_info.info.inspect_version}`,
+                                    'data-inspectsize': bookmarkedItem.asset_info.info.inspect_en_size
+                                },
+                                content: 'Screenshot'
+                            });
                         }
 
                         for (let i = 0, l = bookmarkedItem.asset_info?.info?.stickers?.length ?? 0; i < l; i ++) {
                             let sticker = bookmarkedItem.asset_info.info.stickers[i];
-                            tagBoxBContent += `<span ` +
-                                `class="icon icon_stickers j_tips_handler${(sticker.wear > 0 ? ' masked' : '')}" ` +
-                                `data-direction="top" ` +
-                                `data-title="${sticker.name}" ` +
-                                `data-content` +
-                                `><img src="${sticker.img_url}" /></span>`;
+
+                            // tagBoxBContent += `<span ` +
+                            //     `class="icon icon_stickers j_tips_handler${(sticker.wear > 0 ? ' masked' : '')}" ` +
+                            //     `data-direction="top" ` +
+                            //     `data-title="${sticker.name}" ` +
+                            //     `data-content` +
+                            //     `><img src="${sticker.img_url}" /></span>`;
+
+                            tagBoxBContent += Util.buildHTML('span', {
+                                class: `icon icon_stickers j_tips_handler${(sticker.wear > 0 ? ' masked' : '')}`,
+                                attributes: {
+                                    'data-direction': 'top',
+                                    'data-title': sticker.name,
+                                    'data-content': null
+                                },
+                                content: Util.buildHTML('img', {
+                                    attributes: {
+                                        'src': sticker.img_url
+                                    }
+                                })
+                            });
                         }
 
                         li.querySelector('div.tagBoxB').innerHTML = tagBoxBContent;
+
+                        li.setAttribute('id', `sell_order_`);
+
+                        li.innerHTML = Util.buildHTML('a', {
+                            class: 'img item-detail-img',
+                            attributes: {
+                                'href': ``,
+                                'data-classid': '',
+                                'data-instanceid': '',
+                                'data-assetid': '',
+                                'data-contextid': '',
+                                'data-appid': '',
+                                'data-timeout': '',
+                                'data-orderid': '',
+                                'data-origin': '',
+                                'title': ''
+                            },
+                            content: Util.buildHTML('img', {
+                                class: 'lazy',
+                                attributes: {
+                                    'src': '',
+                                    'data-original': '',
+                                    'width': '210',
+                                    'height': '138'
+                                }
+                            })
+                        }) + Util.buildHTML('div', {
+                            class: 'wear',
+                            content: [
+                                Util.buildHTML('div', {
+                                    class: 'wear-value',
+                                    content: ``
+                                })
+                            ]
+                        });
 
                         break;
                 }
