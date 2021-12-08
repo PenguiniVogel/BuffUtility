@@ -1,0 +1,34 @@
+{
+	"name": "Buff Utility",
+	"version": "2.0.0",
+	"description": "Adds cosmetic functionality to buff.163.com.",
+	"manifest_version": 2,
+	"content_scripts": [
+		{
+			"js": [
+				"CurrencyHelper.js",
+				"sources/fRequest.js",
+				"sources/Cookie.js",
+				"sources/Util.js",
+				"sources/ExtensionSettings.ts",
+				"sources/Start.js"
+			],
+			"matches": [
+				"https://buff.163.com/*"
+			]
+		}, {
+			"js": [
+				"sources/Adjust_Settings.js"
+			],
+			"matches": [
+				"https://buff.163.com/user-center/profile"
+			]
+		}
+	],
+	"permissions": [],
+	"icons": {
+		"16": "icon16.png",
+		"48": "icon48.png",
+		"128": "icon128.png"
+	}
+}

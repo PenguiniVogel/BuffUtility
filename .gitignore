@@ -1,5 +1,5 @@
 .idea
 test
 
-*.js
+sources/*.js
 *.zip

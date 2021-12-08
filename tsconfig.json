@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "None",
+        "target": "es5",
+        "sourceMap": false
+    },
+    "files": [
+        "sources/CurrencyHelper.d.ts",
+        "sources/fRequest.ts",
+        "sources/Cookie.ts",
+        "sources/Util.ts",
+        "sources/ExtensionSettings.ts",
+        "sources/Start.ts",
+        "sources/Adjust_Settings.ts"
+    ]
+}
