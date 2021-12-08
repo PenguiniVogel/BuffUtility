@@ -1,7 +1,8 @@
 ///<reference path="CSGOStashUtility.ts"/>
 
 /**
- * Author: Felix Vogel
+ * Copyright 2021 Felix Vogel
+ * CSGOStash Utility is not affiliated with csgostash.com
  */
 /** */
 

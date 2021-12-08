@@ -9,7 +9,6 @@
         "../../sources/Util.ts",
         "../../sources/Cookie.ts",
         "../../sources/fRequest.ts",
-        "../../sources/Buff/BuffApi.ts",
         "../../sources/csgostash/CSGOStashUtility.ts",
         "../../sources/csgostash/content.ts"
     ]

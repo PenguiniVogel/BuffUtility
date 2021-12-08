@@ -27,7 +27,7 @@ module CSGOStashUtility {
 
         let priceDetails = <HTMLElement>document.querySelector('div.price-details > div.tab-content');
 
-        let itemQuery = `game=csgo&page_num=1&search=${encodeURIComponent(itemName)}`;
+        let itemQuery = `game=csgo#tab=selling&page_num=1&search=${encodeURIComponent(itemName)}`;
 
         let pricesTab =
 `<div role="tabpanel" class="tab-pane" id="buffprices">

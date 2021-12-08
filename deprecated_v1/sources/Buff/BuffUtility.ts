@@ -240,7 +240,7 @@ module BuffUtility {
      * @private
      */
     function addCurrencySelection(): void {
-        fRequest.get('https://felixvogel.github.io/currency-repository/rates.json', null, (req, args, e?) => {
+        fRequest.get('https://penguinivogel.github.io/currency-repository/rates.json', null, (req, args, e?) => {
             if (!(req.readyState == 4 && req.status == 200)) return;
 
             cachedCurrencyRates = Util.parseJson(req);
@@ -306,7 +306,7 @@ module BuffUtility {
      * @private
      */
     function readYuan(element: HTMLElement | string): number {
-        let priceString: string = (typeof element == 'string' ? element : element.innerHTML).replace(/\(|\)|¥|<\/?small>|<\/?big>/g, '').trim();
+        let priceString: string = (typeof element == 'string' ? element : element.innerText ?? element.innerHTML).replace(/\(|\)|¥|<\/?small>|<\/?big>/g, '').trim();
 
         let price: number = 0.0;
         try {
@@ -320,6 +320,7 @@ module BuffUtility {
 
     /**
      * Converts the selling price to the actual sum you receive with included conversion
+     *
      * @private
      */
     function addSellingAfterFeeGain(): void {
@@ -411,6 +412,7 @@ module BuffUtility {
     /**
      * Adds how much you gain if you were to supply a buy order
      * also used in the sale history
+     *
      * @private
      */
     function addBuyOrderGain(): void {
@@ -494,6 +496,7 @@ module BuffUtility {
 
     /**
      * Adds the reference price difference to scm and converts to the selected currency
+     *
      * @private
      */
     function addReferencePriceDifferenceBatch(): void {
@@ -910,6 +913,7 @@ module BuffUtility {
 
     /**
      * Updates converted currencies when switching to a different currency
+     *
      * @private
      */
     function updateConvertedCurrency(): void {
