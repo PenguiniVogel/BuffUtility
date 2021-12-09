@@ -3,6 +3,10 @@
 test
 
 sources/*.js
+lib/*.js
+
+!lib/CurrencyHelper.js
+
 *.zip
 
 node_modules

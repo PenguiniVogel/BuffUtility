@@ -20,17 +20,17 @@ module Adjust_Settings {
 
         select.setAttribute('style', 'font-size: 12px; width: 120px; height: 32px; max-height: 300px; overflow: auto;');
 
-        select.innerHTML = keys.map(x => `<option value="${x}" style="width: 101px;" ${(x == ExtensionSettings.settings.selected_currency) ? 'selected' : ''}>${x}</option>`).join('');
+        select.innerHTML = keys.map(x => `<option value="${x}" style="width: 101px;" ${(x == ExtensionSettings.settings.selected_currency) ? 'selected' : ''}>${x} - ${CurrencySymbols.SYMBOL_LIST[x]}</option>`).join('');
 
         div.append(select);
 
         parentElement.append(div);
 
         select.onchange = () => {
-            ExtensionSettings.settings.selected_currency = select?.selectedOptions?.item(0)?.innerText ?? 'USD';
+            ExtensionSettings.settings.selected_currency = select?.selectedOptions?.item(0)?.getAttribute('value') ?? 'USD';
             ExtensionSettings.save();
 
-            console.log(`[BuffUtility] Changed Currency -> ${ExtensionSettings.settings.selected_currency}`);
+            console.log(`[BuffUtility] Changed Currency -> ${ExtensionSettings.settings.selected_currency} - ${CurrencySymbols.SYMBOL_LIST[ExtensionSettings.settings.selected_currency]}`);
         };
     }
 
