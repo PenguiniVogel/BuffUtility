@@ -1,18 +1,26 @@
 {
 	"name": "Buff Utility",
 	"version": "2.0.0",
-	"description": "Adds cosmetic functionality to buff.163.com.",
+	"description": "Adds cosmetic functionality to buff.163.com",
 	"manifest_version": 2,
 	"content_scripts": [
 		{
 			"js": [
+				"lib/InjectionService.js"
+			],
+			"matches": [
+				"https://buff.163.com/*"
+			],
+			"run_at": "document_start"
+		}, {
+			"js": [
 				"lib/CurrencyHelper.js",
+				"lib/CurrencySymbols.js",
 				"sources/fRequest.js",
 				"sources/Cookie.js",
 				"sources/Util.js",
 				"sources/ExtensionSettings.js",
-				"sources/Start.js",
-				"lib/InjectionService.js"
+				"sources/Start.js"
 			],
 			"matches": [
 				"https://buff.163.com/*"
@@ -23,6 +31,13 @@
 			],
 			"matches": [
 				"https://buff.163.com/user-center/profile"
+			]
+		}, {
+			"js": [
+				"sources/Adjust_Listings.js"
+			],
+			"matches": [
+				"https://buff.163.com/goods/*"
 			]
 		}
 	],

@@ -9,12 +9,15 @@
     ],
     "files": [
         "lib/CurrencyHelper.d.ts",
+        "lib/BuffTypes.d.ts",
+        "lib/InjectionService.ts",
+        "lib/CurrencySymbols.ts",
         "sources/fRequest.ts",
         "sources/Cookie.ts",
         "sources/Util.ts",
         "sources/ExtensionSettings.ts",
         "sources/Start.ts",
-        "lib/InjectionService.ts",
-        "sources/Adjust_Settings.ts"
+        "sources/Adjust_Settings.ts",
+        "sources/Adjust_Listings.ts"
     ]
 }

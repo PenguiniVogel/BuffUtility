@@ -4,10 +4,10 @@
 /** */
 module Adjust_Settings {
 
-    export function init(): void {
+    function init(): void {
         // if it's not the settings page we don't execute
         // if (!(/https:\/\/buff\.163\.com\/user-center\/profile/i.test(window.location.href))) return;
-        console.log('[BuffUtility] Adjust_Settings');
+        console.debug('[BuffUtility] Adjust_Settings');
 
         const originalSettings = document.getElementById('user-prefer-buff-price-currency');
         originalSettings.style['display'] = 'none';
@@ -34,7 +34,7 @@ module Adjust_Settings {
         };
     }
 
-    window.addEventListener(BUFF_UTILITY_LOADED_EVENT, () => init());
+    init();
 
 }
 
