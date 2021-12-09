@@ -3,3 +3,5 @@ test
 
 sources/*.js
 *.zip
+
+node_modules

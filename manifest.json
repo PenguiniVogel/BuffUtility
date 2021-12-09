@@ -6,12 +6,13 @@
 	"content_scripts": [
 		{
 			"js": [
-				"CurrencyHelper.js",
+				"lib/CurrencyHelper.js",
 				"sources/fRequest.js",
 				"sources/Cookie.js",
 				"sources/Util.js",
-				"sources/ExtensionSettings.ts",
-				"sources/Start.js"
+				"sources/ExtensionSettings.js",
+				"sources/Start.js",
+				"lib/InjectionService.js"
 			],
 			"matches": [
 				"https://buff.163.com/*"

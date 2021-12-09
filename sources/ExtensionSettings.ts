@@ -1,15 +1,24 @@
+/**
+ * Author: Felix Vogel
+ */
+/** */
 module ExtensionSettings {
 
     export interface Settings {
         selected_currency: string
     }
 
-    let settings: Settings = {
+    export let settings: Settings = {
         selected_currency: 'USD'
     };
 
     export function load(): void {
-        settings = Util.tryParseJson(Cookie.read(BUFF_UTILITY_SETTINGS));
+        let tempSettings: Settings = Util.tryParseJson(Cookie.read(BUFF_UTILITY_SETTINGS)) ?? {} as Settings;
+
+        settings = {
+            ...settings,
+            ...tempSettings
+        };
     }
 
     export function save(): void {

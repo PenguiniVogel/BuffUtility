@@ -1,3 +1,7 @@
+/**
+ * Author: Felix Vogel
+ */
+/** */
 declare module CurrencyHelper {
 
     export interface Data {

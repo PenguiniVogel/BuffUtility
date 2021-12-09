@@ -4,13 +4,17 @@
         "target": "es5",
         "sourceMap": false
     },
+    "include": [
+        "node_modules/@types/*.d.ts"
+    ],
     "files": [
-        "sources/CurrencyHelper.d.ts",
+        "lib/CurrencyHelper.d.ts",
         "sources/fRequest.ts",
         "sources/Cookie.ts",
         "sources/Util.ts",
         "sources/ExtensionSettings.ts",
         "sources/Start.ts",
+        "lib/InjectionService.ts",
         "sources/Adjust_Settings.ts"
     ]
 }
