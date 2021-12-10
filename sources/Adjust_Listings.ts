@@ -7,12 +7,34 @@ module Adjust_Listings {
     function init(): void {
         console.debug('[BuffUtility] Adjust_Listings');
 
-        window.addEventListener(InjectionService.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => setTimeout(() => process(e.detail), 100));
+        window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
     }
 
     function process(transferData: InjectionService.TransferData<unknown>): void {
         if (transferData.url.indexOf('/sell_order') > -1) {
+            // add expand handler
+            let container = document.getElementById('preview_screenshots');
+
+            function setCanExpand(): void {
+                let state = ExtensionSettings.settings.can_expand_screenshots && !!container.querySelector('span[value="inspect_trn_url"].on');
+
+                let tdimgs = <NodeListOf<HTMLElement>>document.querySelectorAll('tr td.img_td');
+
+                for (let i = 0, l = tdimgs.length; i < l; i ++) {
+                    tdimgs.item(i).setAttribute('class', state ? `img_td can_expand ${ExtensionSettings.settings.expand_screenshots_backdrop ? 'expand_backdrop' : ''}` : 'img_td');
+                }
+            }
+
+            setTimeout(() => {
+                container.querySelector('span[value]').addEventListener('click', () => setTimeout(() => setCanExpand(), 200));
+
+                setCanExpand();
+            }, 500);
+
+            // adjust listings
             adjustSellOrderListings(<InjectionService.TransferData<BuffTypes.SellOrder.Data>>transferData);
+        } else if (transferData.url.indexOf('/buy_order') > -1) {
+            adjustBuyOrderListings(<InjectionService.TransferData<BuffTypes.BuyOrder.Data>>transferData);
         }
     }
 
@@ -40,7 +62,7 @@ module Adjust_Listings {
                     Util.buildHTML('strong', {
                         class: 'f_Strong',
                         content: [
-                            `${SYMBOL_YUAN} ${strPriceSplit[0]}`,
+                            `${GlobalConstants.SYMBOL_YUAN} ${strPriceSplit[0]}`,
                             `${strPriceSplit[1] ? `<small>.${strPriceSplit[1]}</small>` : ''}`
                         ]
                     }),
@@ -55,7 +77,7 @@ module Adjust_Listings {
                                 style: {
                                     'color': priceDiff < 0 ? '#009800' : '#c90000'
                                 },
-                                content: [ `${priceDiff < 0 ? SYMBOL_ARROW_DOWN : SYMBOL_ARROW_UP}${SYMBOL_YUAN} ${priceDiff.toFixed(2)}` ]
+                                content: [ `${priceDiff < 0 ? GlobalConstants.SYMBOL_ARROW_DOWN : GlobalConstants.SYMBOL_ARROW_UP}${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}` ]
                             })
                         ]
                     })
@@ -65,6 +87,10 @@ module Adjust_Listings {
             let priceContainer = <HTMLElement>row.querySelectorAll('td.t_Left').item(2);
             priceContainer.innerHTML = newHTML;
         }
+    }
+
+    function adjustBuyOrderListings(transferData: InjectionService.TransferData<BuffTypes.BuyOrder.Data>): void {
+
     }
 
     init();
