@@ -17,6 +17,9 @@ uglifyjs -c -o .export/sources/Cookie.js sources/Cookie.js
 uglifyjs -c -o .export/sources/Adjust_Settings.js sources/Adjust_Settings.js
 uglifyjs -c -o .export/sources/Adjust_Listings.js sources/Adjust_Listings.js
 
-uglifyjs -c -o .export/lib/InjectionService.js lib/InjectionService.js
+# Don't compress the InjectionService, bad things happen :(
+# uglifyjs -c -o .export/lib/InjectionService.js lib/InjectionService.js
+cp lib/InjectionService.js .export/lib/InjectionService.js
+
 uglifyjs -c -o .export/lib/CurrencySymbols.js lib/CurrencySymbols.js
 uglifyjs -c -o .export/lib/CurrencyHelper.js lib/CurrencyHelper.js
