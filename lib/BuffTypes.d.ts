@@ -336,9 +336,10 @@ declare module BuffTypes {
     /**
      * Response type for: <br/>
      * <code>/api/market/goods</code>
+     * <code>/api/market/buying</code>
      */
     /** */
-    export module Goods {
+    export module GoodsOrBuying {
 
         export interface TagInfo {
             category: string;
@@ -407,7 +408,7 @@ declare module BuffTypes {
      * Response type for: <br/>
      * <code>/api/market/buying</code>
      */
-    /** */
+    /*
     export module Buying {
 
         export interface TagInfo {
@@ -471,7 +472,7 @@ declare module BuffTypes {
             msg?: any;
         }
 
-    }
+    }*/
 
     /**
      * Response type for: <br/>

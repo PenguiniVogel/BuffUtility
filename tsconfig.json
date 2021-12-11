@@ -19,6 +19,7 @@
         "sources/ExtensionSettings.ts",
         "sources/Start.ts",
         "sources/Adjust_Settings.ts",
-        "sources/Adjust_Listings.ts"
+        "sources/Adjust_Listings.ts",
+        "sources/Adjust_Market.ts"
     ]
 }

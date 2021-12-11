@@ -5,5 +5,10 @@ const enum GlobalConstants {
 
     SYMBOL_YUAN = '¥',
     SYMBOL_ARROW_UP = '▲',
-    SYMBOL_ARROW_DOWN = '▼'
+    SYMBOL_ARROW_DOWN = '▼',
+
+    COLOR_GOOD = '#009800',
+    COLOR_BAD = '#c90000',
+    COLOR_ORANGE = '#eea20e',
+    COLOR_BLUE = '#0e87ee'
 }
