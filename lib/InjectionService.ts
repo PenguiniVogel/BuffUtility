@@ -46,13 +46,13 @@ module InjectionService {
     let customScript = document.createElement('script');
 
     function interceptNetworkRequests() {
-        const open = XMLHttpRequest.prototype.open;
+        const open = window.XMLHttpRequest.prototype.open;
         const isNative = open.toString().indexOf('native code') != -1;
 
         // don't hijack if already hijacked
         if (isNative) {
             // shadow open and capture onLoad
-            XMLHttpRequest.prototype.open = function() {
+            window.XMLHttpRequest.prototype.open = function() {
                 this.addEventListener('load', (e) => {
                     let current = <XMLHttpRequest>e.currentTarget;
 
@@ -105,6 +105,8 @@ td.img_td.can_expand.expand_backdrop:hover div[style].pic-cont img {
         let head = document.getElementsByTagName('head').item(0);
 
         if (head) {
+            customScript.setAttribute('nonce', 'buff-utility-network-tracking');
+
             head.prepend(customScript, customStyles);
 
             clearInterval(test);

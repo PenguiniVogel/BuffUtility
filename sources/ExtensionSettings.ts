@@ -4,16 +4,23 @@
 /** */
 module ExtensionSettings {
 
+    export const enum DifferenceDominator {
+        STEAM,
+        BUFF
+    }
+
     export interface Settings {
         selected_currency: string,
         can_expand_screenshots: boolean,
-        expand_screenshots_backdrop: boolean
+        expand_screenshots_backdrop: boolean,
+        difference_dominator: DifferenceDominator
     }
 
     export let settings: Settings = {
         selected_currency: 'USD',
         can_expand_screenshots: false,
         expand_screenshots_backdrop: false,
+        difference_dominator: DifferenceDominator.STEAM
     };
 
     export function load(): void {

@@ -140,6 +140,32 @@ module Adjust_Settings {
             table.append(tr);
         }
 
+        // dominator selection
+        {
+            const containerTD = makeTD('', 't_Left');
+            containerTD.innerHTML = Util.buildHTML('div', {
+                content: [Util.buildHTML('select', {
+                    id: 'buff-utility-dominator-select',
+                    style: {
+                        'font-size': '12px',
+                        'width': '120px',
+                        'height': '32px',
+                        'max-height': '300px',
+                        'overflow': 'auto'
+                    },
+                    attributes: {
+                        'onchange': `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
+                    },
+                    content: [0, 1].map(x => `<option value="${x}" style="width: 101px;" ${(x == ExtensionSettings.settings.difference_dominator) ? 'selected' : ''}>${x == ExtensionSettings.DifferenceDominator.STEAM ? 'Steam' : 'Buff'}</option>`)
+                })]
+            });
+
+            const tr = makeTR();
+            tr.append(makeTD('BuffUtility<br>Difference Dominator', 't_Left c_Gray'), containerTD, makeTD('', 't_Right'));
+
+            table.append(tr);
+        }
+
         // append stuff
 
         const blank20 = document.createElement('div');
