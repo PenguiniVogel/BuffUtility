@@ -13,23 +13,31 @@ module Adjust_Listings {
             console.debug('[BuffUtility] Adjust_Listings (sell_order)');
 
             // add expand handler
-            let container = document.getElementById('preview_screenshots');
-
             function setCanExpand(): void {
-                let state = ExtensionSettings.settings.can_expand_screenshots && !!container.querySelector('span[value="inspect_trn_url"].on');
+                const container = document.getElementById('preview_screenshots');
+                const state = ExtensionSettings.settings.can_expand_screenshots && !!container.querySelector('span[value="inspect_trn_url"].on');
+                const tags = <NodeListOf<HTMLElement>>document.querySelectorAll('tr td.img_td');
 
-                let tdimgs = <NodeListOf<HTMLElement>>document.querySelectorAll('tr td.img_td');
+                const classes = state ? `img_td can_expand ${ExtensionSettings.settings.expand_screenshots_backdrop ? 'expand_backdrop' : ''}` : 'img_td';
 
-                for (let i = 0, l = tdimgs.length; i < l; i ++) {
-                    tdimgs.item(i).setAttribute('class', state ? `img_td can_expand ${ExtensionSettings.settings.expand_screenshots_backdrop ? 'expand_backdrop' : ''}` : 'img_td');
+                let affected = 0;
+
+                for (let i = 0, l = tags.length; i < l; i ++) {
+                    const td = tags.item(i);
+
+                    if (td.getAttribute('class') != classes) {
+                        td.setAttribute('class', classes);
+
+                        affected ++;
+                    }
+                }
+
+                if (affected > 0) {
+                    console.debug(`[BuffUtility] Expand set on ${affected} elements`);
                 }
             }
 
-            setTimeout(() => {
-                container.querySelector('span[value]').addEventListener('click', () => setTimeout(() => setCanExpand(), 200));
-
-                setCanExpand();
-            }, 1000);
+            setInterval(() => setCanExpand(), 250);
 
             // adjust listings
             adjustSellOrderListings(<InjectionService.TransferData<BuffTypes.SellOrder.Data>>transferData);

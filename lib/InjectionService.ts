@@ -94,8 +94,6 @@ td.img_td.can_expand:hover div[style].pic-cont img {
     position: absolute;
     transform: scale(10) translate(70px, 0px);
     z-index: 99999;
-    /* background-color: rgb(0 0 0 / 25%);
-    background-color: rgba(0, 0, 0, 0.25); */
 }
 
 td.img_td.can_expand.expand_backdrop:hover div[style].pic-cont img {

@@ -16,6 +16,7 @@ uglifyjs -c -o .export/sources/Cookie.js sources/Cookie.js
 
 uglifyjs -c -o .export/sources/Adjust_Settings.js sources/Adjust_Settings.js
 uglifyjs -c -o .export/sources/Adjust_Listings.js sources/Adjust_Listings.js
+uglifyjs -c -o .export/sources/Adjust_Market.js sources/Adjust_Market.js
 
 # Don't compress the InjectionService, bad things happen :(
 # uglifyjs -c -o .export/lib/InjectionService.js lib/InjectionService.js
