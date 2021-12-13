@@ -4,9 +4,6 @@
         "target": "es5",
         "sourceMap": false
     },
-    "include": [
-        "node_modules/@types/*.d.ts"
-    ],
     "files": [
         "lib/.GlobalConstants.ts",
         "lib/CurrencyHelper.d.ts",
