@@ -35,5 +35,7 @@ echo " "
 echo "Writing manifest.json -> .export/manifest.json"
 node rewrite-manifest.js
 
+echo " "
+
 # pause
 read -p "Press [ENTER] to resume ..."
