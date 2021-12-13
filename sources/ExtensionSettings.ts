@@ -11,6 +11,8 @@ module ExtensionSettings {
 
     export interface Settings {
         selected_currency: string,
+        custom_currency_rate: number,
+        custom_currency_name: string,
         can_expand_screenshots: boolean,
         expand_screenshots_backdrop: boolean,
         difference_dominator: DifferenceDominator
@@ -18,6 +20,8 @@ module ExtensionSettings {
 
     export let settings: Settings = {
         selected_currency: 'USD',
+        custom_currency_rate: 1,
+        custom_currency_name: 'CC',
         can_expand_screenshots: false,
         expand_screenshots_backdrop: false,
         difference_dominator: DifferenceDominator.STEAM

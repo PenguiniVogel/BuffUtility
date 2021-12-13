@@ -8,6 +8,9 @@ declare module CurrencyHelper {
         'date': string,
         'rates': {
             [name: string]: [number, number]
+        },
+        'symbols': {
+            [name: string]: string
         }
     }
 

@@ -6,8 +6,12 @@ module Adjust_Settings {
 
     // helper functions
 
+    import settings = ExtensionSettings.settings;
+
     const enum OptionID {
         CURRENCY_SELECT = 'buff-utility-currency-select',
+        CUSTOM_CURRENCY_RATE = 'buff-utility-custom-currency-rate',
+        CUSTOM_CURRENCY_NAME = 'buff-utility-custom-currency-name',
         EXPAND_SCREENSHOTS = 'buff-utility-expand-screenshots',
         EXPAND_SCREENSHOT_BACKDROP = 'buff-utility-expand-screenshot-backdrop',
         DOMINATOR_SELECT = 'buff-utility-dominator-select'
@@ -108,6 +112,43 @@ module Adjust_Settings {
         return (<HTMLSelectElement>document.getElementById(id)).selectedOptions?.item(0)?.getAttribute('value') ?? fallback;
     }
 
+    function addTextOption(id: string, type: string, mappedOption: string, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+        const containerTD = makeTD('', 't_Left');
+
+        containerTD.innerHTML = Util.buildHTML('span', {
+            content: [Util.buildHTML('div', {
+                content: [Util.buildHTML('input', {
+                    id: id,
+                    attributes: {
+                        'type': type,
+                        'value': `${ExtensionSettings.settings[mappedOption]}`,
+                        'onkeyup': `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
+                    }
+                })]
+            })]
+        });
+
+        const tr = makeTR();
+        tr.append(
+            makeTD(`BuffUtility<br>${prefInfo.title} ${prefInfo.description ? Util.buildHTML('i', {
+                class: 'icon icon_qa j_tips_handler',
+                attributes: {
+                    'data-title': 'Description',
+                    'data-content': prefInfo.description,
+                    'data-direction': 'right'
+                }
+            }) : ''}`, 't_Left c_Gray'),
+            containerTD,
+            makeTD('', 't_Right')
+        );
+
+        table.append(tr);
+    }
+
+    export function readTextOption<T>(id: string, operation: (str: string) => T): T {
+        return operation((<HTMLInputElement>document.getElementById(id)).value);
+    }
+
     // add settings
 
     function init(): void {
@@ -121,6 +162,13 @@ module Adjust_Settings {
 
                 // check changes
                 settings.selected_currency = readSelectOption(OptionID.CURRENCY_SELECT);
+
+                settings.custom_currency_rate = readTextOption(OptionID.CUSTOM_CURRENCY_RATE, (str) => Math.max(+(str?.length > 0 ? str : 0), 0.0001));
+                settings.custom_currency_name = readTextOption(OptionID.CUSTOM_CURRENCY_NAME, (str) => {
+                    if (str?.length == 0) str = 'CC';
+
+                    return str;
+                });
 
                 settings.can_expand_screenshots = isCheckboxSelected(OptionID.EXPAND_SCREENSHOTS);
                 settings.expand_screenshots_backdrop = isCheckboxSelected(OptionID.EXPAND_SCREENSHOT_BACKDROP);
@@ -153,14 +201,35 @@ module Adjust_Settings {
         table.setAttribute('width', '100%');
 
         // currency selection
-        makeSelectOption(OptionID.CURRENCY_SELECT, Object.keys(CurrencyHelper.getData().rates).map(x => {
+        const { rates, symbols } = CurrencyHelper.getData();
+
+        let remapped = Object.keys(rates).map(x => {
             return {
                 value: x,
-                displayStr: `${x} - ${CurrencySymbols.SYMBOL_LIST[x]}`,
+                displayStr: `${x} - ${symbols[x].length == 0 ? '?' : symbols[x]}`,
                 selected: x == settings.selected_currency
             };
-        }), {
+        });
+
+        remapped.push({
+            value: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY,
+            displayStr: 'Custom',
+            selected: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY == settings.selected_currency
+        });
+
+        makeSelectOption(OptionID.CURRENCY_SELECT, remapped, {
             title: 'Display Currency'
+        }, table);
+
+        // custom currenct fields
+        addTextOption(OptionID.CUSTOM_CURRENCY_RATE, 'number', 'custom_currency_rate', {
+            title: 'Custom currency rate',
+            description: 'Set the rate of the custom currency e.g.\n10 RMB -> 1 CC\nOnly active if \'Custom\' was selected in the \'Display Currency\' option.'
+        }, table);
+
+        addTextOption(OptionID.CUSTOM_CURRENCY_NAME, 'text', 'custom_currency_name', {
+            title: 'Custom currency name',
+            description: 'Set the name of the custom currency. Only active if \'Custom\' was selected in the \'Display Currency\' option.'
         }, table);
 
         // expand screenshot

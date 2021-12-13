@@ -1,6 +1,10 @@
-.export
 .idea
+.export
+.local
+
 test
+node_modules
+V2Repository
 
 sources/*.js
 lib/*.js
@@ -8,6 +12,3 @@ lib/*.js
 !lib/CurrencyHelper.js
 
 *.zip
-
-node_modules
-V2Repository

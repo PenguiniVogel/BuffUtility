@@ -5,9 +5,37 @@
 module Util {
 
     export function convertCNY(cny: number): string {
-        let selectedRate: [number, number] = CurrencyHelper.getData().rates[ExtensionSettings.settings.selected_currency];
+        const { selected_currency, custom_currency_rate, custom_currency_name } = ExtensionSettings.settings;
 
-        return `${CurrencySymbols.SYMBOL_LIST[ExtensionSettings.settings.selected_currency]} ${(cny * selectedRate[0]).toFixed(selectedRate[1])}`;
+        if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
+            const rate = 1 / Math.max(0.0001, custom_currency_rate);
+
+            function countLeadingZeros(inStr: string): number {
+                let count = 0;
+
+                for (let i = 0, l = inStr.length; i < l; i ++) {
+                    if (inStr[i] != '0') {
+                        break;
+                    }
+
+                    count ++;
+                }
+
+                return count + Math.max(Math.floor(count / 2), 2);
+            }
+
+            let split = `${rate}`.split('.')[1];
+            const fixPoint = split[0] != '0' ? 2 : countLeadingZeros(split[1]);
+
+            return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${rate.toFixed(fixPoint)}">CC </e>${(cny * rate).toFixed(fixPoint)}`;
+        } else {
+            const { rates, symbols } = CurrencyHelper.getData();
+            // const selectedRate: [number, number] = rates[selected_currency];
+            const [ rate, fixPoint ] = rates[selected_currency];
+            const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
+
+            return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${symbol}${rate.toFixed(fixPoint)}">${symbol} </e>${(cny * rate).toFixed(fixPoint)}`;
+        }
     }
 
     /**

@@ -15,7 +15,6 @@
 		}, {
 			"js": [
 				"lib/CurrencyHelper.js",
-				"lib/CurrencySymbols.js",
 				"sources/fRequest.js",
 				"sources/Cookie.js",
 				"sources/Util.js",

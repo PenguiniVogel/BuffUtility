@@ -9,7 +9,6 @@
         "lib/CurrencyHelper.d.ts",
         "lib/BuffTypes.d.ts",
         "lib/InjectionService.ts",
-        "lib/CurrencySymbols.ts",
         "sources/fRequest.ts",
         "sources/Cookie.ts",
         "sources/Util.ts",
