@@ -25,9 +25,18 @@ module Adjust_Market {
             let h3 = <HTMLElement>li.querySelector('h3');
             let p = <HTMLElement>document.createElement('p');
 
-            let price = +dataRow.sell_min_price;
-            let scmPrice = +dataRow.goods_info.steam_price_cny;
-            let priceDiff = (1 - (scmPrice / price)) * 100;
+            let buffPrice = +dataRow.sell_min_price;
+            let steamPrice = +dataRow.goods_info.steam_price_cny;
+            let priceDiff = 0;
+
+            switch (ExtensionSettings.settings.difference_dominator) {
+                case ExtensionSettings.DifferenceDominator.STEAM:
+                    priceDiff = ((steamPrice - buffPrice) / steamPrice) * -1 * 100;
+                    break;
+                case ExtensionSettings.DifferenceDominator.BUFF:
+                    priceDiff = ((steamPrice - buffPrice) / buffPrice) * -1 * 100;
+                    break;
+            }
 
             h3.setAttribute('style', 'margin-bottom: 14px;');
             p.setAttribute('style', 'display: grid; grid-template-columns: auto 20%; grid-template-rows: 20px 20px; margin: 2px;');

@@ -4,29 +4,135 @@
 /** */
 module Adjust_Settings {
 
+    // helper functions
+
+    const enum OptionID {
+        CURRENCY_SELECT = 'buff-utility-currency-select',
+        EXPAND_SCREENSHOTS = 'buff-utility-expand-screenshots',
+        EXPAND_SCREENSHOT_BACKDROP = 'buff-utility-expand-screenshot-backdrop',
+        DOMINATOR_SELECT = 'buff-utility-dominator-select'
+    }
+
+    function makeTR(): HTMLElement {
+        return document.createElement('tr');
+    }
+
+    function makeTD(text: string, cls: string, width: string = '120'): HTMLElement {
+        let td = document.createElement('td');
+        td.setAttribute('class', cls);
+        td.setAttribute('width', width);
+
+        td.innerHTML = text;
+
+        return td;
+    }
+
+    function makeCheckboxOption(id: string, mappedOption: string, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+        const containerTD = makeTD('', 't_Left');
+
+        containerTD.innerHTML = Util.buildHTML('span', {
+            content: [Util.buildHTML('div', {
+                id: id,
+                class: 'w-Checkbox',
+                attributes: {
+                    onclick: `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
+                },
+                content: [Util.buildHTML('span', {
+                    class: ExtensionSettings.settings[mappedOption] ? 'on' : '',
+                    content: [
+                        Util.buildHTML('i', { class: 'icon icon_checkbox' }),
+                        ' Open '
+                    ]
+                })]
+            })]
+        });
+
+        const tr = makeTR();
+        tr.append(
+            makeTD(`BuffUtility<br>${prefInfo.title} ${prefInfo.description ? Util.buildHTML('i', {
+                class: 'icon icon_qa j_tips_handler',
+                attributes: {
+                    'data-title': 'Description',
+                    'data-content': prefInfo.description,
+                    'data-direction': 'right'
+                }
+            }) : ''}`, 't_Left c_Gray'),
+            containerTD,
+            makeTD('', 't_Right')
+        );
+
+        table.append(tr);
+    }
+
+    export function isCheckboxSelected(id: string): boolean {
+        return !!document.getElementById(id).querySelector('span.on');
+    }
+
+    function makeSelectOption(id: string, options: { value: string, displayStr: string, selected?: boolean }[], prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+        const containerTD = makeTD('', 't_Left');
+        containerTD.innerHTML = Util.buildHTML('div', {
+            content: [Util.buildHTML('select', {
+                id: id,
+                style: {
+                    'font-size': '12px',
+                    'width': '120px',
+                    'height': '32px',
+                    'max-height': '300px',
+                    'overflow': 'auto'
+                },
+                attributes: {
+                    'onchange': `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
+                },
+                content: options.map(x => `<option value="${x.value}" style="width: 101px;" ${x.selected ? 'selected' : ''}>${x.displayStr}</option>`)
+            })]
+        });
+
+        const tr = makeTR();
+        tr.append(
+            makeTD(`BuffUtility<br>${prefInfo.title} ${prefInfo.description ? Util.buildHTML('i', {
+                class: 'icon icon_qa j_tips_handler',
+                attributes: {
+                    'data-title': 'Description',
+                    'data-content': prefInfo.description,
+                    'data-direction': 'right'
+                }
+            }) : ''}`, 't_Left c_Gray'),
+            containerTD,
+            makeTD('', 't_Right')
+        );
+
+        table.append(tr);
+    }
+
+    function readSelectOption(id: string, fallback?: string): string {
+        return (<HTMLSelectElement>document.getElementById(id)).selectedOptions?.item(0)?.getAttribute('value') ?? fallback;
+    }
+
+    // add settings
+
     function init(): void {
         console.debug('[BuffUtility] Adjust_Settings');
 
-        window.addEventListener('message', (e) => {
+        window.addEventListener('message', (e: MessageEvent) => {
             if (e.data == GlobalConstants.BUFF_UTILITY_SETTINGS) {
                 let old = JSON.parse(JSON.stringify(ExtensionSettings.settings));
 
-                // check changes
-                ExtensionSettings.settings.selected_currency = (<HTMLSelectElement>document.getElementById('buff-utility-currency-select')).selectedOptions?.item(0)?.getAttribute('value') ?? 'USD';
+                let { settings } = ExtensionSettings;
 
-                ExtensionSettings.settings.can_expand_screenshots = !!document.getElementById('buff-utility-expand-screenshots').querySelector('span.on');
-                ExtensionSettings.settings.expand_screenshots_backdrop = !!document.getElementById('buff-utility-expand-screenshot-backdrop').querySelector('span.on');
+                // check changes
+                settings.selected_currency = readSelectOption(OptionID.CURRENCY_SELECT);
+
+                settings.can_expand_screenshots = isCheckboxSelected(OptionID.EXPAND_SCREENSHOTS);
+                settings.expand_screenshots_backdrop = isCheckboxSelected(OptionID.EXPAND_SCREENSHOT_BACKDROP);
+
+                settings.difference_dominator = +readSelectOption(OptionID.DOMINATOR_SELECT);
 
                 // save any changes
                 ExtensionSettings.save();
 
-                let changes: string[] = [];
-                let settingsKeys = Object.keys(ExtensionSettings.settings);
-                for (let l_Key of settingsKeys) {
-                    if (ExtensionSettings.settings[l_Key] != old[l_Key]) {
-                        changes.push(`${l_Key}: ${old[l_Key]} -> ${ExtensionSettings.settings[l_Key]}`);
-                    }
-                }
+                let changes: string[] = Object.keys(settings)
+                    .filter(x => settings[x] != old[x])
+                    .map(x => `${x}: ${old[x]} -> ${settings[x]}`);
 
                 if (changes.length > 0) {
                     console.debug(`[BuffUtility] Saved settings.\n`, changes.join('\n'));
@@ -35,20 +141,8 @@ module Adjust_Settings {
         });
 
         // Add new section
-        function makeTR(): HTMLElement {
-            return document.createElement('tr');
-        }
 
-        function makeTD(text: string, cls: string, width: string = '120'): HTMLElement {
-            let td = document.createElement('td');
-            td.setAttribute('class', cls);
-            td.setAttribute('width', width);
-
-            td.innerHTML = text;
-
-            return td;
-        }
-
+        let { settings } = ExtensionSettings;
         const userSettings = document.querySelector('div.user-setting');
 
         const h3 = document.createElement('h3');
@@ -59,112 +153,43 @@ module Adjust_Settings {
         table.setAttribute('width', '100%');
 
         // currency selection
-        {
-            const keys = Object.keys(CurrencyHelper.getData().rates);
-
-            const containerTD = makeTD('', 't_Left');
-            containerTD.innerHTML = Util.buildHTML('div', {
-                content: [Util.buildHTML('select', {
-                    id: 'buff-utility-currency-select',
-                    style: {
-                        'font-size': '12px',
-                        'width': '120px',
-                        'height': '32px',
-                        'max-height': '300px',
-                        'overflow': 'auto'
-                    },
-                    attributes: {
-                        'onchange': `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
-                    },
-                    content: keys.map(x => `<option value="${x}" style="width: 101px;" ${(x == ExtensionSettings.settings.selected_currency) ? 'selected' : ''}>${x} - ${CurrencySymbols.SYMBOL_LIST[x]}</option>`)
-                })]
-            });
-
-            const tr = makeTR();
-            tr.append(makeTD('BuffUtility<br>Display Currency', 't_Left c_Gray'), containerTD, makeTD('', 't_Right'));
-
-            table.append(tr);
-        }
+        makeSelectOption(OptionID.CURRENCY_SELECT, Object.keys(CurrencyHelper.getData().rates).map(x => {
+            return {
+                value: x,
+                displayStr: `${x} - ${CurrencySymbols.SYMBOL_LIST[x]}`,
+                selected: x == settings.selected_currency
+            };
+        }), {
+            title: 'Display Currency'
+        }, table);
 
         // expand screenshot
-        {
-            const containerTD = makeTD('', 't_Left');
-
-            containerTD.innerHTML = Util.buildHTML('span', {
-                content: [Util.buildHTML('div', {
-                    id: 'buff-utility-expand-screenshots',
-                    class: 'w-Checkbox',
-                    attributes: {
-                        onclick: `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
-                    },
-                    content: [Util.buildHTML('span', {
-                        class: ExtensionSettings.settings.can_expand_screenshots ? 'on' : '',
-                        content: [
-                            Util.buildHTML('i', { class: 'icon icon_checkbox' }),
-                            ' Can expand screenshots '
-                        ]
-                    })]
-                })]
-            });
-
-            const tr = makeTR();
-            tr.append(makeTD('BuffUtility<br>Can expand screenshots', 't_Left c_Gray'), containerTD, makeTD('', 't_Right'));
-
-            table.append(tr);
-        }
+        makeCheckboxOption(OptionID.EXPAND_SCREENSHOTS, 'can_expand_screenshots', {
+            title: 'Can expand screenshots',
+            description: 'Can screenshots be expanded on sell listings. This only works if \'Preview screenshots\' is turned on and if the item has been inspected.'
+        }, table);
 
         // expand screenshot backdrop
-        {
-            const containerTD = makeTD('', 't_Left');
-
-            containerTD.innerHTML = Util.buildHTML('span', {
-                content: [Util.buildHTML('div', {
-                    id: 'buff-utility-expand-screenshot-backdrop',
-                    class: 'w-Checkbox',
-                    attributes: {
-                        onclick: `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
-                    },
-                    content: [Util.buildHTML('span', {
-                        class: ExtensionSettings.settings.expand_screenshots_backdrop ? 'on' : '',
-                        content: [
-                            Util.buildHTML('i', { class: 'icon icon_checkbox' }),
-                            ' Do expanded screenshots have a backdrop '
-                        ]
-                    })]
-                })]
-            });
-
-            const tr = makeTR();
-            tr.append(makeTD('BuffUtility<br>Expanded screenshot backdrop', 't_Left c_Gray'), containerTD, makeTD('', 't_Right'));
-
-            table.append(tr);
-        }
+        makeCheckboxOption(OptionID.EXPAND_SCREENSHOT_BACKDROP, 'expand_screenshots_backdrop', {
+            title: 'Expanded screenshot backdrop',
+            description: 'Adds a transparent black backdrop to screenshot images to add some contrast.'
+        }, table);
 
         // dominator selection
-        {
-            const containerTD = makeTD('', 't_Left');
-            containerTD.innerHTML = Util.buildHTML('div', {
-                content: [Util.buildHTML('select', {
-                    id: 'buff-utility-dominator-select',
-                    style: {
-                        'font-size': '12px',
-                        'width': '120px',
-                        'height': '32px',
-                        'max-height': '300px',
-                        'overflow': 'auto'
-                    },
-                    attributes: {
-                        'onchange': `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
-                    },
-                    content: [0, 1].map(x => `<option value="${x}" style="width: 101px;" ${(x == ExtensionSettings.settings.difference_dominator) ? 'selected' : ''}>${x == ExtensionSettings.DifferenceDominator.STEAM ? 'Steam' : 'Buff'}</option>`)
-                })]
-            });
-
-            const tr = makeTR();
-            tr.append(makeTD('BuffUtility<br>Difference Dominator', 't_Left c_Gray'), containerTD, makeTD('', 't_Right'));
-
-            table.append(tr);
-        }
+        makeSelectOption(OptionID.DOMINATOR_SELECT, [
+            {
+                value: `${ExtensionSettings.DifferenceDominator.STEAM}`,
+                displayStr: 'Steam',
+                selected: settings.difference_dominator == ExtensionSettings.DifferenceDominator.STEAM
+            }, {
+                value: `${ExtensionSettings.DifferenceDominator.BUFF}`,
+                displayStr: 'Buff',
+                selected: settings.difference_dominator == ExtensionSettings.DifferenceDominator.BUFF
+            }
+        ], {
+            title: 'Difference Dominator',
+            description: 'Specify the dominator meaning:\nSteam: (scmp-bp)/scmp\nBuff: (scmp-bp)/bp\nUnless you know the difference might not want to change this setting.'
+        }, table);
 
         // append stuff
 
