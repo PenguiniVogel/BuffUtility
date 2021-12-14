@@ -19,6 +19,8 @@ module Adjust_Market {
     function adjustMarketGoodsOrBuying(transferData: InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>): void {
         let liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_list_card li');
 
+        let info: string[] = [];
+
         for (let i = 0, l = liList.length; i < l; i ++) {
             let dataRow = transferData.data.items[i];
             let li = liList.item(i);
@@ -26,15 +28,24 @@ module Adjust_Market {
             let p = <HTMLElement>document.createElement('p');
 
             let buffPrice = +dataRow.sell_min_price;
-            let steamPrice = +dataRow.goods_info.steam_price_cny;
-            let priceDiff = 0;
+            let steamPriceCNY = +dataRow.goods_info.steam_price_cny;
 
+            if (ExtensionSettings.settings.apply_steam_tax) {
+                let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
+                let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
+
+                info.push(`Reference price (> ${dataRow.market_hash_name} <) was adjusted with fees: ${steamPriceCNY} -> ${f_steamPriceCNY}`);
+
+                steamPriceCNY = f_steamPriceCNY;
+            }
+
+            let priceDiff;
             switch (ExtensionSettings.settings.difference_dominator) {
                 case ExtensionSettings.DifferenceDominator.STEAM:
-                    priceDiff = ((steamPrice - buffPrice) / steamPrice) * -1 * 100;
+                    priceDiff = ((steamPriceCNY - buffPrice) / steamPriceCNY) * -1 * 100;
                     break;
                 case ExtensionSettings.DifferenceDominator.BUFF:
-                    priceDiff = ((steamPrice - buffPrice) / buffPrice) * -1 * 100;
+                    priceDiff = ((steamPriceCNY - buffPrice) / buffPrice) * -1 * 100;
                     break;
             }
 
@@ -120,6 +131,10 @@ module Adjust_Market {
             }
 
             li.append(p);
+        }
+
+        if (info.length > 0) {
+            console.debug('[BuffUtility] Market Info:\n', info.join('\n '));
         }
     }
 

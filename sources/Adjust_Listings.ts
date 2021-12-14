@@ -55,6 +55,15 @@ module Adjust_Listings {
         let goodsInfo: BuffTypes.SellOrder.GoodsInfo = data.goods_infos[/goods_id=(\d+)/.exec(transferData.url)[1]];
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
+        if (ExtensionSettings.settings.apply_steam_tax) {
+            let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
+            let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
+
+            console.debug(`[BuffUtility] Reference price was adjusted with fees:`, steamPriceCNY, '->', f_steamPriceCNY);
+
+            steamPriceCNY = f_steamPriceCNY;
+        }
+
         for (let i = 0, l = rows.length; i < l; i ++) {
             let dataRow = data.items[i];
             let row = rows.item(i);
@@ -63,6 +72,13 @@ module Adjust_Listings {
 
             let price = +dataRow.price;
             let priceDiff = price - steamPriceCNY;
+
+            let priceDiffStr;
+            if (ExtensionSettings.settings.apply_currency_to_difference) {
+                priceDiffStr = Util.convertCNY(priceDiff);
+            } else {
+                priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}`;
+            }
 
             let newHTML = Util.buildHTML('div', {
                 style: {
@@ -87,7 +103,7 @@ module Adjust_Listings {
                                 style: {
                                     'color': priceDiff < 0 ? GlobalConstants.COLOR_GOOD : GlobalConstants.COLOR_BAD
                                 },
-                                content: [ `${priceDiff < 0 ? GlobalConstants.SYMBOL_ARROW_DOWN : GlobalConstants.SYMBOL_ARROW_UP}${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}` ]
+                                content: [ `${priceDiff < 0 ? GlobalConstants.SYMBOL_ARROW_DOWN : GlobalConstants.SYMBOL_ARROW_UP}${priceDiffStr}` ]
                             })
                         ]
                     })

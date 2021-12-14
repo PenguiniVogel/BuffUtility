@@ -14,7 +14,9 @@ module Adjust_Settings {
         CUSTOM_CURRENCY_NAME = 'buff-utility-custom-currency-name',
         EXPAND_SCREENSHOTS = 'buff-utility-expand-screenshots',
         EXPAND_SCREENSHOT_BACKDROP = 'buff-utility-expand-screenshot-backdrop',
-        DOMINATOR_SELECT = 'buff-utility-dominator-select'
+        DOMINATOR_SELECT = 'buff-utility-dominator-select',
+        APPLY_STEAM_TAX = 'buff-utility-apply-steam-tax',
+        APPLY_CURRENCY_TO_DIFFERENCE = 'buff-utility-apply-currency-to-difference'
     }
 
     function makeTR(): HTMLElement {
@@ -156,12 +158,20 @@ module Adjust_Settings {
 
         window.addEventListener('message', (e: MessageEvent) => {
             if (e.data == GlobalConstants.BUFF_UTILITY_SETTINGS) {
-                let old = JSON.parse(JSON.stringify(ExtensionSettings.settings));
-
                 let { settings } = ExtensionSettings;
+
+                // copy data to see changes
+                let old = JSON.parse(JSON.stringify(settings));
 
                 // check changes
                 settings.selected_currency = readSelectOption(OptionID.CURRENCY_SELECT);
+
+                settings.apply_currency_to_difference = isCheckboxSelected(OptionID.APPLY_CURRENCY_TO_DIFFERENCE);
+                settings.can_expand_screenshots = isCheckboxSelected(OptionID.EXPAND_SCREENSHOTS);
+                settings.expand_screenshots_backdrop = isCheckboxSelected(OptionID.EXPAND_SCREENSHOT_BACKDROP);
+                settings.apply_steam_tax = isCheckboxSelected(OptionID.APPLY_STEAM_TAX);
+
+                settings.difference_dominator = +readSelectOption(OptionID.DOMINATOR_SELECT);
 
                 settings.custom_currency_rate = readTextOption(OptionID.CUSTOM_CURRENCY_RATE, (str) => Math.max(+(str?.length > 0 ? str : 0), 0.0001));
                 settings.custom_currency_name = readTextOption(OptionID.CUSTOM_CURRENCY_NAME, (str) => {
@@ -170,14 +180,13 @@ module Adjust_Settings {
                     return str;
                 });
 
-                settings.can_expand_screenshots = isCheckboxSelected(OptionID.EXPAND_SCREENSHOTS);
-                settings.expand_screenshots_backdrop = isCheckboxSelected(OptionID.EXPAND_SCREENSHOT_BACKDROP);
-
-                settings.difference_dominator = +readSelectOption(OptionID.DOMINATOR_SELECT);
+                settings.custom_currency_calculated_rate = 1 / settings.custom_currency_rate;
+                settings.custom_currency_leading_zeros = Util.countLeadingZeros(`${settings.custom_currency_calculated_rate}`.split('.')[1] ?? '');
 
                 // save any changes
                 ExtensionSettings.save();
 
+                // check changes
                 let changes: string[] = Object.keys(settings)
                     .filter(x => settings[x] != old[x])
                     .map(x => `${x}: ${old[x]} -> ${settings[x]}`);
@@ -188,11 +197,11 @@ module Adjust_Settings {
             }
         });
 
-        // Add new section
-
+        // Get stuff
         let { settings } = ExtensionSettings;
         const userSettings = document.querySelector('div.user-setting');
 
+        // Add normal settings
         const h3 = document.createElement('h3');
         h3.innerHTML = 'BuffUtility Settings';
 
@@ -221,15 +230,10 @@ module Adjust_Settings {
             title: 'Display Currency'
         }, table);
 
-        // custom currenct fields
-        addTextOption(OptionID.CUSTOM_CURRENCY_RATE, 'number', 'custom_currency_rate', {
-            title: 'Custom currency rate',
-            description: 'Set the rate of the custom currency e.g.\n10 RMB -> 1 CC\nOnly active if \'Custom\' was selected in the \'Display Currency\' option.'
-        }, table);
-
-        addTextOption(OptionID.CUSTOM_CURRENCY_NAME, 'text', 'custom_currency_name', {
-            title: 'Custom currency name',
-            description: 'Set the name of the custom currency. Only active if \'Custom\' was selected in the \'Display Currency\' option.'
+        // apply currency to difference
+        makeCheckboxOption(OptionID.APPLY_CURRENCY_TO_DIFFERENCE, 'apply_currency_to_difference', {
+            title: 'Apply Currency to difference',
+            description: 'Whether to show the difference on the listing page in your selected currency or RMB.'
         }, table);
 
         // expand screenshot
@@ -243,6 +247,26 @@ module Adjust_Settings {
             title: 'Expanded screenshot backdrop',
             description: 'Adds a transparent black backdrop to screenshot images to add some contrast.'
         }, table);
+
+        // apply steam tax
+        makeCheckboxOption(OptionID.APPLY_STEAM_TAX, 'apply_steam_tax', {
+            title: 'Apply Steam Tax',
+            description: 'Apply Steam Tax before calculating differences.\nThis will calculate the steam seller price from the provided reference price.'
+        }, table);
+
+        // append normal settings
+        const blank20 = document.createElement('div');
+        blank20.setAttribute('class', 'blank20');
+
+        userSettings.append(h3, table, blank20);
+
+        // Add advanced settings
+        const adv_h3 = document.createElement('h3');
+        adv_h3.innerHTML = 'BuffUtility Advanced Settings';
+
+        const adv_table = document.createElement('table');
+        adv_table.setAttribute('class', 'list_tb');
+        adv_table.setAttribute('width', '100%');
 
         // dominator selection
         makeSelectOption(OptionID.DOMINATOR_SELECT, [
@@ -258,14 +282,24 @@ module Adjust_Settings {
         ], {
             title: 'Difference Dominator',
             description: 'Specify the dominator meaning:\nSteam: (scmp-bp)/scmp\nBuff: (scmp-bp)/bp\nUnless you know the difference might not want to change this setting.'
-        }, table);
+        }, adv_table);
 
-        // append stuff
+        // custom currenct fields
+        addTextOption(OptionID.CUSTOM_CURRENCY_RATE, 'number', 'custom_currency_rate', {
+            title: 'Custom currency rate',
+            description: 'Set the rate of the custom currency e.g.\n10 RMB -> 1 CC\nOnly active if \'Custom\' was selected in the \'Display Currency\' option.'
+        }, adv_table);
 
-        const blank20 = document.createElement('div');
-        blank20.setAttribute('class', 'blank20');
+        addTextOption(OptionID.CUSTOM_CURRENCY_NAME, 'text', 'custom_currency_name', {
+            title: 'Custom currency name',
+            description: 'Set the name of the custom currency. Only active if \'Custom\' was selected in the \'Display Currency\' option.'
+        }, adv_table);
 
-        userSettings.append(h3, table, blank20);
+        // append advanced settings
+        const adv_blank20 = document.createElement('div');
+        adv_blank20.setAttribute('class', 'blank20');
+
+        userSettings.append(adv_h3, adv_table, adv_blank20);
     }
 
     init();

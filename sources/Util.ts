@@ -4,33 +4,93 @@
 /** */
 module Util {
 
-    export function convertCNY(cny: number): string {
-        const { selected_currency, custom_currency_rate, custom_currency_name } = ExtensionSettings.settings;
+    /**
+     * Calculate the steam seller price <br>
+     * Stolen and slightly optimized from Steams' economy_common.js
+     *
+     * @param amount
+     * @param publisherFee
+     */
+    export function calculateSellerPrice(amount: number, publisherFee: number = 0.1): { steam_fee: number, publisher_fee: number, fees: number, amount: number } {
 
-        if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
-            const rate = 1 / Math.max(0.0001, custom_currency_rate);
+        /**
+         * Get the fees
+         *
+         * @param receivedAmount
+         * @param publisherFee
+         */
+        function getFees(receivedAmount: number, publisherFee: number): { steam_fee: number, publisher_fee: number, fees: number, amount: number } {
+            const { wallet_fee_base, wallet_fee_percent, wallet_fee_minimum } = ExtensionSettings.steam_settings;
 
-            function countLeadingZeros(inStr: string): number {
-                let count = 0;
+            let nSteamFee = Math.floor(Math.max(receivedAmount * wallet_fee_percent, wallet_fee_minimum) + wallet_fee_base);
+            let nPublisherFee = Math.floor(publisherFee > 0 ? Math.max(receivedAmount * publisherFee, 1) : 0);
+            let nAmountToSend = receivedAmount + nSteamFee + nPublisherFee;
 
-                for (let i = 0, l = inStr.length; i < l; i ++) {
-                    if (inStr[i] != '0') {
-                        break;
-                    }
+            return {
+                steam_fee: nSteamFee,
+                publisher_fee: nPublisherFee,
+                fees: nSteamFee + nPublisherFee,
+                amount: ~~nAmountToSend
+            };
+        }
 
-                    count ++;
+        const { wallet_fee_base, wallet_fee_percent } = ExtensionSettings.steam_settings;
+
+        // Since getFees has a Math.floor, we could be off a cent or two. Let's check:
+        let iterations = 0; // shouldn't be needed, but included to be sure nothing unforeseen causes us to get stuck
+        let estimatedReceivedValue = (amount - wallet_fee_base) / (wallet_fee_percent + publisherFee + 1);
+
+        let undershot = false;
+        let fees = getFees(estimatedReceivedValue, publisherFee);
+
+        while (fees.amount != amount && iterations < 10) {
+            if (fees.amount > amount) {
+                if (undershot) {
+                    fees = getFees(estimatedReceivedValue - 1, publisherFee);
+                    fees.steam_fee += (amount - fees.amount);
+                    fees.fees += (amount - fees.amount);
+                    fees.amount = amount;
+
+                    break;
+                } else {
+                    estimatedReceivedValue --;
                 }
-
-                return count + Math.max(Math.floor(count / 2), 2);
+            } else {
+                undershot = true;
+                estimatedReceivedValue ++;
             }
 
-            let split = `${rate}`.split('.')[1];
-            const fixPoint = split[0] != '0' ? 2 : countLeadingZeros(split[1]);
+            fees = getFees(estimatedReceivedValue, publisherFee);
+            iterations ++;
+        }
 
-            return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${rate.toFixed(fixPoint)}">CC </e>${(cny * rate).toFixed(fixPoint)}`;
+        return fees;
+    }
+
+    /**
+     * Count leading 0 (zero) of a string
+     *
+     * @param inStr
+     */
+    export function countLeadingZeros(inStr: string) {
+        // console.debug(`[BuffUtility] countLeadingZeros of '${inStr}' w/ ${/^(0+)[1-9]/.exec(inStr)} -> ${Math.max((/^(0+)[1-9]/.exec(inStr) ?? [])[1]?.length ?? 2, 2)}`);
+        return Math.max((/^(0+)[1-9]/.exec(inStr) ?? [])[1]?.length ?? 2, 2);
+    }
+
+    /**
+     * Convert the specified cny value to the selected currency
+     *
+     * @param cny
+     */
+    export function convertCNY(cny: number): string {
+        const { selected_currency } = ExtensionSettings.settings;
+
+        if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
+            const { custom_currency_name, custom_currency_calculated_rate, custom_currency_leading_zeros } = ExtensionSettings.settings;
+
+            return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${custom_currency_calculated_rate.toFixed(custom_currency_leading_zeros)}">CC </e>${(cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)}`;
         } else {
             const { rates, symbols } = CurrencyHelper.getData();
-            // const selectedRate: [number, number] = rates[selected_currency];
             const [ rate, fixPoint ] = rates[selected_currency];
             const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
 

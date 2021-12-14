@@ -87,7 +87,7 @@ module InjectionService {
 
     customStyles.innerHTML = `
 td.img_td.can_expand:hover {
-    padding: 20px 0px 16px 0px;
+    padding: 20px 0px 20px 0px;
 }
 
 td.img_td.can_expand:hover div[style].pic-cont img {
