@@ -50,7 +50,7 @@ module Adjust_Market {
             }
 
             h3.setAttribute('style', 'margin-bottom: 14px;');
-            p.setAttribute('style', 'display: grid; grid-template-columns: auto 20%; grid-template-rows: 20px 20px; margin: 2px;');
+            p.setAttribute('style', 'display: grid; grid-template-columns: auto 25%; grid-template-rows: 20px 20px; margin: 2px;');
 
             let newHTML: string[] = [];
 
@@ -58,7 +58,11 @@ module Adjust_Market {
                 newHTML.push(Util.buildHTML('span', {
                     class: 'f_12px',
                     style: {
-                        'grid-column': '1'
+                        'grid-column': '1',
+                        'overflow': 'hidden'
+                    },
+                    attributes: {
+                        'title': `${GlobalConstants.SYMBOL_YUAN} ${dataRow.sell_min_price} selling (${dataRow.sell_num})`
                     },
                     content: [
                         Util.buildHTML('span', {
@@ -86,6 +90,9 @@ module Adjust_Market {
                     class: 'f_12px',
                     style: {
                         'grid-column': '1'
+                    },
+                    attributes: {
+                        'title': `${GlobalConstants.SYMBOL_YUAN} ${dataRow.buy_max_price} buying (${dataRow.buy_num})`
                     },
                     content: [
                         Util.buildHTML('span', {
