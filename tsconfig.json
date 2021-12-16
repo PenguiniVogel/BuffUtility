@@ -16,6 +16,7 @@
         "sources/Start.ts",
         "sources/Adjust_Settings.ts",
         "sources/Adjust_Listings.ts",
-        "sources/Adjust_Market.ts"
+        "sources/Adjust_Market.ts",
+        "sources/csgostash/Add_Links_Skin.ts"
     ]
 }

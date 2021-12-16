@@ -45,6 +45,14 @@
 			"matches": [
 				"https://buff.163.com/market/*"
 			]
+		}, {
+			"js": [
+				"sources/Util.js",
+				"sources/csgostash/Add_Links_Skin.js"
+			],
+			"matches": [
+				"https://csgostash.com/skin/*"
+			]
 		}
 	],
 	"permissions": [],
