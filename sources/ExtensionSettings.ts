@@ -9,6 +9,27 @@ module ExtensionSettings {
         BUFF
     }
 
+    export const FOP_PRESETS: {
+        [key: string]: [number, number]
+    } = {
+        'Auto': [-1, -1],
+        'w245,h230': [245, 230],
+        'w490,h460': [490, 460],
+        'w980,h920': [490, 460],
+        'w1960,h1840': [1960, 1840],
+        'w3920,h3680': [3920, 3680]
+    };
+
+    export const SORT_BY = {
+        'Default': 'default',
+        'Newest': 'created.desc',
+        'Price Ascending': 'price.asc',
+        'Price Descending': 'price.desc',
+        'Float Ascending': 'paintwear.asc',
+        'Float Descending': 'paintwear.desc',
+        'Hot Descending': 'heat.desc'
+    };
+
     export interface SteamSettings {
         wallet_fee: number,
         wallet_fee_base: number,
@@ -26,7 +47,9 @@ module ExtensionSettings {
         expand_screenshots_backdrop: boolean,
         difference_dominator: DifferenceDominator,
         apply_steam_tax: boolean,
-        apply_currency_to_difference: boolean
+        apply_currency_to_difference: boolean,
+        custom_fop: string,
+        default_sort_by: string
     }
 
     export const DEFAULT_SETTINGS: Settings = {
@@ -39,7 +62,9 @@ module ExtensionSettings {
         expand_screenshots_backdrop: false,
         difference_dominator: DifferenceDominator.STEAM,
         apply_steam_tax: false,
-        apply_currency_to_difference: false
+        apply_currency_to_difference: false,
+        custom_fop: 'Auto',
+        default_sort_by: 'default'
     };
 
     export let settings: Settings = {

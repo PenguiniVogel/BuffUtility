@@ -28,6 +28,15 @@ module Adjust_Listings {
                     if (td.getAttribute('class') != classes) {
                         td.setAttribute('class', classes);
 
+                        let img = td.querySelector('img');
+
+                        // set image resolution
+                        if (state) {
+
+                        } else {
+
+                        }
+
                         affected ++;
                     }
                 }
@@ -49,12 +58,19 @@ module Adjust_Listings {
     }
 
     function adjustSellOrderListings(transferData: InjectionService.TransferData<BuffTypes.SellOrder.Data>): void {
+        let updated_preview = 0;
+
         let data = transferData.data;
         let rows = <NodeListOf<HTMLElement>>document.querySelectorAll('tr[id^="sell_order_"]');
 
         let goodsInfo: BuffTypes.SellOrder.GoodsInfo = data.goods_infos[/goods_id=(\d+)/.exec(transferData.url)[1]];
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
+        const preview_screenshots = document.getElementById('preview_screenshots');
+        const can_expand_screenshots = ExtensionSettings.settings.can_expand_screenshots && !!preview_screenshots.querySelector('span[value="inspect_trn_url"].on');
+        const expand_classes = can_expand_screenshots ? `img_td can_expand ${ExtensionSettings.settings.expand_screenshots_backdrop ? 'expand_backdrop' : ''}` : 'img_td';
+
+        // adjust reference price
         if (ExtensionSettings.settings.apply_steam_tax) {
             let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
             let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
@@ -62,6 +78,22 @@ module Adjust_Listings {
             console.debug(`[BuffUtility] Reference price was adjusted with fees:`, steamPriceCNY, '->', f_steamPriceCNY);
 
             steamPriceCNY = f_steamPriceCNY;
+        }
+
+        // add expand handler
+        function setCanExpand(td_img_td: HTMLElement, img_src: string): void {
+            let img = td_img_td.querySelector('img');
+
+            // set image source
+            if (img.getAttribute('src') != img_src) {
+                img.setAttribute('src', img_src);
+            }
+
+            if (td_img_td.getAttribute('class') != expand_classes) {
+                td_img_td.setAttribute('class', expand_classes);
+
+                updated_preview ++;
+            }
         }
 
         for (let i = 0, l = rows.length; i < l; i ++) {
@@ -110,9 +142,47 @@ module Adjust_Listings {
                 ]
             });
 
+            let img_src = dataRow.img_src + data.fop_str;
+            if (can_expand_screenshots) {
+                switch (ExtensionSettings.settings.custom_fop) {
+                    case 'Auto':
+                        img_src = dataRow.img_src;
+
+                        break;
+                    case 'w245,h230':
+                        img_src = `${dataRow.img_src}?fop=imageView/2/w/245/h/230`;
+
+                        break;
+                    case 'w490,h460':
+                        img_src = `${dataRow.img_src}?fop=imageView/2/w/490/h/460`;
+
+                        break;
+                    case 'w980,h920':
+                        img_src = `${dataRow.img_src}?fop=imageView/2/w/980/h/920`;
+
+                        break;
+                    case 'w1960,h1840':
+                        img_src = `${dataRow.img_src}?fop=imageView/2/w/1960/h/1840`;
+
+                        break;
+                    case 'w3920,h3680':
+                        img_src = `${dataRow.img_src}?fop=imageView/2/w/3920/h/3680`;
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            setCanExpand(row.querySelector('td.img_td'), img_src);
+
             let priceContainer = <HTMLElement>row.querySelectorAll('td.t_Left').item(2);
             let paymentMethods = (<HTMLElement>priceContainer.querySelectorAll('div').item(1))?.outerHTML ?? '';
             priceContainer.innerHTML = (newHTML + paymentMethods);
+        }
+
+        if (updated_preview > 0) {
+            console.debug(`[BuffUtility] Preview adjusted for ${updated_preview} elements.`);
         }
     }
 
@@ -147,13 +217,6 @@ module Adjust_Listings {
                                 class: 'c_Gray f_12px',
                                 content: [ `(${Util.convertCNY(price)})` ]
                             })
-                            // Util.buildHTML('div', {
-                            //     class: 'f_12px',
-                            //     style: {
-                            //         'color': priceDiff < 0 ? '#009800' : '#c90000'
-                            //     },
-                            //     content: [ `${priceDiff < 0 ? GlobalConstants.SYMBOL_ARROW_DOWN : GlobalConstants.SYMBOL_ARROW_UP}${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}` ]
-                            // })
                         ]
                     })
                 ]

@@ -19,6 +19,15 @@ done
 
 echo " "
 
+FILES="sources/csgostash/*.js"
+for f in $FILES
+do
+  echo "Processing (uglifyjs) $f -> $DEST/$f"
+  uglifyjs -c -o "$DEST/$f" "$f"
+done
+
+echo " "
+
 FILES="lib/*.js"
 for f in $FILES
 do

@@ -72,6 +72,7 @@ declare module BuffTypes {
             allow_bargain: boolean;
             appid: number;
             asset_info: AssetInfo;
+            background_image_url: string;
             bookmarked: boolean;
             can_bargain: boolean;
             cannot_bargain_reason: string;
@@ -83,6 +84,7 @@ declare module BuffTypes {
             game: string;
             goods_id: number;
             id: string;
+            img_src: string;
             income: string;
             lowest_bargain_price: string;
             mode: number;
@@ -94,6 +96,11 @@ declare module BuffTypes {
             tradable_cooldown?: any;
             updated_at: number;
             user_id: string;
+        }
+
+        export interface PreviewScreenshots {
+            bg_img: string;
+            selling: string;
         }
 
         export interface UserInfo {
@@ -112,12 +119,15 @@ declare module BuffTypes {
         }
 
         export interface Data {
+            fop_str: string;
             goods_infos: GoodsInfos;
             has_market_stores: HasMarketStores;
             items: Item[];
             page_num: number;
             page_size: number;
+            preview_screenshots: PreviewScreenshots;
             sort_by: string;
+            src_url_background: string;
             total_count: number;
             total_page: number;
             user_infos: UserInfos;

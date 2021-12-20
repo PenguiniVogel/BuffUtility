@@ -17,15 +17,22 @@ module Adjust_Market {
     }
 
     function adjustMarketGoodsOrBuying(transferData: InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>): void {
-        let liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_list_card li');
+        const liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_list_card li');
 
         let info: string[] = [];
 
         for (let i = 0, l = liList.length; i < l; i ++) {
-            let dataRow = transferData.data.items[i];
-            let li = liList.item(i);
-            let h3 = <HTMLElement>li.querySelector('h3');
-            let p = <HTMLElement>document.createElement('p');
+            const dataRow = transferData.data.items[i];
+            const li = liList.item(i);
+            const h3 = <HTMLElement>li.querySelector('h3');
+            const p = <HTMLElement>document.createElement('p');
+
+            let aHrefList = li.querySelectorAll('a[href]');
+            for (let x = 0, y = aHrefList.length; x < y; x ++) {
+                let aHref = aHrefList.item(x);
+
+                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${ExtensionSettings.settings.default_sort_by}`);
+            }
 
             let buffPrice = +dataRow.sell_min_price;
             let steamPriceCNY = +dataRow.goods_info.steam_price_cny;
