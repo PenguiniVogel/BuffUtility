@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Buff Utility</title>
+
+    <link rel="icon" href="../icon16.png" />
+
+    <style>
+        /* Elements */
+        :root {
+            --color-dark: #2e2a35;
+            --color-dark-accent: #312d39;
+            --color-dark-shadow: #15121c;
+
+            --color-light: #ddb362;
+            --color-light-accent: #cfa555;
+
+            --color-light2: #cecece;
+        }
+
+        html {
+            font-size: 22px;
+
+            background: var(--color-dark);
+
+            color: var(--color-light);
+        }
+
+        hr {
+            margin: 0;
+
+            border-color: var(--color-dark-shadow);
+        }
+
+        /* Classes */
+        .hr-top {
+            margin-top: 15px;
+        }
+
+        .hr-bottom {
+            margin-bottom: 15px;
+        }
+
+        .head {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            align-content: center;
+        }
+
+        .head span {
+            margin-left: 15px;
+        }
+
+        .head sup {
+            color: var(--color-light2);
+
+            margin-bottom: 10px;
+            margin-left: 5px;
+        }
+
+        .nav-links {
+            width: 100%;
+
+            font-size: 20px;
+        }
+
+        .nav-links td {
+            padding: 0 20px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .nav-links td:hover {
+            background: var(--color-dark-shadow);
+        }
+
+        .nav-links td.active {
+            background: var(--color-dark-shadow);
+            text-decoration: underline;
+        }
+
+        .mainContent {
+            color: var(--color-light2);
+
+            font-size: 20px;
+        }
+
+        .text-flavour {
+            color: var(--color-light-accent);
+        }
+    </style>
+
+    <style id="inject"></style>
+</head>
+<body>
+    <noscript>
+        This website works better with JavaScript!
+    </noscript>
+    <nav>
+        <div class="head">
+            <img src="../icon128.png" height="32" />
+            <span>Buff Utility</span>
+            <sup>2.0.6</sup>
+        </div>
+        <hr class="hr-top">
+        <table class="nav-links">
+            <tr>
+                <td class="" data-rel="Home" onclick="page('Home');">Home</td>
+                <td class="" data-rel="Wiki" onclick="page('Wiki');">Wiki</td>
+                <td class="" data-rel="WhereToGet" onclick="page('WhereToGet');">Where to get?</td>
+                <td style="display: none;" class="" data-rel="Other" onclick="page('Other');">Other</td>
+            </tr>
+        </table>
+    </nav>
+    <hr class="hr-bottom">
+    <div class="mainContent">
+        <div id="p_Home">
+            <h6 class="text-flavour">Home</h6>
+            Buff Utility is a browser extension developed by <span class="text-flavour">Penguini</span> aka. <span class="text-flavour">Felix Vogel</span>
+            <br>
+            Development started in <span class="text-flavour">May 2021</span>. The project has since evolved quite significantly.
+            <br>
+            <span class="text-flavour">Thank you!</span> to everyone who has supported me and this project ever since it has started!
+            <br>
+            Without your suggestions and wishes to keep it going <span class="text-flavour">V2</span> would have never come to life.
+            <br>
+            <br>
+            I would like to especially thank these people:
+            <ul>
+                <li>
+                    <span class="text-flavour">Futeish</span>
+                    <br>
+                    For making me the awesome new icon!
+                </li>
+                <li>
+                    <span class="text-flavour">Arceus</span>
+                    <br>
+                    For providing and correcting me with calculations and formulas
+                </li>
+                <li>
+                    <span class="text-flavour">Scarlet</span>
+                    <br>
+                    For suggesting the 'expand preview' feature.
+                </li>
+                <li>
+                    <span class="text-flavour">And all of you users!</span>
+                    <br>
+                    For sticking with me, reporting issues, making suggestions, and so much more
+                    <br>
+                    If you feel that you are missing from this list, feel free to contribute!
+                </li>
+            </ul>
+        </div>
+        <div id="p_Wiki">
+
+        </div>
+        <div id="p_WhereToGet">
+
+        </div>
+        <div id="p_Other">
+            <!-- empty for now -->
+        </div>
+    </div>
+
+    <!-- execute script at the end -->
+    <script>
+        function hideAll() {
+            document.querySelectorAll('td[data-rel]').forEach(function (element) {
+               element.setAttribute('class', '');
+            });
+
+            document.querySelectorAll('div[id^="p_"]').forEach(function (element) {
+                element.setAttribute('style', 'display: none;');
+            });
+        }
+
+        function page(tag) {
+            hideAll();
+
+            document.querySelector('td[data-rel="' + tag + '"]').setAttribute('class', 'active');
+            document.querySelector('#p_' + tag).setAttribute('style', '');
+        }
+
+        function init() {
+            var inject = document.getElementById('inject');
+            inject.innerHTML = 'h6 { display: none; }';
+
+            var match;
+            if (window.location && window.location.href) {
+                match = /page=(.*)/g.exec(window.location.href);
+            }
+
+            page(match && match.length >= 2 ? match[1] : 'Home');
+        }
+
+        init();
+    </script>
+</body>
+</html>
