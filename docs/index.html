@@ -33,6 +33,16 @@
             border-color: var(--color-dark-shadow);
         }
 
+        a.link[href] {
+            color: var(--color-light2);
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        a.link[href]:after {
+            content: ' 🔗';
+        }
+
         /* Classes */
         .hr-top {
             margin-top: 15px;
@@ -56,7 +66,7 @@
         .head sup {
             color: var(--color-light2);
 
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             margin-left: 5px;
         }
 
@@ -100,19 +110,20 @@
     </noscript>
     <nav>
         <div class="head">
-            <img src="../icon128.png" height="32" />
-            <span>Buff Utility</span>
+            <img style="height: 48px;" src="resources/logotransp.png" />
+            <!--span>Buff Utility</span-->
             <sup>2.0.6</sup>
         </div>
         <hr class="hr-top">
         <table class="nav-links">
             <tr>
                 <td class="" data-rel="Home" onclick="page('Home');">Home</td>
-                <td class="" data-rel="Wiki" onclick="page('Wiki');">Wiki</td>
+                <td style="display: none;" class="" data-rel="Wiki" onclick="page('Wiki');">Wiki</td>
                 <td class="" data-rel="WhereToGet" onclick="page('WhereToGet');">Where to get?</td>
                 <td style="display: none;" class="" data-rel="Other" onclick="page('Other');">Other</td>
             </tr>
         </table>
+        <a id="hidden-anchor" href="#p_Home" style="display: none;"></a>
     </nav>
     <hr class="hr-bottom">
     <div class="mainContent">
@@ -132,7 +143,7 @@
                 <li>
                     <span class="text-flavour">Futeish</span>
                     <br>
-                    For making me the awesome new icon!
+                    For making me the awesome new icon, and making other assets, such as the logo on this site!
                 </li>
                 <li>
                     <span class="text-flavour">Arceus</span>
@@ -154,10 +165,20 @@
             </ul>
         </div>
         <div id="p_Wiki">
-
+            <!-- empty for now -->
         </div>
         <div id="p_WhereToGet">
-
+            <ul>
+                <li>
+                    <span class="text-flavour">Chrome</span> <a class="link" href="https://chrome.google.com/webstore/detail/buff-utility/gfjnmalnjjmjahaddeaamlkeliginpaf" target="_blank"></a>
+                </li>
+                <li>
+                    <span class="text-flavour">Firefox</span> <a class="link" href="#" target="_blank"></a>
+                </li>
+                <li>
+                    <span class="text-flavour">Github Unpacked</span> <a class="link" href="https://github.com/PenguiniVogel/BuffUtility/releases/latest" target="_blank"></a>
+                </li>
+            </ul>
         </div>
         <div id="p_Other">
             <!-- empty for now -->
@@ -181,6 +202,14 @@
 
             document.querySelector('td[data-rel="' + tag + '"]').setAttribute('class', 'active');
             document.querySelector('#p_' + tag).setAttribute('style', '');
+
+            /**
+             * @type HTMLElement
+             */
+            var hiddenAnchor = document.querySelector('#hidden-anchor');
+            hiddenAnchor.setAttribute('href', '#p_' + tag);
+
+            hiddenAnchor.click();
         }
 
         function init() {
@@ -190,6 +219,10 @@
             var match;
             if (window.location && window.location.href) {
                 match = /page=(.*)/g.exec(window.location.href);
+
+                if (!match) {
+                    match = /#p_(.*)/g.exec(window.location.href);
+                }
             }
 
             page(match && match.length >= 2 ? match[1] : 'Home');
