@@ -12,42 +12,6 @@ module Adjust_Listings {
         if (transferData.url.indexOf('/sell_order') > -1) {
             console.debug('[BuffUtility] Adjust_Listings (sell_order)');
 
-            // add expand handler
-            function setCanExpand(): void {
-                const container = document.getElementById('preview_screenshots');
-                const state = ExtensionSettings.settings.can_expand_screenshots && !!container.querySelector('span[value="inspect_trn_url"].on');
-                const tags = <NodeListOf<HTMLElement>>document.querySelectorAll('tr td.img_td');
-
-                const classes = state ? `img_td can_expand ${ExtensionSettings.settings.expand_screenshots_backdrop ? 'expand_backdrop' : ''}` : 'img_td';
-
-                let affected = 0;
-
-                for (let i = 0, l = tags.length; i < l; i ++) {
-                    const td = tags.item(i);
-
-                    if (td.getAttribute('class') != classes) {
-                        td.setAttribute('class', classes);
-
-                        let img = td.querySelector('img');
-
-                        // set image resolution
-                        if (state) {
-
-                        } else {
-
-                        }
-
-                        affected ++;
-                    }
-                }
-
-                if (affected > 0) {
-                    console.debug(`[BuffUtility] Expand set on ${affected} elements`);
-                }
-            }
-
-            setInterval(() => setCanExpand(), 250);
-
             // adjust listings
             adjustSellOrderListings(<InjectionService.TransferData<BuffTypes.SellOrder.Data>>transferData);
         } else if (transferData.url.indexOf('/buy_order') > -1) {
@@ -82,11 +46,15 @@ module Adjust_Listings {
 
         // add expand handler
         function setCanExpand(td_img_td: HTMLElement, img_src: string): void {
-            let img = td_img_td.querySelector('img');
+            let divContainer = td_img_td.querySelector('div');
+            let expandImg = document.createElement('img');
+
+            expandImg.setAttribute('data-buff-utility-expand-image', `${ExtensionSettings.settings.expand_type}`);
+            // expandImg.setAttribute('style', 'display: none;');
 
             // set image source
-            if (img.getAttribute('src') != img_src) {
-                img.setAttribute('src', img_src);
+            if (expandImg.getAttribute('src') != img_src) {
+                expandImg.setAttribute('src', img_src);
             }
 
             if (td_img_td.getAttribute('class') != expand_classes) {
@@ -94,6 +62,8 @@ module Adjust_Listings {
 
                 updated_preview ++;
             }
+
+            divContainer.appendChild(expandImg);
         }
 
         for (let i = 0, l = rows.length; i < l; i ++) {
@@ -142,39 +112,49 @@ module Adjust_Listings {
                 ]
             });
 
-            let img_src = dataRow.img_src + data.fop_str;
-            if (can_expand_screenshots) {
-                switch (ExtensionSettings.settings.custom_fop) {
-                    case 'Auto':
-                        img_src = dataRow.img_src;
+            if (can_expand_screenshots && dataRow.can_use_inspect_trn_url) {
+                let img_src = dataRow.img_src + data.fop_str;
+
+                switch (ExtensionSettings.settings.expand_type) {
+                    case ExtensionSettings.ExpandScreenshotType.PREVIEW:
+                        switch (ExtensionSettings.settings.custom_fop) {
+                            case ExtensionSettings.FOP_VALUES.Auto:
+                                img_src = dataRow.img_src;
+
+                                break;
+                            case ExtensionSettings.FOP_VALUES.w245xh230:
+                                img_src = `${dataRow.img_src}?fop=imageView/2/w/245/h/230`;
+
+                                break;
+                            case ExtensionSettings.FOP_VALUES.w490xh460:
+                                img_src = `${dataRow.img_src}?fop=imageView/2/w/490/h/460`;
+
+                                break;
+                            case ExtensionSettings.FOP_VALUES.w980xh920:
+                                img_src = `${dataRow.img_src}?fop=imageView/2/w/980/h/920`;
+
+                                break;
+                            case ExtensionSettings.FOP_VALUES.w1960xh1840:
+                                img_src = `${dataRow.img_src}?fop=imageView/2/w/1960/h/1840`;
+
+                                break;
+                            case ExtensionSettings.FOP_VALUES.w3920xh3680:
+                                img_src = `${dataRow.img_src}?fop=imageView/2/w/3920/h/3680`;
+
+                                break;
+                            default:
+                                break;
+                        }
 
                         break;
-                    case 'w245,h230':
-                        img_src = `${dataRow.img_src}?fop=imageView/2/w/245/h/230`;
+                    case ExtensionSettings.ExpandScreenshotType.INSPECT:
+                        img_src = dataRow.asset_info.info.inspect_url;
 
-                        break;
-                    case 'w490,h460':
-                        img_src = `${dataRow.img_src}?fop=imageView/2/w/490/h/460`;
-
-                        break;
-                    case 'w980,h920':
-                        img_src = `${dataRow.img_src}?fop=imageView/2/w/980/h/920`;
-
-                        break;
-                    case 'w1960,h1840':
-                        img_src = `${dataRow.img_src}?fop=imageView/2/w/1960/h/1840`;
-
-                        break;
-                    case 'w3920,h3680':
-                        img_src = `${dataRow.img_src}?fop=imageView/2/w/3920/h/3680`;
-
-                        break;
-                    default:
                         break;
                 }
-            }
 
-            setCanExpand(row.querySelector('td.img_td'), img_src);
+                setCanExpand(row.querySelector('td.img_td'), img_src);
+            }
 
             let priceContainer = <HTMLElement>row.querySelectorAll('td.t_Left').item(2);
             let paymentMethods = (<HTMLElement>priceContainer.querySelectorAll('div').item(1))?.outerHTML ?? '';
@@ -182,7 +162,7 @@ module Adjust_Listings {
         }
 
         if (updated_preview > 0) {
-            console.debug(`[BuffUtility] Preview adjusted for ${updated_preview} elements.`);
+            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview > 1 ? 's.' : '.'}`, 't:', ExtensionSettings.settings.expand_type);
         }
     }
 

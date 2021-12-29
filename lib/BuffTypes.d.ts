@@ -46,6 +46,18 @@ declare module BuffTypes {
         export interface Info {
             fraudwarnings?: any;
             icon_url: string;
+            inspect_en_size: string;
+            inspect_en_url: string;
+            inspect_mobile_size: string;
+            inspect_mobile_url: string;
+            inspect_size: string;
+            inspect_start_at: string;
+            inspect_state: number;
+            inspect_trn_size: string;
+            inspect_trn_url: string;
+            inspect_url: string;
+            inspect_version: number;
+            inspected_at: string;
             original_icon_url: string;
             paintindex: number;
             paintseed: number;
@@ -75,6 +87,7 @@ declare module BuffTypes {
             background_image_url: string;
             bookmarked: boolean;
             can_bargain: boolean;
+            can_use_inspect_trn_url: boolean;
             cannot_bargain_reason: string;
             coupon_infos?: any;
             created_at: number;

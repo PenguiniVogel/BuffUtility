@@ -9,16 +9,19 @@ module ExtensionSettings {
         BUFF
     }
 
-    export const FOP_PRESETS: {
-        [key: string]: [number, number]
-    } = {
-        'Auto': [-1, -1],
-        'w245,h230': [245, 230],
-        'w490,h460': [490, 460],
-        'w980,h920': [490, 460],
-        'w1960,h1840': [1960, 1840],
-        'w3920,h3680': [3920, 3680]
-    };
+    export const enum ExpandScreenshotType {
+        PREVIEW,
+        INSPECT
+    }
+
+    export const enum FOP_VALUES {
+       Auto,
+       w245xh230,
+       w490xh460,
+       w980xh920,
+       w1960xh1840,
+       w3920xh3680,
+    }
 
     export const SORT_BY = {
         'Default': 'default',
@@ -48,7 +51,8 @@ module ExtensionSettings {
         difference_dominator: DifferenceDominator,
         apply_steam_tax: boolean,
         apply_currency_to_difference: boolean,
-        custom_fop: string,
+        expand_type
+        custom_fop: number,
         default_sort_by: string
     }
 
@@ -63,7 +67,8 @@ module ExtensionSettings {
         difference_dominator: DifferenceDominator.STEAM,
         apply_steam_tax: false,
         apply_currency_to_difference: false,
-        custom_fop: 'Auto',
+        expand_type: ExpandScreenshotType.PREVIEW,
+        custom_fop: FOP_VALUES.Auto,
         default_sort_by: 'default'
     };
 

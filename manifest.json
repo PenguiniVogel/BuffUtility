@@ -1,64 +1,64 @@
 {
-	"name": "Buff Utility (Dev)",
-	"version": "2.0.5",
-	"description": "Adds cosmetic functionality to buff.163.com",
-	"manifest_version": 2,
-	"content_scripts": [
-		{
-			"js": [
-				"lib/InjectionService.js"
-			],
-			"matches": [
-				"https://buff.163.com/*"
-			],
-			"run_at": "document_start"
-		}, {
-			"js": [
-				"lib/CurrencyHelper.js",
-				"sources/fRequest.js",
-				"sources/Cookie.js",
-				"sources/Util.js",
-				"sources/ExtensionSettings.js",
-				"sources/Start.js"
-			],
-			"matches": [
-				"https://buff.163.com/*"
-			]
-		}, {
-			"js": [
-				"sources/Adjust_Settings.js"
-			],
-			"matches": [
-				"https://buff.163.com/user-center/profile"
-			]
-		}, {
-			"js": [
-				"sources/Adjust_Listings.js"
-			],
-			"matches": [
-				"https://buff.163.com/goods/*"
-			]
-		}, {
-			"js": [
-				"sources/Adjust_Market.js"
-			],
-			"matches": [
-				"https://buff.163.com/market/*"
-			]
-		}, {
-			"js": [
-				"sources/Util.js",
-				"sources/csgostash/Add_Links_Skin.js"
-			],
-			"matches": [
-				"https://csgostash.com/skin/*"
-			]
-		}
-	],
-	"permissions": [],
-	"icons": {
-		"16": "icon16.png",
-		"48": "icon48.png",
-		"128": "icon128.png"
-	}
+    "name": "Buff Utility (Dev)",
+    "version": "2.0.6",
+    "description": "Adds cosmetic functionality to buff.163.com",
+    "manifest_version": 2,
+    "content_scripts": [
+        {
+            "js": [
+                "lib/InjectionService.js"
+            ],
+            "matches": [
+                "https://buff.163.com/*"
+            ],
+            "run_at": "document_start"
+        }, {
+            "js": [
+                "lib/CurrencyHelper.js",
+                "sources/fRequest.js",
+                "sources/Cookie.js",
+                "sources/Util.js",
+                "sources/ExtensionSettings.js",
+                "sources/Start.js"
+            ],
+            "matches": [
+                "https://buff.163.com/*"
+            ]
+        }, {
+            "js": [
+                "sources/Adjust_Settings.js"
+            ],
+            "matches": [
+                "https://buff.163.com/user-center/profile"
+            ]
+        }, {
+            "js": [
+                "sources/Adjust_Listings.js"
+            ],
+            "matches": [
+                "https://buff.163.com/goods/*"
+            ]
+        }, {
+            "js": [
+                "sources/Adjust_Market.js"
+            ],
+            "matches": [
+                "https://buff.163.com/market/*"
+            ]
+        }, {
+            "js": [
+                "sources/Util.js",
+                "sources/csgostash/Add_Links_Skin.js"
+            ],
+            "matches": [
+                "https://csgostash.com/skin/*"
+            ]
+        }
+    ],
+    "permissions": [],
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    }
 }

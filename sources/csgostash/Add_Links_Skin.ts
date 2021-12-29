@@ -76,7 +76,7 @@ module Add_Links_Skin {
 
         let pricesTab = Util.buildHTML('div', {
             id: Constants.BUFF_TAB_ID,
-            class: 'tab-pane active',
+            class: 'tab-pane',
             attributes: {
                 'role': 'tabpanel'
             },

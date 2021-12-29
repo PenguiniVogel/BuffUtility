@@ -17,6 +17,7 @@ module Adjust_Settings {
         DOMINATOR_SELECT = 'buff-utility-dominator-select',
         APPLY_STEAM_TAX = 'buff-utility-apply-steam-tax',
         APPLY_CURRENCY_TO_DIFFERENCE = 'buff-utility-apply-currency-to-difference',
+        EXPAND_TYPE = 'buff-utility-expand-type',
         CUSTOM_FOP = 'buff-utility-custom-fop',
         SORT_BY = 'buff-utility-sort-by'
     }
@@ -112,8 +113,9 @@ module Adjust_Settings {
         table.append(tr);
     }
 
-    function readSelectOption(id: string, fallback?: string): string {
-        return (<HTMLSelectElement>document.getElementById(id)).selectedOptions?.item(0)?.getAttribute('value') ?? fallback;
+    function readSelectOption<T>(id: string, operation?: (value: string) => T): T {
+        let raw = (<HTMLSelectElement>document.getElementById(id)).selectedOptions?.item(0)?.getAttribute('value');
+        return operation ? operation(raw) : <T><unknown>raw;
     }
 
     function makeTextOption(id: string, type: string, mappedOption: string, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
@@ -173,11 +175,19 @@ module Adjust_Settings {
                 settings.expand_screenshots_backdrop = isCheckboxSelected(OptionID.EXPAND_SCREENSHOT_BACKDROP);
                 settings.apply_steam_tax = isCheckboxSelected(OptionID.APPLY_STEAM_TAX);
 
-                settings.difference_dominator = +readSelectOption(OptionID.DOMINATOR_SELECT);
+                settings.difference_dominator = readSelectOption(OptionID.DOMINATOR_SELECT, value => +value);
 
-                settings.default_sort_by = readSelectOption(OptionID.SORT_BY, 'default');
+                settings.default_sort_by = readSelectOption(OptionID.SORT_BY, value => value ?? ExtensionSettings.SORT_BY['Default']);
 
-                settings.custom_fop = readSelectOption(OptionID.CUSTOM_FOP, 'Auto');
+                settings.expand_type = readSelectOption(OptionID.EXPAND_TYPE, value => +value);
+
+                settings.custom_fop = readSelectOption(OptionID.CUSTOM_FOP, value => {
+                    if (!isFinite(+value) || +value == null) {
+                        return ExtensionSettings.FOP_VALUES.Auto;
+                    } else {
+                        return +value;
+                    }
+                });
 
                 settings.custom_currency_rate = readTextOption(OptionID.CUSTOM_CURRENCY_RATE, (str) => Math.max(+(str?.length > 0 ? str : 0), 0.0001));
                 settings.custom_currency_name = readTextOption(OptionID.CUSTOM_CURRENCY_NAME, (str) => {
@@ -302,12 +312,36 @@ module Adjust_Settings {
             description: 'Default sort by for item listings\nDefault: Default\nNewest: Newest\nPrice Ascending: low to high\nPrice Descending: high to low\nFloat Ascending: low to high\nFloat Descending: high to low\nHot Descending: by heat..?'
         }, adv_table);
 
+        // choose what to expand, preview or screenshot
+        makeSelectOption(OptionID.EXPAND_TYPE, [
+            {
+                value: `${ExtensionSettings.ExpandScreenshotType.PREVIEW}`,
+                displayStr: 'Preview',
+                selected: settings.expand_type == ExtensionSettings.ExpandScreenshotType.PREVIEW
+            },
+            {
+                value: `${ExtensionSettings.ExpandScreenshotType.INSPECT}`,
+                displayStr: 'Inspect',
+                selected: settings.expand_type == ExtensionSettings.ExpandScreenshotType.INSPECT
+            }
+        ], {
+            title: 'Expand preview type',
+            description: 'Either expand into a zoomed preview image or expand into the inspect image.'
+        }, adv_table);
+
         // custom fop field
-        makeSelectOption(OptionID.CUSTOM_FOP, Object.keys(ExtensionSettings.FOP_PRESETS).map(x => {
+        makeSelectOption(OptionID.CUSTOM_FOP, [
+            [ExtensionSettings.FOP_VALUES.Auto, 'Auto'],
+            [ExtensionSettings.FOP_VALUES.w245xh230, 'w245xh230'],
+            [ExtensionSettings.FOP_VALUES.w490xh460, 'w490xh460'],
+            [ExtensionSettings.FOP_VALUES.w980xh920, 'w980xh920'],
+            [ExtensionSettings.FOP_VALUES.w1960xh1840, 'w1960xh1840'],
+            [ExtensionSettings.FOP_VALUES.w3920xh3680, 'w3920xh3680']
+        ].map(x => {
             return {
-                value: x,
-                displayStr: x,
-                selected: x == ExtensionSettings.settings.custom_fop
+                value: `${x[0]}`,
+                displayStr: `${x[1]}`,
+                selected: x[0] == ExtensionSettings.settings.custom_fop
             };
         }), {
             title: 'Custom FOP',

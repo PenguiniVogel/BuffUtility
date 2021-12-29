@@ -86,17 +86,31 @@ module InjectionService {
     let customStyles = document.createElement('style');
 
     customStyles.innerHTML = `
+td.img_td.can_expand img[data-buff-utility-expand-image] {
+    display: none;
+}
+    
 td.img_td.can_expand:hover {
     padding: 20px 0px 20px 0px;
 }
 
-td.img_td.can_expand:hover div[style].pic-cont img {
+td.img_td.can_expand:hover img[data-buff-utility-expand-image] {
+    width: auto;
+    height: auto;
+    display: block;
     position: absolute;
-    transform: scale(10) translate(70px, 0px);
     z-index: 99999;
 }
 
-td.img_td.can_expand.expand_backdrop:hover div[style].pic-cont img {
+td.img_td.can_expand:hover img[data-buff-utility-expand-image="0"] {
+    transform: scale(10) translate(70px, 0px);
+}
+
+td.img_td.can_expand:hover img[data-buff-utility-expand-image="1"] {
+    transform: scale(8) translate(99px, 10px);
+}
+
+td.img_td.can_expand.expand_backdrop:hover img[data-buff-utility-expand-image="0"] {
     background-color: rgb(0 0 0 / 25%);
     background-color: rgba(0, 0, 0, 0.25);
 }`;
