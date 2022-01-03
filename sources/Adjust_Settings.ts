@@ -4,9 +4,10 @@
 /** */
 module Adjust_Settings {
 
-    // helper functions
+    // imports
+    import Settings = ExtensionSettings.Settings;
 
-    import settings = ExtensionSettings.settings;
+    // module
 
     const enum OptionID {
         CURRENCY_SELECT = 'buff-utility-currency-select',
@@ -36,7 +37,7 @@ module Adjust_Settings {
         return td;
     }
 
-    function makeCheckboxOption(id: string, mappedOption: string, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+    function makeCheckboxOption(id: string, mappedOption: ExtensionSettings.Settings, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
         const containerTD = makeTD('', 't_Left');
 
         containerTD.innerHTML = Util.buildHTML('span', {
@@ -47,7 +48,7 @@ module Adjust_Settings {
                     onclick: `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
                 },
                 content: [Util.buildHTML('span', {
-                    class: ExtensionSettings.settings[mappedOption] ? 'on' : '',
+                    class: ExtensionSettings.get[mappedOption] ? 'on' : '',
                     content: [
                         Util.buildHTML('i', { class: 'icon icon_checkbox' }),
                         ' Open '
@@ -74,7 +75,7 @@ module Adjust_Settings {
     }
 
     export function isCheckboxSelected(id: string): boolean {
-        return !!document.getElementById(id).querySelector('span.on');
+        return !!document.getElementById(id)?.querySelector('span.on');
     }
 
     function makeSelectOption(id: string, options: { value: string, displayStr: string, selected?: boolean }[], prefInfo: { title: string, description?: string }, table: HTMLElement): void {
@@ -113,12 +114,11 @@ module Adjust_Settings {
         table.append(tr);
     }
 
-    function readSelectOption<T>(id: string, operation?: (value: string) => T): T {
-        let raw = (<HTMLSelectElement>document.getElementById(id)).selectedOptions?.item(0)?.getAttribute('value');
-        return operation ? operation(raw) : <T><unknown>raw;
+    function readSelectOption(id: string): string {
+        return (<HTMLSelectElement>document.getElementById(id)).selectedOptions?.item(0)?.getAttribute('value');
     }
 
-    function makeTextOption(id: string, type: string, mappedOption: string, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+    function makeTextOption(id: string, type: string, mappedOption: ExtensionSettings.Settings, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
         const containerTD = makeTD('', 't_Left');
 
         containerTD.innerHTML = Util.buildHTML('span', {
@@ -127,7 +127,7 @@ module Adjust_Settings {
                     id: id,
                     attributes: {
                         'type': type,
-                        'value': `${ExtensionSettings.settings[mappedOption]}`,
+                        'value': `${ExtensionSettings.get[mappedOption]}`,
                         'onkeyup': `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
                     }
                 })]
@@ -151,8 +151,8 @@ module Adjust_Settings {
         table.append(tr);
     }
 
-    export function readTextOption<T>(id: string, operation: (str: string) => T): T {
-        return operation((<HTMLInputElement>document.getElementById(id)).value);
+    export function readTextOption(id: string): string {
+        return (<HTMLInputElement>document.getElementById(id))?.value;
     }
 
     // add settings
@@ -162,59 +162,25 @@ module Adjust_Settings {
 
         window.addEventListener('message', (e: MessageEvent) => {
             if (e.data == GlobalConstants.BUFF_UTILITY_SETTINGS) {
-                let { settings } = ExtensionSettings;
-
-                // copy data to see changes
-                let old = JSON.parse(JSON.stringify(settings));
-
                 // check changes
-                settings.selected_currency = readSelectOption(OptionID.CURRENCY_SELECT);
+                ExtensionSettings.save(Settings.SELECTED_CURRENCY, readSelectOption(OptionID.CURRENCY_SELECT));
+                ExtensionSettings.save(Settings.APPLY_CURRENCY_TO_DIFFERENCE, isCheckboxSelected(OptionID.APPLY_CURRENCY_TO_DIFFERENCE));
+                ExtensionSettings.save(Settings.CAN_EXPAND_SCREENSHOTS, isCheckboxSelected(OptionID.EXPAND_SCREENSHOTS));
+                ExtensionSettings.save(Settings.EXPAND_SCREENSHOTS_BACKDROP, isCheckboxSelected(OptionID.EXPAND_SCREENSHOT_BACKDROP));
+                ExtensionSettings.save(Settings.APPLY_STEAM_TAX, isCheckboxSelected(OptionID.APPLY_STEAM_TAX));
+                ExtensionSettings.save(Settings.DIFFERENCE_DOMINATOR, readSelectOption(OptionID.DOMINATOR_SELECT));
+                ExtensionSettings.save(Settings.DEFAULT_SORT_BY, readSelectOption(OptionID.SORT_BY));
+                ExtensionSettings.save(Settings.EXPAND_TYPE, readSelectOption(OptionID.EXPAND_TYPE));
+                ExtensionSettings.save(Settings.CUSTOM_FOP, readSelectOption(OptionID.CUSTOM_FOP));
 
-                settings.apply_currency_to_difference = isCheckboxSelected(OptionID.APPLY_CURRENCY_TO_DIFFERENCE);
-                settings.can_expand_screenshots = isCheckboxSelected(OptionID.EXPAND_SCREENSHOTS);
-                settings.expand_screenshots_backdrop = isCheckboxSelected(OptionID.EXPAND_SCREENSHOT_BACKDROP);
-                settings.apply_steam_tax = isCheckboxSelected(OptionID.APPLY_STEAM_TAX);
-
-                settings.difference_dominator = readSelectOption(OptionID.DOMINATOR_SELECT, value => +value);
-
-                settings.default_sort_by = readSelectOption(OptionID.SORT_BY, value => value ?? ExtensionSettings.SORT_BY['Default']);
-
-                settings.expand_type = readSelectOption(OptionID.EXPAND_TYPE, value => +value);
-
-                settings.custom_fop = readSelectOption(OptionID.CUSTOM_FOP, value => {
-                    if (!isFinite(+value) || +value == null) {
-                        return ExtensionSettings.FOP_VALUES.Auto;
-                    } else {
-                        return +value;
-                    }
-                });
-
-                settings.custom_currency_rate = readTextOption(OptionID.CUSTOM_CURRENCY_RATE, (str) => Math.max(+(str?.length > 0 ? str : 0), 0.0001));
-                settings.custom_currency_name = readTextOption(OptionID.CUSTOM_CURRENCY_NAME, (str) => {
-                    if (str?.length == 0) str = 'CC';
-
-                    return str;
-                });
-
-                settings.custom_currency_calculated_rate = 1 / settings.custom_currency_rate;
-                settings.custom_currency_leading_zeros = Util.countLeadingZeros(`${settings.custom_currency_calculated_rate}`.split('.')[1] ?? '');
-
-                // save any changes
-                ExtensionSettings.save();
-
-                // check changes
-                let changes: string[] = Object.keys(settings)
-                    .filter(x => settings[x] != old[x])
-                    .map(x => `${x}: ${old[x]} -> ${settings[x]}`);
-
-                if (changes.length > 0) {
-                    console.debug(`[BuffUtility] Saved settings.\n`, changes.join('\n'));
-                }
+                ExtensionSettings.save(Settings.CUSTOM_CURRENCY_RATE, readTextOption(OptionID.CUSTOM_CURRENCY_RATE));
+                ExtensionSettings.save(Settings.CUSTOM_CURRENCY_NAME, readTextOption(OptionID.CUSTOM_CURRENCY_NAME));
+                ExtensionSettings.save(Settings.CUSTOM_CURRENCY_CALCULATED_RATE, 1 / <number>ExtensionSettings.get(Settings.CUSTOM_CURRENCY_RATE));
+                ExtensionSettings.save(Settings.CUSTOM_CURRENCY_LEADING_ZEROS, Util.countLeadingZeros(`${ExtensionSettings.get(Settings.CUSTOM_CURRENCY_CALCULATED_RATE)}`.split('.')[1] ?? ''));
             }
         });
 
         // Get stuff
-        let { settings } = ExtensionSettings;
         const userSettings = document.querySelector('div.user-setting');
 
         // Add normal settings
@@ -232,14 +198,14 @@ module Adjust_Settings {
             return {
                 value: x,
                 displayStr: `${x} - ${symbols[x].length == 0 ? '?' : symbols[x]}`,
-                selected: x == settings.selected_currency
+                selected: x == ExtensionSettings.get(Settings.SELECTED_CURRENCY)
             };
         });
 
         remapped.push({
             value: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY,
             displayStr: 'Custom',
-            selected: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY == settings.selected_currency
+            selected: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY == ExtensionSettings.get(Settings.SELECTED_CURRENCY)
         });
 
         makeSelectOption(OptionID.CURRENCY_SELECT, remapped, {
@@ -247,25 +213,25 @@ module Adjust_Settings {
         }, table);
 
         // apply currency to difference
-        makeCheckboxOption(OptionID.APPLY_CURRENCY_TO_DIFFERENCE, 'apply_currency_to_difference', {
+        makeCheckboxOption(OptionID.APPLY_CURRENCY_TO_DIFFERENCE, Settings.APPLY_CURRENCY_TO_DIFFERENCE, {
             title: 'Apply Currency to difference',
             description: 'Whether to show the difference on the listing page in your selected currency or RMB.'
         }, table);
 
         // expand screenshot
-        makeCheckboxOption(OptionID.EXPAND_SCREENSHOTS, 'can_expand_screenshots', {
+        makeCheckboxOption(OptionID.EXPAND_SCREENSHOTS, Settings.CAN_EXPAND_SCREENSHOTS, {
             title: 'Can expand preview',
             description: 'Can previews be expanded on sell listings. This only works if \'Preview screenshots\' is turned on and if the item has been inspected.'
         }, table);
 
         // expand screenshot backdrop
-        makeCheckboxOption(OptionID.EXPAND_SCREENSHOT_BACKDROP, 'expand_screenshots_backdrop', {
+        makeCheckboxOption(OptionID.EXPAND_SCREENSHOT_BACKDROP, Settings.EXPAND_SCREENSHOTS_BACKDROP, {
             title: 'Expanded preview backdrop',
             description: 'Adds a transparent black backdrop to preview images to add some contrast.'
         }, table);
 
         // apply steam tax
-        makeCheckboxOption(OptionID.APPLY_STEAM_TAX, 'apply_steam_tax', {
+        makeCheckboxOption(OptionID.APPLY_STEAM_TAX, Settings.APPLY_STEAM_TAX, {
             title: 'Apply Steam Tax',
             description: 'Apply Steam Tax before calculating differences.\nThis will calculate the steam seller price from the provided reference price.'
         }, table);
@@ -289,11 +255,11 @@ module Adjust_Settings {
             {
                 value: `${ExtensionSettings.DifferenceDominator.STEAM}`,
                 displayStr: 'Steam',
-                selected: settings.difference_dominator == ExtensionSettings.DifferenceDominator.STEAM
+                selected: ExtensionSettings.get(Settings.DIFFERENCE_DOMINATOR) == ExtensionSettings.DifferenceDominator.STEAM
             }, {
                 value: `${ExtensionSettings.DifferenceDominator.BUFF}`,
                 displayStr: 'Buff',
-                selected: settings.difference_dominator == ExtensionSettings.DifferenceDominator.BUFF
+                selected: ExtensionSettings.get(Settings.DIFFERENCE_DOMINATOR) == ExtensionSettings.DifferenceDominator.BUFF
             }
         ], {
             title: 'Difference Dominator',
@@ -305,7 +271,7 @@ module Adjust_Settings {
             return {
                 value: ExtensionSettings.SORT_BY[x],
                 displayStr: x,
-                selected: ExtensionSettings.SORT_BY[x] == ExtensionSettings.settings.default_sort_by
+                selected: ExtensionSettings.SORT_BY[x] == ExtensionSettings.get(Settings.DEFAULT_SORT_BY)
             };
         }), {
             title: 'Default sort by',
@@ -317,12 +283,12 @@ module Adjust_Settings {
             {
                 value: `${ExtensionSettings.ExpandScreenshotType.PREVIEW}`,
                 displayStr: 'Preview',
-                selected: settings.expand_type == ExtensionSettings.ExpandScreenshotType.PREVIEW
+                selected: ExtensionSettings.get(Settings.EXPAND_TYPE) == ExtensionSettings.ExpandScreenshotType.PREVIEW
             },
             {
                 value: `${ExtensionSettings.ExpandScreenshotType.INSPECT}`,
                 displayStr: 'Inspect',
-                selected: settings.expand_type == ExtensionSettings.ExpandScreenshotType.INSPECT
+                selected: ExtensionSettings.get(Settings.EXPAND_TYPE) == ExtensionSettings.ExpandScreenshotType.INSPECT
             }
         ], {
             title: 'Expand preview type',
@@ -341,7 +307,7 @@ module Adjust_Settings {
             return {
                 value: `${x[0]}`,
                 displayStr: `${x[1]}`,
-                selected: x[0] == ExtensionSettings.settings.custom_fop
+                selected: x[0] == ExtensionSettings.get(Settings.CUSTOM_FOP)
             };
         }), {
             title: 'Custom FOP',
@@ -349,12 +315,12 @@ module Adjust_Settings {
         }, adv_table);
 
         // custom currency fields
-        makeTextOption(OptionID.CUSTOM_CURRENCY_RATE, 'number', 'custom_currency_rate', {
+        makeTextOption(OptionID.CUSTOM_CURRENCY_RATE, 'number', Settings.CUSTOM_CURRENCY_RATE, {
             title: 'Custom currency rate',
             description: 'Set the rate of the custom currency e.g.\n10 RMB -> 1 CC\nOnly active if \'Custom\' was selected in the \'Display Currency\' option.'
         }, adv_table);
 
-        makeTextOption(OptionID.CUSTOM_CURRENCY_NAME, 'text', 'custom_currency_name', {
+        makeTextOption(OptionID.CUSTOM_CURRENCY_NAME, 'text', Settings.CUSTOM_CURRENCY_NAME, {
             title: 'Custom currency name',
             description: 'Set the name of the custom currency. Only active if \'Custom\' was selected in the \'Display Currency\' option.'
         }, adv_table);

@@ -21,6 +21,8 @@
 
         html {
             font-size: 22px;
+            font-family: 'Trebuchet MS', serif;
+            font-weight: normal;
 
             background: var(--color-dark);
 
@@ -121,6 +123,7 @@
                 <td style="display: none;" class="" data-rel="Wiki" onclick="page('Wiki');">Wiki</td>
                 <td class="" data-rel="WhereToGet" onclick="page('WhereToGet');">Where to get?</td>
                 <td style="display: none;" class="" data-rel="Other" onclick="page('Other');">Other</td>
+                <td class="" data-rel="LEECH" onclick="page('LEECH');">LEECH</td>
             </tr>
         </table>
         <a id="hidden-anchor" href="#p_Home" style="display: none;"></a>
@@ -182,6 +185,19 @@
         </div>
         <div id="p_Other">
             <!-- empty for now -->
+        </div>
+        <div id="p_LEECH">
+            <div>
+                What is <span class="text-flavour">LEECH</span>?
+                <br>
+                LEECH is the external <span class="text-flavour">BUFF API</span> developed by Felix Vogel.
+                <br>
+                You can view the documentation here.
+                <div>
+                    <div class="leech-list"></div>
+                    <div class="leech-content"></div>
+                </div>
+            </div>
         </div>
     </div>
 

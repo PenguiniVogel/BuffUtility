@@ -40,39 +40,73 @@ module ExtensionSettings {
         wallet_fee_minimum: number
     }
 
-    export interface Settings {
-        selected_currency: string,
-        custom_currency_rate: number,
-        custom_currency_name: string,
-        custom_currency_calculated_rate: number,
-        custom_currency_leading_zeros: number,
-        can_expand_screenshots: boolean,
-        expand_screenshots_backdrop: boolean,
-        difference_dominator: DifferenceDominator,
-        apply_steam_tax: boolean,
-        apply_currency_to_difference: boolean,
-        expand_type
-        custom_fop: number,
-        default_sort_by: string
+    export const enum Settings {
+        SELECTED_CURRENCY = 'selected_currency',
+        CUSTOM_CURRENCY_RATE = 'custom_currency_rate',
+        CUSTOM_CURRENCY_NAME = 'custom_currency_name',
+        CUSTOM_CURRENCY_CALCULATED_RATE = 'custom_currency_calculated_rate',
+        CUSTOM_CURRENCY_LEADING_ZEROS = 'custom_currency_leading_zeros',
+        CAN_EXPAND_SCREENSHOTS = 'can_expand_screenshots',
+        EXPAND_SCREENSHOTS_BACKDROP = 'expand_screenshots_backdrop',
+        DIFFERENCE_DOMINATOR = 'difference_dominator',
+        APPLY_STEAM_TAX = 'apply_steam_tax',
+        APPLY_CURRENCY_TO_DIFFERENCE = 'apply_currency_to_difference',
+        EXPAND_TYPE = 'expand_type',
+        CUSTOM_FOP = 'custom_fop',
+        DEFAULT_SORT_BY = 'default_sort_by',
     }
 
-    export const DEFAULT_SETTINGS: Settings = {
-        selected_currency: 'USD',
-        custom_currency_rate: 1,
-        custom_currency_name: 'CC',
-        custom_currency_calculated_rate: 1,
-        custom_currency_leading_zeros: 2,
-        can_expand_screenshots: false,
-        expand_screenshots_backdrop: false,
-        difference_dominator: DifferenceDominator.STEAM,
-        apply_steam_tax: false,
-        apply_currency_to_difference: false,
-        expand_type: ExpandScreenshotType.PREVIEW,
-        custom_fop: FOP_VALUES.Auto,
-        default_sort_by: 'default'
+    interface SettingsProperties {
+        [Settings.SELECTED_CURRENCY]: string,
+        [Settings.CUSTOM_CURRENCY_RATE]: number,
+        [Settings.CUSTOM_CURRENCY_NAME]: string,
+        [Settings.CUSTOM_CURRENCY_CALCULATED_RATE]: number,
+        [Settings.CUSTOM_CURRENCY_LEADING_ZEROS]: number,
+        [Settings.CAN_EXPAND_SCREENSHOTS]: boolean,
+        [Settings.EXPAND_SCREENSHOTS_BACKDROP]: boolean,
+        [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator,
+        [Settings.APPLY_STEAM_TAX]: boolean,
+        [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: boolean,
+        [Settings.EXPAND_TYPE]: ExpandScreenshotType,
+        [Settings.CUSTOM_FOP]: number,
+        [Settings.DEFAULT_SORT_BY]: string
+    }
+
+    const DEFAULT_SETTINGS: SettingsProperties = {
+        [Settings.SELECTED_CURRENCY]: 'USD',
+        [Settings.CUSTOM_CURRENCY_RATE]: 1,
+        [Settings.CUSTOM_CURRENCY_NAME]: 'CC',
+        [Settings.CUSTOM_CURRENCY_CALCULATED_RATE]: 1,
+        [Settings.CUSTOM_CURRENCY_LEADING_ZEROS]: 2,
+        [Settings.CAN_EXPAND_SCREENSHOTS]: false,
+        [Settings.EXPAND_SCREENSHOTS_BACKDROP]: false,
+        [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator.STEAM,
+        [Settings.APPLY_STEAM_TAX]: false,
+        [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: false,
+        [Settings.EXPAND_TYPE]: ExpandScreenshotType.PREVIEW,
+        [Settings.CUSTOM_FOP]: FOP_VALUES.Auto,
+        [Settings.DEFAULT_SORT_BY]: 'default'
     };
 
-    export let settings: Settings = {
+    const VALIDATORS: {
+        [key in Settings]: (value: any) => any
+    } = {
+        [Settings.SELECTED_CURRENCY]: (value) => value ?? DEFAULT_SETTINGS[Settings.SELECTED_CURRENCY],
+        [Settings.CUSTOM_CURRENCY_RATE]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.CUSTOM_CURRENCY_RATE]),
+        [Settings.CUSTOM_CURRENCY_NAME]: (value) => value ?? DEFAULT_SETTINGS[Settings.CUSTOM_CURRENCY_NAME],
+        [Settings.CUSTOM_CURRENCY_CALCULATED_RATE]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.CUSTOM_CURRENCY_CALCULATED_RATE]),
+        [Settings.CUSTOM_CURRENCY_LEADING_ZEROS]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.CUSTOM_CURRENCY_LEADING_ZEROS]),
+        [Settings.CAN_EXPAND_SCREENSHOTS]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.CAN_EXPAND_SCREENSHOTS]),
+        [Settings.EXPAND_SCREENSHOTS_BACKDROP]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPAND_SCREENSHOTS_BACKDROP]),
+        [Settings.DIFFERENCE_DOMINATOR]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.DIFFERENCE_DOMINATOR]),
+        [Settings.APPLY_STEAM_TAX]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.APPLY_STEAM_TAX]),
+        [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.APPLY_CURRENCY_TO_DIFFERENCE]),
+        [Settings.EXPAND_TYPE]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.EXPAND_TYPE]),
+        [Settings.CUSTOM_FOP]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.CUSTOM_FOP]),
+        [Settings.DEFAULT_SORT_BY]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_SORT_BY]
+    };
+
+    let settings: SettingsProperties = {
         ...DEFAULT_SETTINGS
     };
 
@@ -83,8 +117,28 @@ module ExtensionSettings {
         wallet_fee_minimum: 1
     };
 
+    // func validators
+
+    function validateNumber(value: string, fallback: number): number {
+        if (!isFinite(+value) || +value == null) {
+            return fallback;
+        } else {
+            return +value;
+        }
+    }
+
+    function validateBoolean(value: any, fallback: boolean): boolean {
+        if (value == undefined) return fallback;
+        if (value == false || value == true) return value;
+        if (/false|true/gi.test(value)) return value == 'true';
+
+        return fallback;
+    }
+
+    // general
+
     export function load(): void {
-        let tempSettings: Settings = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS)) ?? {} as Settings;
+        let tempSettings: SettingsProperties = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS)) ?? {} as SettingsProperties;
 
         settings = {
             ...settings,
@@ -92,8 +146,20 @@ module ExtensionSettings {
         };
     }
 
-    export function save(): void {
-        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(settings), 50);
+    export function get<T>(setting: Settings): T {
+        return <T>VALIDATORS[setting](settings[setting]);
+    }
+
+    export function save(setting: Settings, newValue: any): void {
+        let oldValue = `${settings[setting]}`;
+
+        if (oldValue != `${newValue}`) {
+            settings[setting] = <never>(VALIDATORS[setting](newValue));
+
+            Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(settings), 50);
+
+            console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
+        }
     }
 
 }

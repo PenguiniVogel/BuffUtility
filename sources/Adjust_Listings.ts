@@ -4,6 +4,11 @@
 /** */
 module Adjust_Listings {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+
+    // module
+
     function init(): void {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
     }
@@ -31,11 +36,11 @@ module Adjust_Listings {
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
         const preview_screenshots = document.getElementById('preview_screenshots');
-        const can_expand_screenshots = ExtensionSettings.settings.can_expand_screenshots && !!preview_screenshots.querySelector('span[value="inspect_trn_url"].on');
-        const expand_classes = can_expand_screenshots ? `img_td can_expand ${ExtensionSettings.settings.expand_screenshots_backdrop ? 'expand_backdrop' : ''}` : 'img_td';
+        const can_expand_screenshots = ExtensionSettings.get(Settings.CAN_EXPAND_SCREENSHOTS) && !!preview_screenshots.querySelector('span[value="inspect_trn_url"].on');
+        const expand_classes = can_expand_screenshots ? `img_td can_expand ${ExtensionSettings.get(Settings.EXPAND_SCREENSHOTS_BACKDROP) ? 'expand_backdrop' : ''}` : 'img_td';
 
         // adjust reference price
-        if (ExtensionSettings.settings.apply_steam_tax) {
+        if (ExtensionSettings.get(Settings.APPLY_STEAM_TAX)) {
             let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
             let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
@@ -49,7 +54,7 @@ module Adjust_Listings {
             let divContainer = td_img_td.querySelector('div');
             let expandImg = document.createElement('img');
 
-            expandImg.setAttribute('data-buff-utility-expand-image', `${ExtensionSettings.settings.expand_type}`);
+            expandImg.setAttribute('data-buff-utility-expand-image', `${ExtensionSettings.get(Settings.EXPAND_TYPE)}`);
             // expandImg.setAttribute('style', 'display: none;');
 
             // set image source
@@ -76,7 +81,7 @@ module Adjust_Listings {
             let priceDiff = price - steamPriceCNY;
 
             let priceDiffStr;
-            if (ExtensionSettings.settings.apply_currency_to_difference) {
+            if (ExtensionSettings.get(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
                 priceDiffStr = Util.convertCNY(priceDiff);
             } else {
                 priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}`;
@@ -115,9 +120,9 @@ module Adjust_Listings {
             if (can_expand_screenshots && dataRow.can_use_inspect_trn_url) {
                 let img_src = dataRow.img_src + data.fop_str;
 
-                switch (ExtensionSettings.settings.expand_type) {
+                switch (ExtensionSettings.get(Settings.EXPAND_TYPE)) {
                     case ExtensionSettings.ExpandScreenshotType.PREVIEW:
-                        switch (ExtensionSettings.settings.custom_fop) {
+                        switch (ExtensionSettings.get(Settings.CUSTOM_FOP)) {
                             case ExtensionSettings.FOP_VALUES.Auto:
                                 img_src = dataRow.img_src;
 
@@ -162,7 +167,7 @@ module Adjust_Listings {
         }
 
         if (updated_preview > 0) {
-            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview > 1 ? 's.' : '.'}`, 't:', ExtensionSettings.settings.expand_type);
+            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview > 1 ? 's.' : '.'}`, 't:', ExtensionSettings.get(Settings.EXPAND_TYPE));
         }
     }
 

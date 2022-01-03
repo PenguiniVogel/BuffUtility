@@ -4,6 +4,11 @@
 /** */
 module Util {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+
+    // module
+
     /**
      * Calculate the steam seller price <br>
      * Stolen and slightly optimized from Steams' economy_common.js
@@ -83,10 +88,12 @@ module Util {
      * @param cny
      */
     export function convertCNY(cny: number): string {
-        const { selected_currency } = ExtensionSettings.settings;
+        const selected_currency = <string>ExtensionSettings.get(Settings.SELECTED_CURRENCY);
 
         if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
-            const { custom_currency_name, custom_currency_calculated_rate, custom_currency_leading_zeros } = ExtensionSettings.settings;
+            const custom_currency_name = <string>ExtensionSettings.get(Settings.CUSTOM_CURRENCY_NAME),
+                custom_currency_calculated_rate = <number>ExtensionSettings.get(Settings.CUSTOM_CURRENCY_CALCULATED_RATE),
+                custom_currency_leading_zeros = <number>ExtensionSettings.get(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
 
             return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${custom_currency_calculated_rate.toFixed(custom_currency_leading_zeros)}">CC </e>${(cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)}`;
         } else {
@@ -137,7 +144,7 @@ module Util {
     }
 
     /**
-     * This lets you build html in a easy and nicely manageable way, it supports the most common html
+     * This lets you build html in an easy and nicely manageable way, it supports the most common html
      * attributes while also allowing freedom for any custom ones, and avoids long self typed html strings.
      *
      * @param tag
@@ -200,7 +207,7 @@ module Util {
             result += '>';
         }
 
-        // add content, will disable selfClosing as self closing tags cannot have content
+        // add content, will disable selfClosing as self-closing tags cannot have content
         let content = options.content;
 
         if (content && typeof content == 'string' && content.length > 0) {

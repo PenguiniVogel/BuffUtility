@@ -1,5 +1,10 @@
 module Adjust_Market {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+
+    // module
+
     function init(): void {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
     }
@@ -31,13 +36,13 @@ module Adjust_Market {
             for (let x = 0, y = aHrefList.length; x < y; x ++) {
                 let aHref = aHrefList.item(x);
 
-                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${ExtensionSettings.settings.default_sort_by}`);
+                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${ExtensionSettings.get(Settings.DEFAULT_SORT_BY)}`);
             }
 
             let buffPrice = +dataRow.sell_min_price;
             let steamPriceCNY = +dataRow.goods_info.steam_price_cny;
 
-            if (ExtensionSettings.settings.apply_steam_tax) {
+            if (ExtensionSettings.get(Settings.APPLY_STEAM_TAX)) {
                 let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
                 let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
@@ -47,7 +52,7 @@ module Adjust_Market {
             }
 
             let priceDiff;
-            switch (ExtensionSettings.settings.difference_dominator) {
+            switch (ExtensionSettings.get(Settings.DIFFERENCE_DOMINATOR)) {
                 case ExtensionSettings.DifferenceDominator.STEAM:
                     priceDiff = ((steamPriceCNY - buffPrice) / steamPriceCNY) * -1 * 100;
                     break;
@@ -123,17 +128,19 @@ module Adjust_Market {
             }
 
             if (dataRow.sell_num > 0) {
+                let priceDiffStr = `${priceDiff.toFixed(1)}%`;
+
                 newHTML.push(Util.buildHTML('span', {
                     style: {
                         'grid-column': '2',
                         'grid-row': '1',
                         'margin-top': '12px',
-                        'font-size': '12px',
+                        'font-size': priceDiffStr.length >= 4 ? '10px' : '12px',
                         'font-weight': '700',
                         'text-align': 'center',
                         'color': priceDiff < 0 ? GlobalConstants.COLOR_GOOD : GlobalConstants.COLOR_BAD
                     },
-                    content: [ `${priceDiff.toFixed(1)}%` ]
+                    content: [ priceDiffStr ]
                 }));
             }
 
