@@ -36,13 +36,13 @@ module Adjust_Market {
             for (let x = 0, y = aHrefList.length; x < y; x ++) {
                 let aHref = aHrefList.item(x);
 
-                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${ExtensionSettings.get(Settings.DEFAULT_SORT_BY)}`);
+                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${storedSettings[Settings.DEFAULT_SORT_BY]}`);
             }
 
             let buffPrice = +dataRow.sell_min_price;
             let steamPriceCNY = +dataRow.goods_info.steam_price_cny;
 
-            if (ExtensionSettings.get(Settings.APPLY_STEAM_TAX)) {
+            if (storedSettings[Settings.APPLY_STEAM_TAX]) {
                 let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
                 let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
@@ -52,7 +52,7 @@ module Adjust_Market {
             }
 
             let priceDiff;
-            switch (ExtensionSettings.get(Settings.DIFFERENCE_DOMINATOR)) {
+            switch (storedSettings[Settings.DIFFERENCE_DOMINATOR]) {
                 case ExtensionSettings.DifferenceDominator.STEAM:
                     priceDiff = ((steamPriceCNY - buffPrice) / steamPriceCNY) * -1 * 100;
                     break;

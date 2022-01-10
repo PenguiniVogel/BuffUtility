@@ -36,11 +36,11 @@ module Adjust_Listings {
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
         const preview_screenshots = document.getElementById('preview_screenshots');
-        const can_expand_screenshots = ExtensionSettings.get(Settings.CAN_EXPAND_SCREENSHOTS) && !!preview_screenshots.querySelector('span[value="inspect_trn_url"].on');
-        const expand_classes = can_expand_screenshots ? `img_td can_expand ${ExtensionSettings.get(Settings.EXPAND_SCREENSHOTS_BACKDROP) ? 'expand_backdrop' : ''}` : 'img_td';
+        const can_expand_screenshots = storedSettings[Settings.CAN_EXPAND_SCREENSHOTS] && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
+        const expand_classes = can_expand_screenshots ? `img_td can_expand ${storedSettings[Settings.EXPAND_SCREENSHOTS_BACKDROP] ? 'expand_backdrop' : ''}` : 'img_td';
 
         // adjust reference price
-        if (ExtensionSettings.get(Settings.APPLY_STEAM_TAX)) {
+        if (storedSettings[Settings.APPLY_STEAM_TAX]) {
             let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
             let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
@@ -54,7 +54,7 @@ module Adjust_Listings {
             let divContainer = td_img_td.querySelector('div');
             let expandImg = document.createElement('img');
 
-            expandImg.setAttribute('data-buff-utility-expand-image', `${ExtensionSettings.get(Settings.EXPAND_TYPE)}`);
+            expandImg.setAttribute('data-buff-utility-expand-image', `${storedSettings[Settings.EXPAND_TYPE]}`);
             // expandImg.setAttribute('style', 'display: none;');
 
             // set image source
@@ -72,8 +72,12 @@ module Adjust_Listings {
         }
 
         for (let i = 0, l = rows.length; i < l; i ++) {
-            let dataRow = data.items[i];
             let row = rows.item(i);
+            let priceContainer = <HTMLElement>([ ...<Array<HTMLElement>><unknown>row.querySelectorAll('td.t_Left') ].filter(td => !!td.querySelector('p.hide-cny')))[0];
+
+            if (!priceContainer) continue;
+
+            let dataRow = data.items[i];
 
             let strPriceSplit = dataRow.price.split('.');
 
@@ -81,7 +85,7 @@ module Adjust_Listings {
             let priceDiff = price - steamPriceCNY;
 
             let priceDiffStr;
-            if (ExtensionSettings.get(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
+            if (storedSettings[Settings.APPLY_CURRENCY_TO_DIFFERENCE]) {
                 priceDiffStr = Util.convertCNY(priceDiff);
             } else {
                 priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}`;
@@ -120,9 +124,9 @@ module Adjust_Listings {
             if (can_expand_screenshots && dataRow.can_use_inspect_trn_url) {
                 let img_src = dataRow.img_src + data.fop_str;
 
-                switch (ExtensionSettings.get(Settings.EXPAND_TYPE)) {
+                switch (storedSettings[Settings.EXPAND_TYPE]) {
                     case ExtensionSettings.ExpandScreenshotType.PREVIEW:
-                        switch (ExtensionSettings.get(Settings.CUSTOM_FOP)) {
+                        switch (storedSettings[Settings.CUSTOM_FOP]) {
                             case ExtensionSettings.FOP_VALUES.Auto:
                                 img_src = dataRow.img_src;
 
@@ -161,13 +165,12 @@ module Adjust_Listings {
                 setCanExpand(row.querySelector('td.img_td'), img_src);
             }
 
-            let priceContainer = <HTMLElement>row.querySelectorAll('td.t_Left').item(2);
             let paymentMethods = (<HTMLElement>priceContainer.querySelectorAll('div').item(1))?.outerHTML ?? '';
             priceContainer.innerHTML = (newHTML + paymentMethods);
         }
 
         if (updated_preview > 0) {
-            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview > 1 ? 's.' : '.'}`, 't:', ExtensionSettings.get(Settings.EXPAND_TYPE));
+            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview > 1 ? 's.' : '.'}`, 't:', storedSettings[Settings.EXPAND_TYPE]);
         }
     }
 

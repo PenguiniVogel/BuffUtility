@@ -88,12 +88,12 @@ module Util {
      * @param cny
      */
     export function convertCNY(cny: number): string {
-        const selected_currency = <string>ExtensionSettings.get(Settings.SELECTED_CURRENCY);
+        const selected_currency = storedSettings[Settings.SELECTED_CURRENCY];
 
         if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
-            const custom_currency_name = <string>ExtensionSettings.get(Settings.CUSTOM_CURRENCY_NAME),
-                custom_currency_calculated_rate = <number>ExtensionSettings.get(Settings.CUSTOM_CURRENCY_CALCULATED_RATE),
-                custom_currency_leading_zeros = <number>ExtensionSettings.get(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
+            const custom_currency_name = storedSettings[Settings.CUSTOM_CURRENCY_NAME],
+                custom_currency_calculated_rate = storedSettings[Settings.CUSTOM_CURRENCY_CALCULATED_RATE],
+                custom_currency_leading_zeros = storedSettings[Settings.CUSTOM_CURRENCY_LEADING_ZEROS];
 
             return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${custom_currency_calculated_rate.toFixed(custom_currency_leading_zeros)}">CC </e>${(cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)}`;
         } else {

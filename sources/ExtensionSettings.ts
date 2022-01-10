@@ -56,7 +56,7 @@ module ExtensionSettings {
         DEFAULT_SORT_BY = 'default_sort_by',
     }
 
-    interface SettingsProperties {
+    export interface SettingsProperties {
         [Settings.SELECTED_CURRENCY]: string,
         [Settings.CUSTOM_CURRENCY_RATE]: number,
         [Settings.CUSTOM_CURRENCY_NAME]: string,
@@ -146,8 +146,20 @@ module ExtensionSettings {
         };
     }
 
-    export function get<T>(setting: Settings): T {
-        return <T>VALIDATORS[setting](settings[setting]);
+    /**
+     * Returns a cloned settings object
+     */
+    export function getAll(): SettingsProperties {
+        let copy = <SettingsProperties>JSON.parse(JSON.stringify(settings));
+
+        const keys = Object.keys(VALIDATORS);
+        for (let l_key of keys) {
+            copy[l_key] = VALIDATORS[l_key](settings[l_key]);
+        }
+
+        console.log('[BuffUtility] Getting all settings:', settings, '->', copy);
+
+        return copy;
     }
 
     export function save(setting: Settings, newValue: any): void {
