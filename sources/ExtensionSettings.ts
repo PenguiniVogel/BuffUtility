@@ -23,7 +23,7 @@ module ExtensionSettings {
        w3920xh3680,
     }
 
-    export const SORT_BY = {
+    export const FILTER_SORT_BY = {
         'Default': 'default',
         'Newest': 'created.desc',
         'Price Ascending': 'price.asc',
@@ -31,6 +31,13 @@ module ExtensionSettings {
         'Float Ascending': 'paintwear.asc',
         'Float Descending': 'paintwear.desc',
         'Hot Descending': 'heat.desc'
+    };
+
+    export const FILTER_STICKER_SEARCH = {
+        'All': '',
+        'Stickers': '&extra_tag_ids=non_empty',
+        'No Stickers': '&extra_tag_ids=empty',
+        'Squad Combos': '&extra_tag_ids=squad_combos'
     };
 
     export interface SteamSettings {
@@ -54,22 +61,24 @@ module ExtensionSettings {
         EXPAND_TYPE = 'expand_type',
         CUSTOM_FOP = 'custom_fop',
         DEFAULT_SORT_BY = 'default_sort_by',
+        DEFAULT_STICKER_SEARCH = 'default_sticker_search'
     }
 
     export interface SettingsProperties {
-        [Settings.SELECTED_CURRENCY]: string,
-        [Settings.CUSTOM_CURRENCY_RATE]: number,
-        [Settings.CUSTOM_CURRENCY_NAME]: string,
-        [Settings.CUSTOM_CURRENCY_CALCULATED_RATE]: number,
-        [Settings.CUSTOM_CURRENCY_LEADING_ZEROS]: number,
-        [Settings.CAN_EXPAND_SCREENSHOTS]: boolean,
-        [Settings.EXPAND_SCREENSHOTS_BACKDROP]: boolean,
-        [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator,
-        [Settings.APPLY_STEAM_TAX]: boolean,
-        [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: boolean,
-        [Settings.EXPAND_TYPE]: ExpandScreenshotType,
-        [Settings.CUSTOM_FOP]: number,
-        [Settings.DEFAULT_SORT_BY]: string
+        [Settings.SELECTED_CURRENCY]: string;
+        [Settings.CUSTOM_CURRENCY_RATE]: number;
+        [Settings.CUSTOM_CURRENCY_NAME]: string;
+        [Settings.CUSTOM_CURRENCY_CALCULATED_RATE]: number;
+        [Settings.CUSTOM_CURRENCY_LEADING_ZEROS]: number;
+        [Settings.CAN_EXPAND_SCREENSHOTS]: boolean;
+        [Settings.EXPAND_SCREENSHOTS_BACKDROP]: boolean;
+        [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator;
+        [Settings.APPLY_STEAM_TAX]: boolean;
+        [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: boolean;
+        [Settings.EXPAND_TYPE]: ExpandScreenshotType;
+        [Settings.CUSTOM_FOP]: number;
+        [Settings.DEFAULT_SORT_BY]: string;
+        [Settings.DEFAULT_STICKER_SEARCH]: string;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -85,7 +94,8 @@ module ExtensionSettings {
         [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: false,
         [Settings.EXPAND_TYPE]: ExpandScreenshotType.PREVIEW,
         [Settings.CUSTOM_FOP]: FOP_VALUES.Auto,
-        [Settings.DEFAULT_SORT_BY]: 'default'
+        [Settings.DEFAULT_SORT_BY]: 'default',
+        [Settings.DEFAULT_STICKER_SEARCH]: 'All'
     };
 
     const VALIDATORS: {
@@ -103,7 +113,8 @@ module ExtensionSettings {
         [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.APPLY_CURRENCY_TO_DIFFERENCE]),
         [Settings.EXPAND_TYPE]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.EXPAND_TYPE]),
         [Settings.CUSTOM_FOP]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.CUSTOM_FOP]),
-        [Settings.DEFAULT_SORT_BY]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_SORT_BY]
+        [Settings.DEFAULT_SORT_BY]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_SORT_BY],
+        [Settings.DEFAULT_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_STICKER_SEARCH]
     };
 
     let settings: SettingsProperties = {
@@ -157,7 +168,7 @@ module ExtensionSettings {
             copy[l_key] = VALIDATORS[l_key](settings[l_key]);
         }
 
-        console.log('[BuffUtility] Getting all settings:', settings, '->', copy);
+        console.debug('[BuffUtility] Getting all settings:', settings, '->', copy);
 
         return copy;
     }

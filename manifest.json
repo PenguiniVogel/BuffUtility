@@ -1,11 +1,12 @@
 {
     "name": "Buff Utility (Dev)",
-    "version": "2.0.8",
+    "version": "2.0.9",
     "description": "Adds cosmetic functionality to buff.163.com",
     "manifest_version": 2,
     "content_scripts": [
         {
             "js": [
+                "lib/SchemaHelper.js",
                 "lib/InjectionService.js"
             ],
             "matches": [
@@ -15,7 +16,6 @@
         }, {
             "js": [
                 "lib/CurrencyHelper.js",
-                "sources/fRequest.js",
                 "sources/Cookie.js",
                 "sources/Util.js",
                 "sources/ExtensionSettings.js",

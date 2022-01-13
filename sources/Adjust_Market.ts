@@ -26,8 +26,13 @@ module Adjust_Market {
 
         let info: string[] = [];
 
+        let data = transferData.data;
+
+        // if we have no items don't adjust anything
+        if (!data?.items.length) return;
+
         for (let i = 0, l = liList.length; i < l; i ++) {
-            const dataRow = transferData.data.items[i];
+            const dataRow = data.items[i];
             const li = liList.item(i);
             const h3 = <HTMLElement>li.querySelector('h3');
             const p = <HTMLElement>document.createElement('p');
@@ -36,7 +41,7 @@ module Adjust_Market {
             for (let x = 0, y = aHrefList.length; x < y; x ++) {
                 let aHref = aHrefList.item(x);
 
-                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${storedSettings[Settings.DEFAULT_SORT_BY]}`);
+                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${storedSettings[Settings.DEFAULT_SORT_BY]}${storedSettings[Settings.DEFAULT_STICKER_SEARCH]}`);
             }
 
             let buffPrice = +dataRow.sell_min_price;

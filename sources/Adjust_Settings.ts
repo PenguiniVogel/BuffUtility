@@ -160,6 +160,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.APPLY_STEAM_TAX, isCheckboxSelected(Settings.APPLY_STEAM_TAX));
                 ExtensionSettings.save(Settings.DIFFERENCE_DOMINATOR, readSelectOption(Settings.DIFFERENCE_DOMINATOR));
                 ExtensionSettings.save(Settings.DEFAULT_SORT_BY, readSelectOption(Settings.DEFAULT_SORT_BY));
+                ExtensionSettings.save(Settings.DEFAULT_STICKER_SEARCH, readSelectOption(Settings.DEFAULT_STICKER_SEARCH));
                 ExtensionSettings.save(Settings.EXPAND_TYPE, readSelectOption(Settings.EXPAND_TYPE));
                 ExtensionSettings.save(Settings.CUSTOM_FOP, readSelectOption(Settings.CUSTOM_FOP));
 
@@ -257,15 +258,27 @@ module Adjust_Settings {
         }, adv_table);
 
         // default sort by
-        makeSelectOption(Settings.DEFAULT_SORT_BY, Object.keys(ExtensionSettings.SORT_BY).map(x => {
+        makeSelectOption(Settings.DEFAULT_SORT_BY, Object.keys(ExtensionSettings.FILTER_SORT_BY).map(x => {
             return {
-                value: ExtensionSettings.SORT_BY[x],
+                value: ExtensionSettings.FILTER_SORT_BY[x],
                 displayStr: x,
-                selected: ExtensionSettings.SORT_BY[x] == storedSettings[Settings.DEFAULT_SORT_BY]
+                selected: ExtensionSettings.FILTER_SORT_BY[x] == storedSettings[Settings.DEFAULT_SORT_BY]
             };
         }), {
             title: 'Default sort by',
             description: 'Default sort by for item listings\nDefault: Default\nNewest: Newest\nPrice Ascending: low to high\nPrice Descending: high to low\nFloat Ascending: low to high\nFloat Descending: high to low\nHot Descending: by heat..?'
+        }, adv_table);
+
+        // default sticker search
+        makeSelectOption(Settings.DEFAULT_STICKER_SEARCH, Object.keys(ExtensionSettings.FILTER_STICKER_SEARCH).map(x => {
+            return {
+                value: ExtensionSettings.FILTER_STICKER_SEARCH[x],
+                displayStr: x,
+                selected: ExtensionSettings.FILTER_STICKER_SEARCH[x] == storedSettings[Settings.DEFAULT_STICKER_SEARCH]
+            };
+        }), {
+            title: 'Default sticker search',
+            description: 'Search listings with sticker settings automatically'
         }, adv_table);
 
         // choose what to expand, preview or screenshot

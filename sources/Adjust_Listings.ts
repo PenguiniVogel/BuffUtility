@@ -32,6 +32,9 @@ module Adjust_Listings {
         let data = transferData.data;
         let rows = <NodeListOf<HTMLElement>>document.querySelectorAll('tr[id^="sell_order_"]');
 
+        // if we have no items or no rows don't adjust anything
+        if (!data?.items?.length || !rows) return;
+
         let goodsInfo: BuffTypes.SellOrder.GoodsInfo = data.goods_infos[/goods_id=(\d+)/.exec(transferData.url)[1]];
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
@@ -73,11 +76,31 @@ module Adjust_Listings {
 
         for (let i = 0, l = rows.length; i < l; i ++) {
             let row = rows.item(i);
+            let dataRow = data.items[i];
+
+            // only apply to csgo
+            if (goodsInfo.appid == 730) {
+                let wearContainer = <HTMLElement>row.querySelector('td.t_Left div.csgo_value');
+
+                let aCopyGen = document.createElement('a');
+                aCopyGen.innerHTML = '<b><i class="icon icon_grid"></i></b>Copy !gen';
+                aCopyGen.setAttribute('class', 'ctag btn');
+                aCopyGen.setAttribute('href', 'javascript:;');
+
+                let aShare = document.createElement('a');
+                aShare.innerHTML = '<b><i class="icon icon_eye"></i></b>Share';
+                aShare.setAttribute('class', 'ctag btn');
+                aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
+                aShare.setAttribute('target', '_blank');
+
+                wearContainer.appendChild(document.createElement('br'));
+                wearContainer.appendChild(aCopyGen);
+                wearContainer.appendChild(aShare);
+            }
+
             let priceContainer = <HTMLElement>([ ...<Array<HTMLElement>><unknown>row.querySelectorAll('td.t_Left') ].filter(td => !!td.querySelector('p.hide-cny')))[0];
 
             if (!priceContainer) continue;
-
-            let dataRow = data.items[i];
 
             let strPriceSplit = dataRow.price.split('.');
 

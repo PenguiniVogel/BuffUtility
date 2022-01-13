@@ -11,11 +11,11 @@ switch (argv2) {
     case 'firefox':
         dest = '.export/BuffUtility_Firefox';
 
-        manifest['name'] = 'Buff Utility (Firefox)';
+        manifest['name'] = 'Buff Utility';
         manifest['browser_specific_settings'] = {
             'gecko': {
                 'id': 'buff.utility@penguinivogel.github.io',
-                'strict_min_version': '42.0'
+                'strict_min_version': '48.0'
             }
         };
 
