@@ -6,6 +6,7 @@
     "content_scripts": [
         {
             "js": [
+                "lib/SchemaData.js",
                 "lib/SchemaHelper.js",
                 "lib/InjectionService.js"
             ],

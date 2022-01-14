@@ -29,7 +29,7 @@ module Adjust_Market {
         let data = transferData.data;
 
         // if we have no items don't adjust anything
-        if (!data?.items.length) return;
+        if (!data?.items?.length) return;
 
         for (let i = 0, l = liList.length; i < l; i ++) {
             const dataRow = data.items[i];
