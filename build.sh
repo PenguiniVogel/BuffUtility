@@ -1,6 +1,11 @@
 # tsc
 tsc
 
+# delete previous export
+echo "Deleting previous export..."
+rm -rf .export
+echo " "
+
 # setup folder structure
 echo "Checking directory structure..."
 mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/{lib,sources/csgostash}

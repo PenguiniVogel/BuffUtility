@@ -7,21 +7,13 @@
         {
             "js": [
                 "lib/SchemaData.js",
-                "lib/SchemaHelper.js"
-            ],
-            "matches": [
-                "https://buff.163.com/*"
-            ],
-            "run_at": "document_start"
-        },
-        {
-            "js": [
+                "lib/SchemaHelper.js",
                 "lib/InjectionService.js"
             ],
             "matches": [
                 "https://buff.163.com/*"
             ],
-            "run_at": "document_end"
+            "run_at": "document_start"
         },
         {
             "js": [

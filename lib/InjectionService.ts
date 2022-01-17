@@ -28,7 +28,7 @@ module InjectionService {
         a.setAttribute('style', 'display: none !important;');
         a.setAttribute('onclick', `(function() { let s = document.createElement('script');s.setAttribute('data-isl', 'injected-script');${inner};document.querySelector('${appendOn}').appendChild(s); })();`);
 
-        document.querySelector('body').appendChild(a);
+        document.querySelector('head').appendChild(a);
 
         a.click();
         a.remove();
@@ -49,7 +49,7 @@ module InjectionService {
         a.setAttribute('style', 'display: none !important;');
         a.setAttribute('onclick', `(function() { let s = document.createElement('style');s.setAttribute('data-isl', 'injected-style');${inner};document.querySelector('head').appendChild(s); })();`);
 
-        document.querySelector('body').appendChild(a);
+        document.querySelector('head').appendChild(a);
 
         a.click();
         a.remove();
@@ -85,8 +85,6 @@ module InjectionService {
             }, 150);
         }
     });
-
-    // let customScript = document.createElement('script');
 
     function interceptNetworkRequests() {
         const open = window.XMLHttpRequest.prototype.open;
@@ -124,53 +122,14 @@ module InjectionService {
         }
     }
 
-//     customScript.innerHTML = `${(interceptNetworkRequests).toString()}\n    interceptNetworkRequests();`;
-//
-//     let customStyles = document.createElement('style');
-//
-//     customStyles.innerHTML = `
-// td.img_td.can_expand img[data-buff-utility-expand-image] {
-//     display: none;
-// }
-//
-// td.img_td.can_expand:hover {
-//     padding: 20px 0px 20px 0px;
-// }
-//
-// td.img_td.can_expand:hover img[data-buff-utility-expand-image] {
-//     width: auto;
-//     height: auto;
-//     display: block;
-//     position: absolute;
-//     z-index: 99999;
-// }
-//
-// td.img_td.can_expand:hover img[data-buff-utility-expand-image="0"] {
-//     transform: scale(10) translate(70px, 0px);
-// }
-//
-// td.img_td.can_expand:hover img[data-buff-utility-expand-image="1"] {
-//     transform: scale(8) translate(99px, 10px);
-// }
-//
-// td.img_td.can_expand.expand_backdrop:hover img[data-buff-utility-expand-image="0"] {
-//     background-color: rgb(0 0 0 / 25%);
-//     background-color: rgba(0, 0, 0, 0.25);
-// }`;
-
-    // let test = setInterval(() => {
-    //     let head = document.getElementsByTagName('head').item(0);
-    //
-    //     if (head) {
-    //         customScript.setAttribute('nonce', 'buff-utility-network-tracking');
-    //
-    //         head.prepend(customScript, customStyles);
-    //
-    //         clearInterval(test);
-    //     }
-    // }, 100);
-
     function init(): void {
+        // if we can't find the body, try again
+        if (!document.querySelector('head')) {
+            setTimeout(() => init(), 50);
+
+            return;
+        }
+
         injectCode(`${interceptNetworkRequests.toString()}\ninterceptNetworkRequests();`);
         injectCSS(`
 td.img_td.can_expand img[data-buff-utility-expand-image] {
@@ -201,6 +160,8 @@ td.img_td.can_expand.expand_backdrop:hover img[data-buff-utility-expand-image="0
     background-color: rgb(0 0 0 / 25%);
     background-color: rgba(0, 0, 0, 0.25);
 }`);
+
+        console.debug('[BuffUtility] ISL document_end injected tags');
     }
 
     init();
