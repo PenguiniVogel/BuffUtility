@@ -16,11 +16,12 @@ module SchemaHelper {
     }
 
     export interface Weapon {
+        id: number;
         name: string;
         sticker_amount: number;
         type: string;
 
-        map_paints: { id: number, paint: Paint }[];
+        map_paints: Paint[];
     }
 
     interface IWeapon extends Weapon {
@@ -30,6 +31,8 @@ module SchemaHelper {
     }
 
     export interface Paint {
+        id: number;
+        weapon_id: number;
         collection: string;
         max: number;
         min: number;
@@ -46,7 +49,7 @@ module SchemaHelper {
 
         formatted?: boolean;
         map_stickers: { id: number, name: string }[];
-        map_weapons: { id: number, weapon: IWeapon }[];
+        map_weapons: Weapon[];
     }
 
     interface ISchema extends Schema {
@@ -86,7 +89,9 @@ module SchemaHelper {
             for (let l_weapon of keys_weapons) {
                 let weapon = (<ISchema>parsed).weapons[l_weapon];
 
-                parsed.map_weapons.push({ id: l_weapon, weapon: weapon });
+                weapon.id = l_weapon;
+
+                parsed.map_weapons.push(weapon);
 
                 let keys_paints = Object.keys(weapon.paints).map(x => +x);
 
@@ -95,7 +100,10 @@ module SchemaHelper {
                 for (let l_paint of keys_paints) {
                     let paint = weapon.paints[l_paint];
 
-                    weapon.map_paints.push({ id: l_paint, paint: paint });
+                    paint.id = l_paint;
+                    paint.weapon_id = l_weapon;
+
+                    weapon.map_paints.push(paint);
 
                     // delete a bunch of overhead data
                     delete paint['image'];
@@ -110,24 +118,86 @@ module SchemaHelper {
 
             delete parsed['weapons'];
 
-            console.warn('[BuffUtility] Schema not formatted:', parsed, JSON.stringify(parsed));
+            parsed.formatted = true;
+
+            console.warn('[BuffUtility] Schema not formatted!');
+            console.debug('[BuffUtility] Schema not formatted:', parsed, JSON.stringify(parsed));
         }
     }
 
-    export function getWeaponByName(name: string): Weapon {
-        return parsed.map_weapons.filter(x => name == x.weapon.name)[0]?.weapon;
-    }
+    /**
+     * Find weapon(s) by the specified name <br>
+     * e.g. Glock-18 | Gamma Doppler would return the Glock-18 with the 5 gamma phase paints
+     *
+     * @param name
+     * @param weaponOnly
+     * @param isVanilla
+     */
+    export function find(name: string, weaponOnly: boolean = false, isVanilla: boolean = false): Weapon[] {
+        const d_filter = (a: string, b: string) => a.indexOf(b) > -1 || b.indexOf(a) > -1;
 
-    export function getSkinFromWeaponByName(weapon: Weapon, name: string): Paint {
-        return weapon.map_paints.filter(x => name == x.paint.name)[0]?.paint;
-    }
+        let result: Weapon[] = [];
 
-    export function getWeaponAndSkinByName(name: string): [Weapon, Paint] {
         let parts = name.split(' | ');
-        let weapon = getWeaponByName(parts[0]);
-        let paint = getSkinFromWeaponByName(weapon, parts[1]);
 
-        return [weapon, paint];
+        // we only have a weapon name (presumably)
+        if ((parts.length == 1 && !isVanilla) || weaponOnly) {
+            result = findWeapons(x => d_filter(x.name, parts[0]));
+        } else {
+            if (isVanilla) {
+                parts[1] = 'Vanilla';
+            }
+
+            result = findPaints(x => d_filter(x.name, parts[1])).filter(x => d_filter(x.name, parts[0]));
+
+            result.forEach(x => x.map_paints.sort((a, b) => Util.pStrCompare(a.name, parts[1]) > Util.pStrCompare(b.name, parts[1]) ? -1 : 1));
+        }
+
+        return result;
+    }
+
+    /**
+     * Finds all weapons that pass the specified test
+     *
+     * @param filter
+     */
+    export function findWeapons(filter: (weapon: Weapon) => boolean): Weapon[] {
+        let weapons: Weapon[] = [];
+
+        for (let l_weapon of parsed.map_weapons) {
+            if (filter(l_weapon)) {
+                weapons.push({
+                    ...l_weapon,
+                    map_paints: []
+                });
+            }
+        }
+
+        return weapons;
+    }
+
+    /**
+     * Returns all weapons that contain a paint that passed the specified test <br>
+     * The paint list only contains paints that passed the test
+     *
+     * @param filter
+     */
+    export function findPaints(filter: (paint: Paint) => boolean): Weapon[] {
+        let weapons: Weapon[] = [];
+
+        for (let l_weapon of parsed.map_weapons) {
+            let f_paints = l_weapon.map_paints.filter(x => filter(x));
+
+            // if we have no paints don't add
+            if (f_paints?.length == 0) continue;
+
+            weapons.push({
+                ...l_weapon,
+                map_paints: f_paints
+            });
+        }
+
+        return weapons;
     }
 
 }

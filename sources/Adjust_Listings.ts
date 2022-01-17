@@ -38,6 +38,9 @@ module Adjust_Listings {
         let goodsInfo: BuffTypes.SellOrder.GoodsInfo = data.goods_infos[/goods_id=(\d+)/.exec(transferData.url)[1]];
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
+        const schemaData = SchemaHelper.find(goodsInfo.short_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
+        // console.log(schemaData);
+
         const preview_screenshots = document.getElementById('preview_screenshots');
         const can_expand_screenshots = storedSettings[Settings.CAN_EXPAND_SCREENSHOTS] && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
         const expand_classes = can_expand_screenshots ? `img_td can_expand ${storedSettings[Settings.EXPAND_SCREENSHOTS_BACKDROP] ? 'expand_backdrop' : ''}` : 'img_td';
@@ -80,21 +83,44 @@ module Adjust_Listings {
 
             // only apply to csgo
             if (goodsInfo.appid == 730) {
-                let wearContainer = <HTMLElement>row.querySelector('td.t_Left div.csgo_value');
+                const wearContainer = <HTMLElement>row.querySelector('td.t_Left div.csgo_value');
 
-                let aCopyGen = document.createElement('a');
-                aCopyGen.innerHTML = '<b><i class="icon icon_grid"></i></b>Copy !gen';
-                aCopyGen.setAttribute('class', 'ctag btn');
-                aCopyGen.setAttribute('href', 'javascript:;');
+                let aCopyGen = null;
+                if (schemaData) {
+                    // !gen weapon_id paint_id pattern float sticker1 wear1...
+                    let gen = `!gen ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
 
-                let aShare = document.createElement('a');
+                    if (dataRow.asset_info.info?.stickers?.length > 0) {
+                        let stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
+
+                        for (let l_sticker of dataRow.asset_info.info.stickers) {
+                            stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
+                        }
+
+                        gen += ` ${stickers.join(' ')}`;
+                    }
+
+                    aCopyGen = document.createElement('a');
+                    aCopyGen.innerHTML = '<b><i class="icon icon_grid"></i></b>Copy !gen';
+                    aCopyGen.setAttribute('class', 'ctag btn');
+                    aCopyGen.setAttribute('href', 'javascript:;');
+
+                    aCopyGen.addEventListener('click', (e) => {
+                        navigator?.clipboard?.writeText(gen).then(() => {
+                            alert(`Copied ${gen} to clipboard!`);
+                            console.debug(`[BuffUtility] Copy gen: ${gen}`);
+                        }).catch((e) => console.error('[BuffUtility]', e));
+                    });
+                }
+
+                const aShare = document.createElement('a');
                 aShare.innerHTML = '<b><i class="icon icon_eye"></i></b>Share';
                 aShare.setAttribute('class', 'ctag btn');
                 aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
                 aShare.setAttribute('target', '_blank');
 
                 wearContainer.appendChild(document.createElement('br'));
-                wearContainer.appendChild(aCopyGen);
+                if (aCopyGen) wearContainer.appendChild(aCopyGen);
                 wearContainer.appendChild(aShare);
             }
 

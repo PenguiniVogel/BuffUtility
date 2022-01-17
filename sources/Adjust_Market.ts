@@ -37,11 +37,14 @@ module Adjust_Market {
             const h3 = <HTMLElement>li.querySelector('h3');
             const p = <HTMLElement>document.createElement('p');
 
+            const schemaData = SchemaHelper.find(dataRow.short_name, true, dataRow.goods_info.info?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
+            // console.log(schemaData);
+
             let aHrefList = li.querySelectorAll('a[href]');
             for (let x = 0, y = aHrefList.length; x < y; x ++) {
                 let aHref = aHrefList.item(x);
 
-                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${storedSettings[Settings.DEFAULT_SORT_BY]}${storedSettings[Settings.DEFAULT_STICKER_SEARCH]}`);
+                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${storedSettings[Settings.DEFAULT_SORT_BY]}${schemaData && schemaData.sticker_amount > 0 ? storedSettings[Settings.DEFAULT_STICKER_SEARCH] : ''}`);
             }
 
             let buffPrice = +dataRow.sell_min_price;

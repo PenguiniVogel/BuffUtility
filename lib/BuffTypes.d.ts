@@ -43,6 +43,15 @@ declare module BuffTypes {
             [name: string]: boolean;
         }
 
+        export interface Sticker {
+            category: string;
+            img_url: string;
+            name: string;
+            slot: number;
+            sticker_id: number;
+            wear: number;
+        }
+
         export interface Info {
             fraudwarnings?: any;
             icon_url: string;
@@ -61,7 +70,7 @@ declare module BuffTypes {
             original_icon_url: string;
             paintindex: number;
             paintseed: number;
-            stickers: any[];
+            stickers: Sticker[];
             tournament_tags: any[];
         }
 

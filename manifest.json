@@ -2,19 +2,28 @@
     "name": "Buff Utility (Dev)",
     "version": "2.0.9",
     "description": "Adds cosmetic functionality to buff.163.com",
-    "manifest_version": 2,
+    "manifest_version": 3,
     "content_scripts": [
         {
             "js": [
                 "lib/SchemaData.js",
-                "lib/SchemaHelper.js",
-                "lib/InjectionService.js"
+                "lib/SchemaHelper.js"
             ],
             "matches": [
                 "https://buff.163.com/*"
             ],
             "run_at": "document_start"
-        }, {
+        },
+        {
+            "js": [
+                "lib/InjectionService.js"
+            ],
+            "matches": [
+                "https://buff.163.com/*"
+            ],
+            "run_at": "document_end"
+        },
+        {
             "js": [
                 "lib/CurrencyHelper.js",
                 "sources/Cookie.js",
@@ -25,28 +34,32 @@
             "matches": [
                 "https://buff.163.com/*"
             ]
-        }, {
+        },
+        {
             "js": [
                 "sources/Adjust_Settings.js"
             ],
             "matches": [
                 "https://buff.163.com/user-center/profile"
             ]
-        }, {
+        },
+        {
             "js": [
                 "sources/Adjust_Listings.js"
             ],
             "matches": [
                 "https://buff.163.com/goods/*"
             ]
-        }, {
+        },
+        {
             "js": [
                 "sources/Adjust_Market.js"
             ],
             "matches": [
                 "https://buff.163.com/market/*"
             ]
-        }, {
+        },
+        {
             "js": [
                 "sources/Util.js",
                 "sources/csgostash/Add_Links_Skin.js"
