@@ -86,6 +86,7 @@ module Adjust_Listings {
                 const wearContainer = <HTMLElement>row.querySelector('td.t_Left div.csgo_value');
 
                 let aCopyGen = null;
+                let aMatchFloatDB = null;
                 if (schemaData) {
                     // !gen weapon_id paint_id pattern float sticker1 wear1...
                     let gen = `!gen ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
@@ -101,7 +102,7 @@ module Adjust_Listings {
                     }
 
                     aCopyGen = document.createElement('a');
-                    aCopyGen.innerHTML = '<b><i class="icon icon_grid"></i></b>Copy !gen';
+                    aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
                     aCopyGen.setAttribute('class', 'ctag btn');
                     aCopyGen.setAttribute('href', 'javascript:;');
 
@@ -111,10 +112,36 @@ module Adjust_Listings {
                             console.debug(`[BuffUtility] Copy gen: ${gen}`);
                         }).catch((e) => console.error('[BuffUtility]', e));
                     });
+
+                    // match on floatdb
+                    let category;
+                    switch (goodsInfo.tags?.quality?.internal_name ?? 'normal') {
+                        case 'strange':
+                        case 'unusual_strange':
+                            category = '2';
+                            break;
+                        case 'tournament':
+                            category = '3';
+                            break;
+                        case 'normal':
+                        case 'unusual':
+                        default:
+                            category = '1';
+                            break;
+                    }
+
+                    let min = +dataRow.asset_info.paintwear.slice(0, 5);
+                    let max = min + 0.001;
+
+                    aMatchFloatDB = document.createElement('a');
+                    aMatchFloatDB.innerHTML = '<b><i style="margin-right: 1px;" class="icon icon_change"></i></b>Match floatdb';
+                    aMatchFloatDB.setAttribute('class', 'ctag btn');
+                    aMatchFloatDB.setAttribute('href', `https://csgofloat.com/db?name=${schemaData.name}&defIndex=${schemaData.id}&paintIndex=${dataRow.asset_info.info.paintindex}&paintSeed=${dataRow.asset_info.info.paintseed}&category=${category}&min=${`${min}`.slice(0, 5)}&max=${`${max}`.slice(0, 5)}`);
+                    aMatchFloatDB.setAttribute('target', '_blank');
                 }
 
                 const aShare = document.createElement('a');
-                aShare.innerHTML = '<b><i class="icon icon_eye"></i></b>Share';
+                aShare.innerHTML = '<b><i style="margin: -3px 3px 0 0;" class="icon icon_link"></i></b>Share';
                 aShare.setAttribute('class', 'ctag btn');
                 aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
                 aShare.setAttribute('target', '_blank');
@@ -122,6 +149,7 @@ module Adjust_Listings {
                 wearContainer.appendChild(document.createElement('br'));
                 if (aCopyGen) wearContainer.appendChild(aCopyGen);
                 wearContainer.appendChild(aShare);
+                if (aMatchFloatDB) wearContainer.appendChild(aMatchFloatDB);
             }
 
             let priceContainer = <HTMLElement>([ ...<Array<HTMLElement>><unknown>row.querySelectorAll('td.t_Left') ].filter(td => !!td.querySelector('p.hide-cny')))[0];
