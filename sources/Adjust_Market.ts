@@ -44,7 +44,24 @@ module Adjust_Market {
             for (let x = 0, y = aHrefList.length; x < y; x ++) {
                 let aHref = aHrefList.item(x);
 
-                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${storedSettings[Settings.DEFAULT_SORT_BY]}${schemaData && schemaData.sticker_amount > 0 ? storedSettings[Settings.DEFAULT_STICKER_SEARCH] : ''}`);
+                let stickerSearch = '';
+                if (schemaData && schemaData.sticker_amount > 0) {
+                    switch (storedSettings[Settings.DEFAULT_STICKER_SEARCH]) {
+                        case ExtensionSettings.FILTER_STICKER_SEARCH['All']:
+                        case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers']:
+                        case ExtensionSettings.FILTER_STICKER_SEARCH['No Stickers']:
+                        case ExtensionSettings.FILTER_STICKER_SEARCH['Squad Combos']:
+                            stickerSearch = storedSettings[Settings.DEFAULT_STICKER_SEARCH];
+                            break;
+                        case ExtensionSettings.FILTER_STICKER_SEARCH['Save Custom']:
+                            if (storedSettings[Settings.STORED_CUSTOM_STICKER_SEARCH].length > 0) {
+                                stickerSearch = storedSettings[Settings.STORED_CUSTOM_STICKER_SEARCH];
+                            }
+                            break;
+                    }
+                }
+
+                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${storedSettings[Settings.DEFAULT_SORT_BY]}${stickerSearch}`);
             }
 
             let buffPrice = +dataRow.sell_min_price;
@@ -54,7 +71,7 @@ module Adjust_Market {
                 let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
                 let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
-                info.push(`Reference price (> ${dataRow.market_hash_name} <) was adjusted with fees: ${steamPriceCNY} -> ${f_steamPriceCNY}`);
+                info.push(`Reference price for '${dataRow.market_hash_name}' was adjusted with fees: ${steamPriceCNY} -> ${f_steamPriceCNY}`);
 
                 steamPriceCNY = f_steamPriceCNY;
             }
@@ -143,7 +160,7 @@ module Adjust_Market {
                         'grid-column': '2',
                         'grid-row': '1',
                         'margin-top': '12px',
-                        'font-size': priceDiffStr.length >= 4 ? '10px' : '12px',
+                        'font-size': priceDiffStr.length > 6 ? '10px' : '12px',
                         'font-weight': '700',
                         'text-align': 'center',
                         'color': priceDiff < 0 ? GlobalConstants.COLOR_GOOD : GlobalConstants.COLOR_BAD

@@ -168,6 +168,8 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_NAME, readTextOption(Settings.CUSTOM_CURRENCY_NAME));
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_CALCULATED_RATE, 1 / storedSettings[Settings.CUSTOM_CURRENCY_RATE]);
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_LEADING_ZEROS, Util.countLeadingZeros(`${storedSettings[Settings.CUSTOM_CURRENCY_CALCULATED_RATE]}`.split('.')[1] ?? ''));
+
+                ExtensionSettings.save(Settings.LEECH_CONTRIBUTOR_KEY, readTextOption(Settings.LEECH_CONTRIBUTOR_KEY));
             }
         });
 
@@ -333,6 +335,26 @@ module Adjust_Settings {
         adv_blank20.setAttribute('class', 'blank20');
 
         userSettings.append(adv_h3, adv_table, adv_blank20);
+
+        // Add leech settings
+        const leech_h3 = document.createElement('h3');
+        leech_h3.innerHTML = 'BuffLEECH Settings';
+
+        const leech_table = document.createElement('table');
+        leech_table.setAttribute('class', 'list_tb');
+        leech_table.setAttribute('width', '100%');
+
+        // contributor key
+        makeTextOption(Settings.LEECH_CONTRIBUTOR_KEY, 'text', {
+            title: 'Contributor Key',
+            description: 'Set your BuffLEECH contributor key here'
+        }, leech_table);
+
+        // append leech settings
+        const leech_blank20 = document.createElement('div');
+        leech_blank20.setAttribute('class', 'blank20');
+
+        userSettings.append(leech_h3, leech_table, leech_blank20);
     }
 
     init();

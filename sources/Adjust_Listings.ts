@@ -32,6 +32,8 @@ module Adjust_Listings {
         let data = transferData.data;
         let rows = <NodeListOf<HTMLElement>>document.querySelectorAll('tr[id^="sell_order_"]');
 
+        ExtensionSettings.save(Settings.STORED_CUSTOM_STICKER_SEARCH, (/&extra_tag_ids=[^&#]+/g.exec(transferData.url) ?? [''])[0]);
+
         // if we have no items or no rows don't adjust anything
         if (!data?.items?.length || !rows) return;
 

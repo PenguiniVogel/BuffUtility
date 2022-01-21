@@ -37,7 +37,8 @@ module ExtensionSettings {
         'All': '',
         'Stickers': '&extra_tag_ids=non_empty',
         'No Stickers': '&extra_tag_ids=empty',
-        'Squad Combos': '&extra_tag_ids=squad_combos'
+        'Squad Combos': '&extra_tag_ids=squad_combos',
+        'Save Custom': '&extra_tag_ids=$1'
     };
 
     export interface SteamSettings {
@@ -61,7 +62,9 @@ module ExtensionSettings {
         EXPAND_TYPE = 'expand_type',
         CUSTOM_FOP = 'custom_fop',
         DEFAULT_SORT_BY = 'default_sort_by',
-        DEFAULT_STICKER_SEARCH = 'default_sticker_search'
+        DEFAULT_STICKER_SEARCH = 'default_sticker_search',
+        STORED_CUSTOM_STICKER_SEARCH = 'stored_custom_sticker_search',
+        LEECH_CONTRIBUTOR_KEY = 'leech_contributor_key'
     }
 
     export interface SettingsProperties {
@@ -79,6 +82,8 @@ module ExtensionSettings {
         [Settings.CUSTOM_FOP]: number;
         [Settings.DEFAULT_SORT_BY]: string;
         [Settings.DEFAULT_STICKER_SEARCH]: string;
+        [Settings.STORED_CUSTOM_STICKER_SEARCH]: string;
+        [Settings.LEECH_CONTRIBUTOR_KEY]: string;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -95,7 +100,9 @@ module ExtensionSettings {
         [Settings.EXPAND_TYPE]: ExpandScreenshotType.PREVIEW,
         [Settings.CUSTOM_FOP]: FOP_VALUES.Auto,
         [Settings.DEFAULT_SORT_BY]: 'default',
-        [Settings.DEFAULT_STICKER_SEARCH]: 'All'
+        [Settings.DEFAULT_STICKER_SEARCH]: 'All',
+        [Settings.STORED_CUSTOM_STICKER_SEARCH]: '',
+        [Settings.LEECH_CONTRIBUTOR_KEY]: ''
     };
 
     const VALIDATORS: {
@@ -114,7 +121,9 @@ module ExtensionSettings {
         [Settings.EXPAND_TYPE]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.EXPAND_TYPE]),
         [Settings.CUSTOM_FOP]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.CUSTOM_FOP]),
         [Settings.DEFAULT_SORT_BY]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_SORT_BY],
-        [Settings.DEFAULT_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_STICKER_SEARCH]
+        [Settings.DEFAULT_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_STICKER_SEARCH],
+        [Settings.STORED_CUSTOM_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.STORED_CUSTOM_STICKER_SEARCH],
+        [Settings.LEECH_CONTRIBUTOR_KEY]: (value) => value ?? DEFAULT_SETTINGS[Settings.LEECH_CONTRIBUTOR_KEY]
     };
 
     let settings: SettingsProperties = {
