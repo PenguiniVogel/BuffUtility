@@ -135,22 +135,30 @@ module SchemaHelper {
      */
     export function find(name: string, weaponOnly: boolean = false, isVanilla: boolean = false): Weapon[] {
         const d_filter = (a: string, b: string) => a.indexOf(b) > -1 || b.indexOf(a) > -1;
+        const d_sort = (a: { name: string }, b: { name: string }, i: number, parts: string[]) => Util.pStrCompare(a.name, parts[i]) > Util.pStrCompare(b.name, parts[i]) ? -1 : 1;
 
         let result: Weapon[] = [];
 
         let parts = name.split(' | ');
 
+        result = findWeapons(x => d_filter(x.name, parts[0]));
+
+        // result = result.sort((a, b) => Util.pStrCompare(a.name, parts[0]) > Util.pStrCompare(b.name, parts[0]) ? -1 : 1);
+        result = result.sort((a, b) => d_sort(a, b, 0, parts));
+
         // we only have a weapon name (presumably)
         if ((parts.length == 1 && !isVanilla) || weaponOnly) {
-            result = findWeapons(x => d_filter(x.name, parts[0]));
+            return result;
         } else {
             if (isVanilla) {
                 parts[1] = 'Vanilla';
             }
 
-            result = findPaints(x => d_filter(x.name, parts[1])).filter(x => d_filter(x.name, parts[0]));
+            result = result.map(x => <Weapon>findPaintOnWeapon(x, p => d_filter(p.name, parts[1])));
+            result.forEach(x => x.map_paints.sort((a, b) => d_sort(a, b, 1, parts)));
 
-            result.forEach(x => x.map_paints.sort((a, b) => Util.pStrCompare(a.name, parts[1]) > Util.pStrCompare(b.name, parts[1]) ? -1 : 1));
+            // result.forEach(x => x.map_paints.sort((a, b) => Util.pStrCompare(a.name, parts[1]) > Util.pStrCompare(b.name, parts[1]) ? -1 : 1));
+            // result.forEach(x => x.map_paints.sort((a, b) => d_sort(a, b, 1, parts)));
         }
 
         return result;
@@ -166,10 +174,7 @@ module SchemaHelper {
 
         for (let l_weapon of parsed.map_weapons) {
             if (filter(l_weapon)) {
-                weapons.push({
-                    ...l_weapon,
-                    map_paints: []
-                });
+                weapons.push(JSON.parse(JSON.stringify(l_weapon)));
             }
         }
 
@@ -191,13 +196,25 @@ module SchemaHelper {
             // if we have no paints don't add
             if (f_paints?.length == 0) continue;
 
-            weapons.push({
+            weapons.push(JSON.parse(JSON.stringify({
                 ...l_weapon,
                 map_paints: f_paints
-            });
+            })));
         }
 
         return weapons;
+    }
+
+    /**
+     * Returns the weapon with filtered paints
+     *
+     * @param weapon
+     * @param filter
+     */
+    export function findPaintOnWeapon(weapon: Weapon, filter: (paint: Paint) => boolean): Weapon {
+        let f_paints = weapon.map_paints.filter(x => filter(x));
+
+        return <Weapon>JSON.parse(JSON.stringify(<Weapon>{ ...weapon, map_paints: f_paints }));
     }
 
 }

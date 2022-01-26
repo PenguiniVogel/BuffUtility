@@ -1,6 +1,6 @@
 {
     "name": "Buff Utility (Dev)",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "Adds cosmetic functionality to buff.163.com",
     "manifest_version": 3,
     "content_scripts": [
