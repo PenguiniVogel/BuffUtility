@@ -89,24 +89,35 @@ module Adjust_Listings {
 
                 let aCopyGen = null;
                 let aMatchFloatDB = null;
-                if (schemaData) {
-                    // !gen weapon_id paint_id pattern float sticker1 wear1...
-                    let gen = `!gen ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
+                if (schemaData?.type) {
+                    aCopyGen = document.createElement('a');
 
-                    if (dataRow.asset_info.info?.stickers?.length > 0) {
-                        let stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
+                    let gen;
+                    if (schemaData.type == 'Gloves') {
+                        aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gengl';
+                        // !gengl weapon_id paint_id pattern float
+                        gen = `!gengl ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
+                    } else {
+                        aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
+                        // !gen weapon_id paint_id pattern float sticker1 wear1...
+                        gen = `!gen ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
 
-                        for (let l_sticker of dataRow.asset_info.info.stickers) {
-                            stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
+                        if (dataRow.asset_info.info?.stickers?.length > 0) {
+                            let stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
+
+                            for (let l_sticker of dataRow.asset_info.info.stickers) {
+                                stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
+                            }
+
+                            gen += ` ${stickers.join(' ')}`;
                         }
-
-                        gen += ` ${stickers.join(' ')}`;
                     }
 
-                    aCopyGen = document.createElement('a');
-                    aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
+                    // aCopyGen = document.createElement('a');
+                    // aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
                     aCopyGen.setAttribute('class', 'ctag btn');
                     aCopyGen.setAttribute('href', 'javascript:;');
+                    aCopyGen.setAttribute('title', gen);
 
                     aCopyGen.addEventListener('click', (e) => {
                         navigator?.clipboard?.writeText(gen).then(() => {

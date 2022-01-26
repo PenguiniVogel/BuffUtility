@@ -11,7 +11,7 @@ switch (argv2) {
     case 'firefox':
         dest = '.export/BuffUtility_Firefox';
 
-        manifest['name'] = 'Buff Utility';
+        manifest['manifest_version'] = 2;
         manifest['browser_specific_settings'] = {
             'gecko': {
                 'id': 'buff.utility@penguinivogel.github.io',
@@ -23,9 +23,9 @@ switch (argv2) {
     default:
         dest = '.export/BuffUtility';
 
-        manifest['name'] = 'Buff Utility';
-
         break;
 }
+
+manifest['name'] = 'Buff Utility';
 
 fs.writeFileSync(`${dest}/manifest.json`, JSON.stringify(manifest, null, 4));
