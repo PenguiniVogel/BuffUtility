@@ -161,6 +161,8 @@ module InjectionService {
             setTimeout(() => {
                 window.dispatchEvent(new CustomEvent(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, { detail: transferData }));
             }, 150);
+        } else if (e.data['transferType'] == 'buff_utility_debug') {
+            console.debug(responseCache);
         }
     });
 
