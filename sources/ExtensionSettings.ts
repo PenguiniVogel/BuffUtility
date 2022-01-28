@@ -64,7 +64,8 @@ module ExtensionSettings {
         DEFAULT_SORT_BY = 'default_sort_by',
         DEFAULT_STICKER_SEARCH = 'default_sticker_search',
         STORED_CUSTOM_STICKER_SEARCH = 'stored_custom_sticker_search',
-        LEECH_CONTRIBUTOR_KEY = 'leech_contributor_key'
+        LEECH_CONTRIBUTOR_KEY = 'leech_contributor_key',
+        SHOW_TOAST_ON_ACTION = 'show_toast_on_action'
     }
 
     export interface SettingsProperties {
@@ -84,6 +85,7 @@ module ExtensionSettings {
         [Settings.DEFAULT_STICKER_SEARCH]: string;
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: string;
         [Settings.LEECH_CONTRIBUTOR_KEY]: string;
+        [Settings.SHOW_TOAST_ON_ACTION]: boolean;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -102,7 +104,8 @@ module ExtensionSettings {
         [Settings.DEFAULT_SORT_BY]: 'default',
         [Settings.DEFAULT_STICKER_SEARCH]: 'All',
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: '',
-        [Settings.LEECH_CONTRIBUTOR_KEY]: ''
+        [Settings.LEECH_CONTRIBUTOR_KEY]: '',
+        [Settings.SHOW_TOAST_ON_ACTION]: false
     };
 
     const VALIDATORS: {
@@ -123,7 +126,8 @@ module ExtensionSettings {
         [Settings.DEFAULT_SORT_BY]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_SORT_BY],
         [Settings.DEFAULT_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_STICKER_SEARCH],
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.STORED_CUSTOM_STICKER_SEARCH],
-        [Settings.LEECH_CONTRIBUTOR_KEY]: (value) => value ?? DEFAULT_SETTINGS[Settings.LEECH_CONTRIBUTOR_KEY]
+        [Settings.LEECH_CONTRIBUTOR_KEY]: (value) => value ?? DEFAULT_SETTINGS[Settings.LEECH_CONTRIBUTOR_KEY],
+        [Settings.SHOW_TOAST_ON_ACTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.SHOW_TOAST_ON_ACTION])
     };
 
     let settings: SettingsProperties = {

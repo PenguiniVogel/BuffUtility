@@ -158,6 +158,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.CAN_EXPAND_SCREENSHOTS, isCheckboxSelected(Settings.CAN_EXPAND_SCREENSHOTS));
                 ExtensionSettings.save(Settings.EXPAND_SCREENSHOTS_BACKDROP, isCheckboxSelected(Settings.EXPAND_SCREENSHOTS_BACKDROP));
                 ExtensionSettings.save(Settings.APPLY_STEAM_TAX, isCheckboxSelected(Settings.APPLY_STEAM_TAX));
+                ExtensionSettings.save(Settings.SHOW_TOAST_ON_ACTION, isCheckboxSelected(Settings.SHOW_TOAST_ON_ACTION));
                 ExtensionSettings.save(Settings.DIFFERENCE_DOMINATOR, readSelectOption(Settings.DIFFERENCE_DOMINATOR));
                 ExtensionSettings.save(Settings.DEFAULT_SORT_BY, readSelectOption(Settings.DEFAULT_SORT_BY));
                 ExtensionSettings.save(Settings.DEFAULT_STICKER_SEARCH, readSelectOption(Settings.DEFAULT_STICKER_SEARCH));
@@ -227,6 +228,12 @@ module Adjust_Settings {
         makeCheckboxOption(Settings.APPLY_STEAM_TAX, {
             title: 'Apply Steam Tax',
             description: 'Apply Steam Tax before calculating differences.\nThis will calculate the steam seller price from the provided reference price.'
+        }, table);
+
+        // show toast on action
+        makeCheckboxOption(Settings.SHOW_TOAST_ON_ACTION, {
+            title: 'Show Toast on action',
+            description: 'If enabled, respective components will inform you via Buffs Toast system'
         }, table);
 
         // append normal settings

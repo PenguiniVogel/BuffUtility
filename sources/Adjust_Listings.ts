@@ -116,12 +116,18 @@ module Adjust_Listings {
                     // aCopyGen = document.createElement('a');
                     // aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
                     aCopyGen.setAttribute('class', 'ctag btn');
-                    aCopyGen.setAttribute('href', 'javascript:;');
+
+                    if (storedSettings[Settings.SHOW_TOAST_ON_ACTION]) {
+                        aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
+                    } else {
+                        aCopyGen.setAttribute('href', 'javascript:;');
+                    }
+
                     aCopyGen.setAttribute('title', gen);
 
-                    aCopyGen.addEventListener('click', (e) => {
+                    aCopyGen.addEventListener('click', () => {
                         navigator?.clipboard?.writeText(gen).then(() => {
-                            alert(`Copied ${gen} to clipboard!`);
+                            // alert(`Copied ${gen} to clipboard!`);
                             console.debug(`[BuffUtility] Copy gen: ${gen}`);
                         }).catch((e) => console.error('[BuffUtility]', e));
                     });
