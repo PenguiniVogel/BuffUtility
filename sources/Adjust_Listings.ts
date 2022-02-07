@@ -89,6 +89,7 @@ module Adjust_Listings {
 
                 let aCopyGen = null;
                 let aMatchFloatDB = null;
+                let aNarrow = null;
                 if (schemaData?.type) {
                     aCopyGen = document.createElement('a');
 
@@ -157,6 +158,11 @@ module Adjust_Listings {
                     aMatchFloatDB.setAttribute('class', 'ctag btn');
                     aMatchFloatDB.setAttribute('href', `https://csgofloat.com/db?name=${schemaData.name}&defIndex=${schemaData.id}&paintIndex=${dataRow.asset_info.info.paintindex}&paintSeed=${dataRow.asset_info.info.paintseed}&category=${category}&min=${`${min}`.slice(0, 5)}&max=${`${max}`.slice(0, 5)}`);
                     aMatchFloatDB.setAttribute('target', '_blank');
+
+                    aNarrow = document.createElement('a');
+                    aNarrow.innerHTML = '<b><i style="" class="icon icon_search"></i></b>Narrow<br>';
+                    aNarrow.setAttribute('class', 'ctag btn');
+                    aNarrow.setAttribute('href', `javascript:Buff.dialog({title:'Narrow Search',content:'<div style="padding: 10px;">Test</div>'});`);
                 }
 
                 const aShare = document.createElement('a');
@@ -169,6 +175,10 @@ module Adjust_Listings {
                 if (aCopyGen) wearContainer.appendChild(aCopyGen);
                 wearContainer.appendChild(aShare);
                 if (aMatchFloatDB) wearContainer.appendChild(aMatchFloatDB);
+                if (aNarrow) {
+                    let spacerBr = document.createElement('br');
+                    wearContainer.append(spacerBr, aNarrow);
+                }
             }
 
             let priceContainer = <HTMLElement>([ ...<Array<HTMLElement>><unknown>row.querySelectorAll('td.t_Left') ].filter(td => !!td.querySelector('p.hide-cny')))[0];
