@@ -65,7 +65,8 @@ module ExtensionSettings {
         DEFAULT_STICKER_SEARCH = 'default_sticker_search',
         STORED_CUSTOM_STICKER_SEARCH = 'stored_custom_sticker_search',
         LEECH_CONTRIBUTOR_KEY = 'leech_contributor_key',
-        SHOW_TOAST_ON_ACTION = 'show_toast_on_action'
+        SHOW_TOAST_ON_ACTION = 'show_toast_on_action',
+        LISTING_OPTIONS = 'listing_options'
     }
 
     export interface SettingsProperties {
@@ -86,6 +87,7 @@ module ExtensionSettings {
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: string;
         [Settings.LEECH_CONTRIBUTOR_KEY]: string;
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
+        [Settings.LISTING_OPTIONS]: boolean[];
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -105,7 +107,8 @@ module ExtensionSettings {
         [Settings.DEFAULT_STICKER_SEARCH]: 'All',
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: '',
         [Settings.LEECH_CONTRIBUTOR_KEY]: '',
-        [Settings.SHOW_TOAST_ON_ACTION]: false
+        [Settings.SHOW_TOAST_ON_ACTION]: false,
+        [Settings.LISTING_OPTIONS]: [true, true, true, true, false, false]
     };
 
     const VALIDATORS: {
@@ -127,7 +130,17 @@ module ExtensionSettings {
         [Settings.DEFAULT_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.DEFAULT_STICKER_SEARCH],
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.STORED_CUSTOM_STICKER_SEARCH],
         [Settings.LEECH_CONTRIBUTOR_KEY]: (value) => value ?? DEFAULT_SETTINGS[Settings.LEECH_CONTRIBUTOR_KEY],
-        [Settings.SHOW_TOAST_ON_ACTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.SHOW_TOAST_ON_ACTION])
+        [Settings.SHOW_TOAST_ON_ACTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.SHOW_TOAST_ON_ACTION]),
+        [Settings.LISTING_OPTIONS]: (value) => {
+            value = value ?? DEFAULT_SETTINGS[Settings.LISTING_OPTIONS];
+
+            let r = [];
+            for (let i = 0, l = 6; i < l; i ++) {
+                r[i] = validateBoolean(value[i], DEFAULT_SETTINGS[Settings.LISTING_OPTIONS][i]);
+            }
+
+            return r;
+        }
     };
 
     let settings: SettingsProperties = {

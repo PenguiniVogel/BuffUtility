@@ -27,7 +27,7 @@ module Adjust_Settings {
         return td;
     }
 
-    function makeCheckboxOption(mappedOption: ExtensionSettings.Settings, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+    function makeCheckboxOption(mappedOption: Settings, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
         const containerTD = makeTD('', 't_Left');
 
         containerTD.innerHTML = Util.buildHTML('span', {
@@ -66,6 +66,61 @@ module Adjust_Settings {
 
     export function isCheckboxSelected(option: Settings): boolean {
         return !!document.getElementById(getOptionID(option))?.querySelector('span.on');
+    }
+
+    function makeMultiCheckboxOption(mappedOption: Settings, prefInfo: { title: string, description?: string, options: string[] }, table: HTMLElement): void {
+        const containerTD = makeTD('', 't_Left');
+
+        let option: boolean[] = <boolean[]>storedSettings[mappedOption];
+
+        let html = '';
+        for (let i = 0, l = option.length; i < l; i ++) {
+            html += Util.buildHTML('span', {
+                content: [Util.buildHTML('div', {
+                    id: `${getOptionID(mappedOption)}-${i}`,
+                    class: 'w-Checkbox',
+                    attributes: {
+                        onclick: `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
+                    },
+                    content: [Util.buildHTML('span', {
+                        class: option[i] ? 'on' : '',
+                        content: [
+                            Util.buildHTML('i', { class: 'icon icon_checkbox' }),
+                            ` ${prefInfo.options[i] ?? 'Open'} `
+                        ]
+                    })]
+                })]
+            });
+        }
+
+        containerTD.innerHTML = html;
+
+        const tr = makeTR();
+        tr.append(
+            makeTD(`BuffUtility<br>${prefInfo.title} ${prefInfo.description ? Util.buildHTML('i', {
+                class: 'icon icon_qa j_tips_handler',
+                attributes: {
+                    'data-title': 'Description',
+                    'data-content': prefInfo.description,
+                    'data-direction': 'right'
+                }
+            }) : ''}`, 't_Left c_Gray'),
+            containerTD,
+            makeTD('', 't_Right')
+        );
+
+        table.append(tr);
+    }
+
+    function readMultiCheckboxOption(option: Settings): boolean[] {
+        let options = document.querySelectorAll(`[id^=${getOptionID(option)}-]`);
+
+        let result = [];
+        for (let i = 0, l = options.length; i < l; i ++) {
+            result[i] = !!options[i]?.querySelector('span.on');
+        }
+
+        return result;
     }
 
     function makeSelectOption(mappedOption: Settings, options: { value: string, displayStr: string, selected?: boolean }[], prefInfo: { title: string, description?: string }, table: HTMLElement): void {
@@ -108,7 +163,7 @@ module Adjust_Settings {
         return (<HTMLSelectElement>document.getElementById(getOptionID(option))).selectedOptions?.item(0)?.getAttribute('value');
     }
 
-    function makeTextOption(mappedOption: ExtensionSettings.Settings, type: string, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+    function makeTextOption(mappedOption: Settings, type: string, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
         const containerTD = makeTD('', 't_Left');
 
         containerTD.innerHTML = Util.buildHTML('span', {
@@ -159,6 +214,8 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.EXPAND_SCREENSHOTS_BACKDROP, isCheckboxSelected(Settings.EXPAND_SCREENSHOTS_BACKDROP));
                 ExtensionSettings.save(Settings.APPLY_STEAM_TAX, isCheckboxSelected(Settings.APPLY_STEAM_TAX));
                 ExtensionSettings.save(Settings.SHOW_TOAST_ON_ACTION, isCheckboxSelected(Settings.SHOW_TOAST_ON_ACTION));
+                ExtensionSettings.save(Settings.LISTING_OPTIONS, readMultiCheckboxOption(Settings.LISTING_OPTIONS));
+
                 ExtensionSettings.save(Settings.DIFFERENCE_DOMINATOR, readSelectOption(Settings.DIFFERENCE_DOMINATOR));
                 ExtensionSettings.save(Settings.DEFAULT_SORT_BY, readSelectOption(Settings.DEFAULT_SORT_BY));
                 ExtensionSettings.save(Settings.DEFAULT_STICKER_SEARCH, readSelectOption(Settings.DEFAULT_STICKER_SEARCH));
@@ -234,6 +291,20 @@ module Adjust_Settings {
         makeCheckboxOption(Settings.SHOW_TOAST_ON_ACTION, {
             title: 'Show Toast on action',
             description: 'If enabled, respective components will inform you via Buffs Toast system'
+        }, table);
+
+        // listing options
+        makeMultiCheckboxOption(Settings.LISTING_OPTIONS, {
+            title: 'Listing options',
+            description: 'Define what options show up on each listing',
+            options: [
+                '3D Inspect',
+                'Inspect in server',
+                'Copy !gen/!gengl',
+                'Share',
+                'Match floatdb',
+                'Narrow'
+            ]
         }, table);
 
         // append normal settings
@@ -361,7 +432,7 @@ module Adjust_Settings {
         const leech_blank20 = document.createElement('div');
         leech_blank20.setAttribute('class', 'blank20');
 
-        userSettings.append(leech_h3, leech_table, leech_blank20);
+        // userSettings.append(leech_h3, leech_table, leech_blank20);
     }
 
     init();

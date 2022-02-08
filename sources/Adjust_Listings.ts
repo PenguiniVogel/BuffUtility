@@ -162,7 +162,7 @@ module Adjust_Listings {
                     aNarrow = document.createElement('a');
                     aNarrow.innerHTML = '<b><i style="" class="icon icon_search"></i></b>Narrow<br>';
                     aNarrow.setAttribute('class', 'ctag btn');
-                    aNarrow.setAttribute('href', `javascript:Buff.dialog({title:'Narrow Search',content:'<div style="padding: 10px;">Test</div>'});`);
+                    aNarrow.setAttribute('href', `javascript:Buff.dialog({title:'Narrow Search',content:'<div style="padding: 10px;"><table><tbody><tr><td class="t_Left c_Gray">Float</td><td style="padding-left: 10px;"><div class="w-Checkbox" onclick=""><span><i class="icon icon_checkbox"></i> Open </span></div></td></tr><tr><td class="t_Left c_Gray">Pattern</td><td style="padding-left: 10px;"><div class="w-Checkbox" onclick=""><span><i class="icon icon_checkbox"></i> Open </span></div></td></tr><tr><td class="t_Left c_Gray">Stickers</td><td style="padding-left: 10px;"><div class="w-Checkbox" onclick=""><span><i class="icon icon_checkbox"></i> Open </span></div></td></tr></tbody></table></div>',onConfirm:function(data){console.debug(data);Popup.hide(data.selector);}});`);
                 }
 
                 const aShare = document.createElement('a');
@@ -172,10 +172,29 @@ module Adjust_Listings {
                 aShare.setAttribute('target', '_blank');
 
                 wearContainer.appendChild(document.createElement('br'));
-                if (aCopyGen) wearContainer.appendChild(aCopyGen);
-                wearContainer.appendChild(aShare);
-                if (aMatchFloatDB) wearContainer.appendChild(aMatchFloatDB);
-                if (aNarrow) {
+
+                let enabledOptions: boolean[] = storedSettings[Settings.LISTING_OPTIONS];
+
+                let ctags = wearContainer.querySelectorAll('a.ctag');
+                for (let i_i of [0, 1]) {
+                    if (!enabledOptions[i_i]) {
+                        ctags.item(i_i).setAttribute('style', 'display: none;');
+                    }
+                }
+
+                if (aCopyGen && enabledOptions[2]) {
+                    wearContainer.appendChild(aCopyGen);
+                }
+
+                if (enabledOptions[3]) {
+                    wearContainer.appendChild(aShare);
+                }
+
+                if (aMatchFloatDB && enabledOptions[4]) {
+                    wearContainer.appendChild(aMatchFloatDB);
+                }
+
+                if (aNarrow && enabledOptions[5]) {
                     let spacerBr = document.createElement('br');
                     wearContainer.append(spacerBr, aNarrow);
                 }
