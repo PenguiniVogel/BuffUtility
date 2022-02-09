@@ -2,7 +2,7 @@
 
 Get it for:
 * Chrome [here](https://chrome.google.com/webstore/detail/buff-utility/gfjnmalnjjmjahaddeaamlkeliginpaf)
-* Firefox [soon]()
+* Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/buff-utility/)
 * Or run it unpacked via release [here](https://github.com/PenguiniVogel/BuffUtility/releases/latest)
 
 Feature List:
