@@ -181,6 +181,16 @@ module ExtensionSettings {
             ...settings,
             ...tempSettings
         };
+
+        const defaultKeys = Object.keys(DEFAULT_SETTINGS);
+        const loadedKeys = Object.keys(settings);
+
+        for (let l_loadedKey of loadedKeys) {
+            if (defaultKeys.indexOf(l_loadedKey) > -1) continue;
+
+            // delete unused / old properties
+            delete settings[l_loadedKey];
+        }
     }
 
     /**

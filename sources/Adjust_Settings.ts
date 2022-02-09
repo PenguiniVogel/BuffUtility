@@ -227,7 +227,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_CALCULATED_RATE, 1 / storedSettings[Settings.CUSTOM_CURRENCY_RATE]);
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_LEADING_ZEROS, Util.countLeadingZeros(`${storedSettings[Settings.CUSTOM_CURRENCY_CALCULATED_RATE]}`.split('.')[1] ?? ''));
 
-                ExtensionSettings.save(Settings.LEECH_CONTRIBUTOR_KEY, readTextOption(Settings.LEECH_CONTRIBUTOR_KEY));
+                // ExtensionSettings.save(Settings.LEECH_CONTRIBUTOR_KEY, readTextOption(Settings.LEECH_CONTRIBUTOR_KEY));
             }
         });
 
