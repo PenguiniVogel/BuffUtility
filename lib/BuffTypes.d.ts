@@ -1,6 +1,25 @@
 declare module BuffTypes {
 
     /**
+     * g type
+     */
+    /** */
+    export interface g {
+        appid: number,
+        currency: any,
+        game: string,
+        locale: string,
+        user: {
+            avatar: string,
+            id: string,
+            mobile: string,
+            nickname: string,
+            steamid: number
+        },
+        webview_title: any
+    }
+
+    /**
      * Response type for: <br/>
      * <code>/api/market/goods/sell_order</code>
      */
@@ -1083,4 +1102,21 @@ declare module BuffTypes {
 
     }
 
+}
+
+// global buff.163 Functions
+
+declare function market(): unknown;
+
+declare function buff_utility_query(): unknown;
+
+declare function sendRequest(url: string, config: {
+    method: string,
+    dataType: string,
+    showLoading: boolean,
+    success: (data: any) => void
+}): unknown;
+
+interface JQueryEx<T> extends JQuery<T> {
+    showLoading(): void;
 }

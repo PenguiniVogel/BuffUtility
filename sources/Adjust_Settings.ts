@@ -433,6 +433,11 @@ module Adjust_Settings {
         leech_blank20.setAttribute('class', 'blank20');
 
         // userSettings.append(leech_h3, leech_table, leech_blank20);
+
+        // if #buffutility is present jump to the h3
+        if (window?.location?.href?.indexOf('#buffutility') > -1) {
+            window.scrollTo(0, h3.offsetTop);
+        }
     }
 
     init();

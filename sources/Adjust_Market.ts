@@ -18,6 +18,8 @@ module Adjust_Market {
 
                 adjustMarketGoodsOrBuying(<InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>>transferData);
             }
+
+            addSpecialTab();
         }
     }
 
@@ -182,6 +184,79 @@ module Adjust_Market {
         if (info.length > 0) {
             console.debug('[BuffUtility] Market Info:\n', info.join('\n '));
         }
+    }
+
+    function addSpecialTab(): void {
+        // Don't do anything if present
+        if (!!document.querySelector('#buff-utility-special')) return;
+
+        let marketTabs = <HTMLElement>document.querySelector('ul.tab');
+
+        let specialTab = <HTMLElement>document.createElement('li_x');
+        specialTab.setAttribute('id', 'buff-utility-special');
+        specialTab.innerHTML = 'Special';
+
+        marketTabs.append(specialTab);
+
+        function buff_utility_overrides(): void {
+            function overrideTabHandle(): void {
+                $(document).on('click', '.tab li', function () {
+                    $('.tab li.x').removeClass('on');
+                });
+
+                $(document).on('click', '#buff-utility-special', function () {
+                    $('.tab li').removeClass('on');
+                    $(this).addClass('on');
+
+                    console.debug('[BuffUtility] Navigation -> special');
+
+                    (<JQueryEx<HTMLElement>>$('#j_market_card')).showLoading();
+
+                    sendRequest('/api/market/sell_order/price_drops', {
+                        method: 'GET',
+                        dataType: 'json',
+                        showLoading: false,
+                        success: (data) => {
+                            console.debug(data);
+                        }
+                    });
+
+                    return false;
+                });
+            }
+            overrideTabHandle();
+        }
+
+        InjectionServiceLib.injectCSS(`
+        .tab li_x {
+            display: list-item;
+            float: left;
+            font-size: 15px;
+            text-align: center;
+            cursor: pointer;
+            color: #929394;
+            border-right: 1px solid #303B4F;
+            width: 170px;
+            height: 52px;
+            line-height: 52px;
+            overflow: hidden;
+        }
+        
+        .tab li_x.on {
+            color: #fff;
+            font-weight: 700;
+            background-image: url(../static/images/sprite/icon.less.png);
+            background-position: -304px -76px;
+        }
+        
+        .tab li_x:hover {
+            color: #ccc;
+            background-image: url(../static/images/sprite/icon.less.png);
+            background-position: -312px 0;
+        }
+        `);
+
+        InjectionServiceLib.injectCode(`${buff_utility_overrides.toString()}buff_utility_overrides();`, 'body');
     }
 
     init();

@@ -176,10 +176,17 @@ module Adjust_Listings {
                 let enabledOptions: boolean[] = storedSettings[Settings.LISTING_OPTIONS];
 
                 let ctags = wearContainer.querySelectorAll('a.ctag');
-                for (let i_i of [0, 1]) {
-                    if (!enabledOptions[i_i]) {
-                        ctags.item(i_i).setAttribute('style', 'display: none;');
-                    }
+
+                if (!enabledOptions[0]) {
+                    ctags.item(0).setAttribute('style', 'display: none;');
+                }
+
+                if (!enabledOptions[1]) {
+                    ctags.item(1).setAttribute('style', 'display: none;');
+                }
+
+                if (!enabledOptions[0] && !enabledOptions[1]) {
+                    wearContainer.querySelector('br').setAttribute('style', 'display: none;');
                 }
 
                 if (aCopyGen && enabledOptions[2]) {
