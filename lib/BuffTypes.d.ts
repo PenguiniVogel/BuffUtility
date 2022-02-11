@@ -1106,9 +1106,7 @@ declare module BuffTypes {
 
 // global buff.163 Functions
 
-declare function market(): unknown;
-
-declare function buff_utility_query(): unknown;
+declare function buff_utility_readNarrowOptions(selector: string): void;
 
 declare function sendRequest(url: string, config: {
     method: string,
@@ -1117,6 +1115,6 @@ declare function sendRequest(url: string, config: {
     success: (data: any) => void
 }): unknown;
 
-interface JQueryEx<T> extends JQuery<T> {
+interface JQuery<TElement = HTMLElement> extends Iterable<TElement> {
     showLoading(): void;
 }

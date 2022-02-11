@@ -17,6 +17,65 @@ module Adjust_Listings {
         if (transferData.url.indexOf('/sell_order') > -1) {
             console.debug('[BuffUtility] Adjust_Listings (sell_order)');
 
+            // inject some code
+            function buff_utility_readNarrowOptions(selector: string): void {
+                let r: {
+                    [name: string]: {
+                        selected: boolean,
+                        value: string
+                    }
+                } = {};
+
+                // let modal = document.getElementById(selector);
+                let options = <NodeListOf<HTMLElement>>document.getElementById(selector.substring(1)).querySelectorAll(`[data-buff-utility]`);
+
+                for (let i = 0, l = options.length; i < l; i ++) {
+                    let e = options.item(i);
+                    let span = e.querySelector('span');
+
+                    r[e.getAttribute('data-buff-utility')] = {
+                        selected: span.getAttribute('class')?.indexOf('on') > -1,
+                        value: span.getAttribute('data-value')
+                    };
+                }
+
+                console.debug(r);
+
+                window.postMessage([GlobalConstants.BUFF_UTILITY_ASK_NARROW, r], '*');
+            }
+
+            InjectionServiceLib.injectCode(`${buff_utility_readNarrowOptions.toString()}`);
+
+            InjectionServiceLib.injectCSS(`
+                td.img_td.can_expand img[data-buff-utility-expand-image] {
+                    display: none;
+                }
+                    
+                td.img_td.can_expand:hover {
+                    padding: 20px 0px 20px 0px;
+                }
+                
+                td.img_td.can_expand:hover img[data-buff-utility-expand-image] {
+                    width: auto;
+                    height: auto;
+                    display: block;
+                    position: absolute;
+                    z-index: 99999;
+                }
+                
+                td.img_td.can_expand:hover img[data-buff-utility-expand-image="0"] {
+                    transform: scale(10) translate(70px, 0px);
+                }
+                
+                td.img_td.can_expand:hover img[data-buff-utility-expand-image="1"] {
+                    transform: scale(8) translate(99px, 10px);
+                }
+                
+                td.img_td.can_expand.expand_backdrop:hover img[data-buff-utility-expand-image="0"] {
+                    background-color: rgb(0 0 0 / 25%);
+                    background-color: rgba(0, 0, 0, 0.25);
+                }`);
+
             // adjust listings
             adjustSellOrderListings(<InjectionService.TransferData<BuffTypes.SellOrder.Data>>transferData);
         } else if (transferData.url.indexOf('/buy_order') > -1) {
@@ -41,11 +100,58 @@ module Adjust_Listings {
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
         const schemaData = SchemaHelper.find(goodsInfo.short_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
-        // console.log(schemaData);
+
+        let floatdb_category;
+        switch (goodsInfo.tags?.quality?.internal_name ?? 'normal') {
+            case 'strange':
+            case 'unusual_strange':
+                floatdb_category = '2';
+                break;
+            case 'tournament':
+                floatdb_category = '3';
+                break;
+            case 'normal':
+            case 'unusual':
+            default:
+                floatdb_category = '1';
+                break;
+        }
 
         const preview_screenshots = document.getElementById('preview_screenshots');
         const can_expand_screenshots = storedSettings[Settings.CAN_EXPAND_SCREENSHOTS] && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
         const expand_classes = can_expand_screenshots ? `img_td can_expand ${storedSettings[Settings.EXPAND_SCREENSHOTS_BACKDROP] ? 'expand_backdrop' : ''}` : 'img_td';
+
+        let fopString = '';
+        if (can_expand_screenshots) {
+            switch (storedSettings[Settings.CUSTOM_FOP]) {
+                case ExtensionSettings.FOP_VALUES.Auto:
+                    fopString = '';
+
+                    break;
+                case ExtensionSettings.FOP_VALUES.w245xh230:
+                    fopString = '?fop=imageView/2/w/245/h/230';
+
+                    break;
+                case ExtensionSettings.FOP_VALUES.w490xh460:
+                    fopString = '?fop=imageView/2/w/490/h/460';
+
+                    break;
+                case ExtensionSettings.FOP_VALUES.w980xh920:
+                    fopString = '?fop=imageView/2/w/980/h/920';
+
+                    break;
+                case ExtensionSettings.FOP_VALUES.w1960xh1840:
+                    fopString = '?fop=imageView/2/w/1960/h/1840';
+
+                    break;
+                case ExtensionSettings.FOP_VALUES.w3920xh3680:
+                    fopString = '?fop=imageView/2/w/3920/h/3680';
+
+                    break;
+                default:
+                    break;
+            }
+        }
 
         // adjust reference price
         if (storedSettings[Settings.APPLY_STEAM_TAX]) {
@@ -79,6 +185,22 @@ module Adjust_Listings {
             divContainer.appendChild(expandImg);
         }
 
+        // build narrow
+        function buildNarrowModalContent(float: string, pattern: string, stickers: string): string {
+            function buildCheckbox(name: string, key: string, value: string): string {
+                return `<tr><td class="t_Left c_Gray">${name}</td><td style="padding-left: 10px;"><div class="w-Checkbox" data-buff-utility="${key}"><span data-value="${value}"><i class="icon icon_checkbox"></i> Open </span></div></td></tr>`;
+            }
+
+            let html = '<div style="padding: 10px;"><table><tbody>';
+
+            if (float) html += buildCheckbox('Float', 'float', float);
+            if (pattern) html += buildCheckbox('Pattern', 'pattern', pattern);
+            if (stickers) html += buildCheckbox('Stickers', 'stickers', stickers);
+
+            return `${html}</tbody></table></div>`;
+        }
+
+        // go over all rows
         for (let i = 0, l = rows.length; i < l; i ++) {
             let row = rows.item(i);
             let dataRow = data.items[i];
@@ -133,36 +255,19 @@ module Adjust_Listings {
                         }).catch((e) => console.error('[BuffUtility]', e));
                     });
 
-                    // match on floatdb
-                    let category;
-                    switch (goodsInfo.tags?.quality?.internal_name ?? 'normal') {
-                        case 'strange':
-                        case 'unusual_strange':
-                            category = '2';
-                            break;
-                        case 'tournament':
-                            category = '3';
-                            break;
-                        case 'normal':
-                        case 'unusual':
-                        default:
-                            category = '1';
-                            break;
-                    }
-
                     let min = +dataRow.asset_info.paintwear.slice(0, 5);
                     let max = min + 0.001;
 
                     aMatchFloatDB = document.createElement('a');
                     aMatchFloatDB.innerHTML = '<b><i style="margin-right: 1px;" class="icon icon_change"></i></b>Match floatdb';
                     aMatchFloatDB.setAttribute('class', 'ctag btn');
-                    aMatchFloatDB.setAttribute('href', `https://csgofloat.com/db?name=${schemaData.name}&defIndex=${schemaData.id}&paintIndex=${dataRow.asset_info.info.paintindex}&paintSeed=${dataRow.asset_info.info.paintseed}&category=${category}&min=${`${min}`.slice(0, 5)}&max=${`${max}`.slice(0, 5)}`);
+                    aMatchFloatDB.setAttribute('href', `https://csgofloat.com/db?name=${schemaData.name}&defIndex=${schemaData.id}&paintIndex=${dataRow.asset_info.info.paintindex}&paintSeed=${dataRow.asset_info.info.paintseed}&category=${floatdb_category}&min=${`${min}`.slice(0, 5)}&max=${`${max}`.slice(0, 5)}`);
                     aMatchFloatDB.setAttribute('target', '_blank');
 
                     aNarrow = document.createElement('a');
                     aNarrow.innerHTML = '<b><i style="" class="icon icon_search"></i></b>Narrow<br>';
                     aNarrow.setAttribute('class', 'ctag btn');
-                    aNarrow.setAttribute('href', `javascript:Buff.dialog({title:'Narrow Search',content:'<div style="padding: 10px;"><table><tbody><tr><td class="t_Left c_Gray">Float</td><td style="padding-left: 10px;"><div class="w-Checkbox" onclick=""><span><i class="icon icon_checkbox"></i> Open </span></div></td></tr><tr><td class="t_Left c_Gray">Pattern</td><td style="padding-left: 10px;"><div class="w-Checkbox" onclick=""><span><i class="icon icon_checkbox"></i> Open </span></div></td></tr><tr><td class="t_Left c_Gray">Stickers</td><td style="padding-left: 10px;"><div class="w-Checkbox" onclick=""><span><i class="icon icon_checkbox"></i> Open </span></div></td></tr></tbody></table></div>',onConfirm:function(data){console.debug(data);Popup.hide(data.selector);}});`);
+                    aNarrow.setAttribute('href', `javascript:Buff.dialog({title:'Narrow Search',content:'${buildNarrowModalContent(`${dataRow.asset_info.paintwear}`, `${dataRow.asset_info.info.paintseed}`, schemaData?.sticker_amount > 0 ? JSON.stringify(dataRow.asset_info.info.stickers) : null)}',onConfirm:function(data){buff_utility_readNarrowOptions(data.selector);Popup.hide(data.selector);}});`);
                 }
 
                 const aShare = document.createElement('a');
@@ -176,16 +281,17 @@ module Adjust_Listings {
                 let enabledOptions: boolean[] = storedSettings[Settings.LISTING_OPTIONS];
 
                 let ctags = wearContainer.querySelectorAll('a.ctag');
+                if (ctags?.length >= 2) {
+                    if (!enabledOptions[0]) {
+                        ctags.item(0).setAttribute('style', 'display: none;');
+                    }
 
-                if (!enabledOptions[0]) {
-                    ctags.item(0).setAttribute('style', 'display: none;');
+                    if (!enabledOptions[1]) {
+                        ctags.item(1).setAttribute('style', 'display: none;');
+                    }
                 }
 
-                if (!enabledOptions[1]) {
-                    ctags.item(1).setAttribute('style', 'display: none;');
-                }
-
-                if (!enabledOptions[0] && !enabledOptions[1]) {
+                if ((!enabledOptions[0] && !enabledOptions[1]) || ((ctags?.length ?? 0) < 2)) {
                     wearContainer.querySelector('br').setAttribute('style', 'display: none;');
                 }
 
@@ -258,34 +364,7 @@ module Adjust_Listings {
 
                 switch (storedSettings[Settings.EXPAND_TYPE]) {
                     case ExtensionSettings.ExpandScreenshotType.PREVIEW:
-                        switch (storedSettings[Settings.CUSTOM_FOP]) {
-                            case ExtensionSettings.FOP_VALUES.Auto:
-                                img_src = dataRow.img_src;
-
-                                break;
-                            case ExtensionSettings.FOP_VALUES.w245xh230:
-                                img_src = `${dataRow.img_src}?fop=imageView/2/w/245/h/230`;
-
-                                break;
-                            case ExtensionSettings.FOP_VALUES.w490xh460:
-                                img_src = `${dataRow.img_src}?fop=imageView/2/w/490/h/460`;
-
-                                break;
-                            case ExtensionSettings.FOP_VALUES.w980xh920:
-                                img_src = `${dataRow.img_src}?fop=imageView/2/w/980/h/920`;
-
-                                break;
-                            case ExtensionSettings.FOP_VALUES.w1960xh1840:
-                                img_src = `${dataRow.img_src}?fop=imageView/2/w/1960/h/1840`;
-
-                                break;
-                            case ExtensionSettings.FOP_VALUES.w3920xh3680:
-                                img_src = `${dataRow.img_src}?fop=imageView/2/w/3920/h/3680`;
-
-                                break;
-                            default:
-                                break;
-                        }
+                        img_src = `${dataRow.img_src}${fopString}`;
 
                         break;
                     case ExtensionSettings.ExpandScreenshotType.INSPECT:
@@ -302,7 +381,7 @@ module Adjust_Listings {
         }
 
         if (updated_preview > 0) {
-            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview > 1 ? 's.' : '.'}`, 't:', storedSettings[Settings.EXPAND_TYPE]);
+            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview == 1 ? '.' : 's.'}`, 'type:', storedSettings[Settings.EXPAND_TYPE] == 0 ? 'PREVIEW' : 'INSPECT');
         }
     }
 

@@ -201,7 +201,7 @@ module Adjust_Market {
         function buff_utility_overrides(): void {
             function overrideTabHandle(): void {
                 $(document).on('click', '.tab li', function () {
-                    $('.tab li.x').removeClass('on');
+                    $('.tab li_x').removeClass('on');
                 });
 
                 $(document).on('click', '#buff-utility-special', function () {
@@ -210,9 +210,9 @@ module Adjust_Market {
 
                     console.debug('[BuffUtility] Navigation -> special');
 
-                    (<JQueryEx<HTMLElement>>$('#j_market_card')).showLoading();
+                    ($('#j_market_card')).showLoading();
 
-                    sendRequest('/api/market/sell_order/price_drops', {
+                    sendRequest(`/api/market/sell_order/price_drops${window.location?.hash ?? '?game=csgo'}`, {
                         method: 'GET',
                         dataType: 'json',
                         showLoading: false,

@@ -132,8 +132,12 @@ module InjectionService {
     }
 
     export let responseCache: TransferData<unknown>[] = [];
+    export let requireObjects: {
+        [n: string]: any
+    } = {};
 
     window.addEventListener('message', (e) => {
+        // console.debug(e);
         if (e.data['transferType'] == GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE) {
             let transferData = <TransferData<unknown>>e.data;
 
@@ -161,8 +165,16 @@ module InjectionService {
             setTimeout(() => {
                 window.dispatchEvent(new CustomEvent(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, { detail: transferData }));
             }, 150);
-        } else if (e.data['transferType'] == 'buff_utility_debug') {
-            console.debug(responseCache);
+        } else if (e.data == 'buff_utility_debug') {
+            console.debug(responseCache, requireObjects);
+        } else if ((e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE) {
+            let _data = e.data ?? [];
+            let object = _data[1] ?? '';
+            if (requireObjects[object] == false) {
+                requireObjects[object] = _data[2];
+            }
+        } else if ((e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_ASK_NARROW) {
+
         }
     });
 
@@ -202,39 +214,14 @@ module InjectionService {
         }
     }
 
+    function buff_utility_post_object_service(object: string): void {
+        window.postMessage([GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE, object, window[object]], '*');
+    }
+
     function init(): void {
-        InjectionServiceLib.injectCode(`${interceptNetworkRequests.toString()}\ninterceptNetworkRequests();`);
-        InjectionServiceLib.injectCSS(`
-td.img_td.can_expand img[data-buff-utility-expand-image] {
-    display: none;
-}
-    
-td.img_td.can_expand:hover {
-    padding: 20px 0px 20px 0px;
-}
+        requireObjects['g'] = false;
 
-td.img_td.can_expand:hover img[data-buff-utility-expand-image] {
-    width: auto;
-    height: auto;
-    display: block;
-    position: absolute;
-    z-index: 99999;
-}
-
-td.img_td.can_expand:hover img[data-buff-utility-expand-image="0"] {
-    transform: scale(10) translate(70px, 0px);
-}
-
-td.img_td.can_expand:hover img[data-buff-utility-expand-image="1"] {
-    transform: scale(8) translate(99px, 10px);
-}
-
-td.img_td.can_expand.expand_backdrop:hover img[data-buff-utility-expand-image="0"] {
-    background-color: rgb(0 0 0 / 25%);
-    background-color: rgba(0, 0, 0, 0.25);
-}`);
-
-        InjectionServiceLib.onReady(() => console.debug('[BuffUtility] ISL document_start injected tags, done.'));
+        InjectionServiceLib.injectCode(`${buff_utility_post_object_service.toString()}\nbuff_utility_post_object_service('g');\n${interceptNetworkRequests.toString()}\ninterceptNetworkRequests();`);
     }
 
     init();
