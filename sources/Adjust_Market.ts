@@ -10,17 +10,27 @@ module Adjust_Market {
     }
 
     function process(transferData: InjectionService.TransferData<unknown>): void {
-        if (transferData.url.indexOf('/market/') > -1) {
-            if ((<InjectionService.TransferData<BuffTypes.TopBookmarked.Data>>transferData)?.data?.goods_infos) {
-                console.debug('[BuffUtility] Adjust_Market (MISSING)');
-            } else {
-                console.debug('[BuffUtility] Adjust_Market (/goods | /buying)');
+        if (transferData.url.indexOf('/market/') == -1) {
+            return;
+        } else if (transferData.url.indexOf('/market/goods') > -1) {
+            console.debug('[BuffUtility] Adjust_Market (/goods)');
 
-                adjustMarketGoodsOrBuying(<InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>>transferData);
-            }
-
-            addSpecialTab();
+            adjustMarketGoodsOrBuying(<InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>>transferData);
+        } else {
+            console.debug(`[BuffUtility] Adjust_Market MISSING (${/(\/market\/.*)[?#]/g.exec(transferData.url)[1]})`);
         }
+
+        // if (transferData.url.indexOf('/market/') > -1) {
+        //     if ((<InjectionService.TransferData<BuffTypes.TopBookmarked.Data>>transferData)?.data?.goods_infos) {
+        //         console.debug('[BuffUtility] Adjust_Market (MISSING)');
+        //     } else {
+        //         console.debug('[BuffUtility] Adjust_Market (/goods | /buying)');
+        //
+        //         adjustMarketGoodsOrBuying(<InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>>transferData);
+        //     }
+        //
+        //     addSpecialTab();
+        // }
     }
 
     function adjustMarketGoodsOrBuying(transferData: InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>): void {

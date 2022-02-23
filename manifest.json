@@ -53,6 +53,22 @@
         },
         {
             "js": [
+                "sources/Adjust_Sales.js"
+            ],
+            "matches": [
+                "https://buff.163.com/market/sell_order/on_sale*"
+            ]
+        },
+        {
+            "js": [
+                "sources/Adjust_Favourites.js"
+            ],
+            "matches": [
+                "https://buff.163.com/user-center/bookmark/sell_order*"
+            ]
+        },
+        {
+            "js": [
                 "sources/Util.js",
                 "sources/csgostash/Add_Links_Skin.js"
             ],

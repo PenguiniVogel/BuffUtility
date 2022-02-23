@@ -4,7 +4,8 @@
         "target": "es5",
         "sourceMap": false,
         "inlineSourceMap": false,
-        "disableSizeLimit": true
+        "removeComments": true,
+        "outDir": ".out"
     },
     "files": [
         "lib/.GlobalConstants.ts",

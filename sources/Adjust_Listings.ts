@@ -11,12 +11,8 @@ module Adjust_Listings {
 
     function init(): void {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
-    }
 
-    function process(transferData: InjectionService.TransferData<unknown>): void {
-        if (transferData.url.indexOf('/sell_order') > -1) {
-            console.debug('[BuffUtility] Adjust_Listings (sell_order)');
-
+        InjectionServiceLib.onReady(() => {
             // inject some code
             function buff_utility_readNarrowOptions(selector: string): void {
                 let r: {
@@ -47,6 +43,10 @@ module Adjust_Listings {
             InjectionServiceLib.injectCode(`${buff_utility_readNarrowOptions.toString()}`);
 
             InjectionServiceLib.injectCSS(`
+                .f_Strong.f_Strong_Blue {
+                    color: ${GlobalConstants.COLOR_BLUE};
+                }
+            
                 td.img_td.can_expand img[data-buff-utility-expand-image] {
                     display: none;
                 }
@@ -75,6 +75,12 @@ module Adjust_Listings {
                     background-color: rgb(0 0 0 / 25%);
                     background-color: rgba(0, 0, 0, 0.25);
                 }`);
+        });
+    }
+
+    function process(transferData: InjectionService.TransferData<unknown>): void {
+        if (transferData.url.indexOf('/sell_order') > -1) {
+            console.debug('[BuffUtility] Adjust_Listings (sell_order)');
 
             // adjust listings
             adjustSellOrderListings(<InjectionService.TransferData<BuffTypes.SellOrder.Data>>transferData);
@@ -91,15 +97,23 @@ module Adjust_Listings {
         let data = transferData.data;
         let rows = <NodeListOf<HTMLElement>>document.querySelectorAll('tr[id^="sell_order_"]');
 
-        ExtensionSettings.save(Settings.STORED_CUSTOM_STICKER_SEARCH, (/&extra_tag_ids=[^&#]+/g.exec(transferData.url) ?? [''])[0]);
-
         // if we have no items or no rows don't adjust anything
         if (!data?.items?.length || !rows) return;
+
+        let strBalance = (<HTMLElement>document.querySelector('#navbar-cash-amount')).innerText;
+        let isBalanceYuan = strBalance.indexOf('¥') > -1;
+        let nrBalance = isBalanceYuan ? +(strBalance.replace('¥', '')) : 0;
+        console.debug('[BuffUtility] Balance:', strBalance, '->', isBalanceYuan, '->', nrBalance);
 
         let goodsInfo: BuffTypes.SellOrder.GoodsInfo = data.goods_infos[/goods_id=(\d+)/.exec(transferData.url)[1]];
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
-        const schemaData = SchemaHelper.find(goodsInfo.short_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
+        const schemaData = SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
+
+        // only override stickers if we actually can have any
+        if (schemaData?.sticker_amount > 0) {
+            ExtensionSettings.save(Settings.STORED_CUSTOM_STICKER_SEARCH, (/&extra_tag_ids=[^&#]+/g.exec(transferData.url) ?? [''])[0]);
+        }
 
         let floatdb_category;
         switch (goodsInfo.tags?.quality?.internal_name ?? 'normal') {
@@ -307,9 +321,9 @@ module Adjust_Listings {
                     wearContainer.appendChild(aMatchFloatDB);
                 }
 
-                if (aNarrow && enabledOptions[5]) {
-                    let spacerBr = document.createElement('br');
-                    wearContainer.append(spacerBr, aNarrow);
+                // TODO make narrow work
+                if (aNarrow && enabledOptions[5] && false) {
+                    wearContainer.append(document.createElement('br'), aNarrow);
                 }
             }
 
@@ -378,6 +392,20 @@ module Adjust_Listings {
 
             let paymentMethods = (<HTMLElement>priceContainer.querySelectorAll('div').item(1))?.outerHTML ?? '';
             priceContainer.innerHTML = (newHTML + paymentMethods);
+
+            if (isBalanceYuan) {
+                let aBuy = row.querySelector('td a.btn-buy-order[data-asset-info]');
+                let aBargain = dataRow.can_bargain ? row.querySelector('td a.bargain[data-asset-info]') : null;
+                // console.debug(aBuy, aBargain);
+
+                if (aBuy && price > nrBalance) {
+                    aBuy.setAttribute('style', `background: ${GlobalConstants.COLOR_BAD};`);
+                }
+
+                if (aBargain && +dataRow.lowest_bargain_price > nrBalance) {
+                    aBargain.setAttribute('style', `color: ${GlobalConstants.COLOR_BAD} !important;`);
+                }
+            }
         }
 
         if (updated_preview > 0) {

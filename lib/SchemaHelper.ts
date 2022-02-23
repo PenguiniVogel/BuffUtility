@@ -66,10 +66,7 @@ module SchemaHelper {
     let parsed: Schema = null;
 
     export function init(): void {
-        parsed = JSON.parse(raw_schema);
-
-        // remove from memory
-        raw_schema = null;
+        parsed = JSON.parse(SchemaData.RAW_SCHEMA);
 
         if (!parsed.formatted) {
             // set stuff

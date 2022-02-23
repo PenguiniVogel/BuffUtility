@@ -174,7 +174,7 @@ module InjectionService {
                 requireObjects[object] = _data[2];
             }
         } else if ((e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_ASK_NARROW) {
-
+            // TODO make narrow work
         }
     });
 

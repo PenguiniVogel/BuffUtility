@@ -66,7 +66,8 @@ module ExtensionSettings {
         STORED_CUSTOM_STICKER_SEARCH = 'stored_custom_sticker_search',
         LEECH_CONTRIBUTOR_KEY = 'leech_contributor_key',
         SHOW_TOAST_ON_ACTION = 'show_toast_on_action',
-        LISTING_OPTIONS = 'listing_options'
+        LISTING_OPTIONS = 'listing_options',
+        SHOW_FLOAT_BAR = 'show_float_bar'
     }
 
     export interface SettingsProperties {
@@ -88,6 +89,7 @@ module ExtensionSettings {
         [Settings.LEECH_CONTRIBUTOR_KEY]: string;
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
         [Settings.LISTING_OPTIONS]: boolean[];
+        [Settings.SHOW_FLOAT_BAR]: boolean;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -108,7 +110,8 @@ module ExtensionSettings {
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: '',
         [Settings.LEECH_CONTRIBUTOR_KEY]: '',
         [Settings.SHOW_TOAST_ON_ACTION]: false,
-        [Settings.LISTING_OPTIONS]: [true, true, true, true, false, false]
+        [Settings.LISTING_OPTIONS]: [true, true, true, true, false, false],
+        [Settings.SHOW_FLOAT_BAR]: true
     };
 
     const VALIDATORS: {
@@ -140,7 +143,8 @@ module ExtensionSettings {
             }
 
             return r;
-        }
+        },
+        [Settings.SHOW_FLOAT_BAR]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.SHOW_FLOAT_BAR])
     };
 
     let settings: SettingsProperties = {

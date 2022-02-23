@@ -1,10 +1,13 @@
 .idea
 .export
 .local
+.out
 
 test
 node_modules
 V2Repository
+
+package-lock.json
 
 sources/*.js
 sources/csgostash/*.js

@@ -1,0 +1,11 @@
+{
+    "name": "buffutility",
+    "version": "1.0.0",
+    "private": true,
+    "devDependencies": {
+        "@types/jquery": "3.5.13"
+    },
+    "dependencies": {
+        "typescript": "4.5.5"
+    }
+}

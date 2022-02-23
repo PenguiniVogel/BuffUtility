@@ -215,6 +215,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.APPLY_STEAM_TAX, isCheckboxSelected(Settings.APPLY_STEAM_TAX));
                 ExtensionSettings.save(Settings.SHOW_TOAST_ON_ACTION, isCheckboxSelected(Settings.SHOW_TOAST_ON_ACTION));
                 ExtensionSettings.save(Settings.LISTING_OPTIONS, readMultiCheckboxOption(Settings.LISTING_OPTIONS));
+                ExtensionSettings.save(Settings.SHOW_FLOAT_BAR, isCheckboxSelected(Settings.SHOW_FLOAT_BAR));
 
                 ExtensionSettings.save(Settings.DIFFERENCE_DOMINATOR, readSelectOption(Settings.DIFFERENCE_DOMINATOR));
                 ExtensionSettings.save(Settings.DEFAULT_SORT_BY, readSelectOption(Settings.DEFAULT_SORT_BY));
@@ -305,6 +306,12 @@ module Adjust_Settings {
                 'Match floatdb',
                 'Narrow'
             ]
+        }, table);
+
+        // show float bar
+        makeCheckboxOption(Settings.SHOW_FLOAT_BAR, {
+            title: 'Show float-bar',
+            description: 'Show the float-bar buff has on the side, can be expanded back if hidden!'
         }, table);
 
         // append normal settings

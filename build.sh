@@ -1,5 +1,5 @@
 # tsc
-tsc
+tsc --project production.tsconfig.json
 
 # delete previous export
 echo "Deleting previous export..."
@@ -15,38 +15,42 @@ echo " "
 f_copy() {
   for f in $1
   do
-    echo "Processing (cp) $f -> $DEST/$f"
-    cp "$f" "$DEST/$f"
+    echo "Processing (cp) $f -> $DEST/${f:5}"
+    cp "$f" "$DEST/${f:5}"
   done
 }
 
 # f_uglify
-f_uglify() {
-  for f in $1
-  do
-    echo "Processing (uglifyjs) $f -> $DEST/$f"
-    uglifyjs -c -o "$DEST/$f" "$f"
-  done
-}
+#f_uglify() {
+#  for f in $1
+#  do
+#    echo "Processing (uglifyjs) $f -> $DEST/${f:5}"
+#    uglifyjs -c -o "$DEST/${f:5}" "$f"
+#  done
+#}
 
 # f_build
 f_build() {
   # uglify files
+#  f_uglify ".out/sources/*.js"
+#  echo " "
+#
+#  f_uglify ".out/sources/csgostash/*.js"
+#  echo " "
+#
+#  f_uglify ".out/lib/*.js"
+#  echo " "
 
-  f_uglify "sources/*.js"
-  echo " "
+  # copy lib
+  f_copy ".out/lib/*.js"
 
-  f_uglify "sources/csgostash/*.js"
-  echo " "
+  # copy sources
+  f_copy ".out/sources/*.js"
 
-  f_uglify "lib/*.js"
-  echo " "
-
-  # copy files
-  # Don't compress the InjectionService, bad things happen :(
-  for f in "icon128.png" "icon48.png" "icon16.png" "lib/InjectionService.js"
+  # copy icons
+  for f in "icon128.png" "icon48.png" "icon16.png"
   do
-    f_copy $f
+    cp "$f" "$DEST/$f"
   done
   echo " "
 
