@@ -47,6 +47,9 @@ f_build() {
   # copy sources
   f_copy ".out/sources/*.js"
 
+  # copy csgostash
+  f_copy ".out/sources/csgostash/*.js"
+
   # copy icons
   for f in "icon128.png" "icon48.png" "icon16.png" "options.html" "options.js"
   do

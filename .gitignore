@@ -13,7 +13,4 @@ sources/*.js
 sources/csgostash/*.js
 lib/*.js
 
-!lib/CurrencyHelper.js
-!lib/localforage.min.js
-
 *.zip

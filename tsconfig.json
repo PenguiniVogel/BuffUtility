@@ -8,7 +8,7 @@
     },
     "files": [
         "lib/.GlobalConstants.ts",
-        "lib/CurrencyHelper.d.ts",
+        "lib/CurrencyHelper.ts",
         "lib/BuffTypes.d.ts",
         "lib/SchemaData.ts",
         "lib/SchemaHelper.ts",
