@@ -216,6 +216,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.SHOW_TOAST_ON_ACTION, isCheckboxSelected(Settings.SHOW_TOAST_ON_ACTION));
                 ExtensionSettings.save(Settings.LISTING_OPTIONS, readMultiCheckboxOption(Settings.LISTING_OPTIONS));
                 ExtensionSettings.save(Settings.SHOW_FLOAT_BAR, isCheckboxSelected(Settings.SHOW_FLOAT_BAR));
+                ExtensionSettings.save(Settings.COLOR_LISTINGS, readMultiCheckboxOption(Settings.COLOR_LISTINGS));
 
                 ExtensionSettings.save(Settings.DIFFERENCE_DOMINATOR, readSelectOption(Settings.DIFFERENCE_DOMINATOR));
                 ExtensionSettings.save(Settings.DEFAULT_SORT_BY, readSelectOption(Settings.DEFAULT_SORT_BY));
@@ -228,6 +229,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_CALCULATED_RATE, 1 / storedSettings[Settings.CUSTOM_CURRENCY_RATE]);
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_LEADING_ZEROS, Util.countLeadingZeros(`${storedSettings[Settings.CUSTOM_CURRENCY_CALCULATED_RATE]}`.split('.')[1] ?? ''));
 
+                ExtensionSettings.save(Settings.DATA_PROTECTION, isCheckboxSelected(Settings.DATA_PROTECTION));
                 // ExtensionSettings.save(Settings.LEECH_CONTRIBUTOR_KEY, readTextOption(Settings.LEECH_CONTRIBUTOR_KEY));
             }
         });
@@ -312,6 +314,16 @@ module Adjust_Settings {
         makeCheckboxOption(Settings.SHOW_FLOAT_BAR, {
             title: 'Show float-bar',
             description: 'Show the float-bar buff has on the side, can be expanded back if hidden!'
+        }, table);
+
+        // color listings
+        makeMultiCheckboxOption(Settings.COLOR_LISTINGS, {
+            title: 'Color purchase options',
+            description: 'Color purchase options, this will paint purchase options red if not affordable with the current held balance.',
+            options: [
+                'Color Buy',
+                'Color Bargain'
+            ]
         }, table);
 
         // append normal settings
@@ -413,6 +425,12 @@ module Adjust_Settings {
         makeTextOption(Settings.CUSTOM_CURRENCY_NAME, 'text', {
             title: 'Custom currency name',
             description: 'Set the name of the custom currency. Only active if \'Custom\' was selected in the \'Display Currency\' option.'
+        }, adv_table);
+
+        // data protection
+        makeCheckboxOption(Settings.DATA_PROTECTION, {
+            title: 'Data protection',
+            description: 'Blur some settings on the account page to protect yourself'
         }, adv_table);
 
         // append advanced settings

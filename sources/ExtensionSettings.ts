@@ -67,7 +67,9 @@ module ExtensionSettings {
         LEECH_CONTRIBUTOR_KEY = 'leech_contributor_key',
         SHOW_TOAST_ON_ACTION = 'show_toast_on_action',
         LISTING_OPTIONS = 'listing_options',
-        SHOW_FLOAT_BAR = 'show_float_bar'
+        SHOW_FLOAT_BAR = 'show_float_bar',
+        COLOR_LISTINGS = 'color_listings',
+        DATA_PROTECTION = 'data_protection'
     }
 
     export interface SettingsProperties {
@@ -90,6 +92,8 @@ module ExtensionSettings {
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
         [Settings.LISTING_OPTIONS]: boolean[];
         [Settings.SHOW_FLOAT_BAR]: boolean;
+        [Settings.COLOR_LISTINGS]: boolean[];
+        [Settings.DATA_PROTECTION]: boolean;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -111,7 +115,9 @@ module ExtensionSettings {
         [Settings.LEECH_CONTRIBUTOR_KEY]: '',
         [Settings.SHOW_TOAST_ON_ACTION]: false,
         [Settings.LISTING_OPTIONS]: [true, true, true, true, false, false],
-        [Settings.SHOW_FLOAT_BAR]: true
+        [Settings.SHOW_FLOAT_BAR]: true,
+        [Settings.COLOR_LISTINGS]: [false, false],
+        [Settings.DATA_PROTECTION]: true
     };
 
     const VALIDATORS: {
@@ -134,17 +140,10 @@ module ExtensionSettings {
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: (value) => value ?? DEFAULT_SETTINGS[Settings.STORED_CUSTOM_STICKER_SEARCH],
         [Settings.LEECH_CONTRIBUTOR_KEY]: (value) => value ?? DEFAULT_SETTINGS[Settings.LEECH_CONTRIBUTOR_KEY],
         [Settings.SHOW_TOAST_ON_ACTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.SHOW_TOAST_ON_ACTION]),
-        [Settings.LISTING_OPTIONS]: (value) => {
-            value = value ?? DEFAULT_SETTINGS[Settings.LISTING_OPTIONS];
-
-            let r = [];
-            for (let i = 0, l = 6; i < l; i ++) {
-                r[i] = validateBoolean(value[i], DEFAULT_SETTINGS[Settings.LISTING_OPTIONS][i]);
-            }
-
-            return r;
-        },
-        [Settings.SHOW_FLOAT_BAR]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.SHOW_FLOAT_BAR])
+        [Settings.LISTING_OPTIONS]: (value) => validateBooleanArray(value, DEFAULT_SETTINGS[Settings.LISTING_OPTIONS]),
+        [Settings.SHOW_FLOAT_BAR]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.SHOW_FLOAT_BAR]),
+        [Settings.COLOR_LISTINGS]: (value) => validateBooleanArray(value, DEFAULT_SETTINGS[Settings.COLOR_LISTINGS]),
+        [Settings.DATA_PROTECTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.DATA_PROTECTION])
     };
 
     let settings: SettingsProperties = {
@@ -174,6 +173,17 @@ module ExtensionSettings {
         if (/false|true/gi.test(value)) return value == 'true';
 
         return fallback;
+    }
+
+    function validateBooleanArray(value: any, fallback: boolean[]): boolean[] {
+        value = value ?? fallback;
+
+        let r = [];
+        for (let i = 0, l = fallback.length; i < l; i ++) {
+            r[i] = validateBoolean(value[i], fallback[i]);
+        }
+
+        return r;
     }
 
     // general

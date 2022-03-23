@@ -157,8 +157,7 @@ module InjectionService {
             if (transferData.data) {
                 responseCache.push(transferData);
 
-                if (responseCache.length > 10)
-                    responseCache.shift();
+                if (responseCache.length > 10) responseCache.shift();
             }
 
             // add a slight delay before dispatching the response somewhere
@@ -222,6 +221,14 @@ module InjectionService {
         requireObjects['g'] = false;
 
         InjectionServiceLib.injectCode(`${buff_utility_post_object_service.toString()}\nbuff_utility_post_object_service('g');\n${interceptNetworkRequests.toString()}\ninterceptNetworkRequests();`);
+
+        if (window.location.href.indexOf('/user-center/profile') > -1) {
+            InjectionServiceLib.injectCSS(`
+                span#mobile, a[href*="steamcommunity.com"] {
+                    filter: blur(5px);
+                }
+            `);
+        }
     }
 
     init();

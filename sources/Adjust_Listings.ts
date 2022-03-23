@@ -398,11 +398,11 @@ module Adjust_Listings {
                 let aBargain = dataRow.can_bargain ? row.querySelector('td a.bargain[data-asset-info]') : null;
                 // console.debug(aBuy, aBargain);
 
-                if (aBuy && price > nrBalance) {
+                if (aBuy && price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][0]) {
                     aBuy.setAttribute('style', `background: ${GlobalConstants.COLOR_BAD};`);
                 }
 
-                if (aBargain && +dataRow.lowest_bargain_price > nrBalance) {
+                if (aBargain && +dataRow.lowest_bargain_price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][1]) {
                     aBargain.setAttribute('style', `color: ${GlobalConstants.COLOR_BAD} !important;`);
                 }
             }
