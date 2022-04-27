@@ -1,10 +1,15 @@
 # tsc
+echo "Building tsc w/ production.tsconfig"
 tsc --project production.tsconfig.json
+echo " "
 
 # delete previous export
 echo "Deleting previous export..."
-rm -rf .export
+rm -rf ".export"
 echo " "
+
+# pause
+read -p "Press [ENTER] to resume ..."
 
 # setup folder structure
 echo "Checking directory structure..."

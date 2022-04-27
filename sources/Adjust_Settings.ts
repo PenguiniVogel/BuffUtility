@@ -64,7 +64,7 @@ module Adjust_Settings {
         table.append(tr);
     }
 
-    export function isCheckboxSelected(option: Settings): boolean {
+    function isCheckboxSelected(option: Settings): boolean {
         return !!document.getElementById(getOptionID(option))?.querySelector('span.on');
     }
 
@@ -196,8 +196,86 @@ module Adjust_Settings {
         table.append(tr);
     }
 
-    export function readTextOption(option: Settings): string {
+    function readTextOption(option: Settings): string {
         return (<HTMLInputElement>document.getElementById(getOptionID(option)))?.value;
+    }
+
+    function makeColorOption(mappedOption: Settings, prefInfo: { title: string, description?: string, options: string[] }, table: HTMLElement): void {
+        const containerTD = makeTD('', 't_Left');
+
+        let option: string[] = <string[]>storedSettings[mappedOption];
+
+        let html = '';
+        for (let i = 0, l = option.length; i < l; i ++) {
+            html += Util.buildHTML('div', {
+                style: {
+                    'display': 'grid',
+                    'grid-template-columns': '140px 10px',
+                    'margin-bottom': '5px'
+                },
+                content: [
+                    Util.buildHTML('label', {
+                        attributes: {
+                            'for': `${getOptionID(mappedOption)}-${i}`
+                        },
+                        content: [prefInfo.options[i]]
+                    }),
+                    Util.buildHTML('input', {
+                        attributes: {
+                            'id': `${getOptionID(mappedOption)}-${i}`,
+                            'type': 'color',
+                            'value': `${option[i]}`,
+                            'onchange': `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
+                        }
+                    }),
+                ]
+            });
+        }
+
+        containerTD.innerHTML = html;
+
+        const tr = makeTR();
+        tr.append(
+            makeTD(`BuffUtility<br>${prefInfo.title} ${prefInfo.description ? Util.buildHTML('i', {
+                class: 'icon icon_qa j_tips_handler',
+                attributes: {
+                    'data-title': 'Description',
+                    'data-content': prefInfo.description,
+                    'data-direction': 'right'
+                }
+            }) : ''}`, 't_Left c_Gray'),
+            containerTD,
+            makeTD(`<div id="bu_color_preview" style="background: ${option[0]}; padding: 10px;">
+<div style="text-align: center; background: ${option[0]}; color: ${option[2]}; border: 1px solid ${option[2]}; padding: 5px;">Text on normal <u>background</u></div>
+<div style="text-align: center; background: ${option[1]}; color: ${option[2]}; border: 1px solid ${option[2]}; padding: 5px;">Text on hover <u>background</u></div>
+<div style="text-align: center; background: ${option[0]}; color: ${option[3]}; border: 1px solid ${option[2]}; padding: 5px;">Disabled on <u>background</u></div>
+<div style="text-align: center; background: ${option[1]}; color: ${option[3]}; border: 1px solid ${option[2]}; padding: 5px;">Disabled on hover <u>background</u></div>
+</div>`, 't_Right')
+        );
+
+        table.append(tr);
+    }
+
+    function renderColorPreview(colors: string[]): void {
+        let container = document.getElementById('bu_color_preview');
+
+        container.setAttribute('style', `background: ${colors[0]}; padding: 10px;`);
+
+        container.innerHTML = `<div style="text-align: center; background: ${colors[0]}; color: ${colors[2]}; border: 1px solid ${colors[2]}; padding: 5px;">Text on normal <u>background</u></div>
+<div style="text-align: center; background: ${colors[1]}; color: ${colors[2]}; border: 1px solid ${colors[2]}; padding: 5px;">Text on hover <u>background</u></div>
+<div style="text-align: center; background: ${colors[0]}; color: ${colors[3]}; border: 1px solid ${colors[2]}; padding: 5px;">Disabled on <u>background</u></div>
+<div style="text-align: center; background: ${colors[1]}; color: ${colors[3]}; border: 1px solid ${colors[2]}; padding: 5px;">Disabled on hover <u>background</u></div>`;
+    }
+
+    function readColorOption(option: Settings): string[] {
+        let options = <NodeListOf<HTMLInputElement>>document.querySelectorAll(`[id^=${getOptionID(option)}-]`);
+
+        let result = [];
+        for (let i = 0, l = options.length; i < l; i ++) {
+            result[i] = options[i]?.value;
+        }
+
+        return result;
     }
 
     // add settings
@@ -217,6 +295,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.LISTING_OPTIONS, readMultiCheckboxOption(Settings.LISTING_OPTIONS));
                 ExtensionSettings.save(Settings.SHOW_FLOAT_BAR, isCheckboxSelected(Settings.SHOW_FLOAT_BAR));
                 ExtensionSettings.save(Settings.COLOR_LISTINGS, readMultiCheckboxOption(Settings.COLOR_LISTINGS));
+                ExtensionSettings.save(Settings.USE_SCHEME, isCheckboxSelected(Settings.USE_SCHEME));
 
                 ExtensionSettings.save(Settings.DIFFERENCE_DOMINATOR, readSelectOption(Settings.DIFFERENCE_DOMINATOR));
                 ExtensionSettings.save(Settings.DEFAULT_SORT_BY, readSelectOption(Settings.DEFAULT_SORT_BY));
@@ -230,7 +309,10 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_LEADING_ZEROS, Util.countLeadingZeros(`${storedSettings[Settings.CUSTOM_CURRENCY_CALCULATED_RATE]}`.split('.')[1] ?? ''));
 
                 ExtensionSettings.save(Settings.DATA_PROTECTION, isCheckboxSelected(Settings.DATA_PROTECTION));
-                // ExtensionSettings.save(Settings.LEECH_CONTRIBUTOR_KEY, readTextOption(Settings.LEECH_CONTRIBUTOR_KEY));
+
+                let colors = readColorOption(Settings.COLOR_SCHEME);
+                ExtensionSettings.save(Settings.COLOR_SCHEME, colors);
+                renderColorPreview(colors);
             }
         });
 
@@ -324,6 +406,12 @@ module Adjust_Settings {
                 'Color Buy',
                 'Color Bargain'
             ]
+        }, table);
+
+        // use scheme
+        makeCheckboxOption(Settings.USE_SCHEME, {
+            title: 'Use Color Scheme',
+            description: 'Use the defined color scheme (dark mode by default)'
         }, table);
 
         // append normal settings
@@ -431,6 +519,18 @@ module Adjust_Settings {
         makeCheckboxOption(Settings.DATA_PROTECTION, {
             title: 'Data protection',
             description: 'Blur some settings on the account page to protect yourself'
+        }, adv_table);
+
+        // color scheme
+        makeColorOption(Settings.COLOR_SCHEME, {
+            title: 'Color Scheme',
+            description: 'Color Scheme for whatever theme you want (Dark-Theme by default)',
+            options: [
+                'Background',
+                'Background Hover',
+                'Text Color',
+                'Text Color Disabled'
+            ]
         }, adv_table);
 
         // append advanced settings

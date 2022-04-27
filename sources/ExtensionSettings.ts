@@ -36,8 +36,10 @@ module ExtensionSettings {
     export const FILTER_STICKER_SEARCH = {
         'All': '',
         'Stickers': '&extra_tag_ids=non_empty',
+        'Stickers 100%': '&extra_tag_ids=non_empty&wearless_sticker=1',
         'No Stickers': '&extra_tag_ids=empty',
-        'Squad Combos': '&extra_tag_ids=squad_combos',
+        'Quad Combos': '&extra_tag_ids=squad_combos',
+        'Quad Combos 100%': '&extra_tag_ids=squad_combos&wearless_sticker=1',
         'Save Custom': '&extra_tag_ids=$1'
     };
 
@@ -69,7 +71,9 @@ module ExtensionSettings {
         LISTING_OPTIONS = 'listing_options',
         SHOW_FLOAT_BAR = 'show_float_bar',
         COLOR_LISTINGS = 'color_listings',
-        DATA_PROTECTION = 'data_protection'
+        DATA_PROTECTION = 'data_protection',
+        COLOR_SCHEME = 'color_scheme',
+        USE_SCHEME = 'use_scheme'
     }
 
     export interface SettingsProperties {
@@ -94,6 +98,8 @@ module ExtensionSettings {
         [Settings.SHOW_FLOAT_BAR]: boolean;
         [Settings.COLOR_LISTINGS]: boolean[];
         [Settings.DATA_PROTECTION]: boolean;
+        [Settings.COLOR_SCHEME]: string[];
+        [Settings.USE_SCHEME]: boolean;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -117,7 +123,9 @@ module ExtensionSettings {
         [Settings.LISTING_OPTIONS]: [true, true, true, true, false, false],
         [Settings.SHOW_FLOAT_BAR]: true,
         [Settings.COLOR_LISTINGS]: [false, false],
-        [Settings.DATA_PROTECTION]: true
+        [Settings.DATA_PROTECTION]: true,
+        [Settings.COLOR_SCHEME]: ['#121212', '#1f1f1f', '#bfbfbf', '#696969'],
+        [Settings.USE_SCHEME]: false
     };
 
     const VALIDATORS: {
@@ -143,7 +151,9 @@ module ExtensionSettings {
         [Settings.LISTING_OPTIONS]: (value) => validateBooleanArray(value, DEFAULT_SETTINGS[Settings.LISTING_OPTIONS]),
         [Settings.SHOW_FLOAT_BAR]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.SHOW_FLOAT_BAR]),
         [Settings.COLOR_LISTINGS]: (value) => validateBooleanArray(value, DEFAULT_SETTINGS[Settings.COLOR_LISTINGS]),
-        [Settings.DATA_PROTECTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.DATA_PROTECTION])
+        [Settings.DATA_PROTECTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.DATA_PROTECTION]),
+        [Settings.COLOR_SCHEME]: (value) => validateColorArray(value, DEFAULT_SETTINGS[Settings.COLOR_SCHEME]),
+        [Settings.USE_SCHEME]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.USE_SCHEME])
     };
 
     let settings: SettingsProperties = {
@@ -181,6 +191,27 @@ module ExtensionSettings {
         let r = [];
         for (let i = 0, l = fallback.length; i < l; i ++) {
             r[i] = validateBoolean(value[i], fallback[i]);
+        }
+
+        return r;
+    }
+
+    function validateColor(value: any, fallback: string): string {
+        value = value ?? fallback;
+
+        if (!/#[0-9a-f]{6}/i.test(value)) {
+            value = fallback;
+        }
+
+        return value;
+    }
+
+    function validateColorArray(value: any, fallback: string[]): string[] {
+        value = value ?? fallback;
+
+        let r = [];
+        for (let i = 0, l = fallback.length; i < l; i ++) {
+            r[i] = validateColor(value[i], fallback[i]);
         }
 
         return r;

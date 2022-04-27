@@ -57,3 +57,83 @@ function adjustFloatBar(): void {
 }
 
 adjustFloatBar();
+
+if (storedSettings[Settings.USE_SCHEME]) {
+    InjectionServiceLib.injectCSS(`
+/* market */
+.dark-theme #j_market_card,
+.dark-theme #j_list_card li {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+
+.dark-theme #j_list_card li {
+    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+}
+
+.dark-theme #j_list_card li, 
+.dark-theme #j_list_card li a, 
+.dark-theme #j_list_card li p {
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+}
+
+.dark-theme .pager li.disabled * {
+    color: ${storedSettings[Settings.COLOR_SCHEME][3]} !important;
+    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
+}
+
+.dark-theme .pager .next, .dark-theme .pager .page-link {
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+}
+
+/* listings */
+.dark-theme .detail-tab-cont,
+.dark-theme div.desc_content {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+
+.dark-theme div.stickers {
+    background: transparent;
+}
+
+.dark-theme .des_row,
+.dark-theme .pager li.disabled span,
+.dark-theme .list_tb th {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
+    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+}
+
+.dark-theme .list_tb td {
+    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+}
+
+.dark-theme .detail-tab-cont tr:hover {
+    background: ${storedSettings[Settings.COLOR_SCHEME][1]};
+}
+
+.dark-theme tr[id], 
+.dark-theme span.c_Gray, 
+.dark-theme .j_shoptip_handler, 
+.dark-theme .wear-value, 
+.dark-theme a.ctag,
+.dark-theme .pager li .page-link,
+.dark-theme .desc_content {
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+}
+
+/* settings */
+.dark-theme,
+.dark-theme .user-setting,
+.dark-theme .user-setting h3,
+.dark-theme .user-setting label[for],
+.dark-theme .user-setting select,
+.dark-theme .user-setting input[type] {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+}
+`);
+
+    let body = document.querySelector('body');
+    body.setAttribute('class', `${body.getAttribute('class')} dark-theme`);
+}

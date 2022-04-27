@@ -5,10 +5,6 @@ module Adjust_Market {
 
     // module
 
-    function init(): void {
-        window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
-    }
-
     function process(transferData: InjectionService.TransferData<unknown>): void {
         if (transferData.url.indexOf('/market/') == -1) {
             return;
@@ -17,7 +13,7 @@ module Adjust_Market {
 
             adjustMarketGoodsOrBuying(<InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>>transferData);
         } else {
-            console.debug(`[BuffUtility] Adjust_Market MISSING (${/(\/market\/.*)[?#]/g.exec(transferData.url)[1]})`);
+            console.debug(`[BuffUtility] Adjust_Market MISSING (${(/(\/market\/.*)[?#]/g.exec(transferData.url) ?? [null, transferData.url])[1]})`);
         }
 
         // if (transferData.url.indexOf('/market/') > -1) {
@@ -269,6 +265,7 @@ module Adjust_Market {
         InjectionServiceLib.injectCode(`${buff_utility_overrides.toString()}buff_utility_overrides();`, 'body');
     }
 
-    init();
+    // init();
+    window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
 
 }
