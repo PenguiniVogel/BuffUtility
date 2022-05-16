@@ -61,11 +61,13 @@ module SchemaHelper {
         };
     }
 
-    export const LAST_UPDATE = '2.0.9-14.01.2022';
+    export const LAST_UPDATE = '2.1.4-16.05.2022';
 
     let parsed: Schema = null;
 
     export function init(): void {
+        let start = Date.now();
+
         parsed = JSON.parse(SchemaData.RAW_SCHEMA);
 
         if (!parsed.formatted) {
@@ -120,6 +122,8 @@ module SchemaHelper {
             console.warn('[BuffUtility] Schema not formatted!');
             console.debug('[BuffUtility] Schema not formatted:', parsed, JSON.stringify(parsed));
         }
+
+        console.debug(`[BuffUtility] Schema (v. ${LAST_UPDATE}) loaded. (${Date.now() - start} ms)`);
     }
 
     /**

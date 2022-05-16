@@ -132,6 +132,11 @@ if (storedSettings[Settings.USE_SCHEME]) {
     background: ${storedSettings[Settings.COLOR_SCHEME][0]};
     color: ${storedSettings[Settings.COLOR_SCHEME][2]};
 }
+
+/* inventory */
+.dark-theme .detail-tab-cont .market-card {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
 `);
 
     let body = document.querySelector('body');
