@@ -40,6 +40,10 @@ module CurrencyHelper {
         return data;
     }
 
+    export function getOldData(): Data {
+        return JSON.parse(raw);
+    }
+
     /**
      * Uses the exchangerate.host free API to get current exchance rates with base CNY
      * @returns Exchange rates in format: {currency:value} 

@@ -328,7 +328,19 @@ module Adjust_Settings {
         table.setAttribute('width', '100%');
 
         // currency selection
-        const { rates, symbols } = CurrencyHelper.getData();
+        const currencyData: CurrencyHelper.Data | undefined = CurrencyHelper.getData();
+        let rates: CurrencyHelper.Data["rates"] = null;
+        let symbols: CurrencyHelper.Data["symbols"] = null;
+        if (typeof currencyData === "undefined") {
+            const data: CurrencyHelper.Data = CurrencyHelper.getOldData();
+            rates = data.rates;
+            symbols = data.symbols;
+        } else {
+            rates = currencyData.rates;
+            symbols = currencyData.symbols;
+        }
+       
+        
 
         let remapped = Object.keys(rates).map(x => {
             return {
