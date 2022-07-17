@@ -15,11 +15,43 @@ module CurrencyHelper {
     let data: Data;
 
     export function initialize(): void {
-        data = JSON.parse(raw);
+        //data = JSON.parse(raw);
+        fetchRates().then((res) => {
+            // if API not accessible, take old data
+            if (res === null) {
+                data = JSON.parse(raw);
+                return;
+            }
+            let rates = {};
+            for (let key in res)
+                rates[key] = [res[key], 2];
+            // takes only pre-defined symbols. API may be expandable for many more currencies
+            data = {
+                'date': new Date().toISOString().slice(0, 10),
+                'rates': rates,
+                'symbols': JSON.parse(raw).symbols
+            };
+            console.debug("[BuffUtility] Fetched new currency exchange rates.");
+        });
+
     }
 
     export function getData(): Data {
         return data;
+    }
+
+    /**
+     * Uses the exchangerate.host free API to get current exchance rates with base CNY
+     * @returns Exchange rates in format: {currency:value} 
+     */
+    async function fetchRates(): Promise<any> {
+        return fetch('https://api.exchangerate.host/latest?base=CNY')
+                .then(res => res.json())
+                .then(res => {
+                    if (!res?.success)
+                        return null;
+                    return res?.rates;
+                });
     }
 
 }
