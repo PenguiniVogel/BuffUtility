@@ -37,6 +37,9 @@ module CurrencyHelper {
     }
 
     export function getData(): Data {
+        if (typeof data === "undefined"){
+            return getOldData();
+        }
         return data;
     }
 

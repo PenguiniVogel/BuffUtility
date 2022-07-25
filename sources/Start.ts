@@ -56,7 +56,25 @@ function adjustFloatBar(): void {
     }
 }
 
+function adjustBalance(): void {
+    let balanceDiv = document.getElementsByClassName("store-account")[0].children[0];
+    let balYuan: number = +balanceDiv.innerHTML.split("¥ ")[1].split("<")[0];
+
+    let balNew = Util.buildHTML('span', {
+        content: [
+            Util.buildHTML('br', {}),
+            Util.buildHTML('span', {
+                class: 'c_Gray f_12px',
+                content: [ `(${Util.convertCNY(balYuan)})` ]
+            })
+        ]
+    });
+
+    balanceDiv.innerHTML += balNew;
+}
+
 adjustFloatBar();
+adjustBalance();
 
 if (storedSettings[Settings.USE_SCHEME]) {
     InjectionServiceLib.injectCSS(`
