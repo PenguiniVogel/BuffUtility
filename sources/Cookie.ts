@@ -15,7 +15,8 @@ module Cookie {
 
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
 
-        document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+        console.debug(`${name}=${value};path=/;expires=${date.toUTCString()}`);
+        document.cookie = `${name}=${value};path=/;expires=${date.toUTCString()}`;
     }
 
 }

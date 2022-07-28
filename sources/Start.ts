@@ -7,7 +7,10 @@ declare var storedSettings: ExtensionSettings.SettingsProperties;
 
 SchemaHelper.init();
 ExtensionSettings.load();
-CurrencyHelper.initialize();
+
+// currency stuff
+let currencyCache = Cookie.read(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
+CurrencyHelper.initialize(currencyCache, !currencyCache);
 
 storedSettings = ExtensionSettings.getAll();
 
@@ -56,7 +59,26 @@ function adjustFloatBar(): void {
     }
 }
 
+// TODO this needs to be executed upon transactions to update the converted balance
+function adjustAccountBalance(): void {
+    let balanceDiv = document.querySelector('div.store-account > h4');
+    let balYuan: number = +(<HTMLElement>balanceDiv.querySelector('#navbar-cash-amount')).innerText.replace('¥ ', '');
+
+    let balConverted = Util.buildHTML('span', {
+        content: [
+            '<br>',
+            Util.buildHTML('span', {
+                class: 'c_Gray f_12px',
+                content: [ `(${Util.convertCNY(balYuan)})` ]
+            })
+        ]
+    });
+
+    balanceDiv.innerHTML += balConverted;
+}
+
 adjustFloatBar();
+adjustAccountBalance();
 
 if (storedSettings[Settings.USE_SCHEME]) {
     InjectionServiceLib.injectCSS(`

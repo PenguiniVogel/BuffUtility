@@ -239,6 +239,8 @@ module Util {
         return `${result}${selfClosing ? '/>' : `</${tag}>`}`;
     }
 
+    // string compare
+
     export function pStrCompare(first, second): number {
         first = first.replace(/\s+/g, '');
         second = second.replace(/\s+/g, '');
