@@ -159,6 +159,15 @@ if (storedSettings[Settings.USE_SCHEME]) {
 .dark-theme .detail-tab-cont .market-card {
     background: ${storedSettings[Settings.COLOR_SCHEME][0]};
 }
+
+/* favorites */
+.dark-theme .l_Layout .cont_main .user-record {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+.dark-theme .l_Layout .cont_main .user-record a,
+.dark-theme .l_Layout .cont_main .user-record .delete-bookmark {
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+}
 `);
 
     let body = document.querySelector('body');
