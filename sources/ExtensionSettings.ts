@@ -266,4 +266,8 @@ module ExtensionSettings {
         }
     }
 
+    export function saveCurrencyConversion(): void {
+
+    }
+
 }

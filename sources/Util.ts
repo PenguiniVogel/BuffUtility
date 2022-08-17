@@ -268,4 +268,17 @@ module Util {
         return (2.0 * intersectionSize) / (first.length + second.length - 2);
     }
 
+    // format Date
+
+    export function formatDate(inDate: Date, format: string = 'yyyy-mm-dd'): string {
+        let year: string = `${inDate.getFullYear()}`;
+        let month: string = (inDate.getMonth() + 1) < 10 ? `0${inDate.getMonth() + 1}` : `${inDate.getMonth() + 1}`;
+        let day: string = inDate.getDate() < 10 ? `0${inDate.getDate()}` : `${inDate.getDate()}`;
+
+        return format
+            .replace('yyyy', year)
+            .replace('mm', month)
+            .replace('dd', day);
+    }
+
 }

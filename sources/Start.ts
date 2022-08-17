@@ -8,11 +8,48 @@ declare var storedSettings: ExtensionSettings.SettingsProperties;
 SchemaHelper.init();
 ExtensionSettings.load();
 
-// currency stuff
-let currencyCache = Cookie.read(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
-CurrencyHelper.initialize(currencyCache, !currencyCache);
-
 storedSettings = ExtensionSettings.getAll();
+
+// currency stuff
+{
+    let currencyCache = Cookie.read(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
+    let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache);
+    let dateToday = Util.formatDate(new Date());
+
+    function cacheCurrency(date: string): void {
+        let segment: CurrencyHelper.Data = {
+            date: date,
+            rates: {
+                [storedSettings[Settings.SELECTED_CURRENCY]]: CurrencyHelper.getData().rates[storedSettings[Settings.SELECTED_CURRENCY]]
+            },
+            symbols: {}
+        };
+
+        console.debug(segment);
+
+        Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, JSON.stringify(segment));
+    }
+
+    if (parsedCurrencyCache) {
+        console.debug(parsedCurrencyCache.date, dateToday);
+        if (parsedCurrencyCache.date != dateToday) {
+            CurrencyHelper.initialize(null, true);
+
+            cacheCurrency(dateToday);
+        } else {
+            CurrencyHelper.initialize(null, false);
+            let cachedRates = Object.keys(parsedCurrencyCache.rates);
+            for (let key of cachedRates) {
+                console.debug(`[BuffUtility] Reading cached current rates for ${key}: [${CurrencyHelper.getData().date}] ${CurrencyHelper.getData().rates[key]} -> [${parsedCurrencyCache.date}] ${parsedCurrencyCache.rates[key]}`);
+                CurrencyHelper.getData().rates[key] = parsedCurrencyCache.rates[key];
+            }
+        }
+    } else {
+        CurrencyHelper.initialize(null, true);
+
+        cacheCurrency(dateToday);
+    }
+}
 
 function adjustFloatBar(): void {
     let divFloatBar = document.querySelector('body > div.floatbar');
@@ -22,12 +59,12 @@ function adjustFloatBar(): void {
 
     divFloatBar.setAttribute('id', GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR);
 
-    let h = function () {
+    let hideFloatBar = function () {
         document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'display: none;');
         document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'padding: 10px 4px; cursor: pointer; user-select: none; text-align: center; background: #2f3744; color: #959595; text-decoration: none;');
     };
 
-    let s = function () {
+    let showFloatBar = function () {
         document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR}`).setAttribute('style', '');
         document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'display: none;');
     };
@@ -36,7 +73,7 @@ function adjustFloatBar(): void {
 
     p.setAttribute('class', 'gotop');
     p.setAttribute('style', 'cursor: pointer; user-select: none; text-align: center; padding: 22px 0px; color: #959595; text-decoration: none;');
-    p.setAttribute('onclick', `(${h.toString()})();`);
+    p.setAttribute('onclick', `(${hideFloatBar.toString()})();`);
 
     p.innerText = '>';
 
@@ -46,16 +83,16 @@ function adjustFloatBar(): void {
 
     divExpandFloatBar.setAttribute('id', GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR);
     divExpandFloatBar.setAttribute('class', 'floatbar');
-    divExpandFloatBar.setAttribute('onclick', `(${s.toString()})();`);
+    divExpandFloatBar.setAttribute('onclick', `(${showFloatBar.toString()})();`);
 
     divExpandFloatBar.innerText = '<';
 
     divFloatBar.parentElement.appendChild(divExpandFloatBar);
 
     if (storedSettings[Settings.SHOW_FLOAT_BAR]) {
-        s();
+        showFloatBar();
     } else {
-        h();
+        hideFloatBar();
     }
 }
 
