@@ -42,6 +42,55 @@ module Adjust_Listings {
 
             InjectionServiceLib.injectCode(`${buff_utility_readNarrowOptions.toString()}`);
 
+            function buff_utility_forceNewestReload(): void {
+                const reloadKey = 'bu_reload';
+                let hash = getParamsFromHash();
+
+                let currentReload = +(hash[reloadKey] ?? '0');
+
+                currentReload ++;
+
+                updateHashData({
+                    page: 1,
+                    sort_by: 'created.desc',
+                    [reloadKey]: currentReload
+                });
+            }
+
+            InjectionServiceLib.injectCode(`${buff_utility_forceNewestReload.toString()}`);
+
+            let a = document.createElement('a');
+            a.setAttribute('href', 'javascript:buff_utility_forceNewestReload();');
+            a.setAttribute('class', 'i_Btn i_Btn_mid i_Btn_sub');
+            a.setAttribute('style', 'margin: 0; min-width: 32px;');
+            a.innerHTML = '<i class="icon icon_refresh" style=" margin: 0 0 3px 0; filter: grayscale(1) brightness(2);"></i>';
+
+            switch (storedSettings[Settings.LOCATION_RELOAD_NEWEST]) {
+                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE:
+                    break;
+                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK:
+                    document.querySelector('#batch-buy-btn')?.parentElement?.appendChild(a);
+                    break;
+                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.SORT:
+                    document.querySelector('#asset_tag-filter div.l_Right div.w-Select-Multi[name="sort"]')?.parentElement?.appendChild(a);
+                    break;
+                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.CENTER:
+                    document.querySelector('#asset_tag-filter div.l_Left')?.parentElement?.appendChild(a);
+                    break;
+                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.LEFT:
+                    document.querySelector('#asset_tag-filter div.l_Left')?.prepend(a);
+                    break;
+                default:
+                    break;
+            }
+
+            // todo add force newest
+            /*
+<a href="javascript:buff_utility_forceNewestReload();" class="i_Btn i_Btn_mid i_Btn_sub" id="buff_utility_force_newest" style="margin: 0; min-width: 32px;">
+    <i class="icon icon_refresh" style=" margin: 0 0 3px 0; filter: grayscale(1) brightness(2);"></i>
+</a>
+             */
+
             InjectionServiceLib.injectCSS(`
                 .f_Strong.f_Strong_Blue {
                     color: ${GlobalConstants.COLOR_BLUE};

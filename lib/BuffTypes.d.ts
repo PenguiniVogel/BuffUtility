@@ -1106,6 +1106,10 @@ declare module BuffTypes {
 
 // global buff.163 Functions
 
+interface JQuery<TElement = HTMLElement> extends Iterable<TElement> {
+    showLoading(): void;
+}
+
 declare function buff_utility_readNarrowOptions(selector: string): void;
 
 declare function sendRequest(url: string, config: {
@@ -1115,6 +1119,10 @@ declare function sendRequest(url: string, config: {
     success: (data: any) => void
 }): unknown;
 
-interface JQuery<TElement = HTMLElement> extends Iterable<TElement> {
-    showLoading(): void;
+declare function getParamsFromHash(): {
+    [param: string]: string
 }
+
+declare function updateHashData(params: {
+    [param: string]: any
+}): void;

@@ -23,6 +23,14 @@ module ExtensionSettings {
        w3920xh3680,
     }
 
+    export const enum LOCATION_RELOAD_NEWEST_VALUES {
+        NONE,
+        BULK,
+        SORT,
+        CENTER,
+        LEFT
+    }
+
     export const FILTER_SORT_BY = {
         'Default': 'default',
         'Newest': 'created.desc',
@@ -73,7 +81,8 @@ module ExtensionSettings {
         COLOR_LISTINGS = 'color_listings',
         DATA_PROTECTION = 'data_protection',
         COLOR_SCHEME = 'color_scheme',
-        USE_SCHEME = 'use_scheme'
+        USE_SCHEME = 'use_scheme',
+        LOCATION_RELOAD_NEWEST = 'location_reload_newest'
     }
 
     export interface SettingsProperties {
@@ -100,6 +109,7 @@ module ExtensionSettings {
         [Settings.DATA_PROTECTION]: boolean;
         [Settings.COLOR_SCHEME]: string[];
         [Settings.USE_SCHEME]: boolean;
+        [Settings.LOCATION_RELOAD_NEWEST]: number;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -125,7 +135,8 @@ module ExtensionSettings {
         [Settings.COLOR_LISTINGS]: [false, false],
         [Settings.DATA_PROTECTION]: true,
         [Settings.COLOR_SCHEME]: ['#121212', '#1f1f1f', '#bfbfbf', '#696969'],
-        [Settings.USE_SCHEME]: false
+        [Settings.USE_SCHEME]: false,
+        [Settings.LOCATION_RELOAD_NEWEST]: LOCATION_RELOAD_NEWEST_VALUES.NONE
     };
 
     const VALIDATORS: {
@@ -153,7 +164,8 @@ module ExtensionSettings {
         [Settings.COLOR_LISTINGS]: (value) => validateBooleanArray(value, DEFAULT_SETTINGS[Settings.COLOR_LISTINGS]),
         [Settings.DATA_PROTECTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.DATA_PROTECTION]),
         [Settings.COLOR_SCHEME]: (value) => validateColorArray(value, DEFAULT_SETTINGS[Settings.COLOR_SCHEME]),
-        [Settings.USE_SCHEME]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.USE_SCHEME])
+        [Settings.USE_SCHEME]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.USE_SCHEME]),
+        [Settings.LOCATION_RELOAD_NEWEST]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.LOCATION_RELOAD_NEWEST])
     };
 
     let settings: SettingsProperties = {

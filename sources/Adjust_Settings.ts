@@ -302,6 +302,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.DEFAULT_STICKER_SEARCH, readSelectOption(Settings.DEFAULT_STICKER_SEARCH));
                 ExtensionSettings.save(Settings.EXPAND_TYPE, readSelectOption(Settings.EXPAND_TYPE));
                 ExtensionSettings.save(Settings.CUSTOM_FOP, readSelectOption(Settings.CUSTOM_FOP));
+                ExtensionSettings.save(Settings.LOCATION_RELOAD_NEWEST, readSelectOption(Settings.LOCATION_RELOAD_NEWEST));
 
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_RATE, readTextOption(Settings.CUSTOM_CURRENCY_RATE));
                 ExtensionSettings.save(Settings.CUSTOM_CURRENCY_NAME, readTextOption(Settings.CUSTOM_CURRENCY_NAME));
@@ -502,6 +503,24 @@ module Adjust_Settings {
         }), {
             title: 'Custom FOP',
             description: 'Set the factor (or field) of preview, you should *not* change this from \'Auto\'.'
+        }, adv_table);
+
+        // location reload newest
+        makeSelectOption(Settings.LOCATION_RELOAD_NEWEST, [
+            [ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE, 'None'],
+            [ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK, 'Bulk'],
+            [ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.SORT, 'Sort'],
+            [ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.CENTER, 'Center'],
+            [ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.LEFT, 'Left']
+        ].map(x => {
+            return {
+                value: `${x[0]}`,
+                displayStr: `${x[1]}`,
+                selected: x[0] == storedSettings[Settings.LOCATION_RELOAD_NEWEST]
+            };
+        }), {
+            title: 'Location Reload Newest',
+            description: 'Sets the location of the forced newest reload.\nNone: Don\'t show\nBulk: Next to \'Bulk Buy\'\nSort: Next to sorting\nCenter: In the center\nLeft: Left most position'
         }, adv_table);
 
         // custom currency fields
