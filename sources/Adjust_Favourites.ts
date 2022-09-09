@@ -83,6 +83,24 @@ module AdjustFavourites {
             aShare.setAttribute('target', '_blank');
 
             nameContainer.parentElement.appendChild(aShare);
+
+            //TODO: color coding on available balance
+            let parentBargain = row.lastElementChild;
+            let aBargain = <HTMLElement>parentBargain.querySelector('a').cloneNode(true);
+            // items below 100 yuan cannot be bargained
+            if (+aBargain.getAttribute('data-price') >= 100) {
+                parentBargain.setAttribute('style', 'line-height: 200%;');
+                aBargain.setAttribute('class', 'c_Blue2 bargain i_Btn i_Btn_mid');
+                aBargain.setAttribute('style', 'margin-left: 10px; border: 2px solid #4773C8; background: none; border-radius: 10px;');
+                aBargain.setAttribute('data-lowest-bargain-price', `${((+aBargain.getAttribute('data-price'))*0.8).toFixed(1)}`);
+                aBargain.removeAttribute('data-goods-sell-min-price');
+                aBargain.removeAttribute('data-cooldown');
+                aBargain.innerText = 'Bargain';
+                parentBargain.querySelector('span').setAttribute('style', 'margin-left: 50px;');
+
+                parentBargain.querySelector('a').after(aBargain);
+            }
+
         }
     }
 
