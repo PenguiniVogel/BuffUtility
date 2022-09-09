@@ -314,6 +314,8 @@ module Adjust_Settings {
                 let colors = readColorOption(Settings.COLOR_SCHEME);
                 ExtensionSettings.save(Settings.COLOR_SCHEME, colors);
                 renderColorPreview(colors);
+
+                ExtensionSettings.save(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, isCheckboxSelected(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN));
             }
         });
 
@@ -557,6 +559,26 @@ module Adjust_Settings {
         adv_blank20.setAttribute('class', 'blank20');
 
         userSettings.append(adv_h3, adv_table, adv_blank20);
+
+        // Add experimental settings
+        const ex_h3 = document.createElement('h3');
+        ex_h3.innerHTML = 'BuffUtility Experimental Settings';
+
+        const ex_table = document.createElement('table');
+        ex_table.setAttribute('class', 'list_tb');
+        ex_table.setAttribute('width', '100%');
+
+        // experimental bargain favourites
+        makeCheckboxOption(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, {
+            title: 'Favourite Bargain',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nShow the \'Bargain\' feature on favourites.'
+        }, ex_table);
+
+        // append experimental settings
+        const ex_blank20 = document.createElement('div');
+        ex_blank20.setAttribute('class', 'blank20');
+
+        userSettings.append(ex_h3, ex_table, ex_blank20);
 
         // Add leech settings
         const leech_h3 = document.createElement('h3');

@@ -82,7 +82,9 @@ module ExtensionSettings {
         DATA_PROTECTION = 'data_protection',
         COLOR_SCHEME = 'color_scheme',
         USE_SCHEME = 'use_scheme',
-        LOCATION_RELOAD_NEWEST = 'location_reload_newest'
+        LOCATION_RELOAD_NEWEST = 'location_reload_newest',
+
+        EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain'
     }
 
     export interface SettingsProperties {
@@ -110,6 +112,8 @@ module ExtensionSettings {
         [Settings.COLOR_SCHEME]: string[];
         [Settings.USE_SCHEME]: boolean;
         [Settings.LOCATION_RELOAD_NEWEST]: number;
+
+        [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: boolean;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -136,7 +140,9 @@ module ExtensionSettings {
         [Settings.DATA_PROTECTION]: true,
         [Settings.COLOR_SCHEME]: ['#121212', '#1f1f1f', '#bfbfbf', '#696969'],
         [Settings.USE_SCHEME]: false,
-        [Settings.LOCATION_RELOAD_NEWEST]: LOCATION_RELOAD_NEWEST_VALUES.NONE
+        [Settings.LOCATION_RELOAD_NEWEST]: LOCATION_RELOAD_NEWEST_VALUES.NONE,
+
+        [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: true
     };
 
     const VALIDATORS: {
@@ -165,7 +171,9 @@ module ExtensionSettings {
         [Settings.DATA_PROTECTION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.DATA_PROTECTION]),
         [Settings.COLOR_SCHEME]: (value) => validateColorArray(value, DEFAULT_SETTINGS[Settings.COLOR_SCHEME]),
         [Settings.USE_SCHEME]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.USE_SCHEME]),
-        [Settings.LOCATION_RELOAD_NEWEST]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.LOCATION_RELOAD_NEWEST])
+        [Settings.LOCATION_RELOAD_NEWEST]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.LOCATION_RELOAD_NEWEST]),
+
+        [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN])
     };
 
     let settings: SettingsProperties = {
@@ -276,10 +284,6 @@ module ExtensionSettings {
 
             console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
         }
-    }
-
-    export function saveCurrencyConversion(): void {
-
     }
 
 }
