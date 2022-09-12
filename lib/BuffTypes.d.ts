@@ -1102,6 +1102,207 @@ declare module BuffTypes {
 
     }
 
+    /**
+     * Response type for: <br>
+     * <code>/api/market/sell_order/top_bookmarked</code>
+     */
+    /** */
+    export module TopPopular {
+
+        export interface TagInfo {
+            category: string;
+            id: number;
+            internal_name: string;
+            localized_name: string;
+        }
+
+        export interface Tags {
+            [name: string]: TagInfo
+        }
+
+        export interface Custom {
+            category: string;
+            id: number;
+            internal_name: string;
+            localized_name: string;
+        }
+
+        export interface GoodsInfo {
+            appid: number;
+            can_3d_inspect: boolean;
+            can_inspect: boolean;
+            description?: any;
+            game: string;
+            goods_id: number;
+            icon_url: string;
+            item_id?: any;
+            market_hash_name: string;
+            market_min_price: string;
+            name: string;
+            original_icon_url: string;
+            short_name: string;
+            steam_price: string;
+            steam_price_cny: string;
+            tags: Tags;
+        }
+
+        export interface GoodsInfos {
+            [id: number]: GoodsInfo
+        }
+
+        export interface MetaPhysicData {
+            color: string;
+            name: string;
+        }
+
+        export interface MetaPhysic {
+            data: MetaPhysicData;
+            title: string;
+        }
+
+        export interface Sticker {
+            category: string;
+            img_url: string;
+            name: string;
+            slot: number;
+            sticker_id: number;
+            wear: number;
+        }
+
+        export interface TierData {
+            color: string;
+            name: string;
+        }
+
+        export interface TournamentTag {
+            category: string;
+            internal_name: string;
+            localized_name: string;
+        }
+
+        export interface PhaseData {
+            color: string;
+            name: string;
+        }
+
+        export interface Info {
+            fraudwarnings: string;
+            icon_url: string;
+            inspect_en_size: string;
+            inspect_en_url: string;
+            inspect_mobile_size: string;
+            inspect_mobile_url: string;
+            inspect_size: string;
+            inspect_start_at: string;
+            inspect_state: number;
+            inspect_trn_size: string;
+            inspect_trn_url: string;
+            inspect_url: string;
+            inspect_version: number;
+            inspected_at: string;
+            metaphysic: MetaPhysic;
+            original_icon_url: string;
+            paintindex: number;
+            paintseed: number;
+            stickers: Sticker[];
+            tier_data: TierData;
+            tournament_tags: TournamentTag[];
+            phase_data: PhaseData;
+        }
+
+        export interface AssetInfo {
+            action_link: string;
+            appid: number;
+            assetid: string;
+            classid: string;
+            contextid: number;
+            goods_id: number;
+            has_tradable_cooldown: boolean;
+            info: Info;
+            instanceid: string;
+            paintwear: string;
+            tradable_cooldown_text: string;
+            tradable_unfrozen_time?: any;
+        }
+
+        export interface CouponInfo {
+            cdkey_id: string;
+            cdkey_text: string;
+            coupon_type: string;
+        }
+
+        export interface Item {
+            allow_bargain: boolean;
+            appid: number;
+            asset_info: AssetInfo;
+            background_image_url: string;
+            can_bargain: boolean;
+            can_use_inspect_trn_url: boolean;
+            cannot_bargain_reason: string;
+            coupon_infos: CouponInfo[];
+            created_at: number;
+            description: string;
+            featured: number;
+            fee: string;
+            game: string;
+            goods_id: number;
+            id: string;
+            img_src: string;
+            income: string;
+            lowest_bargain_price: string;
+            mode: number;
+            price: string;
+            recent_average_duration?: any;
+            recent_deliver_rate?: any;
+            state: number;
+            tradable_cooldown?: any;
+            updated_at: number;
+            user_id: string;
+        }
+
+        export interface PreviewScreenshots {
+            bg_img: string;
+            top_bookmark: string;
+        }
+
+        export interface UserInfo {
+            avatar: string;
+            avatar_safe: string;
+            is_auto_accept: boolean;
+            is_premium_vip: boolean;
+            nickname: string;
+            seller_level: number;
+            shop_id: string;
+            user_id: string;
+            v_types?: any;
+        }
+
+        export interface UserInfos {
+            [name: string]: UserInfo
+        }
+
+        export interface Data {
+            fop_str: string;
+            goods_infos: GoodsInfos;
+            items: Item[];
+            page_num: number;
+            page_size: number;
+            preview_screenshots: PreviewScreenshots;
+            show_game_cms_icon: boolean;
+            src_url_background: string;
+            total_count: number;
+            total_page: number;
+            user_infos: UserInfos;
+        }
+
+        export interface RootObject {
+            code: string;
+            data: Data;
+            msg?: any;
+        }
+
+    }
+
 }
 
 // global buff.163 Functions
