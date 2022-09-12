@@ -10,8 +10,10 @@ module Adjust_Market {
             return;
         } else if (transferData.url.indexOf('/market/goods') > -1) {
             console.debug('[BuffUtility] Adjust_Market (/goods)');
-
             adjustMarketGoodsOrBuying(<InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>>transferData);
+        } else if (transferData.url.indexOf('/market/sell_order/top_bookmarked') > -1) {
+            console.debug('[BuffUtility] Adjust_Market (/sell_order/top_bookmarked)');
+            adjustMarketTopBookmarked(<InjectionService.TransferData<BuffTypes.TopPopular.Data>>transferData);
         } else {
             console.debug(`[BuffUtility] Adjust_Market MISSING (${(/(\/market\/.*)[?#]/g.exec(transferData.url) ?? [null, transferData.url])[1]})`);
         }
@@ -190,6 +192,10 @@ module Adjust_Market {
         if (info.length > 0) {
             console.debug('[BuffUtility] Market Info:\n', info.join('\n '));
         }
+    }
+
+    function adjustMarketTopBookmarked(transferData: InjectionService.TransferData<BuffTypes.TopPopular.Data>): void {
+        // here you go, you can merge this with your changed
     }
 
     function addSpecialTab(): void {
