@@ -12,6 +12,10 @@ module Adjust_Market {
             console.debug('[BuffUtility] Adjust_Market (/goods)');
 
             adjustMarketGoodsOrBuying(<InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>>transferData);
+        } else if (transferData.url.indexOf('/market/sell_order/top_bookmarked') > -1) {
+            console.debug('[BuffUtility] Adjust_Market (/sell_oder/top_bookmarked)');
+
+            adjustMarketTopBookmarked(<InjectionService.TransferData<BuffTypes.TopBookmarked.Data>>transferData);
         } else {
             console.debug(`[BuffUtility] Adjust_Market MISSING (${(/(\/market\/.*)[?#]/g.exec(transferData.url) ?? [null, transferData.url])[1]})`);
         }
@@ -269,3 +273,70 @@ module Adjust_Market {
     window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
 
 }
+
+function adjustMarketTopBookmarked(transferData: InjectionService.TransferData<BuffTypes.TopBookmarked.Data>): void {
+    const liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_list_card li');
+
+    let info: string[] = [];
+
+    let data = transferData.data;
+
+    // if we have no items don't adjust anything
+    if (!data?.items?.length) return;
+
+    for (let i = 0, l = liList.length; i < l; i ++) {
+        const dataRow = data.items[i];
+        const li = liList.item(i);
+        const tagBox = <HTMLElement>li.querySelector('.tagBox > .g_Right');
+        const nameContainer = <HTMLElement>li.querySelector('h3 > a');
+
+        let itemName = nameContainer.innerText.replace('（★）', '');
+        
+        const schemaData = SchemaHelper.find(itemName, true, itemName.indexOf('|') == -1)[0];
+
+        if (dataRow.appid == 730) {
+            const aShare = document.createElement('a');
+            aShare.setAttribute('style', 'cursor: pointer;');
+            aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
+            aShare.setAttribute('target', '_blank');
+            aShare.innerHTML = '<i class="icon icon_link j_tips_handler" data-direction="bottom" data-title="Share"></i>';
+
+            let aCopyGen = document.createElement('a');
+            let gen;
+            if (schemaData?.type == 'Gloves') {
+                aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gengl" style="-webkit-filter: invert(50%);"></i>';
+                // !gengl weapon_id paint_id pattern float
+                gen = `!gengl ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
+            } else {
+                aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gen"  style="-webkit-filter: invert(50%);"></i>';
+                // !gen weapon_id paint_id pattern float sticker1 wear1...
+                gen = `!gen ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
+                if (dataRow.asset_info.info?.stickers?.length > 0) {
+                    let stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
+                    for (let l_sticker of dataRow.asset_info.info.stickers) {
+                        stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
+                    }
+                    gen += ` ${stickers.join(' ')}`;
+                }
+            }
+            
+            if (storedSettings[Settings.SHOW_TOAST_ON_ACTION]) {
+                aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
+            } else {
+                aCopyGen.setAttribute('href', 'javascript:;');
+            }
+            aCopyGen.setAttribute('title', gen);
+            aCopyGen.setAttribute('style', 'cursor: pointer;');
+            aCopyGen.addEventListener('click', () => {
+                navigator?.clipboard?.writeText(gen).then(() => {
+                    // alert(`Copied ${gen} to clipboard!`);
+                    console.debug(`[BuffUtility] Copy gen: ${gen}`);
+                }).catch((e) => console.error('[BuffUtility]', e));
+            });
+
+            tagBox.insertBefore(aShare, tagBox.firstChild);
+            tagBox.insertBefore(aCopyGen, tagBox.firstChild);
+        }
+    }
+}
+

@@ -88,6 +88,7 @@ module AdjustFavourites {
 
             if (storedSettings[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]) {
                 //TODO: color coding on available balance
+                //Note: this feature is unable to check if the seller has disabled bargaining
                 let parentBargain = row.lastElementChild;
                 let aBargain = <HTMLElement>parentBargain.querySelector('a').cloneNode(true);
                 // items below 100 yuan cannot be bargained
