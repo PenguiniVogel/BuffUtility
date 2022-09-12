@@ -196,7 +196,6 @@ module Adjust_Market {
 
     function adjustMarketTopBookmarked(transferData: InjectionService.TransferData<BuffTypes.TopPopular.Data>): void {
         const liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_list_card li');
-        let info: string[] = [];
         let data = transferData.data;
         let goods_infos = data.goods_infos;
 
