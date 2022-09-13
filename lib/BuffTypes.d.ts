@@ -1327,3 +1327,9 @@ declare function getParamsFromHash(): {
 declare function updateHashData(params: {
     [param: string]: any
 }): void;
+
+declare module Buff {
+
+    export function toast(a?: any, b?: any): unknown;
+
+}

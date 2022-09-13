@@ -149,10 +149,12 @@ module Adjust_Listings {
         // if we have no items or no rows don't adjust anything
         if (!data?.items?.length || !rows) return;
 
-        let strBalance = (<HTMLElement>document.querySelector('#navbar-cash-amount')).innerText;
-        let isBalanceYuan = strBalance.indexOf('¥') > -1;
-        let nrBalance = isBalanceYuan ? +(strBalance.replace('¥', '')) : 0;
-        console.debug('[BuffUtility] Balance:', strBalance, '->', isBalanceYuan, '->', nrBalance);
+        let { strBalance, isBalanceYuan, nrBalance } = Util.getAccountBalance();
+
+        // let strBalance = (<HTMLElement>document.querySelector('#navbar-cash-amount')).innerText;
+        // let isBalanceYuan = strBalance.indexOf('¥') > -1;
+        // let nrBalance = isBalanceYuan ? +(strBalance.replace('¥', '')) : 0;
+        // console.debug('[BuffUtility] Balance:', strBalance, '->', isBalanceYuan, '->', nrBalance);
 
         let goodsInfo: BuffTypes.SellOrder.GoodsInfo = data.goods_infos[/goods_id=(\d+)/.exec(transferData.url)[1]];
         let steamPriceCNY = +goodsInfo.steam_price_cny;
@@ -278,25 +280,11 @@ module Adjust_Listings {
                 if (schemaData?.type) {
                     aCopyGen = document.createElement('a');
 
-                    let gen;
+                    let gen = Util.generateInspectGen(schemaData, dataRow.asset_info.info.paintindex, dataRow.asset_info.info.paintseed, dataRow.asset_info.paintwear, dataRow.asset_info?.info?.stickers ?? []);
                     if (schemaData.type == 'Gloves') {
                         aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gengl';
-                        // !gengl weapon_id paint_id pattern float
-                        gen = `!gengl ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
                     } else {
                         aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
-                        // !gen weapon_id paint_id pattern float sticker1 wear1...
-                        gen = `!gen ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
-
-                        if (dataRow.asset_info.info?.stickers?.length > 0) {
-                            let stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
-
-                            for (let l_sticker of dataRow.asset_info.info.stickers) {
-                                stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
-                            }
-
-                            gen += ` ${stickers.join(' ')}`;
-                        }
                     }
 
                     // aCopyGen = document.createElement('a');

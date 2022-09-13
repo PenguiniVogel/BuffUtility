@@ -316,6 +316,8 @@ module Adjust_Settings {
                 renderColorPreview(colors);
 
                 ExtensionSettings.save(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, isCheckboxSelected(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN));
+                ExtensionSettings.save(Settings.EXPERIMENTAL_ADJUST_POPULAR, isCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_POPULAR));
+                ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, isCheckboxSelected(Settings.EXPERIMENTAL_FETCH_NOTIFICATION));
             }
         });
 
@@ -571,7 +573,19 @@ module Adjust_Settings {
         // experimental bargain favourites
         makeCheckboxOption(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, {
             title: 'Favourite Bargain',
-            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nShow the \'Bargain\' feature on favourites.'
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nShow the \'Bargain\' feature on favourites. Setting will be moved with 2.1.7 to advanced settings.'
+        }, ex_table);
+
+        // experimental adjust popular tab
+        makeCheckboxOption(Settings.EXPERIMENTAL_ADJUST_POPULAR, {
+            title: 'Adjust Popular Tab',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nAdjust the \'Popular\' tab in the market page, adding some features. Setting will be removed with 2.1.7 and become default.'
+        }, ex_table);
+
+        // experimental fetch notification
+        makeCheckboxOption(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, {
+            title: 'Currency Fetch Notification',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nShow toast notification when currency rates were updated, happens once a day. Setting will be merged in 2.1.7 into \'Show Toast on Action\'.'
         }, ex_table);
 
         // append experimental settings

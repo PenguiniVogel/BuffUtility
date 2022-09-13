@@ -145,10 +145,6 @@ module InjectionServiceLib {
 
 }
 
-/**
- * Author: Felix Vogel
- */
-/** */
 module InjectionService {
 
     export interface TransferData<T> {
@@ -245,13 +241,30 @@ module InjectionService {
         window.postMessage([GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE, object, window[object]], '*');
     }
 
+    // [GlobalConstants.BUFF_UTILITY_SIGNAL, callOrder, thisArg = null, args = []]
+    function buff_utility_signal_receiver(): void {
+        window.addEventListener('message', (e) => {
+            if (typeof e.data == 'object' && e.data?.length == 4 && (e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_SIGNAL) {
+                let callOrder: string[] = e.data[1];
+                let current: any = window;
+                for (let caller of callOrder) {
+                    current = current[caller];
+                }
+
+                if (typeof current == 'function') {
+                    current.call(e.data[2], e.data[3]);
+                }
+            }
+        });
+    }
+
     function init(): void {
         requireObjects['g'] = false;
 
         InjectionServiceLib.attempt_safe = false;
         InjectionServiceLib.html_check_run = 'html';
 
-        InjectionServiceLib.injectCode(`${buff_utility_post_object_service.toString()}\nbuff_utility_post_object_service('g');\n${interceptNetworkRequests.toString()}\ninterceptNetworkRequests();`, 'html');
+        InjectionServiceLib.injectCode(`${buff_utility_signal_receiver.toString()}\nbuff_utility_signal_receiver();\n${buff_utility_post_object_service.toString()}\nbuff_utility_post_object_service('g');\n${interceptNetworkRequests.toString()}\ninterceptNetworkRequests();`, 'html');
 
         if (window.location.href.indexOf('/user-center/profile') > -1) {
             InjectionServiceLib.injectCSS(`

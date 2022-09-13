@@ -17,15 +17,22 @@ storedSettings = ExtensionSettings.getAll();
     let dateToday = Util.formatDate(new Date());
 
     function cacheCurrency(date: string): void {
+        let currencyName: string = storedSettings[Settings.SELECTED_CURRENCY];
+        let rates = CurrencyHelper.getData().rates[currencyName];
+
         let segment: CurrencyHelper.Data = {
             date: date,
             rates: {
-                [storedSettings[Settings.SELECTED_CURRENCY]]: CurrencyHelper.getData().rates[storedSettings[Settings.SELECTED_CURRENCY]]
+                [currencyName]: rates
             },
             symbols: {}
         };
 
         console.debug(segment);
+
+        if (storedSettings[Settings.EXPERIMENTAL_FETCH_NOTIFICATION]) {
+            Util.signal(['Buff', 'toast'], null, [`Fetched current conversion rates: ${currencyName} -> ${rates[0].toFixed(rates[1])}`]);
+        }
 
         Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, JSON.stringify(segment));
     }

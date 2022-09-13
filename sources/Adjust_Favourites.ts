@@ -13,6 +13,8 @@ module AdjustFavourites {
         // if no rows, skip
         if (rows?.length == 0) return;
 
+        let { strBalance, isBalanceYuan, nrBalance } = Util.getAccountBalance();
+
         for (let i = 0, l = rows.length; i < l; i++) {
             let row = rows.item(i);
             let nameContainer = (<HTMLElement>row.querySelector('div.name-cont h3'));
@@ -87,22 +89,42 @@ module AdjustFavourites {
             nameContainer.parentElement.appendChild(aShare);
 
             if (storedSettings[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]) {
-                //TODO: color coding on available balance
-                //Note: this feature is unable to check if the seller has disabled bargaining
+                // Note: this feature is yet unable to check if the seller has disabled bargaining
+                //       https://buff.163.com/api/market/buyer_bargain/create/preview?sell_order_id=220913T2001697026
+                //       will enable us to check the code if a bargain can be created, NEEDS to be optional, and off by default.
+                //       To avoid a rate limit exceed and potentially being flagged, one page is rather limited in size though.
                 let parentBargain = row.lastElementChild;
-                let aBargain = <HTMLElement>parentBargain.querySelector('a').cloneNode(true);
+                let aBuy = <HTMLElement>parentBargain.querySelector('a');
+                let aBargain = <HTMLElement>aBuy.cloneNode(true);
+
+                let price = +aBuy.getAttribute('data-price');
+                let lowest_bargain_price = price * 0.8;
+
                 // items below 100 yuan cannot be bargained
                 if (+aBargain.getAttribute('data-price') >= 100) {
                     parentBargain.setAttribute('style', 'line-height: 200%;');
-                    aBargain.setAttribute('class', 'c_Blue2 bargain i_Btn i_Btn_mid');
-                    aBargain.setAttribute('style', 'margin-left: 10px; border: 2px solid #4773C8; background: none; border-radius: 10px;');
+
+                    aBargain.setAttribute('class', 'i_Btn i_Btn_mid bargain');
+                    aBargain.setAttribute('style', 'margin-left: 5px;');
                     aBargain.setAttribute('data-lowest-bargain-price', `${((+aBargain.getAttribute('data-price'))*0.8).toFixed(1)}`);
+
                     aBargain.removeAttribute('data-goods-sell-min-price');
                     aBargain.removeAttribute('data-cooldown');
-                    aBargain.innerText = 'Bargain';
-                    parentBargain.querySelector('span').setAttribute('style', 'margin-left: 50px;');
 
+                    aBargain.innerText = 'Bargain';
+
+                    parentBargain.querySelector('span').setAttribute('style', 'margin-left: 50px;');
                     parentBargain.querySelector('a').after(aBargain);
+                }
+
+                if (isBalanceYuan) {
+                    if (price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][0]) {
+                        aBuy.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
+                    }
+
+                    if (lowest_bargain_price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][1]) {
+                        aBargain.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
+                    }
                 }
             }
         }

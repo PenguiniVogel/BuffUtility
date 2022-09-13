@@ -195,6 +195,12 @@ module Adjust_Market {
     }
 
     function adjustMarketTopBookmarked(transferData: InjectionService.TransferData<BuffTypes.TopPopular.Data>): void {
+        // If experimental feature was disabled, ignore.
+        if (!storedSettings[Settings.EXPERIMENTAL_ADJUST_POPULAR]) {
+            console.debug('[BuffUtility] Experimental feature \'Adjust Popular\' is disabled.');
+            return;
+        }
+
         const liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_list_card li');
         let data = transferData.data;
         let goods_infos = data.goods_infos;
@@ -218,32 +224,21 @@ module Adjust_Market {
                 aShare.innerHTML = '<i class="icon icon_link j_tips_handler" data-direction="bottom" data-title="Share"></i>';
 
                 let aCopyGen = document.createElement('a');
-                let gen;
+                let gen = Util.generateInspectGen(schemaData, dataRow.asset_info.info.paintindex, dataRow.asset_info.info.paintseed, dataRow.asset_info.paintwear, dataRow.asset_info?.info?.stickers ?? []);
                 if (schemaData) {
                     if (schemaData?.type == 'Gloves') {
                         aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gengl" style="-webkit-filter: invert(50%);"></i>';
-                        // !gengl weapon_id paint_id pattern float
-                        gen = `!gengl ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
                     } else {
                         aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gen"  style="-webkit-filter: invert(50%);"></i>';
-                        // !gen weapon_id paint_id pattern float sticker1 wear1...
-                        gen = `!gen ${schemaData.id} ${dataRow.asset_info.info.paintindex} ${dataRow.asset_info.info.paintseed} ${dataRow.asset_info.paintwear}`;
-                        if (dataRow.asset_info.info?.stickers?.length > 0) {
-                            let stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
-                            for (let l_sticker of dataRow.asset_info.info.stickers) {
-                                stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
-                            }
-                            gen += ` ${stickers.join(' ')}`;
-                        }
                     }
                 }
-                
             
                 if (storedSettings[Settings.SHOW_TOAST_ON_ACTION]) {
                     aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
                 } else {
                     aCopyGen.setAttribute('href', 'javascript:;');
                 }
+
                 aCopyGen.setAttribute('title', gen);
                 aCopyGen.setAttribute('style', 'cursor: pointer;');
                 aCopyGen.addEventListener('click', () => {
@@ -254,7 +249,11 @@ module Adjust_Market {
                 });
 
                 tagBox.insertBefore(aShare, tagBox.firstChild);
-                tagBox.insertBefore(aCopyGen, tagBox.firstChild);
+
+                // only append if we have schema data, which we always should have, but some items have weird CH mappings
+                if (schemaData) {
+                    tagBox.insertBefore(aCopyGen, tagBox.firstChild);
+                }
             }
         }
     }

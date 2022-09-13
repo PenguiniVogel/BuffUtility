@@ -281,4 +281,55 @@ module Util {
             .replace('dd', day);
     }
 
+    // !gen/!gengl generation code
+
+    export function generateInspectGen(weapon: SchemaHelper.Weapon, paintIndex: any, paintSeed: any, paintWear: any, stickers: { slot: number, sticker_id: any, wear: any }[]): string {
+        if (weapon) {
+            if (weapon?.type == 'Gloves') {
+                // !gengl weapon_id paint_id pattern float
+                return `!gengl ${weapon.id} ${paintIndex} ${paintSeed} ${paintWear}`;
+            } else {
+                // !gen weapon_id paint_id pattern float sticker1 wear1...
+                let gen = `!gen ${weapon.id} ${paintIndex} ${paintSeed} ${paintWear}`;
+                if (stickers?.length > 0) {
+                    let str_stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
+                    for (let l_sticker of stickers) {
+                        str_stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
+                    }
+                    gen += ` ${str_stickers.join(' ')}`;
+                }
+
+                return gen;
+            }
+        }
+
+        return '';
+    }
+
+    // signal
+
+    export function signal(callOrder: string[], thisArg: any = null, args: any[] = []): void {
+        window.postMessage([GlobalConstants.BUFF_UTILITY_SIGNAL, callOrder, thisArg, args], '*');
+    }
+
+    // get account balance
+
+    export function getAccountBalance(): {
+        strBalance: string,
+        isBalanceYuan: boolean,
+        nrBalance: number
+    } {
+        let strBalance = (<HTMLElement>document.querySelector('#navbar-cash-amount')).innerText;
+        let isBalanceYuan = strBalance.indexOf('¥') > -1;
+        let nrBalance = isBalanceYuan ? +(strBalance.replace('¥', '')) : 0;
+
+        console.debug('[BuffUtility] Balance:', strBalance, '->', isBalanceYuan, '->', nrBalance);
+
+        return {
+            strBalance: strBalance,
+            isBalanceYuan: isBalanceYuan,
+            nrBalance: nrBalance
+        };
+    }
+
 }

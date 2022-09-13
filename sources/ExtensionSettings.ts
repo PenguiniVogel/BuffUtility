@@ -84,7 +84,12 @@ module ExtensionSettings {
         USE_SCHEME = 'use_scheme',
         LOCATION_RELOAD_NEWEST = 'location_reload_newest',
 
-        EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain'
+        // 2.1.7 -> advanced settings
+        EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain',
+        // 2.1.7 -> setting will be removed, default procedure
+        EXPERIMENTAL_ADJUST_POPULAR = 'experimental_adjust_popular',
+        // 2.1.7 -> setting will be merged into show toast on action
+        EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification'
     }
 
     export interface SettingsProperties {
@@ -114,6 +119,8 @@ module ExtensionSettings {
         [Settings.LOCATION_RELOAD_NEWEST]: number;
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: boolean;
+        [Settings.EXPERIMENTAL_ADJUST_POPULAR]: boolean;
+        [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -142,7 +149,9 @@ module ExtensionSettings {
         [Settings.USE_SCHEME]: false,
         [Settings.LOCATION_RELOAD_NEWEST]: LOCATION_RELOAD_NEWEST_VALUES.NONE,
 
-        [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: true
+        [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: true,
+        [Settings.EXPERIMENTAL_ADJUST_POPULAR]: true,
+        [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: true
     };
 
     const VALIDATORS: {
@@ -173,7 +182,9 @@ module ExtensionSettings {
         [Settings.USE_SCHEME]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.USE_SCHEME]),
         [Settings.LOCATION_RELOAD_NEWEST]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.LOCATION_RELOAD_NEWEST]),
 
-        [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN])
+        [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]),
+        [Settings.EXPERIMENTAL_ADJUST_POPULAR]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_ADJUST_POPULAR]),
+        [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_NOTIFICATION])
     };
 
     let settings: SettingsProperties = {
