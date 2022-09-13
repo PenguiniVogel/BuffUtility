@@ -99,6 +99,7 @@ function adjustFloatBar(): void {
 // TODO this needs to be executed upon transactions to update the converted balance
 function adjustAccountBalance(): void {
     let balanceDiv = document.querySelector('div.store-account > h4');
+    if (!balanceDiv) return;
     let balYuan: number = +(<HTMLElement>balanceDiv.querySelector('#navbar-cash-amount')).innerText.replace('¥ ', '');
 
     let balConverted = Util.buildHTML('span', {
