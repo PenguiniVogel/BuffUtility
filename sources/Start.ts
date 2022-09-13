@@ -33,11 +33,11 @@ storedSettings = ExtensionSettings.getAll();
     if (parsedCurrencyCache) {
         console.debug(parsedCurrencyCache.date, dateToday);
         if (parsedCurrencyCache.date != dateToday) {
-            CurrencyHelper.initialize(null, true);
-
-            cacheCurrency(dateToday);
+            CurrencyHelper.initialize(true, () => {
+                cacheCurrency(dateToday);
+            });
         } else {
-            CurrencyHelper.initialize(null, false);
+            CurrencyHelper.initialize(false);
             let cachedRates = Object.keys(parsedCurrencyCache.rates);
             for (let key of cachedRates) {
                 console.debug(`[BuffUtility] Reading cached current rates for ${key}: [${CurrencyHelper.getData().date}] ${CurrencyHelper.getData().rates[key]} -> [${parsedCurrencyCache.date}] ${parsedCurrencyCache.rates[key]}`);
@@ -45,9 +45,9 @@ storedSettings = ExtensionSettings.getAll();
             }
         }
     } else {
-        CurrencyHelper.initialize(null, true);
-
-        cacheCurrency(dateToday);
+        CurrencyHelper.initialize(true, () => {
+            cacheCurrency(dateToday);
+        });
     }
 }
 
