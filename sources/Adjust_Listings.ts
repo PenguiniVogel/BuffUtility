@@ -145,10 +145,15 @@ module Adjust_Listings {
         }
     }
 
+    /**
+     * Adds a price range to the item overview ("header"). Supports 7 or 30 days ranges (default: 7).
+     */
     async function adjustHeaderListings() {
-        let goods_id = +document.querySelector("div.detail-cont div.add-bookmark").getAttribute('data-target-id');
+        //default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
+        const days: 7|30 = 7;
+        const goods_id = +document.querySelector("div.detail-cont div.add-bookmark").getAttribute('data-target-id');
         //discard dates from prices as not used
-        let history = (await fetchPriceHistory(goods_id, 30)).map((arr) => arr[1]);
+        let history = (await fetchPriceHistory(goods_id, days)).map((arr) => arr[1]);
 
         let header = <HTMLElement>document.querySelector("body > div.market-list > div > div.detail-header.black");
         let priceMin = history[0], priceMax = history[0];
@@ -186,7 +191,7 @@ module Adjust_Listings {
     /**
      * Fetch price history for a given item in the last X days
      * @param goodsId
-     * @param days
+     * @param days 7 or 30
      * @returns Array of [timestamp, price in rmb] pairs
      */
     function fetchPriceHistory(goodsId: number, days: 7 | 30): Promise<[[number, number]]> {
