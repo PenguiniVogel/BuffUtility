@@ -84,11 +84,11 @@ module ExtensionSettings {
         USE_SCHEME = 'use_scheme',
         LOCATION_RELOAD_NEWEST = 'location_reload_newest',
 
-        // 2.1.7 -> advanced settings
+        // 2.1.8 -> advanced settings
         EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain',
-        // 2.1.7 -> setting will be removed, default procedure
+        // 2.1.8 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_POPULAR = 'experimental_adjust_popular',
-        // 2.1.7 -> setting will be merged into show toast on action
+        // 2.1.8 -> setting will be merged into show toast on action
         EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification'
     }
 
