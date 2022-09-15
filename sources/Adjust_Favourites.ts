@@ -17,12 +17,18 @@ module AdjustFavourites {
 
         for (let i = 0, l = rows.length; i < l; i++) {
             let row = rows.item(i);
+            let imgContainer = (<HTMLElement>row.querySelector('div.pic-cont[data-orderid]'));
             let nameContainer = (<HTMLElement>row.querySelector('div.name-cont h3'));
             let aAssetInfo = <HTMLElement>row.querySelector('a[data-asset-info]');
             let wearContainer = row.querySelector('div.csgo_value');
             let targetId = row.querySelector('[data-target-id]');
 
-            if (!aAssetInfo || !(nameContainer?.innerText) || !targetId) continue;
+            if (!imgContainer || !aAssetInfo || !(nameContainer?.innerText) || !targetId) continue;
+
+            // item was sold or unlisted, skip
+            if (imgContainer.getAttribute('class').indexOf('g-soldout') > -1) {
+                continue;
+            }
 
             let assetInfo: BuffTypes.SellOrder.AssetInfo = JSON.parse(aAssetInfo.getAttribute('data-asset-info'));
 
@@ -101,7 +107,7 @@ module AdjustFavourites {
                 let lowest_bargain_price = price * 0.8;
 
                 // items below 100 yuan cannot be bargained
-                if (+aBargain.getAttribute('data-price') >= 100) {
+                if (price >= 100) {
                     parentBargain.setAttribute('style', 'line-height: 200%;');
 
                     aBargain.setAttribute('class', 'i_Btn i_Btn_mid bargain');
@@ -115,6 +121,20 @@ module AdjustFavourites {
 
                     parentBargain.querySelector('span').setAttribute('style', 'margin-left: 50px;');
                     parentBargain.querySelector('a').after(aBargain);
+
+                    if (storedSettings[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]) {
+                        let orderId = imgContainer.getAttribute('data-orderid');
+                        if (orderId?.length > 0) {
+                            fetch(`https://buff.163.com/api/market/buyer_bargain/create/preview?sell_order_id=${orderId}`)
+                                .then(x => x.json().then(data => {
+                                    // code is not OK or not defined, so probably cannot bargain, or API limited, lets hope not the latter :)
+                                    if (!(data && data['code'] && /OK/gi.test(data['code']))) {
+                                        aBargain.setAttribute('style', 'display: none !important;');
+                                        parentBargain.querySelector('span').setAttribute('style', '');
+                                    }
+                                }));
+                        }
+                    }
                 }
 
                 if (isBalanceYuan) {

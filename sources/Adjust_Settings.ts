@@ -318,6 +318,10 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, isCheckboxSelected(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN));
                 ExtensionSettings.save(Settings.EXPERIMENTAL_ADJUST_POPULAR, isCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_POPULAR));
                 ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, isCheckboxSelected(Settings.EXPERIMENTAL_FETCH_NOTIFICATION));
+                ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, isCheckboxSelected(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS));
+
+                // write settings
+                ExtensionSettings.finalize();
             }
         });
 
@@ -586,6 +590,12 @@ module Adjust_Settings {
         makeCheckboxOption(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, {
             title: 'Currency Fetch Notification',
             description: '!!!BuffUtility!!!\n!!!Experimental!!!\nShow toast notification when currency rates were updated, happens once a day. Setting will be merged in 2.1.7 into \'Show Toast on Action\'.'
+        }, ex_table);
+
+        // experimental fetch bargain status
+        makeCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
+            title: 'Fetch Favourite Bargain Status',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
         }, ex_table);
 
         // append experimental settings
