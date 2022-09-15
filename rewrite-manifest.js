@@ -19,6 +19,14 @@ switch (argv2) {
             }
         };
 
+        delete manifest['options_page'];
+
+        manifest['permissions'] = [
+            "*://penguinivogel.github.io/currency-repository/rates.json",
+            "*://buff.163.com/*",
+            "*://csgostash.com/*"
+        ];
+
         break;
     default:
         dest = '.export/BuffUtility';

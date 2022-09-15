@@ -84,12 +84,14 @@ module ExtensionSettings {
         USE_SCHEME = 'use_scheme',
         LOCATION_RELOAD_NEWEST = 'location_reload_newest',
 
-        // 2.1.7 -> advanced settings
+        // 2.1.8 -> setting will be moved to advanced settings
         EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain',
-        // 2.1.7 -> setting will be removed, default procedure
+        // 2.1.8 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_POPULAR = 'experimental_adjust_popular',
-        // 2.1.7 -> setting will be merged into show toast on action
-        EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification'
+        // 2.1.8 -> setting will be merged into show toast on action
+        EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification',
+        // [TBA] -> setting will be moved to advanced settings
+        EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS = 'fetch_favourite_bargain_status'
     }
 
     export interface SettingsProperties {
@@ -121,6 +123,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: boolean;
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
+        [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: boolean;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -151,7 +154,8 @@ module ExtensionSettings {
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: true,
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: true,
-        [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: true
+        [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: true,
+        [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: false
     };
 
     const VALIDATORS: {
@@ -184,7 +188,8 @@ module ExtensionSettings {
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]),
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_ADJUST_POPULAR]),
-        [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_NOTIFICATION])
+        [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_NOTIFICATION]),
+        [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS])
     };
 
     let settings: SettingsProperties = {
@@ -291,10 +296,27 @@ module ExtensionSettings {
         if (oldValue != `${newValue}`) {
             settings[setting] = <never>(VALIDATORS[setting](newValue));
 
-            Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(settings), 50);
-
             console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
         }
+    }
+
+    /**
+     * This will write the current settings to the cookie storage
+     */
+    export function finalize(): void {
+        const defaultKeys = Object.keys(DEFAULT_SETTINGS);
+        const loadedKeys = Object.keys(settings);
+
+        for (let l_loadedKey of loadedKeys) {
+            if (defaultKeys.indexOf(l_loadedKey) > -1) continue;
+
+            // delete unused / old properties
+            delete settings[l_loadedKey];
+
+            console.debug(`[BuffUtility] Deleted old setting: ${l_loadedKey}`);
+        }
+
+        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(settings));
     }
 
 }
