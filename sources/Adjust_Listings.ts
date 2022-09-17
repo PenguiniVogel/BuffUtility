@@ -139,7 +139,7 @@ module Adjust_Listings {
             adjustBuyOrderListings(<InjectionService.TransferData<BuffTypes.BuyOrder.Data>>transferData);
         }
 
-        if (!document.querySelector('span.buffutility-pricerange')) {
+        if (!document.querySelector('span.buffutility-pricerange') && storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] > 0) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
             adjustHeaderListings();
         }
@@ -150,7 +150,8 @@ module Adjust_Listings {
      */
     async function adjustHeaderListings() {
         //default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
-        const days: 7|30 = 7;
+        const settingsMap = {1: 7, 2: 30};
+        const days: 7|30 = settingsMap[storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]];
         const goods_id = +document.querySelector("div.detail-cont div.add-bookmark").getAttribute('data-target-id');
         //discard dates from prices as not used
         let history = (await fetchPriceHistory(goods_id, days)).map((arr) => arr[1]);
@@ -175,7 +176,7 @@ module Adjust_Listings {
 
         priceParent.setAttribute('style', 'line-height: 200%;');
         priceSpan.setAttribute('class', 'buffutility-pricerange');
-        priceLabel.innerText = 'Buff Price Trend (7D) |';
+        priceLabel.innerText = `Buff Price Trend (${days}D) |`;
 
         priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> — <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
 
@@ -189,7 +190,7 @@ module Adjust_Listings {
     }
 
     /**
-     * Fetch price history for a given item in the last X days
+     * Fetch price history for a given item in the last X days. Uses the same API as the "Price Trend" tab
      * @param goodsId
      * @param days 7 or 30
      * @returns Array of [timestamp, price in rmb] pairs

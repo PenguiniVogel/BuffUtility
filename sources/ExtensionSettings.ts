@@ -31,6 +31,12 @@ module ExtensionSettings {
         LEFT
     }
 
+    export const enum PriceHistoryRange {
+        OFF,
+        WEEKLY,
+        MONTHLY
+    }
+
     export const FILTER_SORT_BY = {
         'Default': 'default',
         'Newest': 'created.desc',
@@ -91,7 +97,9 @@ module ExtensionSettings {
         // 2.1.8 -> setting will be merged into show toast on action
         EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification',
         // [TBA] -> setting will be moved to advanced settings
-        EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS = 'fetch_favourite_bargain_status'
+        EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS = 'fetch_favourite_bargain_status',
+        // [TBA] -> setting will be moved to advanced settings
+        EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY = 'fetch_item_price_history'
     }
 
     export interface SettingsProperties {
@@ -124,6 +132,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: boolean;
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: boolean;
+        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange;
     }
 
     const DEFAULT_SETTINGS: SettingsProperties = {
@@ -155,7 +164,8 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: true,
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: true,
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: true,
-        [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: false
+        [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: false,
+        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange.OFF
     };
 
     const VALIDATORS: {
@@ -189,7 +199,8 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]),
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_ADJUST_POPULAR]),
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_NOTIFICATION]),
-        [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS])
+        [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]),
+        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY])
     };
 
     let settings: SettingsProperties = {
