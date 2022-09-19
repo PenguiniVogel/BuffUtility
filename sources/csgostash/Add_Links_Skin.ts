@@ -6,6 +6,8 @@ module Add_Links_Skin {
     }
 
     function init(): void {
+        // TODO map items exactly to their store listing page via json dump
+
         let itemHeader = document.querySelector('h2');
         let itemName = itemHeader.innerText.trim();
 
