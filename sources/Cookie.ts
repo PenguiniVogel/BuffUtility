@@ -1,7 +1,3 @@
-/**
- * Author: Felix Vogel
- */
-/** */
 module Cookie {
 
     export function read(name: string): string {

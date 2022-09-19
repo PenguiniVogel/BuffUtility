@@ -8,7 +8,8 @@
             "js": [
                 "lib/SchemaData.js",
                 "lib/SchemaHelper.js",
-                "lib/InjectionService.js"
+                "lib/InjectionService.js",
+                "sources/Cookie.js"
             ],
             "matches": [
                 "https://buff.163.com/*"
@@ -17,10 +18,9 @@
         },
         {
             "js": [
-                "lib/CurrencyHelper.js",
-                "sources/Cookie.js",
                 "sources/Util.js",
                 "sources/ExtensionSettings.js",
+                "lib/CurrencyHelper.js",
                 "sources/Start.js"
             ],
             "matches": [

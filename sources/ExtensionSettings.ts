@@ -1,7 +1,5 @@
-/**
- * Author: Felix Vogel
- */
-/** */
+declare var storedSettings: ExtensionSettings.SettingsProperties;
+
 module ExtensionSettings {
 
     export const enum DifferenceDominator {
@@ -32,9 +30,9 @@ module ExtensionSettings {
     }
 
     export const enum PriceHistoryRange {
-        OFF,
-        WEEKLY,
-        MONTHLY
+        OFF = 0,
+        WEEKLY = 7,
+        MONTHLY = 30
     }
 
     export const FILTER_SORT_BY = {
@@ -283,6 +281,8 @@ module ExtensionSettings {
             // delete unused / old properties
             delete settings[l_loadedKey];
         }
+
+        storedSettings = getAll();
     }
 
     /**
@@ -331,3 +331,5 @@ module ExtensionSettings {
     }
 
 }
+
+ExtensionSettings.load();

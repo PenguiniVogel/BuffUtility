@@ -1,7 +1,3 @@
-/**
- * Author: Felix Vogel
- */
-/** */
 module Add_Links_Skin {
 
     const enum Constants {

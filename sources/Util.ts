@@ -1,7 +1,3 @@
-/**
- * Author: Felix Vogel
- */
-/** */
 module Util {
 
     // imports
@@ -330,6 +326,57 @@ module Util {
             isBalanceYuan: isBalanceYuan,
             nrBalance: nrBalance
         };
+    }
+
+}
+
+module PopupHelper {
+
+    export function setup(): void {
+        // if already added, don't add again
+        if (document.querySelector('#buff_utility_popup') != null) {
+            return;
+        }
+
+        const popup_html = `
+<div class="popup" id="buff_utility_popup" style="width: 600px; margin-left: -300px; margin-top: -182px; z-index: 503; display: none;">
+    <div class="popup-header">
+        <h2>BuffUtility</h2>
+    </div>
+    <a class="popup-close" href="javascript:;" onclick="Popup.hide();">×</a>
+    <div class="popup-cont">
+        <div class="popup-good-summary"></div>
+    </div>
+    <div class="popup-bottom black">
+        <table width="100%" cellspacing="0" cellpadding="0">
+        <tbody>
+            <tr>
+                <td></td>
+                <td>
+                    <a href="javascript:;" class="i_Btn i_Btn_main i_Btn_disabled">Confirm</a>
+                </td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+</div>`;
+
+        let storeE = document.createElement('e');
+
+        storeE.innerHTML = popup_html;
+
+        document.querySelector('html > body').append(storeE);
+    }
+
+    export function show(content: any): void {
+        // if not added, don't execute
+        if (document.querySelector('#buff_utility_popup') == null) {
+            return;
+        }
+
+        document.querySelector('#buff_utility_popup div.popup-good-summary').innerHTML = content;
+
+        Util.signal(['Popup', 'show'], null, ['buff_utility_popup']);
     }
 
 }

@@ -1,7 +1,3 @@
-/**
- * Author: Felix Vogel
- */
-/** */
 module Adjust_Settings {
 
     // imports

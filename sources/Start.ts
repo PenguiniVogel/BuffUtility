@@ -3,12 +3,8 @@
 import Settings = ExtensionSettings.Settings;
 
 declare var g: BuffTypes.g;
-declare var storedSettings: ExtensionSettings.SettingsProperties;
 
 SchemaHelper.init();
-ExtensionSettings.load();
-
-storedSettings = ExtensionSettings.getAll();
 
 // currency stuff
 {
