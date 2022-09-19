@@ -138,6 +138,70 @@ module Adjust_Listings {
 
             adjustBuyOrderListings(<InjectionService.TransferData<BuffTypes.BuyOrder.Data>>transferData);
         }
+
+        if (!document.querySelector('span.buffutility-pricerange') && storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] > 0) {
+            console.debug('[BuffUtility] Adjust_Listings (header)');
+            adjustHeaderListings();
+        }
+    }
+
+    /**
+     * Adds a price range to the item overview ("header"). Supports 7 or 30 days ranges (default: 7).
+     */
+    async function adjustHeaderListings() {
+        //default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
+        const settingsMap = {1: 7, 2: 30};
+        const days: 7|30 = settingsMap[storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]];
+        const goods_id = +document.querySelector("div.detail-cont div.add-bookmark").getAttribute('data-target-id');
+        //discard dates from prices as not used
+        let history = (await fetchPriceHistory(goods_id, days)).map((arr) => arr[1]);
+
+        let header = <HTMLElement>document.querySelector("body > div.market-list > div > div.detail-header.black");
+        let priceMin = history[0], priceMax = history[0];
+
+        for (let i=1;i<history.length;i++) {
+            if (history[i] < priceMin) {
+                priceMin = history[i];
+            }
+            if (history[i] > priceMax) {
+                priceMax = history[i];
+            }
+        }
+
+        let priceParent = <HTMLElement>header.querySelector("div.detail-summ");
+
+        let priceSpan = document.createElement('span');
+        let priceLabel = document.createElement('label');
+        let priceStrong = document.createElement('strong');
+
+        priceParent.setAttribute('style', 'line-height: 200%;');
+        priceSpan.setAttribute('class', 'buffutility-pricerange');
+        priceLabel.innerText = `Buff Price Trend (${days}D) |`;
+
+        priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> — <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
+
+        priceSpan.appendChild(priceLabel);
+        priceSpan.appendChild(priceStrong);
+        //prevent the double adding of the element caused by the async nature of the function
+        if (!document.querySelector('span.buffutility-pricerange')) {
+            priceParent.appendChild(document.createElement('br'));
+            priceParent.appendChild(priceSpan);
+        }
+    }
+
+    /**
+     * Fetch price history for a given item in the last X days. Uses the same API as the "Price Trend" tab
+     * @param goodsId
+     * @param days 7 or 30
+     * @returns Array of [timestamp, price in rmb] pairs
+     */
+    function fetchPriceHistory(goodsId: number, days: 7 | 30): Promise<[[number, number]]> {
+        return new Promise((resolve, _) => {
+            fetch(`https://buff.163.com/api/market/goods/price_history/buff?game=csgo&goods_id=${goodsId}&days=${days}`)
+            .then(r => r.json().then(_response => {
+                resolve(_response.data.price_history);
+            }));
+        });
     }
 
     function adjustSellOrderListings(transferData: InjectionService.TransferData<BuffTypes.SellOrder.Data>): void {

@@ -319,6 +319,7 @@ module Adjust_Settings {
                 ExtensionSettings.save(Settings.EXPERIMENTAL_ADJUST_POPULAR, isCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_POPULAR));
                 ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, isCheckboxSelected(Settings.EXPERIMENTAL_FETCH_NOTIFICATION));
                 ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, isCheckboxSelected(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS));
+                ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, readSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
 
                 // write settings
                 ExtensionSettings.finalize();
@@ -596,6 +597,28 @@ module Adjust_Settings {
         makeCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
             title: 'Fetch Favourite Bargain Status',
             description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
+        }, ex_table);
+
+        // experimental fetch item price history
+        makeSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, [
+            {
+                value: `${ExtensionSettings.PriceHistoryRange.OFF}`,
+                displayStr: 'Off',
+                selected: storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] == ExtensionSettings.PriceHistoryRange.OFF
+            },
+            {
+                value: `${ExtensionSettings.PriceHistoryRange.WEEKLY}`,
+                displayStr: '7 Days',
+                selected: storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] == ExtensionSettings.PriceHistoryRange.WEEKLY
+            },
+            {
+                value: `${ExtensionSettings.PriceHistoryRange.MONTHLY}`,
+                displayStr: '30 Days',
+                selected: storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] == ExtensionSettings.PriceHistoryRange.MONTHLY
+            }
+        ], {
+            title: 'Fetch item price history',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
         }, ex_table);
 
         // append experimental settings
