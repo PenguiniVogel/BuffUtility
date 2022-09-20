@@ -244,6 +244,16 @@ if (storedSettings[Settings.USE_SCHEME]) {
     color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
 }
 
+/* applied sticker popup */
+.dark-theme .popup_flower .popup-header,
+.dark-theme .popup_flower .popup-cont,
+.dark-theme .popup_flower .popup-cont li {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
+}
+.dark-theme .popup_flower .popup-cont tr:hover {
+    background: ${storedSettings[Settings.COLOR_SCHEME][1]} !important;
+}
+
 `);
 
     let body = document.querySelector('body');
