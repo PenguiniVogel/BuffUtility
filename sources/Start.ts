@@ -209,6 +209,41 @@ if (storedSettings[Settings.USE_SCHEME]) {
 .dark-theme .l_Layout .cont_main .user-record .delete-bookmark {
     color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
 }
+.dark-theme .l_Layout .cont_main .user-record .i_Btn_hollow {
+    background-color: #959595;
+    color: #fff;
+}
+
+/* bargain popup */
+.dark-theme .popup_supply .popup-header,
+.dark-theme .popup_supply .popup-cont,
+.dark-theme .popup_supply .popup-cont .popup-good-summary,
+.dark-theme .popup_supply .popup-cont .popup-good-summary .input-cont .j_filter {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+.dark-theme .popup_supply .input-cont .c_Gray {
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+}
+
+/* selling popup */
+.dark-theme .popup_charge .popup-header,
+.dark-theme .popup_charge .popup-cont {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+.dark-theme .popup_charge .popup-cont .list_tb_csgo tr:hover {
+    background: ${storedSettings[Settings.COLOR_SCHEME][1]};
+}
+
+/* selling description popup */
+.dark-theme .popup_guide_sell .popup-header,
+.dark-theme .popup_guide_sell .popup-cont {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+.dark-theme .popup_guide_sell textarea {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+}
+
 `);
 
     let body = document.querySelector('body');
