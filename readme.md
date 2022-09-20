@@ -8,6 +8,11 @@ Get it for:
 
 ---
 
+**You have issues or a suggestion, but don't use or have a GitHub account?** <br/>
+No worries! We now have a [support discord](https://discord.gg/yeYuuKZxbP).
+
+---
+
 ### The settings and what they do:
 
 ---
