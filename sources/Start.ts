@@ -185,20 +185,25 @@ if (storedSettings[Settings.USE_SCHEME]) {
     border-color: ${storedSettings[Settings.COLOR_SCHEME][2]};
 }
 
+/* shop pages */
+.dark-theme .l_Layout .market-card, 
+.dark-theme .shop .list_card {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
+}
+
 /* settings */
 .dark-theme,
 .dark-theme .user-setting,
 .dark-theme .user-setting h3,
 .dark-theme .user-setting label[for],
 .dark-theme .user-setting select,
-.dark-theme .user-setting input[type] {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+.dark-theme .user-setting input[type],
+.dark-theme .user-wallet,
+.dark-theme .user-wallet .user-pay-desc,
+.dark-theme .user-rights,
+.dark-theme .user-feedback {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
     color: ${storedSettings[Settings.COLOR_SCHEME][2]};
-}
-
-/* inventory */
-.dark-theme .detail-tab-cont .market-card {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
 }
 
 /* favorites */
@@ -212,6 +217,11 @@ if (storedSettings[Settings.USE_SCHEME]) {
 .dark-theme .l_Layout .cont_main .user-record .i_Btn_hollow {
     background-color: #959595;
     color: #fff;
+}
+
+/* inventory */
+.dark-theme .detail-tab-cont .market-card {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
 }
 
 /* bargain popup */
@@ -254,6 +264,27 @@ if (storedSettings[Settings.USE_SCHEME]) {
     background: ${storedSettings[Settings.COLOR_SCHEME][1]} !important;
 }
 
+/* payment methods popup */
+.dark-theme .popup .popup-header,
+.dark-theme .popup .popup-tip,
+.dark-theme .popup .popup-cont {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+
+/* float range popup */
+.dark-theme .popup_custom {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+.dark-theme .popup_custom .popup_custom-title {
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+}
+/* confirmation popup */
+.dark-theme .popup_common {
+    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+}
+.dark-theme .popup_common .popup-cont h2 {
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+}
 `);
 
     let body = document.querySelector('body');
