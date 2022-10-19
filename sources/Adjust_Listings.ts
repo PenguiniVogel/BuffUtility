@@ -61,7 +61,7 @@ module Adjust_Listings {
             a.setAttribute('style', 'margin: 0; min-width: 32px;');
             a.innerHTML = '<i class="icon icon_refresh" style=" margin: 0 0 3px 0; filter: grayscale(1) brightness(2);"></i>';
 
-            switch (storedSettings[Settings.LOCATION_RELOAD_NEWEST]) {
+            switch (getSetting(Settings.LOCATION_RELOAD_NEWEST)) {
                 case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE:
                     break;
                 case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK:
@@ -128,7 +128,7 @@ module Adjust_Listings {
             adjustBuyOrderListings(<InjectionService.TransferData<BuffTypes.BuyOrder.Data>>transferData);
         }
 
-        if (!document.querySelector('span.buffutility-pricerange') && storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] > ExtensionSettings.PriceHistoryRange.OFF) {
+        if (!document.querySelector('span.buffutility-pricerange') && getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
             adjustHeaderListings();
         }
@@ -139,7 +139,7 @@ module Adjust_Listings {
      */
     function adjustHeaderListings() {
         // default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
-        const days: ExtensionSettings.PriceHistoryRange = storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY];
+        const days: ExtensionSettings.PriceHistoryRange = getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
         const goods_id = document.querySelector('div.detail-cont div.add-bookmark').getAttribute('data-target-id');
 
         // skip to prevent doubles
@@ -222,7 +222,7 @@ module Adjust_Listings {
 
         // only override stickers if we actually can have any
         if (schemaData?.sticker_amount > 0) {
-            ExtensionSettings.save(Settings.STORED_CUSTOM_STICKER_SEARCH, (/&extra_tag_ids=[^&#]+/g.exec(transferData.url) ?? [''])[0]);
+            ExtensionSettings.setSetting(Settings.STORED_CUSTOM_STICKER_SEARCH, (/&extra_tag_ids=[^&#]+/g.exec(transferData.url) ?? [''])[0]);
         }
 
         let floatdb_category;
@@ -242,12 +242,12 @@ module Adjust_Listings {
         }
 
         const preview_screenshots = document.getElementById('preview_screenshots');
-        const can_expand_screenshots = storedSettings[Settings.CAN_EXPAND_SCREENSHOTS] && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
-        const expand_classes = can_expand_screenshots ? `img_td can_expand ${storedSettings[Settings.EXPAND_SCREENSHOTS_BACKDROP] ? 'expand_backdrop' : ''}` : 'img_td';
+        const can_expand_screenshots = getSetting(Settings.CAN_EXPAND_SCREENSHOTS) && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
+        const expand_classes = can_expand_screenshots ? `img_td can_expand ${getSetting(Settings.EXPAND_SCREENSHOTS_BACKDROP) ? 'expand_backdrop' : ''}` : 'img_td';
 
         let fopString = '';
         if (can_expand_screenshots) {
-            switch (storedSettings[Settings.CUSTOM_FOP]) {
+            switch (getSetting(Settings.CUSTOM_FOP)) {
                 case ExtensionSettings.FOP_VALUES.Auto:
                     fopString = '';
 
@@ -278,7 +278,7 @@ module Adjust_Listings {
         }
 
         // adjust reference price
-        if (storedSettings[Settings.APPLY_STEAM_TAX]) {
+        if (getSetting(Settings.APPLY_STEAM_TAX)) {
             let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
             let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
@@ -292,7 +292,7 @@ module Adjust_Listings {
             let divContainer = td_img_td.querySelector('div');
             let expandImg = document.createElement('img');
 
-            expandImg.setAttribute('data-buff-utility-expand-image', `${storedSettings[Settings.EXPAND_TYPE]}`);
+            expandImg.setAttribute('data-buff-utility-expand-image', `${getSetting(Settings.EXPAND_TYPE)}`);
             // expandImg.setAttribute('style', 'display: none;');
 
             // set image source
@@ -350,7 +350,7 @@ module Adjust_Listings {
                     // aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
                     aCopyGen.setAttribute('class', 'ctag btn');
 
-                    if (storedSettings[Settings.SHOW_TOAST_ON_ACTION]) {
+                    if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
                         aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
                     } else {
                         aCopyGen.setAttribute('href', 'javascript:;');
@@ -388,7 +388,7 @@ module Adjust_Listings {
 
                 wearContainer.appendChild(document.createElement('br'));
 
-                let enabledOptions: boolean[] = storedSettings[Settings.LISTING_OPTIONS];
+                let enabledOptions: boolean[] = getSetting(Settings.LISTING_OPTIONS);
 
                 let ctags = wearContainer.querySelectorAll('a.ctag');
                 if (ctags?.length >= 2) {
@@ -433,7 +433,7 @@ module Adjust_Listings {
             let priceDiff = price - steamPriceCNY;
 
             let priceDiffStr;
-            if (storedSettings[Settings.APPLY_CURRENCY_TO_DIFFERENCE]) {
+            if (getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
                 priceDiffStr = Util.convertCNY(priceDiff);
             } else {
                 priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}`;
@@ -472,7 +472,7 @@ module Adjust_Listings {
             if (can_expand_screenshots && dataRow.can_use_inspect_trn_url) {
                 let img_src = dataRow.img_src + data.fop_str;
 
-                switch (storedSettings[Settings.EXPAND_TYPE]) {
+                switch (getSetting(Settings.EXPAND_TYPE)) {
                     case ExtensionSettings.ExpandScreenshotType.PREVIEW:
                         img_src = `${dataRow.img_src}${fopString}`;
 
@@ -494,18 +494,18 @@ module Adjust_Listings {
                 let aBargain = dataRow.can_bargain ? row.querySelector('td a.bargain[data-asset-info]') : null;
                 // console.debug(aBuy, aBargain);
 
-                if (aBuy && price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][0]) {
+                if (aBuy && price > nrBalance && getSetting(Settings.COLOR_LISTINGS)[0]) {
                     aBuy.setAttribute('style', `background: ${GlobalConstants.COLOR_BAD};`);
                 }
 
-                if (aBargain && +dataRow.lowest_bargain_price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][1]) {
+                if (aBargain && +dataRow.lowest_bargain_price > nrBalance && getSetting(Settings.COLOR_LISTINGS)[1]) {
                     aBargain.setAttribute('style', `color: ${GlobalConstants.COLOR_BAD} !important;`);
                 }
             }
         }
 
         if (updated_preview > 0) {
-            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview == 1 ? '.' : 's.'}`, 'type:', storedSettings[Settings.EXPAND_TYPE] == 0 ? 'PREVIEW' : 'INSPECT');
+            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview == 1 ? '.' : 's.'}`, 'type:', getSetting(Settings.EXPAND_TYPE) == 0 ? 'PREVIEW' : 'INSPECT');
         }
     }
 

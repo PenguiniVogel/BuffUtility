@@ -12,5 +12,6 @@ package-lock.json
 sources/*.js
 sources/csgostash/*.js
 lib/*.js
+config.js
 
 *.zip

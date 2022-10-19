@@ -1,6 +1,7 @@
-// Start the extension
-
+// imports
 import Settings = ExtensionSettings.Settings;
+
+// Start the extension
 
 declare var g: BuffTypes.g;
 
@@ -13,7 +14,7 @@ SchemaHelper.init();
     let dateToday = Util.formatDate(new Date());
 
     function cacheCurrency(date: string): void {
-        let currencyName: string = storedSettings[Settings.SELECTED_CURRENCY];
+        let currencyName: string = getSetting(Settings.SELECTED_CURRENCY);
         let rates = CurrencyHelper.getData().rates[currencyName];
 
         let segment: CurrencyHelper.Data = {
@@ -26,7 +27,7 @@ SchemaHelper.init();
 
         console.debug(segment);
 
-        if (storedSettings[Settings.EXPERIMENTAL_FETCH_NOTIFICATION]) {
+        if (getSetting(Settings.EXPERIMENTAL_FETCH_NOTIFICATION)) {
             Util.signal(['Buff', 'toast'], null, [`Fetched current conversion rates: ${currencyName} -> ${rates[0].toFixed(rates[1])}`]);
         }
 
@@ -92,7 +93,7 @@ function adjustFloatBar(): void {
 
     divFloatBar.parentElement.appendChild(divExpandFloatBar);
 
-    if (storedSettings[Settings.SHOW_FLOAT_BAR]) {
+    if (getSetting(Settings.SHOW_FLOAT_BAR)) {
         showFloatBar();
     } else {
         hideFloatBar();
@@ -121,38 +122,38 @@ function adjustAccountBalance(): void {
 adjustFloatBar();
 adjustAccountBalance();
 
-if (storedSettings[Settings.USE_SCHEME]) {
+if (getSetting(Settings.USE_SCHEME)) {
     InjectionServiceLib.injectCSS(`
 /* market */
 .dark-theme #j_market_card,
 .dark-theme #j_list_card li {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 
 .dark-theme #j_list_card li {
-    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]};
 }
 
 .dark-theme #j_list_card li, 
 .dark-theme #j_list_card li a, 
 .dark-theme #j_list_card li p {
-    color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
 }
 
 .dark-theme .pager li.disabled * {
-    color: ${storedSettings[Settings.COLOR_SCHEME][3]} !important;
-    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
+    color: ${getSetting(Settings.COLOR_SCHEME)[3]} !important;
+    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
 }
 
 .dark-theme .pager .next, .dark-theme .pager .page-link {
-    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
 }
 
 /* listings */
 .dark-theme .detail-tab-cont,
 .dark-theme div.desc_content {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 
 .dark-theme div.stickers {
@@ -162,16 +163,16 @@ if (storedSettings[Settings.USE_SCHEME]) {
 .dark-theme .des_row,
 .dark-theme .pager li.disabled span,
 .dark-theme .list_tb th {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
-    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
+    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
 }
 
 .dark-theme .list_tb td {
-    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
 }
 
 .dark-theme .detail-tab-cont tr:hover {
-    background: ${storedSettings[Settings.COLOR_SCHEME][1]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[1]};
 }
 
 .dark-theme tr[id], 
@@ -181,8 +182,8 @@ if (storedSettings[Settings.USE_SCHEME]) {
 .dark-theme a.ctag,
 .dark-theme .pager li .page-link,
 .dark-theme .desc_content {
-    color: ${storedSettings[Settings.COLOR_SCHEME][2]};
-    border-color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]};
 }
 
 /* settings */
@@ -192,22 +193,22 @@ if (storedSettings[Settings.USE_SCHEME]) {
 .dark-theme .user-setting label[for],
 .dark-theme .user-setting select,
 .dark-theme .user-setting input[type] {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
-    color: ${storedSettings[Settings.COLOR_SCHEME][2]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
 }
 
 /* inventory */
 .dark-theme .detail-tab-cont .market-card {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 
 /* favorites */
 .dark-theme .l_Layout .cont_main .user-record {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 .dark-theme .l_Layout .cont_main .user-record a,
 .dark-theme .l_Layout .cont_main .user-record .delete-bookmark {
-    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
 }
 .dark-theme .l_Layout .cont_main .user-record .i_Btn_hollow {
     background-color: #959595;
@@ -219,39 +220,60 @@ if (storedSettings[Settings.USE_SCHEME]) {
 .dark-theme .popup_supply .popup-cont,
 .dark-theme .popup_supply .popup-cont .popup-good-summary,
 .dark-theme .popup_supply .popup-cont .popup-good-summary .input-cont .j_filter {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 .dark-theme .popup_supply .input-cont .c_Gray {
-    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
 }
 
 /* selling popup */
 .dark-theme .popup_charge .popup-header,
 .dark-theme .popup_charge .popup-cont {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 .dark-theme .popup_charge .popup-cont .list_tb_csgo tr:hover {
-    background: ${storedSettings[Settings.COLOR_SCHEME][1]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[1]};
 }
 
 /* selling description popup */
 .dark-theme .popup_guide_sell .popup-header,
 .dark-theme .popup_guide_sell .popup-cont {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 .dark-theme .popup_guide_sell textarea {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]};
-    color: ${storedSettings[Settings.COLOR_SCHEME][2]} !important;
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
 }
 
 /* applied sticker popup */
 .dark-theme .popup_flower .popup-header,
 .dark-theme .popup_flower .popup-cont,
 .dark-theme .popup_flower .popup-cont li {
-    background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
 }
 .dark-theme .popup_flower .popup-cont tr:hover {
-    background: ${storedSettings[Settings.COLOR_SCHEME][1]} !important;
+    background: ${getSetting(Settings.COLOR_SCHEME)[1]} !important;
+}
+
+/* payment methods popup */
+.dark-theme .popup .popup-header,
+.dark-theme .popup .popup-tip,
+.dark-theme .popup .popup-cont {
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+}
+/* float range popup */
+.dark-theme .popup_custom {
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+}
+.dark-theme .popup_custom .popup_custom-title {
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+}
+/* confirmation popup */
+.dark-theme .popup_common {
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+}
+.dark-theme .popup_common .popup-cont h2 {
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]}
 }
 
 `);

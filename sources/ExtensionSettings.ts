@@ -1,5 +1,3 @@
-declare var storedSettings: ExtensionSettings.SettingsProperties;
-
 module ExtensionSettings {
 
     export const enum DifferenceDominator {
@@ -63,6 +61,7 @@ module ExtensionSettings {
     }
 
     export const enum Settings {
+        VERSION = 'version',
         SELECTED_CURRENCY = 'selected_currency',
         CUSTOM_CURRENCY_RATE = 'custom_currency_rate',
         CUSTOM_CURRENCY_NAME = 'custom_currency_name',
@@ -97,10 +96,13 @@ module ExtensionSettings {
         // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS = 'fetch_favourite_bargain_status',
         // [TBA] -> setting will be moved to advanced settings
-        EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY = 'fetch_item_price_history'
+        EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY = 'fetch_item_price_history',
+
+        STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
     }
 
-    export interface SettingsProperties {
+    type SettingsTypes = {
+        [Settings.VERSION]: string;
         [Settings.SELECTED_CURRENCY]: string;
         [Settings.CUSTOM_CURRENCY_RATE]: number;
         [Settings.CUSTOM_CURRENCY_NAME]: string;
@@ -120,7 +122,7 @@ module ExtensionSettings {
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
         [Settings.LISTING_OPTIONS]: boolean[];
         [Settings.SHOW_FLOAT_BAR]: boolean;
-        [Settings.COLOR_LISTINGS]: boolean[];
+        [Settings.COLOR_LISTINGS]: [boolean, boolean];
         [Settings.DATA_PROTECTION]: boolean;
         [Settings.COLOR_SCHEME]: string[];
         [Settings.USE_SCHEME]: boolean;
@@ -131,9 +133,223 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: boolean;
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange;
+
+        [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
     }
 
-    const DEFAULT_SETTINGS: SettingsProperties = {
+    const enum InternalStructureTransform {
+        NONE,
+        BOOLEAN,
+        BOOLEAN_ARRAY
+    }
+
+    type InternalSettingStructure = {
+        [key in Settings]: {
+            default: SettingsTypes[key],
+            value?: SettingsTypes[key],
+            export: string,
+            transform: InternalStructureTransform,
+            validator: (key: Settings, value: any) => any
+        }
+    }
+
+    const INTERNAL_SETTINGS: InternalSettingStructure = {
+        [Settings.VERSION]: {
+            default: '2.1.8',
+            export: '0x0',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNotNull
+        },
+        [Settings.SELECTED_CURRENCY]: {
+            default: 'USD',
+            export: '0x1',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNotNull
+        },
+        [Settings.CUSTOM_CURRENCY_RATE]: {
+            default: 1,
+            export: '0x2',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
+        [Settings.CUSTOM_CURRENCY_NAME]: {
+            default: 'CC',
+            export: '0x3',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNotNull
+        },
+        [Settings.CUSTOM_CURRENCY_CALCULATED_RATE]: {
+            default: 1,
+            export: '0x4',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
+        [Settings.CUSTOM_CURRENCY_LEADING_ZEROS]: {
+            default: 2,
+            export: '0x5',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
+        [Settings.CAN_EXPAND_SCREENSHOTS]: {
+            default: false,
+            export: '0x6',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.EXPAND_SCREENSHOTS_BACKDROP]: {
+            default: false,
+            export: '0x7',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.DIFFERENCE_DOMINATOR]: {
+            default: DifferenceDominator.STEAM,
+            export: '0x8',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
+        [Settings.APPLY_STEAM_TAX]: {
+            default: false,
+            export: '0x9',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: {
+            default: false,
+            export: '0x10',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.EXPAND_TYPE]: {
+            default: ExpandScreenshotType.PREVIEW,
+            export: '0x11',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
+        [Settings.CUSTOM_FOP]: {
+            default: FOP_VALUES.Auto,
+            export: '0x12',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
+        [Settings.DEFAULT_SORT_BY]: {
+            default: 'default',
+            export: '0x13',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNotNull
+        },
+        [Settings.DEFAULT_STICKER_SEARCH]: {
+            default: 'All',
+            export: '0x14',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNotNull
+        },
+        [Settings.STORED_CUSTOM_STICKER_SEARCH]: {
+            default: '',
+            export: '0x15',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNotNull
+        },
+        [Settings.LEECH_CONTRIBUTOR_KEY]: {
+            default: '',
+            export: '0x16',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNotNull
+        },
+        [Settings.SHOW_TOAST_ON_ACTION]: {
+            default: false,
+            export: '0x17',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.LISTING_OPTIONS]: {
+            default: [true, true, true, true, false, false],
+            export: '0x18',
+            transform: InternalStructureTransform.BOOLEAN_ARRAY,
+            validator: validateBooleanArray
+        },
+        [Settings.SHOW_FLOAT_BAR]: {
+            default: true,
+            export: '0x19',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.COLOR_LISTINGS]: {
+            default: [false, false],
+            export: '0x20',
+            transform: InternalStructureTransform.BOOLEAN_ARRAY,
+            validator: validateBooleanArray
+        },
+        [Settings.DATA_PROTECTION]: {
+            default: true,
+            export: '0x21',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.COLOR_SCHEME]: {
+            default: ['#121212', '#1f1f1f', '#bfbfbf', '#696969'],
+            export: '0x22',
+            transform: InternalStructureTransform.NONE,
+            validator: validateColorArray
+        },
+        [Settings.USE_SCHEME]: {
+            default: false,
+            export: '0x23',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.LOCATION_RELOAD_NEWEST]: {
+            default: LOCATION_RELOAD_NEWEST_VALUES.NONE,
+            export: '0x24',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
+
+        [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: {
+            default: true,
+            export: '2x1',
+            transform: InternalStructureTransform.NONE,
+            validator: null
+        },
+        [Settings.EXPERIMENTAL_ADJUST_POPULAR]: {
+            default: false,
+            export: '2x2',
+            transform: InternalStructureTransform.NONE,
+            validator: null
+        },
+        [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: {
+            default: false,
+            export: '2x3',
+            transform: InternalStructureTransform.NONE,
+            validator: null
+        },
+        [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: {
+            default: false,
+            export: '2x4',
+            transform: InternalStructureTransform.NONE,
+            validator: null
+        },
+        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: {
+            default: PriceHistoryRange.OFF,
+            export: '2x5',
+            transform: InternalStructureTransform.NONE,
+            validator: null
+        },
+
+        [Settings.STORE_DANGER_AGREEMENTS]: {
+            default: [false, false],
+            export: '3x1',
+            transform: InternalStructureTransform.BOOLEAN_ARRAY,
+            validator: validateBooleanArray
+        }
+    };
+
+    /*
+     * legacy, keep until 2.1.9
+     * @private
+     *
+    const DEFAULT_SETTINGS: SettingsTypes = {
+        [Settings.VERSION]: '2.1.8',
         [Settings.SELECTED_CURRENCY]: 'USD',
         [Settings.CUSTOM_CURRENCY_RATE]: 1,
         [Settings.CUSTOM_CURRENCY_NAME]: 'CC',
@@ -164,11 +380,16 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: true,
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: false,
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange.OFF
-    };
+    };*/
 
+    /*
+     * legacy, keep until 2.1.9
+     * @private
+     *
     const VALIDATORS: {
         [key in Settings]: (value: any) => any
     } = {
+        [Settings.VERSION]: (value) => value ?? DEFAULT_SETTINGS[Settings.VERSION],
         [Settings.SELECTED_CURRENCY]: (value) => value ?? DEFAULT_SETTINGS[Settings.SELECTED_CURRENCY],
         [Settings.CUSTOM_CURRENCY_RATE]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.CUSTOM_CURRENCY_RATE]),
         [Settings.CUSTOM_CURRENCY_NAME]: (value) => value ?? DEFAULT_SETTINGS[Settings.CUSTOM_CURRENCY_NAME],
@@ -199,11 +420,15 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_NOTIFICATION]),
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: (value) => validateBoolean(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]),
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: (value) => validateNumber(value, DEFAULT_SETTINGS[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY])
-    };
+    };*/
 
-    let settings: SettingsProperties = {
+    /*
+     * legacy, keep until 2.1.9
+     * @private
+     *
+    let settings: SettingsTypes = {
         ...DEFAULT_SETTINGS
-    };
+    };*/
 
     export let steam_settings: SteamSettings = {
         wallet_fee: 1,
@@ -214,49 +439,77 @@ module ExtensionSettings {
 
     // func validators
 
-    function validateNumber(value: string, fallback: number): number {
+    function checkTypeValidation(key: Settings, targetType: string): void {
+        if (!(typeof INTERNAL_SETTINGS[key].default == targetType)) {
+            console.warn(`[BuffUtility] Tried validating ${key} as ${targetType}, should be validated as ${typeof INTERNAL_SETTINGS[key].default}`);
+        }
+    }
+
+    function validateNotNull(key: Settings, value: any): any {
+        if (value == null) {
+            return INTERNAL_SETTINGS[key].default;
+        } else {
+            return value;
+        }
+    }
+
+    function validateNumber(key: Settings, value: any): number {
+        checkTypeValidation(key, typeof 0);
+
         if (!isFinite(+value) || +value == null) {
-            return fallback;
+            return <number>INTERNAL_SETTINGS[key].default;
         } else {
             return +value;
         }
     }
 
-    function validateBoolean(value: any, fallback: boolean): boolean {
-        if (value == undefined) return fallback;
-        if (value == false || value == true) return value;
-        if (/false|true/gi.test(value)) return value == 'true';
+    function _validateBoolean(value: any): boolean {
+        if (typeof value == 'boolean') {
+            return value;
+        }
 
-        return fallback;
+        if (typeof value == 'string') {
+            return value == 'true';
+        }
+
+        return null;
     }
 
-    function validateBooleanArray(value: any, fallback: boolean[]): boolean[] {
-        value = value ?? fallback;
+    function validateBoolean(key: Settings, value: any): boolean {
+        checkTypeValidation(key, typeof true);
+
+        return _validateBoolean(value) ?? <boolean>INTERNAL_SETTINGS[key].default;
+    }
+
+    function validateBooleanArray(key: Settings, value: any): boolean[] {
+        checkTypeValidation(key, typeof []);
+
+        value = value ?? INTERNAL_SETTINGS[key].default;
 
         let r = [];
-        for (let i = 0, l = fallback.length; i < l; i ++) {
-            r[i] = validateBoolean(value[i], fallback[i]);
+        for (let i = 0, l = (<[]>INTERNAL_SETTINGS[key].default)?.length; i < l; i ++) {
+            r[i] = _validateBoolean(value[i]) ?? INTERNAL_SETTINGS[key].default[i];
         }
 
         return r;
     }
 
-    function validateColor(value: any, fallback: string): string {
-        value = value ?? fallback;
-
-        if (!/#[0-9a-f]{6}/i.test(value)) {
-            value = fallback;
-        }
-
-        return value;
+    function _validateColor(value: any): string {
+        return /#[0-9a-f]{6}/i.test(value) ? value : null;
     }
 
-    function validateColorArray(value: any, fallback: string[]): string[] {
-        value = value ?? fallback;
+    function validateColor(key: Settings, value: any): string {
+        checkTypeValidation(key, typeof '');
+
+        return _validateColor(value) ?? <string>INTERNAL_SETTINGS[key].default;
+    }
+
+    function validateColorArray(key: Settings, value: any): string[] {
+        value = value ?? INTERNAL_SETTINGS[key].default;
 
         let r = [];
-        for (let i = 0, l = fallback.length; i < l; i ++) {
-            r[i] = validateColor(value[i], fallback[i]);
+        for (let i = 0, l = (<[]>INTERNAL_SETTINGS[key].default)?.length; i < l; i ++) {
+            r[i] = _validateColor(value[i]) ?? INTERNAL_SETTINGS[key].default[i];
         }
 
         return r;
@@ -265,31 +518,55 @@ module ExtensionSettings {
     // general
 
     export function load(): void {
-        let tempSettings: SettingsProperties = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS)) ?? {} as SettingsProperties;
+        let tempSettings = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS)) ?? {};
 
-        settings = {
-            ...settings,
-            ...tempSettings
-        };
+        if (tempSettings[Settings.VERSION]?.length < 1) {
+            _upgrade218();
+        } else {
+            // map export structure dynamically
+            let export_structure: {
+                [key: string]: Settings
+            } = {};
 
-        const defaultKeys = Object.keys(DEFAULT_SETTINGS);
-        const loadedKeys = Object.keys(settings);
+            const keys = (<Settings[]>Object.keys(INTERNAL_SETTINGS)).map<string>(k => {
+                const exportKey = INTERNAL_SETTINGS[k].export;
+                export_structure[exportKey] = k;
+                return exportKey;
+            });
 
-        for (let l_loadedKey of loadedKeys) {
-            if (defaultKeys.indexOf(l_loadedKey) > -1) continue;
+            for (let l_key of keys) {
+                let struc: Settings = export_structure[l_key];
+                let newValue = null;
 
-            // delete unused / old properties
-            delete settings[l_loadedKey];
+                switch (INTERNAL_SETTINGS[struc].transform) {
+                    case InternalStructureTransform.NONE:
+                        newValue = tempSettings[ l_key ];
+                        break;
+                    case InternalStructureTransform.BOOLEAN:
+                        newValue = tempSettings[ l_key ] == 1;
+                        break;
+                    case InternalStructureTransform.BOOLEAN_ARRAY:
+                        newValue = Util.importBooleansFromBytes(tempSettings[ l_key ]);
+                        break;
+                }
+
+                let validator = INTERNAL_SETTINGS[struc].validator ?? ((_, value) => value);
+                INTERNAL_SETTINGS[struc].value = validator(struc, newValue);
+            }
         }
 
-        storedSettings = getAll();
+        if (DEBUG) {
+            console.debug('Loaded Settings:', INTERNAL_SETTINGS);
+        }
     }
 
-    /**
+    /*
+     * legacy, keep until 2.1.9
      * Returns a cloned settings object
-     */
-    export function getAll(): SettingsProperties {
-        let copy = <SettingsProperties>JSON.parse(JSON.stringify(settings));
+     * @private
+     *
+    function getAll(): SettingsTypes {
+        let copy = <SettingsTypes>JSON.parse(JSON.stringify(settings));
 
         const keys = Object.keys(VALIDATORS);
         for (let l_key of keys) {
@@ -299,13 +576,31 @@ module ExtensionSettings {
         console.debug('[BuffUtility] Getting all settings:', settings, '->', copy);
 
         return copy;
+    }*/
+
+    /**
+     * Get the specified setting
+     *
+     * @param setting The value of the setting to get
+     * @returns The value from the specified setting, return type is determined by passed setting
+     */
+    export function getSetting<T extends Settings, R extends SettingsTypes[T]>(setting: T): R {
+        return <R>INTERNAL_SETTINGS[setting].value;
     }
 
-    export function save(setting: Settings, newValue: any): void {
-        let oldValue = `${settings[setting]}`;
+    /**
+     * Set a new value for the specified setting <br>
+     * Value will be checked by the specified setting validator
+     *
+     * @param setting The specified setting to update
+     * @param newValue The new value of the setting
+     */
+    export function setSetting<T extends Settings>(setting: T, newValue: any): void {
+        let oldValue = `${INTERNAL_SETTINGS[setting].value}`;
 
         if (oldValue != `${newValue}`) {
-            settings[setting] = <never>(VALIDATORS[setting](newValue));
+            let validator = INTERNAL_SETTINGS[setting].validator ?? ((_, value) => value);
+            INTERNAL_SETTINGS[setting].value = validator(setting, newValue);
 
             console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
         }
@@ -315,6 +610,62 @@ module ExtensionSettings {
      * This will write the current settings to the cookie storage
      */
     export function finalize(): void {
+        const keys = Object.keys(INTERNAL_SETTINGS);
+
+        let exportSettings = {};
+
+        for (let l_key of keys) {
+            let struc = INTERNAL_SETTINGS[<Settings>l_key];
+
+            switch (struc.transform) {
+                case InternalStructureTransform.NONE:
+                    exportSettings[struc.export] = struc.value;
+                    break;
+                case InternalStructureTransform.BOOLEAN:
+                    exportSettings[struc.export] = struc.value == true ? 1 : 0;
+                    break;
+                case InternalStructureTransform.BOOLEAN_ARRAY:
+                    exportSettings[struc.export] = Util.exportBooleansToBytes(<boolean[]>struc.value);
+                    break;
+            }
+        }
+
+        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(exportSettings));
+    }
+
+    export function hasBeenAgreed(setting: Settings): boolean {
+        switch (setting) {
+            case Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS:
+                return getSetting(Settings.STORE_DANGER_AGREEMENTS)[0];
+            case Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY:
+                return getSetting(Settings.STORE_DANGER_AGREEMENTS)[1];
+            default:
+                return false;
+        }
+    }
+
+    // --- upgrade 2.1.7 -> 2.1.8
+
+    function _upgrade218(): void {
+        _load217();
+        finalize();
+    }
+
+    function _load217(): void {
+        let tempSettings = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS));
+
+        const defaultKeys = Object.keys(INTERNAL_SETTINGS);
+
+        for (let key of defaultKeys) {
+            setSetting(<Settings>key, tempSettings[key]);
+        }
+    }
+
+    /*
+     * legacy, keep until 2.1.9
+     * @private
+     *
+    function _finalize217(): void {
         const defaultKeys = Object.keys(DEFAULT_SETTINGS);
         const loadedKeys = Object.keys(settings);
 
@@ -328,8 +679,17 @@ module ExtensionSettings {
         }
 
         Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(settings));
-    }
+    }*/
 
 }
+
+/**
+ * Exposed function to avoid imports <br>
+ * Get the specified setting
+ *
+ * @param setting The value of the setting to get
+ * @returns The value from the specified setting, return type is determined by passed setting
+ */
+const getSetting = ExtensionSettings.getSetting;
 
 ExtensionSettings.load();

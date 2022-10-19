@@ -56,28 +56,28 @@ module Adjust_Market {
 
                 let stickerSearch = '';
                 if (schemaData && schemaData.sticker_amount > 0) {
-                    switch (storedSettings[Settings.DEFAULT_STICKER_SEARCH]) {
+                    switch (getSetting(Settings.DEFAULT_STICKER_SEARCH)) {
                         case ExtensionSettings.FILTER_STICKER_SEARCH['All']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['No Stickers']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Squad Combos']:
-                            stickerSearch = storedSettings[Settings.DEFAULT_STICKER_SEARCH];
+                            stickerSearch = getSetting(Settings.DEFAULT_STICKER_SEARCH);
                             break;
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Save Custom']:
-                            if (storedSettings[Settings.STORED_CUSTOM_STICKER_SEARCH].length > 0) {
-                                stickerSearch = storedSettings[Settings.STORED_CUSTOM_STICKER_SEARCH];
+                            if (getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH).length > 0) {
+                                stickerSearch = getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH);
                             }
                             break;
                     }
                 }
 
-                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${storedSettings[Settings.DEFAULT_SORT_BY]}${stickerSearch}`);
+                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${getSetting(Settings.DEFAULT_SORT_BY)}${stickerSearch}`);
             }
 
             let buffPrice = +dataRow.sell_min_price;
             let steamPriceCNY = +dataRow.goods_info.steam_price_cny;
 
-            if (storedSettings[Settings.APPLY_STEAM_TAX]) {
+            if (getSetting(Settings.APPLY_STEAM_TAX)) {
                 let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
                 let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
@@ -87,7 +87,7 @@ module Adjust_Market {
             }
 
             let priceDiff;
-            switch (storedSettings[Settings.DIFFERENCE_DOMINATOR]) {
+            switch (getSetting(Settings.DIFFERENCE_DOMINATOR)) {
                 case ExtensionSettings.DifferenceDominator.STEAM:
                     priceDiff = ((steamPriceCNY - buffPrice) / steamPriceCNY) * -1 * 100;
                     break;
@@ -196,7 +196,7 @@ module Adjust_Market {
 
     function adjustMarketTopBookmarked(transferData: InjectionService.TransferData<BuffTypes.TopPopular.Data>): void {
         // If experimental feature was disabled, ignore.
-        if (!storedSettings[Settings.EXPERIMENTAL_ADJUST_POPULAR]) {
+        if (!getSetting(Settings.EXPERIMENTAL_ADJUST_POPULAR)) {
             console.debug('[BuffUtility] Experimental feature \'Adjust Popular\' is disabled.');
             return;
         }
@@ -233,7 +233,7 @@ module Adjust_Market {
                     }
                 }
             
-                if (storedSettings[Settings.SHOW_TOAST_ON_ACTION]) {
+                if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
                     aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
                 } else {
                     aCopyGen.setAttribute('href', 'javascript:;');

@@ -2,11 +2,15 @@
     "compilerOptions": {
         "module": "None",
         "target": "es5",
-        "sourceMap": false,
-        "inlineSourceMap": false,
+        "inlineSources": true,
+        "inlineSourceMap": true,
         "disableSizeLimit": true
     },
+    "exclude": [
+        "node_modules"
+    ],
     "files": [
+        "config.ts",
         "lib/.GlobalConstants.ts",
         "lib/CurrencyHelper.ts",
         "lib/BuffTypes.d.ts",

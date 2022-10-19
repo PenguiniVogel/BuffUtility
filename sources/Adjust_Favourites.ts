@@ -1,5 +1,6 @@
 module AdjustFavourites {
 
+    // imports
     import Settings = ExtensionSettings.Settings;
 
     function init(): void {
@@ -68,7 +69,7 @@ module AdjustFavourites {
                 aCopyGen.setAttribute('class', 'ctag btn');
                 aCopyGen.setAttribute('style', 'margin-top: 3px;');
 
-                if (storedSettings[Settings.SHOW_TOAST_ON_ACTION]) {
+                if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
                     aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
                 } else {
                     aCopyGen.setAttribute('href', 'javascript:;');
@@ -94,7 +95,7 @@ module AdjustFavourites {
 
             nameContainer.parentElement.appendChild(aShare);
 
-            if (storedSettings[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]) {
+            if (getSetting(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN)) {
                 // Note: this feature is yet unable to check if the seller has disabled bargaining
                 //       https://buff.163.com/api/market/buyer_bargain/create/preview?sell_order_id=220913T2001697026
                 //       will enable us to check the code if a bargain can be created, NEEDS to be optional, and off by default.
@@ -122,7 +123,7 @@ module AdjustFavourites {
                     parentBargain.querySelector('span').setAttribute('style', 'margin-left: 50px;');
                     parentBargain.querySelector('a').after(aBargain);
 
-                    if (storedSettings[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]) {
+                    if (getSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS)) {
                         let orderId = imgContainer.getAttribute('data-orderid');
                         if (orderId?.length > 0) {
                             fetch(`https://buff.163.com/api/market/buyer_bargain/create/preview?sell_order_id=${orderId}`)
@@ -138,11 +139,11 @@ module AdjustFavourites {
                 }
 
                 if (isBalanceYuan) {
-                    if (price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][0]) {
+                    if (price > nrBalance && getSetting(Settings.COLOR_LISTINGS)[0]) {
                         aBuy.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
                     }
 
-                    if (lowest_bargain_price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][1]) {
+                    if (lowest_bargain_price > nrBalance && getSetting(Settings.COLOR_LISTINGS)[1]) {
                         aBargain.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
                     }
                 }

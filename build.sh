@@ -1,6 +1,6 @@
 # tsc
-echo "Building tsc w/ production.tsconfig"
-tsc --project production.tsconfig.json
+echo "Building tsc w/ production level + tsconfig"
+tsc --project tsconfig.json --inlineSources false --inlineSourceMap false --removeComments true --outDir .out
 echo " "
 
 # delete previous export
@@ -37,14 +37,14 @@ f_copy() {
 # f_build
 f_build() {
   # uglify files
-#  f_uglify ".out/sources/*.js"
-#  echo " "
-#
-#  f_uglify ".out/sources/csgostash/*.js"
-#  echo " "
-#
-#  f_uglify ".out/lib/*.js"
-#  echo " "
+  #  f_uglify ".out/sources/*.js"
+  #  echo " "
+  #
+  #  f_uglify ".out/sources/csgostash/*.js"
+  #  echo " "
+  #
+  #  f_uglify ".out/lib/*.js"
+  #  echo " "
 
   # copy lib
   f_copy ".out/lib/*.js"
