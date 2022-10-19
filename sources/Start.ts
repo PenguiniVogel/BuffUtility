@@ -187,8 +187,14 @@ if (storedSettings[Settings.USE_SCHEME]) {
 
 /* shop pages */
 .dark-theme .l_Layout .market-card, 
-.dark-theme .shop .list_card {
+.dark-theme .shop .list_card,
+.dark-theme .shop .shop-recommend-cont,
+.dark-theme .shop .shop-recommend-cont .slider-handle,
+.dark-theme .shop .shop-recommend-list li {
     background: ${storedSettings[Settings.COLOR_SCHEME][0]} !important;
+}
+.dark-theme .shop .shop-recommend-list h3 a {
+    color: ${storedSettings[Settings.COLOR_SCHEME][2]};
 }
 
 /* settings */
