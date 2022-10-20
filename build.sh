@@ -1,6 +1,10 @@
 # tsc
-echo "Building tsc w/ production level + tsconfig"
+echo "Building: --project tsconfig.json --inlineSources false --inlineSourceMap false --removeComments true --outDir .out"
 tsc --project tsconfig.json --inlineSources false --inlineSourceMap false --removeComments true --outDir .out
+echo " "
+
+echo "Building: SchemaData.ts --inlineSources false --inlineSourceMap false --removeComments true --outDir .out/SchemaData"
+tsc SchemaData/SchemaData.ts --inlineSources false --inlineSourceMap false --removeComments true --outDir .out/SchemaData
 echo " "
 
 # delete previous export
@@ -13,7 +17,7 @@ read -p "Press [ENTER] to resume ..."
 
 # setup folder structure
 echo "Checking directory structure..."
-mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/{lib,sources/csgostash}
+mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/{lib,SchemaData,sources/csgostash}
 echo " "
 
 # f_copy
@@ -48,6 +52,9 @@ f_build() {
 
   # copy lib
   f_copy ".out/lib/*.js"
+
+  # copy SchemaData
+  f_copy ".out/SchemaData/*.js"
 
   # copy sources
   f_copy ".out/sources/*.js"

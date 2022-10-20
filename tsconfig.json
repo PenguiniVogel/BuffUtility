@@ -14,7 +14,7 @@
         "lib/.GlobalConstants.ts",
         "lib/CurrencyHelper.ts",
         "lib/BuffTypes.d.ts",
-        "lib/SchemaData.ts",
+        "lib/SchemaData.d.ts",
         "lib/SchemaHelper.ts",
         "lib/InjectionService.ts",
         "sources/Cookie.ts",

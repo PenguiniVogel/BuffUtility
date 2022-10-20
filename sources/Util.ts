@@ -21,7 +21,7 @@ module Util {
          * @param publisherFee
          */
         function getFees(receivedAmount: number, publisherFee: number): { steam_fee: number, publisher_fee: number, fees: number, amount: number } {
-            const { wallet_fee_base, wallet_fee_percent, wallet_fee_minimum } = ExtensionSettings.steam_settings;
+            const { wallet_fee_base, wallet_fee_percent, wallet_fee_minimum } = ExtensionSettings.STEAM_SETTINGS;
 
             let nSteamFee = Math.floor(Math.max(receivedAmount * wallet_fee_percent, wallet_fee_minimum) + wallet_fee_base);
             let nPublisherFee = Math.floor(publisherFee > 0 ? Math.max(receivedAmount * publisherFee, 1) : 0);
@@ -35,7 +35,7 @@ module Util {
             };
         }
 
-        const { wallet_fee_base, wallet_fee_percent } = ExtensionSettings.steam_settings;
+        const { wallet_fee_base, wallet_fee_percent } = ExtensionSettings.STEAM_SETTINGS;
 
         // Since getFees has a Math.floor, we could be off a cent or two. Let's check:
         let iterations = 0; // shouldn't be needed, but included to be sure nothing unforeseen causes us to get stuck
@@ -82,6 +82,7 @@ module Util {
      * Convert the specified cny value to the selected currency
      *
      * @param cny
+     * @returns <e title="¥1 = currency_symbol rate">currency_symbol</e>(cny * rate).toFixed(fixPoint)
      */
     export function convertCNY(cny: number): string {
         const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
@@ -98,6 +99,39 @@ module Util {
             const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
 
             return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${symbol}${rate.toFixed(fixPoint)}">${symbol} </e>${(cny * rate).toFixed(fixPoint)}`;
+        }
+    }
+
+    /**
+     * Convert the specified cny value to the selected currency
+     *
+     * @param cny
+     * @returns An object containing the currency symbol and the converted value
+     */
+    export function convertCNYRaw(cny: number): {
+        convertedSymbol: string,
+        convertedValue: string
+    } {
+        const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
+
+        if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
+            const custom_currency_name = getSetting(Settings.CUSTOM_CURRENCY_NAME);
+            const custom_currency_calculated_rate = getSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE);
+            const custom_currency_leading_zeros = getSetting(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
+
+            return {
+                convertedSymbol: custom_currency_name,
+                convertedValue: (cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)
+            };
+        } else {
+            const { rates, symbols } = CurrencyHelper.getData();
+            const [ rate, fixPoint ] = rates[selected_currency];
+            const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
+
+            return {
+                convertedSymbol: symbol,
+                convertedValue: (cny * rate).toFixed(fixPoint)
+            };
         }
     }
 
@@ -300,6 +334,88 @@ module Util {
         }
 
         return '';
+    }
+
+    // <a> action injection
+
+    export function addAnchorToastAction(a: HTMLElement, text: string): void {
+        if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
+            a.setAttribute('href', `javascript:Buff.toast('${text}');`);
+        } else {
+            a.setAttribute('href', 'javascript:;');
+        }
+    }
+
+    export function addAnchorClipboardAction(a: HTMLElement, text: string): void {
+        a.addEventListener('click', () => {
+            navigator?.clipboard?.writeText(text).then(() => {
+                // alert(`Copied ${gen} to clipboard!`);
+                console.debug(`[BuffUtility] Copied: ${text}`);
+            }).catch((e) => console.error('[BuffUtility]', e));
+        });
+    }
+
+    // format number
+
+    export function formatNumber(inNumber: number | string, compress: boolean = false, overrideMode: ExtensionSettings.CurrencyNumberFormats = null): {
+        wasCompressed: boolean,
+        wasFormatted: boolean,
+        strNumber: string
+    } {
+        let _strNumber = `${inNumber}`;
+        let _parsedNumber = +_strNumber;
+
+        function _format(): ReturnType<typeof formatNumber> {
+            let formatted = new Intl.NumberFormat('en-US', {
+                maximumFractionDigits: 2
+            }).format(_parsedNumber);
+
+            return {
+                wasCompressed: false,
+                wasFormatted: true,
+                strNumber: formatted
+            };
+        }
+
+        function _compress(): ReturnType<typeof formatNumber> {
+            let _wasCompressed = false;
+            if (isFinite(_parsedNumber) && _parsedNumber > 1_000) {
+                _wasCompressed = true;
+                const strippedParsed = `${~~_parsedNumber}`;
+                _strNumber = `${strippedParsed.substring(0, strippedParsed.length - 3)}.${strippedParsed.substring(strippedParsed.length - 3)[0]}`;
+            }
+
+            return {
+                wasCompressed: _wasCompressed,
+                wasFormatted: false,
+                strNumber: _strNumber
+            };
+        }
+
+        const compare = overrideMode ?? getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY);
+        switch (compare) {
+            case ExtensionSettings.CurrencyNumberFormats.FORMATTED:
+                return _format();
+            case ExtensionSettings.CurrencyNumberFormats.COMPRESSED:
+                return _compress();
+            case ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH:
+                return compress ? _compress() : _format();
+        }
+
+        return {
+            wasCompressed: false,
+            wasFormatted: false,
+            strNumber: _strNumber
+        };
+    }
+
+    /**
+     * Embed decimals in a <small></small> element
+     *
+     * @param inStr
+     */
+    export function embedDecimalSmall(inStr: string): string {
+        return inStr.indexOf('.') > -1 ? inStr.replace(/(\d+)\.(\d+)/, '$1<small>.$2</small>') : inStr;
     }
 
     // signal

@@ -102,6 +102,23 @@ module Adjust_Market {
             let newHTML: string[] = [];
 
             if (dataRow.sell_num > 0) {
+                let sell_min_price_sym: string = GlobalConstants.SYMBOL_YUAN;
+                let sell_min_price_str = `${dataRow.sell_min_price}`;
+                const sell_min_price_title = Util.formatNumber(sell_min_price_str, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
+
+                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const { convertedSymbol, convertedValue } = Util.convertCNYRaw(+dataRow.sell_min_price);
+                    sell_min_price_sym = convertedSymbol;
+                    sell_min_price_str = convertedValue;
+                }
+
+                let { wasCompressed, wasFormatted, strNumber } = Util.formatNumber(sell_min_price_str, true);
+                if (wasCompressed || wasFormatted) {
+                    sell_min_price_str = strNumber;
+                }
+
+                sell_min_price_str = `${Util.embedDecimalSmall(sell_min_price_str)}${wasCompressed ? 'K' : ''}`;
+
                 newHTML.push(Util.buildHTML('span', {
                     class: 'f_12px',
                     style: {
@@ -109,7 +126,7 @@ module Adjust_Market {
                         'overflow': 'hidden'
                     },
                     attributes: {
-                        'title': `${GlobalConstants.SYMBOL_YUAN} ${dataRow.sell_min_price} selling (${dataRow.sell_num})`
+                        'title': `${GlobalConstants.SYMBOL_YUAN} ${sell_min_price_title.strNumber} selling (${dataRow.sell_num})`
                     },
                     content: [
                         Util.buildHTML('span', {
@@ -117,7 +134,7 @@ module Adjust_Market {
                                 'color': GlobalConstants.COLOR_ORANGE,
                                 'font-weight': '700'
                             },
-                            content: [ `${GlobalConstants.SYMBOL_YUAN} ${dataRow.sell_min_price}` ]
+                            content: [ `${sell_min_price_sym} ${sell_min_price_str}` ]
                         }),
                         ` selling <small>(${dataRow.sell_num})</small>`
                     ]
@@ -133,13 +150,30 @@ module Adjust_Market {
             }
 
             if (dataRow.buy_num > 0) {
+                let buy_max_price_sym: string = GlobalConstants.SYMBOL_YUAN;
+                let buy_max_price_str = `${dataRow.buy_max_price}`;
+                const buy_max_price_title = Util.formatNumber(buy_max_price_str, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
+
+                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const { convertedSymbol, convertedValue } = Util.convertCNYRaw(+dataRow.buy_max_price);
+                    buy_max_price_sym = convertedSymbol;
+                    buy_max_price_str = convertedValue;
+                }
+
+                let { wasCompressed, wasFormatted, strNumber } = Util.formatNumber(buy_max_price_str, true);
+                if (wasCompressed || wasFormatted) {
+                    buy_max_price_str = strNumber;
+                }
+
+                buy_max_price_str = `${Util.embedDecimalSmall(buy_max_price_str)}${wasCompressed ? 'K' : ''}`;
+
                 newHTML.push(Util.buildHTML('span', {
                     class: 'f_12px',
                     style: {
                         'grid-column': '1'
                     },
                     attributes: {
-                        'title': `${GlobalConstants.SYMBOL_YUAN} ${dataRow.buy_max_price} buying (${dataRow.buy_num})`
+                        'title': `${GlobalConstants.SYMBOL_YUAN} ${buy_max_price_title.strNumber} buying (${dataRow.buy_num})`
                     },
                     content: [
                         Util.buildHTML('span', {
@@ -147,7 +181,7 @@ module Adjust_Market {
                                 'color': GlobalConstants.COLOR_BLUE,
                                 'font-weight': '700'
                             },
-                            content: [ `${GlobalConstants.SYMBOL_YUAN} ${dataRow.buy_max_price}` ]
+                            content: [ `${buy_max_price_sym} ${buy_max_price_str}` ]
                         }),
                         ` buying <small>(${dataRow.buy_num})</small>`
                     ]
@@ -232,12 +266,13 @@ module Adjust_Market {
                         aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gen"  style="-webkit-filter: invert(50%);"></i>';
                     }
                 }
-            
-                if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
-                    aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
-                } else {
-                    aCopyGen.setAttribute('href', 'javascript:;');
-                }
+
+                Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
+                // if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
+                //     aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
+                // } else {
+                //     aCopyGen.setAttribute('href', 'javascript:;');
+                // }
 
                 aCopyGen.setAttribute('title', gen);
                 aCopyGen.setAttribute('style', 'cursor: pointer;');

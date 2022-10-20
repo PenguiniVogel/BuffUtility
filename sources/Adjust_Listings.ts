@@ -349,21 +349,10 @@ module Adjust_Listings {
                     // aCopyGen = document.createElement('a');
                     // aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
                     aCopyGen.setAttribute('class', 'ctag btn');
-
-                    if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
-                        aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
-                    } else {
-                        aCopyGen.setAttribute('href', 'javascript:;');
-                    }
-
                     aCopyGen.setAttribute('title', gen);
 
-                    aCopyGen.addEventListener('click', () => {
-                        navigator?.clipboard?.writeText(gen).then(() => {
-                            // alert(`Copied ${gen} to clipboard!`);
-                            console.debug(`[BuffUtility] Copy gen: ${gen}`);
-                        }).catch((e) => console.error('[BuffUtility]', e));
-                    });
+                    Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
+                    Util.addAnchorClipboardAction(aCopyGen, gen);
 
                     let min = +dataRow.asset_info.paintwear.slice(0, 5);
                     let max = min + 0.001;
@@ -427,16 +416,34 @@ module Adjust_Listings {
 
             if (!priceContainer) continue;
 
-            let strPriceSplit = dataRow.price.split('.');
-
             let price = +dataRow.price;
             let priceDiff = price - steamPriceCNY;
 
             let priceDiffStr;
             if (getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
-                priceDiffStr = Util.convertCNY(priceDiff);
+                let { convertedSymbol, convertedValue } = Util.convertCNYRaw(price);
+                const formattedDiff = Util.formatNumber(convertedValue);
+
+                if (formattedDiff.wasCompressed || formattedDiff.wasFormatted) {
+                    priceDiffStr = `${convertedSymbol} ${Util.embedDecimalSmall(formattedDiff.strNumber)}${formattedDiff.wasCompressed ? 'K' : ''}`;
+                } else {
+                    priceDiffStr = `${convertedSymbol} ${Util.embedDecimalSmall(convertedValue)}`;
+                }
             } else {
-                priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}`;
+                priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(priceDiff.toFixed(2))}`;
+            }
+
+            let price_str = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
+            const formattedPrice = Util.formatNumber(dataRow.price);
+            if (formattedPrice.wasCompressed || formattedPrice.wasFormatted) {
+                price_str = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
+            }
+
+            let converted_price_str = Util.convertCNY(price);
+            const { convertedSymbol, convertedValue } = Util.convertCNYRaw(price);
+            const formattedConverted = Util.formatNumber(convertedValue);
+            if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
+                converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;
             }
 
             let newHTML = Util.buildHTML('div', {
@@ -446,16 +453,16 @@ module Adjust_Listings {
                 content: [
                     Util.buildHTML('strong', {
                         class: 'f_Strong',
-                        content: [
-                            `${GlobalConstants.SYMBOL_YUAN} ${strPriceSplit[0]}`,
-                            `${strPriceSplit[1] ? `<small>.${strPriceSplit[1]}</small>` : ''}`
-                        ]
+                        attributes: {
+                            'title': `${GlobalConstants.SYMBOL_YUAN} ${Util.formatNumber(dataRow.price, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED).strNumber}`
+                        },
+                        content: [ Util.embedDecimalSmall(price_str), formattedPrice.wasCompressed ? 'K' : '' ]
                     }),
                     Util.buildHTML('p', {
                         content: [
                             Util.buildHTML('span', {
                                 class: 'c_Gray f_12px',
-                                content: [ `(${Util.convertCNY(price)})` ]
+                                content: [ `(${Util.embedDecimalSmall(converted_price_str)}`, formattedConverted.wasCompressed ? 'K' : '', ')' ]
                             }),
                             Util.buildHTML('div', {
                                 class: 'f_12px',
@@ -517,10 +524,20 @@ module Adjust_Listings {
             let dataRow = data.items[i - 1];
             let row = rows.item(i);
 
-            let strPriceSplit = dataRow.price.split('.');
-
             let price = +dataRow.price;
-            // let priceDiff = price - steamPriceCNY;
+
+            let priceStr = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
+            const formattedPrice = Util.formatNumber(dataRow.price);
+            if (formattedPrice.wasCompressed || formattedPrice.wasFormatted) {
+                priceStr = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
+            }
+
+            let converted_price_str = Util.convertCNY(price);
+            const { convertedSymbol, convertedValue } = Util.convertCNYRaw(price);
+            const formattedConverted = Util.formatNumber(convertedValue);
+            if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
+                converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;
+            }
 
             let newHTML = Util.buildHTML('div', {
                 style: {
@@ -529,16 +546,13 @@ module Adjust_Listings {
                 content: [
                     Util.buildHTML('strong', {
                         class: 'f_Strong',
-                        content: [
-                            `${GlobalConstants.SYMBOL_YUAN} ${strPriceSplit[0]}`,
-                            `${strPriceSplit[1] ? `<small>.${strPriceSplit[1]}</small>` : ''}`
-                        ]
+                        content: [ Util.embedDecimalSmall(priceStr), formattedPrice.wasCompressed ? 'K' : '' ]
                     }),
                     Util.buildHTML('p', {
                         content: [
                             Util.buildHTML('span', {
                                 class: 'c_Gray f_12px',
-                                content: [ `(${Util.convertCNY(price)})` ]
+                                content: [ `(${Util.embedDecimalSmall(converted_price_str)}`, formattedConverted.wasCompressed ? 'K' : '', ')' ]
                             })
                         ]
                     })

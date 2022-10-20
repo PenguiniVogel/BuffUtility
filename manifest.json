@@ -7,7 +7,7 @@
         {
             "js": [
                 "config.js",
-                "lib/SchemaData.js",
+                "SchemaData/SchemaData.js",
                 "lib/SchemaHelper.js",
                 "lib/InjectionService.js",
                 "sources/Cookie.js"

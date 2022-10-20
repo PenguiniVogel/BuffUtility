@@ -33,6 +33,13 @@ module ExtensionSettings {
         MONTHLY = 30
     }
 
+    export const enum CurrencyNumberFormats {
+        NONE,
+        FORMATTED,
+        COMPRESSED,
+        SPACE_MATCH
+    }
+
     export const FILTER_SORT_BY = {
         'Default': 'default',
         'Newest': 'created.desc',
@@ -54,11 +61,18 @@ module ExtensionSettings {
     };
 
     export interface SteamSettings {
-        wallet_fee: number,
-        wallet_fee_base: number,
-        wallet_fee_percent: number,
-        wallet_fee_minimum: number
+        readonly wallet_fee: number,
+        readonly wallet_fee_base: number,
+        readonly wallet_fee_percent: number,
+        readonly wallet_fee_minimum: number
     }
+
+    export const STEAM_SETTINGS: SteamSettings = {
+        wallet_fee: 1,
+        wallet_fee_base: 0,
+        wallet_fee_percent: 0.05,
+        wallet_fee_minimum: 1
+    };
 
     export const enum Settings {
         VERSION = 'version',
@@ -87,16 +101,21 @@ module ExtensionSettings {
         USE_SCHEME = 'use_scheme',
         LOCATION_RELOAD_NEWEST = 'location_reload_newest',
 
-        // 2.1.8 -> setting will be moved to advanced settings
+        // 2.1.9 -> setting will be moved to advanced settings
         EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain',
-        // 2.1.8 -> setting will be removed, default procedure
+        // 2.1.9 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_POPULAR = 'experimental_adjust_popular',
-        // 2.1.8 -> setting will be merged into show toast on action
+        // 2.1.9 -> setting will be merged into show toast on action
         EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification',
         // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS = 'fetch_favourite_bargain_status',
         // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY = 'fetch_item_price_history',
+        // 2.1.9 -> setting will be moved to advanced settings
+        EXPERIMENTAL_ADJUST_MARKET_CURRENCY = 'adjust_market_currency',
+        // 2.1.9 -> setting will be moved to advanced settings
+        EXPERIMENTAL_FORMAT_CURRENCY = 'format_currency',
+
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
     }
@@ -133,6 +152,8 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: boolean;
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange;
+        [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: boolean;
+        [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: CurrencyNumberFormats;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
     }
@@ -145,11 +166,11 @@ module ExtensionSettings {
 
     type InternalSettingStructure = {
         [key in Settings]: {
-            default: SettingsTypes[key],
             value?: SettingsTypes[key],
-            export: string,
-            transform: InternalStructureTransform,
-            validator: (key: Settings, value: any) => any
+            readonly default: SettingsTypes[key],
+            readonly export: string,
+            readonly transform: InternalStructureTransform,
+            readonly validator: (key: Settings, value: any) => any
         }
     }
 
@@ -335,6 +356,18 @@ module ExtensionSettings {
             transform: InternalStructureTransform.NONE,
             validator: null
         },
+        [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: {
+            default: false,
+            export: '2x6',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: {
+            default: CurrencyNumberFormats.NONE,
+            export: '2x7',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
 
         [Settings.STORE_DANGER_AGREEMENTS]: {
             default: [false, false],
@@ -429,13 +462,6 @@ module ExtensionSettings {
     let settings: SettingsTypes = {
         ...DEFAULT_SETTINGS
     };*/
-
-    export let steam_settings: SteamSettings = {
-        wallet_fee: 1,
-        wallet_fee_base: 0,
-        wallet_fee_percent: 0.05,
-        wallet_fee_minimum: 1
-    };
 
     // func validators
 

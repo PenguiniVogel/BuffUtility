@@ -68,21 +68,10 @@ module AdjustFavourites {
 
                 aCopyGen.setAttribute('class', 'ctag btn');
                 aCopyGen.setAttribute('style', 'margin-top: 3px;');
-
-                if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
-                    aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
-                } else {
-                    aCopyGen.setAttribute('href', 'javascript:;');
-                }
-
                 aCopyGen.setAttribute('title', gen);
 
-                aCopyGen.addEventListener('click', () => {
-                    navigator?.clipboard?.writeText(gen).then(() => {
-                        // alert(`Copied ${gen} to clipboard!`);
-                        console.debug(`[BuffUtility] Copy gen: ${gen}`);
-                    }).catch((e) => console.error('[BuffUtility]', e));
-                });
+                Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
+                Util.addAnchorClipboardAction(aCopyGen, gen);
 
                 wearContainer.appendChild(aCopyGen);
             }

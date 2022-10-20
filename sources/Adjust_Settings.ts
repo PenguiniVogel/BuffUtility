@@ -215,7 +215,7 @@ module Adjust_Settings {
     }
 
     function readSelectOption(option: Settings): string {
-        return (<HTMLSelectElement>document.getElementById(getOptionID(option))).selectedOptions?.item(0)?.getAttribute('value');
+        return (<HTMLSelectElement>document.getElementById(getOptionID(option)))?.selectedOptions?.item(0)?.getAttribute('value');
     }
 
     function makeTextOption(mappedOption: Settings, type: string, prefInfo: PrefInfo, table: HTMLElement): void {
@@ -387,6 +387,8 @@ module Adjust_Settings {
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, readCheckboxSelected(Settings.EXPERIMENTAL_FETCH_NOTIFICATION));
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, readCheckboxSelected(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS));
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, readSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, readCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY, readSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY));
 
                 // write settings
                 ExtensionSettings.finalize();
@@ -724,6 +726,43 @@ module Adjust_Settings {
             title: 'Fetch item price history',
             description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
             dangerous: true
+        }, ex_table);
+
+        // experimental adjust market currency
+        makeCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {
+            title: 'Adjust Market Currency',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nAdjust shown market currency to selected currency.'
+        }, ex_table);
+
+        // experimental compress currency
+        makeSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY, [
+            // NONE,
+            // FORMATTED,
+            // COMPRESSED,
+            // SPACE_MATCH
+            {
+                value: `${ExtensionSettings.CurrencyNumberFormats.NONE}`,
+                displayStr: 'None',
+                selected: getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY) == ExtensionSettings.CurrencyNumberFormats.NONE
+            },
+            {
+                value: `${ExtensionSettings.CurrencyNumberFormats.FORMATTED}`,
+                displayStr: 'Formatted',
+                selected: getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY) == ExtensionSettings.CurrencyNumberFormats.FORMATTED
+            },
+            {
+                value: `${ExtensionSettings.CurrencyNumberFormats.COMPRESSED}`,
+                displayStr: 'Compressed',
+                selected: getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY) == ExtensionSettings.CurrencyNumberFormats.COMPRESSED
+            },
+            {
+                value: `${ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH}`,
+                displayStr: 'Space Match',
+                selected: getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY) == ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH
+            }
+        ], {
+            title: 'Compress Currency',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nNone: Don\'t format at all.\nFormatted: Taken e.g. 1234.89 will be transformed to 1,234.89.\nCompressed: Taken e.g. 1234.89 will be transformed to 1.2K.\nSpace Match: Will either use Formatted or Compressed depending on space.'
         }, ex_table);
 
         // append experimental settings
