@@ -70,6 +70,8 @@
         },
         {
             "js": [
+                "config.js",
+                "SchemaData/SchemaData.js",
                 "sources/Util.js",
                 "sources/csgostash/Add_Links_Skin.js"
             ],

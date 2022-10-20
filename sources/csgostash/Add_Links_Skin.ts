@@ -1,13 +1,13 @@
 module Add_Links_Skin {
 
+    import BUFF_SCHEMA = SchemaData.BUFF_SCHEMA;
+
     const enum Constants {
         BUFF_IMG_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAFVBMVEVHcEwhIS0hISshISshISv///+QkJU/x7PBAAAABHRSTlMAJK7xdunbSwAAAFxJREFUeAFjYFR2QQJGAgzCLijAkEEFVcCJwQRVwJnBBQ2QKxAKBXgEwIpTw1AF3EJTEAJQBQgBhAKEQCqaoW5YbHGhuYAbqufCXFJRBVIoC1OMiMKISozIxkgOAEjZind3Npg5AAAAAElFTkSuQmCC',
         BUFF_TAB_ID = 'buffprices'
     }
 
     function init(): void {
-        // TODO map items exactly to their store listing page via json dump
-
         let itemHeader = document.querySelector('h2');
         let itemName = itemHeader.innerText.trim();
 
@@ -52,7 +52,12 @@ module Add_Links_Skin {
 
         let priceDetails = <HTMLElement>document.querySelector('div.price-details > div.tab-content');
 
-        function buildQuery(wear?: string, specialQuality: boolean = false): string {
+        function buildQuery(wear: string, specialQuality: boolean = false): string {
+            // search all
+            if (wear?.length == 0) {
+                return `https://buff.163.com/market/csgo#tab=selling&page_num=1&search=${encodeURIComponent(itemName)}`;
+            }
+
             let quality = isUnusual ? 'unusual' : 'normal';
             if (specialQuality && hasSpecialQuality) {
                 if (isUnusual) {
@@ -62,7 +67,18 @@ module Add_Links_Skin {
                 }
             }
 
-            return `https://buff.163.com/market/csgo#tab=selling&page_num=1&search=${encodeURIComponent(`${itemName}${wear ? ` (${wear})` : ''}`)}${wear ? `&quality=${quality}` : ''}&redirect=1`;
+            const hash_name = `${isUnusual ? '★ ' : (specialQuality && hasSpecialQuality ? (hasStatTrack ? 'StatTrak™ ' : 'Souvenir ') : '')}${itemName} (${wear})`;
+            const goods_id = BUFF_SCHEMA.hash_to_id[hash_name];
+
+            if (DEBUG) {
+                console.debug(hash_name, goods_id);
+            }
+
+            if (typeof goods_id == 'number') {
+                return `https://buff.163.com/goods/${goods_id}?from=market#tab=selling&sort_by=default`;
+            }
+
+            return `https://buff.163.com/market/csgo#tab=selling&page_num=1&search=${encodeURIComponent(`${itemName}${wear ? ` (${wear})` : ''}`)}${wear ? `&quality=${quality}` : ''}`;
         }
 
         /*
@@ -84,7 +100,7 @@ module Add_Links_Skin {
                     content: [Util.buildHTML('a', {
                         class: 'btn btn-default btn-sm',
                         attributes: {
-                            'href': buildQuery(),
+                            'href': buildQuery(''),
                             'target': '_blank',
                             'rel': 'nofollow',
                             'data-gaevent': itemName

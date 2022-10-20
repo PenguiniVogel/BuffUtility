@@ -24,6 +24,47 @@ module AdjustFavourites {
             let wearContainer = row.querySelector('div.csgo_value');
             let targetId = row.querySelector('[data-target-id]');
 
+            // convert price
+            let contentTDList = row.querySelectorAll('td');
+            let priceTD = null;
+            for (let i = 0, l = contentTDList.length; i < l; i ++) {
+                if (contentTDList.item(i).innerText.indexOf(GlobalConstants.SYMBOL_YUAN) > -1) {
+                    priceTD = contentTDList.item(i);
+                    break;
+                }
+            }
+
+            if (priceTD) {
+                let priceCNY = +((/¥ (\d+(\.\d+)?)/.exec(priceTD.innerText) ?? [null, NaN])[1]);
+                if (isFinite(priceCNY)) {
+                    let priceStr = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(`${priceCNY}`)}`;
+                    const formattedPrice = Util.formatNumber(priceCNY);
+                    if (formattedPrice.wasCompressed || formattedPrice.wasFormatted) {
+                        priceStr = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
+                    }
+
+                    let converted_price_str = Util.convertCNY(priceCNY);
+                    const { convertedSymbol, convertedValue } = Util.convertCNYRaw(priceCNY);
+                    const formattedConverted = Util.formatNumber(convertedValue);
+                    if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
+                        converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;
+                    }
+
+                    priceTD.innerHTML = Util.buildHTML('p', {
+                        content: Util.buildHTML('strong', {
+                            attributes: {
+                                'title': `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(Util.formatNumber(priceCNY, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED).strNumber)}`
+                            },
+                            class: 'f_Strong',
+                            content: [ priceStr, formattedPrice.wasCompressed ? 'K' : '' ]
+                        })
+                    }) + Util.buildHTML('p', {
+                        class: 'c_Gray f_12px',
+                        content: [ '(', Util.embedDecimalSmall(converted_price_str), formattedConverted.wasCompressed ? 'K' : '', ')' ]
+                    });
+                }
+            }
+
             if (!imgContainer || !aAssetInfo || !(nameContainer?.innerText) || !targetId) continue;
 
             // item was sold or unlisted, skip
@@ -41,7 +82,9 @@ module AdjustFavourites {
             if (f_schemaData?.length > 0) {
                 let schemaData = f_schemaData[0];
 
-                console.debug(itemType, schemaData, assetInfo);
+                if (DEBUG) {
+                    console.debug(itemType, schemaData, assetInfo);
+                }
 
                 let aCopyGen = <HTMLElement>document.createElement('a');
 
