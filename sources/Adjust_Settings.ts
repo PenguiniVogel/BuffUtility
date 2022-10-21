@@ -5,6 +5,17 @@ module Adjust_Settings {
 
     // module
 
+    interface PrefInfo {
+        title: string,
+        description?: string,
+        dangerous?: boolean
+    }
+
+    const DANGER_SETTINGS: Settings[] = [
+        Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS,
+        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
+    ];
+
     function getOptionID(option: Settings): string {
         return `buff-utility-${option}`;
     }
@@ -23,7 +34,45 @@ module Adjust_Settings {
         return td;
     }
 
-    function makeCheckboxOption(mappedOption: Settings, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+    function makeDangerButton(mappedOption: Settings, prefInfo: PrefInfo, table: HTMLElement): void {
+        const containerTD = makeTD('', 't_Left');
+
+        containerTD.innerHTML = Util.buildHTML('button', {
+            attributes: {
+                'onclick': `window.postMessage(['${GlobalConstants.BUFF_UTILITY_SETTINGS_AGREE_DANGER}', '${mappedOption}'], '*');`
+            },
+            style: {
+                'background': '#b00000',
+                'color': '#f6f6f6',
+                'font-weight': '800',
+                'cursor': 'pointer'
+            },
+            content: 'Enable'
+        });
+
+        const tr = makeTR();
+        tr.append(
+            makeTD(`BuffUtility<br>${prefInfo.title} ${prefInfo.description ? Util.buildHTML('i', {
+                class: 'icon icon_qa j_tips_handler',
+                attributes: {
+                    'data-title': 'Description',
+                    'data-content': prefInfo.description,
+                    'data-direction': 'right'
+                }
+            }) : ''}`, 't_Left c_Gray'),
+            containerTD,
+            makeTD('', 't_Right')
+        );
+
+        table.append(tr);
+    }
+
+    function makeCheckboxOption(mappedOption: Settings, prefInfo: PrefInfo, table: HTMLElement): void {
+        if (prefInfo['dangerous'] == true && !ExtensionSettings.hasBeenAgreed(mappedOption)) {
+            makeDangerButton(mappedOption, prefInfo, table);
+            return;
+        }
+
         const containerTD = makeTD('', 't_Left');
 
         containerTD.innerHTML = Util.buildHTML('span', {
@@ -34,7 +83,7 @@ module Adjust_Settings {
                     onclick: `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
                 },
                 content: [Util.buildHTML('span', {
-                    class: storedSettings[mappedOption] ? 'on' : '',
+                    class: <boolean>getSetting(mappedOption) ? 'on' : '',
                     content: [
                         Util.buildHTML('i', { class: 'icon icon_checkbox' }),
                         ' Open '
@@ -60,14 +109,19 @@ module Adjust_Settings {
         table.append(tr);
     }
 
-    function isCheckboxSelected(option: Settings): boolean {
+    function readCheckboxSelected(option: Settings): boolean {
         return !!document.getElementById(getOptionID(option))?.querySelector('span.on');
     }
 
-    function makeMultiCheckboxOption(mappedOption: Settings, prefInfo: { title: string, description?: string, options: string[] }, table: HTMLElement): void {
+    function makeMultiCheckboxOption(mappedOption: Settings, options: string[], prefInfo: PrefInfo, table: HTMLElement): void {
+        if (prefInfo['dangerous'] == true && !ExtensionSettings.hasBeenAgreed(mappedOption)) {
+            makeDangerButton(mappedOption, prefInfo, table);
+            return;
+        }
+
         const containerTD = makeTD('', 't_Left');
 
-        let option: boolean[] = <boolean[]>storedSettings[mappedOption];
+        let option: boolean[] = getSetting(mappedOption);
 
         let html = '';
         for (let i = 0, l = option.length; i < l; i ++) {
@@ -82,7 +136,7 @@ module Adjust_Settings {
                         class: option[i] ? 'on' : '',
                         content: [
                             Util.buildHTML('i', { class: 'icon icon_checkbox' }),
-                            ` ${prefInfo.options[i] ?? 'Open'} `
+                            ` ${options[i] ?? 'Open'} `
                         ]
                     })]
                 })]
@@ -119,7 +173,12 @@ module Adjust_Settings {
         return result;
     }
 
-    function makeSelectOption(mappedOption: Settings, options: { value: string, displayStr: string, selected?: boolean }[], prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+    function makeSelectOption(mappedOption: Settings, options: { value: string, displayStr: string, selected?: boolean }[], prefInfo: PrefInfo, table: HTMLElement): void {
+        if (prefInfo['dangerous'] == true && !ExtensionSettings.hasBeenAgreed(mappedOption)) {
+            makeDangerButton(mappedOption, prefInfo, table);
+            return;
+        }
+
         const containerTD = makeTD('', 't_Left');
         containerTD.innerHTML = Util.buildHTML('div', {
             content: [Util.buildHTML('select', {
@@ -156,10 +215,15 @@ module Adjust_Settings {
     }
 
     function readSelectOption(option: Settings): string {
-        return (<HTMLSelectElement>document.getElementById(getOptionID(option))).selectedOptions?.item(0)?.getAttribute('value');
+        return (<HTMLSelectElement>document.getElementById(getOptionID(option)))?.selectedOptions?.item(0)?.getAttribute('value');
     }
 
-    function makeTextOption(mappedOption: Settings, type: string, prefInfo: { title: string, description?: string }, table: HTMLElement): void {
+    function makeTextOption(mappedOption: Settings, type: string, prefInfo: PrefInfo, table: HTMLElement): void {
+        if (prefInfo['dangerous'] == true && !ExtensionSettings.hasBeenAgreed(mappedOption)) {
+            makeDangerButton(mappedOption, prefInfo, table);
+            return;
+        }
+
         const containerTD = makeTD('', 't_Left');
 
         containerTD.innerHTML = Util.buildHTML('span', {
@@ -168,7 +232,7 @@ module Adjust_Settings {
                     id: getOptionID(mappedOption),
                     attributes: {
                         'type': type,
-                        'value': `${storedSettings[mappedOption]}`,
+                        'value': `${getSetting(mappedOption)}`,
                         'onkeyup': `window.postMessage('${GlobalConstants.BUFF_UTILITY_SETTINGS}', '*');`
                     }
                 })]
@@ -196,10 +260,15 @@ module Adjust_Settings {
         return (<HTMLInputElement>document.getElementById(getOptionID(option)))?.value;
     }
 
-    function makeColorOption(mappedOption: Settings, prefInfo: { title: string, description?: string, options: string[] }, table: HTMLElement): void {
+    function makeColorOption(mappedOption: Settings, options: string[], prefInfo: PrefInfo, table: HTMLElement): void {
+        if (prefInfo['dangerous'] == true && !ExtensionSettings.hasBeenAgreed(mappedOption)) {
+            makeDangerButton(mappedOption, prefInfo, table);
+            return;
+        }
+
         const containerTD = makeTD('', 't_Left');
 
-        let option: string[] = <string[]>storedSettings[mappedOption];
+        let option: string[] = getSetting(mappedOption);
 
         let html = '';
         for (let i = 0, l = option.length; i < l; i ++) {
@@ -214,7 +283,7 @@ module Adjust_Settings {
                         attributes: {
                             'for': `${getOptionID(mappedOption)}-${i}`
                         },
-                        content: [prefInfo.options[i]]
+                        content: [options[i]]
                     }),
                     Util.buildHTML('input', {
                         attributes: {
@@ -279,46 +348,89 @@ module Adjust_Settings {
     function init(): void {
         console.debug('[BuffUtility] Adjust_Settings');
 
+        PopupHelper.setup();
+
         window.addEventListener('message', (e: MessageEvent) => {
             if (e.data == GlobalConstants.BUFF_UTILITY_SETTINGS) {
                 // check changes
-                ExtensionSettings.save(Settings.SELECTED_CURRENCY, readSelectOption(Settings.SELECTED_CURRENCY));
-                ExtensionSettings.save(Settings.APPLY_CURRENCY_TO_DIFFERENCE, isCheckboxSelected(Settings.APPLY_CURRENCY_TO_DIFFERENCE));
-                ExtensionSettings.save(Settings.CAN_EXPAND_SCREENSHOTS, isCheckboxSelected(Settings.CAN_EXPAND_SCREENSHOTS));
-                ExtensionSettings.save(Settings.EXPAND_SCREENSHOTS_BACKDROP, isCheckboxSelected(Settings.EXPAND_SCREENSHOTS_BACKDROP));
-                ExtensionSettings.save(Settings.APPLY_STEAM_TAX, isCheckboxSelected(Settings.APPLY_STEAM_TAX));
-                ExtensionSettings.save(Settings.SHOW_TOAST_ON_ACTION, isCheckboxSelected(Settings.SHOW_TOAST_ON_ACTION));
-                ExtensionSettings.save(Settings.LISTING_OPTIONS, readMultiCheckboxOption(Settings.LISTING_OPTIONS));
-                ExtensionSettings.save(Settings.SHOW_FLOAT_BAR, isCheckboxSelected(Settings.SHOW_FLOAT_BAR));
-                ExtensionSettings.save(Settings.COLOR_LISTINGS, readMultiCheckboxOption(Settings.COLOR_LISTINGS));
-                ExtensionSettings.save(Settings.USE_SCHEME, isCheckboxSelected(Settings.USE_SCHEME));
+                ExtensionSettings.setSetting(Settings.SELECTED_CURRENCY, readSelectOption(Settings.SELECTED_CURRENCY));
+                ExtensionSettings.setSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE, readCheckboxSelected(Settings.APPLY_CURRENCY_TO_DIFFERENCE));
+                ExtensionSettings.setSetting(Settings.CAN_EXPAND_SCREENSHOTS, readCheckboxSelected(Settings.CAN_EXPAND_SCREENSHOTS));
+                ExtensionSettings.setSetting(Settings.EXPAND_SCREENSHOTS_BACKDROP, readCheckboxSelected(Settings.EXPAND_SCREENSHOTS_BACKDROP));
+                ExtensionSettings.setSetting(Settings.APPLY_STEAM_TAX, readCheckboxSelected(Settings.APPLY_STEAM_TAX));
+                ExtensionSettings.setSetting(Settings.SHOW_TOAST_ON_ACTION, readCheckboxSelected(Settings.SHOW_TOAST_ON_ACTION));
+                ExtensionSettings.setSetting(Settings.LISTING_OPTIONS, readMultiCheckboxOption(Settings.LISTING_OPTIONS));
+                ExtensionSettings.setSetting(Settings.SHOW_FLOAT_BAR, readCheckboxSelected(Settings.SHOW_FLOAT_BAR));
+                ExtensionSettings.setSetting(Settings.COLOR_LISTINGS, readMultiCheckboxOption(Settings.COLOR_LISTINGS));
+                ExtensionSettings.setSetting(Settings.USE_SCHEME, readCheckboxSelected(Settings.USE_SCHEME));
 
-                ExtensionSettings.save(Settings.DIFFERENCE_DOMINATOR, readSelectOption(Settings.DIFFERENCE_DOMINATOR));
-                ExtensionSettings.save(Settings.DEFAULT_SORT_BY, readSelectOption(Settings.DEFAULT_SORT_BY));
-                ExtensionSettings.save(Settings.DEFAULT_STICKER_SEARCH, readSelectOption(Settings.DEFAULT_STICKER_SEARCH));
-                ExtensionSettings.save(Settings.EXPAND_TYPE, readSelectOption(Settings.EXPAND_TYPE));
-                ExtensionSettings.save(Settings.CUSTOM_FOP, readSelectOption(Settings.CUSTOM_FOP));
-                ExtensionSettings.save(Settings.LOCATION_RELOAD_NEWEST, readSelectOption(Settings.LOCATION_RELOAD_NEWEST));
+                ExtensionSettings.setSetting(Settings.DIFFERENCE_DOMINATOR, readSelectOption(Settings.DIFFERENCE_DOMINATOR));
+                ExtensionSettings.setSetting(Settings.DEFAULT_SORT_BY, readSelectOption(Settings.DEFAULT_SORT_BY));
+                ExtensionSettings.setSetting(Settings.DEFAULT_STICKER_SEARCH, readSelectOption(Settings.DEFAULT_STICKER_SEARCH));
+                ExtensionSettings.setSetting(Settings.EXPAND_TYPE, readSelectOption(Settings.EXPAND_TYPE));
+                ExtensionSettings.setSetting(Settings.CUSTOM_FOP, readSelectOption(Settings.CUSTOM_FOP));
+                ExtensionSettings.setSetting(Settings.LOCATION_RELOAD_NEWEST, readSelectOption(Settings.LOCATION_RELOAD_NEWEST));
 
-                ExtensionSettings.save(Settings.CUSTOM_CURRENCY_RATE, readTextOption(Settings.CUSTOM_CURRENCY_RATE));
-                ExtensionSettings.save(Settings.CUSTOM_CURRENCY_NAME, readTextOption(Settings.CUSTOM_CURRENCY_NAME));
-                ExtensionSettings.save(Settings.CUSTOM_CURRENCY_CALCULATED_RATE, 1 / storedSettings[Settings.CUSTOM_CURRENCY_RATE]);
-                ExtensionSettings.save(Settings.CUSTOM_CURRENCY_LEADING_ZEROS, Util.countLeadingZeros(`${storedSettings[Settings.CUSTOM_CURRENCY_CALCULATED_RATE]}`.split('.')[1] ?? ''));
+                ExtensionSettings.setSetting(Settings.CUSTOM_CURRENCY_RATE, readTextOption(Settings.CUSTOM_CURRENCY_RATE));
+                ExtensionSettings.setSetting(Settings.CUSTOM_CURRENCY_NAME, readTextOption(Settings.CUSTOM_CURRENCY_NAME));
+                ExtensionSettings.setSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE, 1 / getSetting(Settings.CUSTOM_CURRENCY_RATE));
+                ExtensionSettings.setSetting(Settings.CUSTOM_CURRENCY_LEADING_ZEROS, Util.countLeadingZeros(`${getSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE)}`.split('.')[1] ?? ''));
 
-                ExtensionSettings.save(Settings.DATA_PROTECTION, isCheckboxSelected(Settings.DATA_PROTECTION));
+                ExtensionSettings.setSetting(Settings.DATA_PROTECTION, readCheckboxSelected(Settings.DATA_PROTECTION));
 
                 let colors = readColorOption(Settings.COLOR_SCHEME);
-                ExtensionSettings.save(Settings.COLOR_SCHEME, colors);
+                ExtensionSettings.setSetting(Settings.COLOR_SCHEME, colors);
                 renderColorPreview(colors);
 
-                ExtensionSettings.save(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, isCheckboxSelected(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN));
-                ExtensionSettings.save(Settings.EXPERIMENTAL_ADJUST_POPULAR, isCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_POPULAR));
-                ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, isCheckboxSelected(Settings.EXPERIMENTAL_FETCH_NOTIFICATION));
-                ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, isCheckboxSelected(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS));
-                ExtensionSettings.save(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, readSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, readCheckboxSelected(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ADJUST_POPULAR, readCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_POPULAR));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, readCheckboxSelected(Settings.EXPERIMENTAL_FETCH_NOTIFICATION));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, readCheckboxSelected(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, readSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, readCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY));
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY, readSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY));
 
                 // write settings
                 ExtensionSettings.finalize();
+            }
+
+            if (typeof e.data == 'object' && e.data['length'] == 2 && e.data[0] == GlobalConstants.BUFF_UTILITY_SETTINGS_AGREE_DANGER) {
+                PopupHelper.show(Util.buildHTML('div', {
+                    content: [
+                        Util.buildHTML('div', {
+                            content: 'What you are about to enable, is considered <span style="color: #d00000; font-weight: 800;">DANGEROUS</span>.<br /><span style="font-weight: 800;">ONLY ENABLE IF YOU ARE AWARE OF THE RISKS.</span><br /><span style="font-size: 11px;">What does it mean when I say "Dangerous"? Simple: This setting violates Buff API integrity, therefor your account could be banned. This will eventually be rectified over a custom proxy, until then, you should not enable these.</span>'
+                        }),
+                        Util.buildHTML('input', {
+                            attributes: {
+                                'placeholder': 'Please type: enable',
+                                'onkeyup': 'if(this.value == \'enable\') { document.getElementById(\'buff_utility_popup_confirm\').setAttribute(\'class\', \'i_Btn i_Btn_main\'); } else { document.getElementById(\'buff_utility_popup_confirm\').setAttribute(\'class\', \'i_Btn i_Btn_main i_Btn_disabled\'); }'
+                            },
+                            style: {
+                                'margin-top': '5px'
+                            }
+                        })
+                    ]
+                }), {
+                    onconfirm: () => {
+                        if (document.getElementById('buff_utility_popup_confirm').getAttribute('class').indexOf('i_Btn_disabled') == -1) {
+                            let stored = getSetting(Settings.STORE_DANGER_AGREEMENTS);
+
+                            switch (e.data[1]) {
+                                case Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS:
+                                    stored[0] = true;
+                                    break;
+                                case Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY:
+                                    stored[1] = true;
+                                    break;
+                            }
+
+                            ExtensionSettings.setSetting(Settings.STORE_DANGER_AGREEMENTS, stored);
+                            ExtensionSettings.finalize();
+
+                            PopupHelper.hide();
+                        }
+                    }
+                });
             }
         });
 
@@ -340,14 +452,14 @@ module Adjust_Settings {
             return {
                 value: x,
                 displayStr: `${x} - ${symbols[x].length == 0 ? '?' : symbols[x]}`,
-                selected: x == storedSettings[Settings.SELECTED_CURRENCY]
+                selected: x == getSetting(Settings.SELECTED_CURRENCY)
             };
         });
 
         remapped.push({
             value: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY,
             displayStr: 'Custom',
-            selected: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY == storedSettings[Settings.SELECTED_CURRENCY]
+            selected: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY == getSetting(Settings.SELECTED_CURRENCY)
         });
 
         makeSelectOption(Settings.SELECTED_CURRENCY, remapped, {
@@ -385,17 +497,16 @@ module Adjust_Settings {
         }, table);
 
         // listing options
-        makeMultiCheckboxOption(Settings.LISTING_OPTIONS, {
+        makeMultiCheckboxOption(Settings.LISTING_OPTIONS, [
+            '3D Inspect',
+            'Inspect in server',
+            'Copy !gen/!gengl',
+            'Share',
+            'Match floatdb',
+            'Narrow'
+        ], {
             title: 'Listing options',
-            description: 'Define what options show up on each listing',
-            options: [
-                '3D Inspect',
-                'Inspect in server',
-                'Copy !gen/!gengl',
-                'Share',
-                'Match floatdb',
-                'Narrow'
-            ]
+            description: 'Define what options show up on each listing'
         }, table);
 
         // show float bar
@@ -405,13 +516,12 @@ module Adjust_Settings {
         }, table);
 
         // color listings
-        makeMultiCheckboxOption(Settings.COLOR_LISTINGS, {
+        makeMultiCheckboxOption(Settings.COLOR_LISTINGS, [
+            'Color Buy',
+            'Color Bargain'
+        ], {
             title: 'Color purchase options',
-            description: 'Color purchase options, this will paint purchase options red if not affordable with the current held balance.',
-            options: [
-                'Color Buy',
-                'Color Bargain'
-            ]
+            description: 'Color purchase options, this will paint purchase options red if not affordable with the current held balance.'
         }, table);
 
         // use scheme
@@ -439,11 +549,11 @@ module Adjust_Settings {
             {
                 value: `${ExtensionSettings.DifferenceDominator.STEAM}`,
                 displayStr: 'Steam',
-                selected: storedSettings[Settings.DIFFERENCE_DOMINATOR] == ExtensionSettings.DifferenceDominator.STEAM
+                selected: getSetting(Settings.DIFFERENCE_DOMINATOR) == ExtensionSettings.DifferenceDominator.STEAM
             }, {
                 value: `${ExtensionSettings.DifferenceDominator.BUFF}`,
                 displayStr: 'Buff',
-                selected: storedSettings[Settings.DIFFERENCE_DOMINATOR] == ExtensionSettings.DifferenceDominator.BUFF
+                selected: getSetting(Settings.DIFFERENCE_DOMINATOR) == ExtensionSettings.DifferenceDominator.BUFF
             }
         ], {
             title: 'Difference Dominator',
@@ -455,7 +565,7 @@ module Adjust_Settings {
             return {
                 value: ExtensionSettings.FILTER_SORT_BY[x],
                 displayStr: x,
-                selected: ExtensionSettings.FILTER_SORT_BY[x] == storedSettings[Settings.DEFAULT_SORT_BY]
+                selected: ExtensionSettings.FILTER_SORT_BY[x] == getSetting(Settings.DEFAULT_SORT_BY)
             };
         }), {
             title: 'Default sort by',
@@ -467,7 +577,7 @@ module Adjust_Settings {
             return {
                 value: ExtensionSettings.FILTER_STICKER_SEARCH[x],
                 displayStr: x,
-                selected: ExtensionSettings.FILTER_STICKER_SEARCH[x] == storedSettings[Settings.DEFAULT_STICKER_SEARCH]
+                selected: ExtensionSettings.FILTER_STICKER_SEARCH[x] == getSetting(Settings.DEFAULT_STICKER_SEARCH)
             };
         }), {
             title: 'Default sticker search',
@@ -479,12 +589,12 @@ module Adjust_Settings {
             {
                 value: `${ExtensionSettings.ExpandScreenshotType.PREVIEW}`,
                 displayStr: 'Preview',
-                selected: storedSettings[Settings.EXPAND_TYPE] == ExtensionSettings.ExpandScreenshotType.PREVIEW
+                selected: getSetting(Settings.EXPAND_TYPE) == ExtensionSettings.ExpandScreenshotType.PREVIEW
             },
             {
                 value: `${ExtensionSettings.ExpandScreenshotType.INSPECT}`,
                 displayStr: 'Inspect',
-                selected: storedSettings[Settings.EXPAND_TYPE] == ExtensionSettings.ExpandScreenshotType.INSPECT
+                selected: getSetting(Settings.EXPAND_TYPE) == ExtensionSettings.ExpandScreenshotType.INSPECT
             }
         ], {
             title: 'Expand preview type',
@@ -503,7 +613,7 @@ module Adjust_Settings {
             return {
                 value: `${x[0]}`,
                 displayStr: `${x[1]}`,
-                selected: x[0] == storedSettings[Settings.CUSTOM_FOP]
+                selected: x[0] == getSetting(Settings.CUSTOM_FOP)
             };
         }), {
             title: 'Custom FOP',
@@ -521,7 +631,7 @@ module Adjust_Settings {
             return {
                 value: `${x[0]}`,
                 displayStr: `${x[1]}`,
-                selected: x[0] == storedSettings[Settings.LOCATION_RELOAD_NEWEST]
+                selected: x[0] == getSetting(Settings.LOCATION_RELOAD_NEWEST)
             };
         }), {
             title: 'Location Reload Newest',
@@ -546,15 +656,14 @@ module Adjust_Settings {
         }, adv_table);
 
         // color scheme
-        makeColorOption(Settings.COLOR_SCHEME, {
+        makeColorOption(Settings.COLOR_SCHEME, [
+            'Background',
+            'Background Hover',
+            'Text Color',
+            'Text Color Disabled'
+        ], {
             title: 'Color Scheme',
-            description: 'Color Scheme for whatever theme you want (Dark-Theme by default)',
-            options: [
-                'Background',
-                'Background Hover',
-                'Text Color',
-                'Text Color Disabled'
-            ]
+            description: 'Color Scheme for whatever theme you want (Dark-Theme by default)'
         }, adv_table);
 
         // append advanced settings
@@ -592,7 +701,8 @@ module Adjust_Settings {
         // experimental fetch bargain status
         makeCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
             title: 'Fetch Favourite Bargain Status',
-            description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+            dangerous: true
         }, ex_table);
 
         // experimental fetch item price history
@@ -600,21 +710,59 @@ module Adjust_Settings {
             {
                 value: `${ExtensionSettings.PriceHistoryRange.OFF}`,
                 displayStr: 'Off',
-                selected: storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] == ExtensionSettings.PriceHistoryRange.OFF
+                selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.OFF
             },
             {
                 value: `${ExtensionSettings.PriceHistoryRange.WEEKLY}`,
                 displayStr: '7 Days',
-                selected: storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] == ExtensionSettings.PriceHistoryRange.WEEKLY
+                selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.WEEKLY
             },
             {
                 value: `${ExtensionSettings.PriceHistoryRange.MONTHLY}`,
                 displayStr: '30 Days',
-                selected: storedSettings[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY] == ExtensionSettings.PriceHistoryRange.MONTHLY
+                selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.MONTHLY
             }
         ], {
             title: 'Fetch item price history',
-            description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+            dangerous: true
+        }, ex_table);
+
+        // experimental adjust market currency
+        makeCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {
+            title: 'Adjust Market Currency',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nAdjust shown market currency to selected currency.'
+        }, ex_table);
+
+        // experimental compress currency
+        makeSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY, [
+            // NONE,
+            // FORMATTED,
+            // COMPRESSED,
+            // SPACE_MATCH
+            {
+                value: `${ExtensionSettings.CurrencyNumberFormats.NONE}`,
+                displayStr: 'None',
+                selected: getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY) == ExtensionSettings.CurrencyNumberFormats.NONE
+            },
+            {
+                value: `${ExtensionSettings.CurrencyNumberFormats.FORMATTED}`,
+                displayStr: 'Formatted',
+                selected: getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY) == ExtensionSettings.CurrencyNumberFormats.FORMATTED
+            },
+            {
+                value: `${ExtensionSettings.CurrencyNumberFormats.COMPRESSED}`,
+                displayStr: 'Compressed',
+                selected: getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY) == ExtensionSettings.CurrencyNumberFormats.COMPRESSED
+            },
+            {
+                value: `${ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH}`,
+                displayStr: 'Space Match',
+                selected: getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY) == ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH
+            }
+        ], {
+            title: 'Compress Currency',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nNone: Don\'t format at all.\nFormatted: Taken e.g. 1234.89 will be transformed to 1,234.89.\nCompressed: Taken e.g. 1234.89 will be transformed to 1.2K.\nSpace Match: Will either use Formatted or Compressed depending on space.'
         }, ex_table);
 
         // append experimental settings

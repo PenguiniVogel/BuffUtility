@@ -63,12 +63,14 @@ module SchemaHelper {
 
     export const LAST_UPDATE = '2.1.4-16.05.2022';
 
-    let parsed: Schema = null;
+    let parsed: Schema = <Schema>SchemaData.RAW_SCHEMA;
 
     export function init(): void {
         let start = Date.now();
 
-        parsed = JSON.parse(SchemaData.RAW_SCHEMA);
+        if (typeof SchemaData.RAW_SCHEMA == 'string') {
+            parsed = JSON.parse(SchemaData.RAW_SCHEMA);
+        }
 
         if (!parsed.formatted) {
             // set stuff

@@ -252,7 +252,14 @@ module InjectionService {
                 }
 
                 if (typeof current == 'function') {
-                    current.call(e.data[2], e.data[3]);
+                    let thisArg = null;
+
+                    // if thisArg is something, find if it is a global object, or use self
+                    if (e.data[2] != null) {
+                        thisArg = window[e.data[2]] ?? e.data[2];
+                    }
+
+                    (<() => unknown>current).call(thisArg, e.data[3]);
                 }
             }
         });

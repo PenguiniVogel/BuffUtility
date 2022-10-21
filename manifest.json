@@ -1,12 +1,13 @@
 {
     "name": "Buff Utility (Dev)",
-    "version": "2.1.7",
+    "version": "2.1.8",
     "description": "Adds cosmetic functionality to buff.163.com",
     "manifest_version": 3,
     "content_scripts": [
         {
             "js": [
-                "lib/SchemaData.js",
+                "config.js",
+                "SchemaData/SchemaData.js",
                 "lib/SchemaHelper.js",
                 "lib/InjectionService.js",
                 "sources/Cookie.js"
@@ -69,6 +70,8 @@
         },
         {
             "js": [
+                "config.js",
+                "SchemaData/SchemaData.js",
                 "sources/Util.js",
                 "sources/csgostash/Add_Links_Skin.js"
             ],

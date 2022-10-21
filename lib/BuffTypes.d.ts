@@ -20,13 +20,13 @@ declare module BuffTypes {
     }
 
     /**
-     * Response type for: <br/>
-     * <code>/api/market/goods/sell_order</code>
+     * Stores some types that are similar or the same across other types
      */
     /** */
-    export module SellOrder {
+    export module CommonType {
 
         export interface TagInfo {
+            id?: unknown;
             category: string;
             internal_name: string;
             localized_name: string;
@@ -35,6 +35,57 @@ declare module BuffTypes {
         export interface Tags {
             [name: string]: TagInfo;
         }
+
+        export interface UserInfo {
+            avatar: string;
+            avatar_safe: string;
+            is_premium_vip?: boolean;
+            is_auto_accept?: boolean;
+            nickname: string;
+            seller_level?: number;
+            shop_id: string;
+            user_id: string;
+            v_types?: any;
+        }
+
+        export interface UserInfos {
+            [name: string]: UserInfo;
+        }
+
+        export interface TournamentTag {
+            category: string;
+            internal_name: string;
+            localized_name: string;
+        }
+
+        export interface MetaphysicData {
+            color: string;
+            name: string;
+        }
+
+        export interface Metaphysic {
+            data: MetaphysicData;
+            title: string;
+        }
+
+        export interface PhaseData {
+            color: string;
+            name: string;
+        }
+
+        export interface TierData {
+            color: string;
+            name: string;
+        }
+
+    }
+
+    /**
+     * Response type for: <br/>
+     * <code>/api/market/goods/sell_order</code>
+     */
+    /** */
+    export module SellOrder {
 
         export interface GoodsInfo {
             appid: number;
@@ -51,7 +102,7 @@ declare module BuffTypes {
             steam_price: string;
             steam_price_cny: string;
             steam_price_custom: string;
-            tags: Tags;
+            tags: CommonType.Tags;
         }
 
         export interface GoodsInfos {
@@ -144,21 +195,6 @@ declare module BuffTypes {
             selling: string;
         }
 
-        export interface UserInfo {
-            avatar: string;
-            avatar_safe: string;
-            is_premium_vip: boolean;
-            nickname: string;
-            seller_level: number;
-            shop_id: string;
-            user_id: string;
-            v_types?: any;
-        }
-
-        export interface UserInfos {
-            [name: string]: UserInfo;
-        }
-
         export interface Data {
             fop_str: string;
             goods_infos: GoodsInfos;
@@ -171,7 +207,7 @@ declare module BuffTypes {
             src_url_background: string;
             total_count: number;
             total_page: number;
-            user_infos: UserInfos;
+            user_infos: CommonType.UserInfos;
         }
 
         export interface RootObject {
@@ -212,28 +248,13 @@ declare module BuffTypes {
             user_id: string;
         }
 
-        export interface UserInfo {
-            avatar: string;
-            avatar_safe: string;
-            is_premium_vip: boolean;
-            nickname: string;
-            seller_level: number;
-            shop_id: string;
-            user_id: string;
-            v_types?: any;
-        }
-
-        export interface UserInfos {
-            [name: string]: UserInfo;
-        }
-
         export interface Data {
             items: Item[];
             page_num: number;
             page_size: number;
             total_count: number;
             total_page: number;
-            user_infos: UserInfos;
+            user_infos: CommonType.UserInfos;
         }
 
         export interface RootObject {
@@ -264,12 +285,6 @@ declare module BuffTypes {
             wear: number;
         }
 
-        export interface TournamentTag {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
         export interface Info {
             fraudwarnings?: any;
             icon_url: string;
@@ -289,7 +304,7 @@ declare module BuffTypes {
             paintindex: number;
             paintseed: number;
             stickers: Sticker[];
-            tournament_tags: TournamentTag[];
+            tournament_tags: CommonType.TournamentTag[];
         }
 
         export interface AssetInfo {
@@ -307,12 +322,10 @@ declare module BuffTypes {
             tradable_unfrozen_time: number;
         }
 
-        export interface BundleInfo { }
-
         export interface Item {
             appid: number;
             asset_info: AssetInfo;
-            bundle_info: BundleInfo;
+            bundle_info: unknown;
             buyer_cancel_timeout?: any;
             buyer_cookie_invalid: boolean;
             buyer_id: string;
@@ -354,18 +367,6 @@ declare module BuffTypes {
             updated_at: number;
         }
 
-        export interface UserInfo {
-            avatar: string;
-            avatar_safe: string;
-            nickname: string;
-            shop_id: string;
-            user_id: string;
-        }
-
-        export interface UserInfos {
-            [name: string]: UserInfo;
-        }
-
         export interface Data {
             has_market_stores: HasMarketStores;
             items: Item[];
@@ -373,7 +374,7 @@ declare module BuffTypes {
             page_size: number;
             total_count: number;
             total_page: number;
-            user_infos: UserInfos;
+            user_infos: CommonType.UserInfos;
         }
 
         export interface RootObject {
@@ -392,18 +393,8 @@ declare module BuffTypes {
     /** */
     export module GoodsOrBuying {
 
-        export interface TagInfo {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface Tags {
-            [name: string]: TagInfo;
-        }
-
         export interface Info {
-            tags: Tags;
+            tags: CommonType.Tags;
         }
 
         export interface GoodsInfo {
@@ -532,16 +523,6 @@ declare module BuffTypes {
     /** */
     export module TopBookmarked {
 
-        export interface TagInfo {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface Tags {
-            [name: string]: TagInfo;
-        }
-
         export interface GoodsInfo {
             appid: number;
             can_3d_inspect: boolean;
@@ -559,7 +540,7 @@ declare module BuffTypes {
             steam_price: string;
             steam_price_cny: string;
             steam_price_custom: string;
-            tags: Tags;
+            tags: CommonType.Tags;
         }
 
         export interface GoodsInfos {
@@ -573,27 +554,6 @@ declare module BuffTypes {
             slot: number;
             sticker_id: number;
             wear: number;
-        }
-
-        export interface TournamentTag {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface MetaphysicData {
-            color: string;
-            name: string;
-        }
-
-        export interface Metaphysic {
-            data: MetaphysicData;
-            title: string;
-        }
-
-        export interface PhaseData {
-            color: string;
-            name: string;
         }
 
         export interface Info {
@@ -615,9 +575,9 @@ declare module BuffTypes {
             paintindex: number;
             paintseed: number;
             stickers: Sticker[];
-            tournament_tags: TournamentTag[];
-            metaphysic: Metaphysic;
-            phase_data: PhaseData;
+            tournament_tags: CommonType.TournamentTag[];
+            metaphysic: CommonType.Metaphysic;
+            phase_data: CommonType.PhaseData;
         }
 
         export interface AssetInfo {
@@ -667,21 +627,6 @@ declare module BuffTypes {
             user_id: string;
         }
 
-        export interface UserInfo {
-            avatar: string;
-            avatar_safe: string;
-            is_premium_vip: boolean;
-            nickname: string;
-            seller_level: number;
-            shop_id: string;
-            user_id: string;
-            v_types?: any;
-        }
-
-        export interface UserInfos {
-            [name: string]: UserInfo;
-        }
-
         export interface Data {
             goods_infos: GoodsInfos;
             items: Item[];
@@ -690,7 +635,7 @@ declare module BuffTypes {
             show_game_cms_icon: boolean;
             total_count: number;
             total_page: number;
-            user_infos: UserInfos;
+            user_infos: CommonType.UserInfos;
         }
 
         export interface RootObject {
@@ -707,16 +652,6 @@ declare module BuffTypes {
      */
     /** */
     export module PopularSellOrder {
-
-        export interface TagInfo {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface Tags {
-            [name: string]: TagInfo;
-        }
 
         export interface GoodsInfo {
             appid: number;
@@ -735,7 +670,7 @@ declare module BuffTypes {
             steam_price: string;
             steam_price_cny: string;
             steam_price_custom: string;
-            tags: Tags;
+            tags: CommonType.Tags;
         }
 
         export interface GoodsInfos {
@@ -749,32 +684,6 @@ declare module BuffTypes {
             slot: number;
             sticker_id: number;
             wear: number;
-        }
-
-        export interface TournamentTag {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface Data2 {
-            color: string;
-            name: string;
-        }
-
-        export interface Metaphysic {
-            data: Data2;
-            title: string;
-        }
-
-        export interface TierData {
-            color: string;
-            name: string;
-        }
-
-        export interface PhaseData {
-            color: string;
-            name: string;
         }
 
         export interface Info {
@@ -796,10 +705,10 @@ declare module BuffTypes {
             paintindex: number;
             paintseed: number;
             stickers: Sticker[];
-            tournament_tags: TournamentTag[];
-            metaphysic: Metaphysic;
-            tier_data: TierData;
-            phase_data: PhaseData;
+            tournament_tags: CommonType.TournamentTag[];
+            metaphysic: CommonType.Metaphysic;
+            tier_data: CommonType.TierData;
+            phase_data: CommonType.PhaseData;
         }
 
         export interface AssetInfo {
@@ -847,26 +756,11 @@ declare module BuffTypes {
             user_id: string;
         }
 
-        export interface UserInfo {
-            avatar: string;
-            avatar_safe: string;
-            is_premium_vip: boolean;
-            nickname: string;
-            seller_level: number;
-            shop_id: string;
-            user_id: string;
-            v_types: string[];
-        }
-
-        export interface UserInfos {
-            [name: string]: UserInfo;
-        }
-
         export interface Data {
             goods_infos: GoodsInfos;
             items: Item[];
             show_game_cms_icon: boolean;
-            user_infos: UserInfos;
+            user_infos: CommonType.UserInfos;
         }
 
         export interface RootObject {
@@ -883,16 +777,6 @@ declare module BuffTypes {
      */
     /** */
     export module SteamInventory {
-
-        export interface TagInfo {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface Tags {
-            [name: string]: TagInfo;
-        }
 
         export interface GoodsInfo {
             appid: number;
@@ -911,7 +795,7 @@ declare module BuffTypes {
             steam_price: string;
             steam_price_cny: string;
             steam_price_custom: string;
-            tags: Tags;
+            tags: CommonType.Tags;
         }
 
         export interface GoodsInfos {
@@ -932,33 +816,12 @@ declare module BuffTypes {
             wear: number;
         }
 
-        export interface TournamentTag {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface MetaphysicData {
-            color: string;
-            name: string;
-        }
-
-        export interface Metaphysic {
-            data: MetaphysicData;
-            title: string;
-        }
-
-        export interface TierData {
-            color: string;
-            name: string;
-        }
-
         export interface Info {
             fraudwarnings: string;
             icon_url: string;
             original_icon_url: string;
             stickers: Sticker[];
-            tournament_tags: TournamentTag[];
+            tournament_tags: CommonType.TournamentTag[];
             paintindex?: number;
             paintseed?: number;
             inspect_en_size: string;
@@ -973,8 +836,8 @@ declare module BuffTypes {
             inspect_url: string;
             inspect_version?: number;
             inspected_at: string;
-            metaphysic: Metaphysic;
-            tier_data: TierData;
+            metaphysic: CommonType.Metaphysic;
+            tier_data: CommonType.TierData;
         }
 
         export interface AssetInfo {
@@ -1024,7 +887,7 @@ declare module BuffTypes {
             state_toast: string;
             steam_price: string;
             steam_price_custom: string;
-            tags: Tags;
+            tags: CommonType.Tags;
             tradable: boolean;
             tradable_text: string;
             tradable_time?: number;
@@ -1073,8 +936,6 @@ declare module BuffTypes {
     /** */
     export module Backpack {
 
-        export interface GoodsInfos { }
-
         export interface StateDesc {
             [id: number]: string;
         }
@@ -1085,7 +946,7 @@ declare module BuffTypes {
             brief_info: string;
             currency: string;
             currency_symbol: string;
-            goods_infos: GoodsInfos;
+            goods_infos: unknown;
             items: any[];
             page_num: number;
             page_size: number;
@@ -1108,17 +969,6 @@ declare module BuffTypes {
      */
     /** */
     export module TopPopular {
-
-        export interface TagInfo {
-            category: string;
-            id: number;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface Tags {
-            [name: string]: TagInfo
-        }
 
         export interface Custom {
             category: string;
@@ -1143,21 +993,11 @@ declare module BuffTypes {
             short_name: string;
             steam_price: string;
             steam_price_cny: string;
-            tags: Tags;
+            tags: CommonType.Tags;
         }
 
         export interface GoodsInfos {
             [id: number]: GoodsInfo
-        }
-
-        export interface MetaPhysicData {
-            color: string;
-            name: string;
-        }
-
-        export interface MetaPhysic {
-            data: MetaPhysicData;
-            title: string;
         }
 
         export interface Sticker {
@@ -1167,22 +1007,6 @@ declare module BuffTypes {
             slot: number;
             sticker_id: number;
             wear: number;
-        }
-
-        export interface TierData {
-            color: string;
-            name: string;
-        }
-
-        export interface TournamentTag {
-            category: string;
-            internal_name: string;
-            localized_name: string;
-        }
-
-        export interface PhaseData {
-            color: string;
-            name: string;
         }
 
         export interface Info {
@@ -1200,14 +1024,14 @@ declare module BuffTypes {
             inspect_url: string;
             inspect_version: number;
             inspected_at: string;
-            metaphysic: MetaPhysic;
+            metaphysic: CommonType.Metaphysic;
             original_icon_url: string;
             paintindex: number;
             paintseed: number;
             stickers: Sticker[];
-            tier_data: TierData;
-            tournament_tags: TournamentTag[];
-            phase_data: PhaseData;
+            tier_data: CommonType.TierData;
+            tournament_tags: CommonType.TournamentTag[];
+            phase_data: CommonType.PhaseData;
         }
 
         export interface AssetInfo {
@@ -1265,22 +1089,6 @@ declare module BuffTypes {
             top_bookmark: string;
         }
 
-        export interface UserInfo {
-            avatar: string;
-            avatar_safe: string;
-            is_auto_accept: boolean;
-            is_premium_vip: boolean;
-            nickname: string;
-            seller_level: number;
-            shop_id: string;
-            user_id: string;
-            v_types?: any;
-        }
-
-        export interface UserInfos {
-            [name: string]: UserInfo
-        }
-
         export interface Data {
             fop_str: string;
             goods_infos: GoodsInfos;
@@ -1292,7 +1100,382 @@ declare module BuffTypes {
             src_url_background: string;
             total_count: number;
             total_page: number;
-            user_infos: UserInfos;
+            user_infos: CommonType.UserInfos;
+        }
+
+        export interface RootObject {
+            code: string;
+            data: Data;
+            msg?: any;
+        }
+
+    }
+
+    /**
+     * Response type for: <br>
+     * <code>/api/market/shop/<user_id>/bill_order</code>
+     */
+    /** */
+    export module ShopBillOrder {
+
+        export interface GoodsInfo {
+            appid: number;
+            description?: any;
+            game: string;
+            goods_id: number;
+            icon_url: string;
+            item_id?: any;
+            market_hash_name: string;
+            market_min_price: string;
+            name: string;
+            original_icon_url: string;
+            short_name: string;
+            steam_price: string;
+            steam_price_cny: string;
+            tags: CommonType.Tags;
+        }
+
+        export interface GoodsInfos {
+            [id: string]: GoodsInfo
+        }
+
+        export interface Info {
+            fraudwarnings?: any;
+            icon_url: string;
+            inspect_en_size: string;
+            inspect_en_url: string;
+            inspect_mobile_size: string;
+            inspect_mobile_url: string;
+            inspect_size: string;
+            inspect_start_at: string;
+            inspect_state: number;
+            inspect_trn_size: string;
+            inspect_trn_url: string;
+            inspect_url: string;
+            inspect_version: number;
+            inspected_at: string;
+            original_icon_url: string;
+            paintindex: number;
+            paintseed: number;
+            stickers: any[];
+            tournament_tags: any[];
+            metaphysic: CommonType.Metaphysic;
+            phase_data: CommonType.PhaseData;
+        }
+
+        export interface AssetInfo {
+            action_link: string;
+            appid: number;
+            assetid: string;
+            classid: string;
+            contextid: number;
+            goods_id: number;
+            has_tradable_cooldown: boolean;
+            id: string;
+            info: Info;
+            instanceid: string;
+            paintwear: string;
+            tradable_cooldown_text: string;
+            tradable_unfrozen_time: number;
+        }
+
+        export interface Item {
+            appid: number;
+            asset_info: AssetInfo;
+            bundle_info: unknown;
+            buyer_cancel_timeout?: any;
+            buyer_cookie_invalid: boolean;
+            buyer_id: string;
+            buyer_pay_time: number;
+            buyer_send_offer_timeout: number;
+            can_replace_asset: boolean;
+            coupon_info?: any;
+            coupon_infos?: any;
+            created_at: number;
+            deliver_expire_timeout: number;
+            error_text?: any;
+            fail_confirm?: any;
+            fee: string;
+            game: string;
+            goods_id: number;
+            has_bargain: boolean;
+            has_sent_offer: boolean;
+            id: string;
+            income: string;
+            is_seller_asked_to_send_offer: boolean;
+            mode: number;
+            original_price?: any;
+            pay_expire_timeout: number;
+            pay_method: number;
+            pay_method_text: string;
+            price: string;
+            receive_expire_timeout: number;
+            sell_order_id?: any;
+            seller_can_cancel: boolean;
+            seller_cookie_invalid: boolean;
+            seller_id: string;
+            trade_offer_trace_url?: any;
+            trade_offer_url?: any;
+            tradeofferid?: any;
+            transact_time: number;
+            type: number;
+            updated_at: number;
+        }
+
+        export interface Data {
+            goods_infos: GoodsInfos;
+            items: Item[];
+            user_infos: CommonType.UserInfo;
+        }
+
+        export interface RootObject {
+            code: string;
+            data: Data;
+            msg?: any;
+        }
+
+    }
+
+    /**
+     * Response type for: <br>
+     * <code>/api/market/shop/<user_id>/featured</code>
+     */
+    /** */
+    export module ShopFeatured {
+
+        export interface GoodsInfo {
+            appid: number;
+            description?: any;
+            game: string;
+            goods_id: number;
+            icon_url: string;
+            item_id?: any;
+            market_hash_name: string;
+            market_min_price: string;
+            name: string;
+            original_icon_url: string;
+            short_name: string;
+            steam_price: string;
+            steam_price_cny: string;
+            tags: CommonType.Tags;
+        }
+
+        export interface GoodsInfos {
+            [id: string]: GoodsInfo
+        }
+
+        export interface Sticker {
+            category: string;
+            img_url: string;
+            name: string;
+            slot: number;
+            sticker_id: number;
+            wear: number;
+        }
+
+        export interface Info {
+            fraudwarnings?: any;
+            icon_url: string;
+            inspect_en_size: string;
+            inspect_en_url: string;
+            inspect_mobile_size: string;
+            inspect_mobile_url: string;
+            inspect_size: string;
+            inspect_start_at: string;
+            inspect_state: number;
+            inspect_trn_size: string;
+            inspect_trn_url: string;
+            inspect_url: string;
+            inspect_version: number;
+            inspected_at: string;
+            original_icon_url: string;
+            paintindex: number;
+            paintseed: number;
+            stickers: Sticker[];
+            tournament_tags: CommonType.TournamentTag[];
+        }
+
+        export interface AssetInfo {
+            action_link: string;
+            appid: number;
+            assetid: string;
+            classid: string;
+            contextid: number;
+            goods_id: number;
+            has_tradable_cooldown: boolean;
+            id: string;
+            info: Info;
+            instanceid: string;
+            paintwear: string;
+            tradable_cooldown_text: string;
+            tradable_unfrozen_time?: any;
+        }
+
+        export interface Item {
+            allow_bargain: boolean;
+            appid: number;
+            asset_info: AssetInfo;
+            coupon_infos?: any;
+            created_at: number;
+            description: string;
+            featured: number;
+            fee: string;
+            game: string;
+            goods_id: number;
+            id: string;
+            income: string;
+            lowest_bargain_price: string;
+            mode: number;
+            price: string;
+            recent_average_duration?: any;
+            recent_deliver_rate?: any;
+            state: number;
+            tradable_cooldown?: any;
+            updated_at: number;
+            user_id: string;
+        }
+
+        export interface Data {
+            goods_infos: GoodsInfos;
+            items: Item[];
+            user_infos: CommonType.UserInfos;
+        }
+
+        export interface RootObject {
+            code: string;
+            data: Data;
+            msg?: any;
+        }
+
+    }
+
+    /**
+     * Response type for: <br>
+     * <code>/api/market/shop/<user_id>/sell_order</code>
+     */
+    /** */
+    export module ShopSellOrder {
+
+        export interface GoodsInfo {
+            appid: number;
+            can_3d_inspect: boolean;
+            can_inspect: boolean;
+            description?: any;
+            game: string;
+            goods_id: number;
+            icon_url: string;
+            item_id?: any;
+            market_hash_name: string;
+            market_min_price: string;
+            name: string;
+            original_icon_url: string;
+            short_name: string;
+            steam_price: string;
+            steam_price_cny: string;
+            tags: CommonType.Tags;
+        }
+
+        export interface GoodsInfos {
+            [id: string]: GoodsInfo
+        }
+
+        export interface Sticker {
+            category: string;
+            img_url: string;
+            name: string;
+            slot: number;
+            sticker_id: number;
+            wear: number;
+        }
+
+        export interface Info {
+            fraudwarnings: string;
+            icon_url: string;
+            inspect_en_size: string;
+            inspect_en_url: string;
+            inspect_mobile_size: string;
+            inspect_mobile_url: string;
+            inspect_size: string;
+            inspect_start_at: string;
+            inspect_state: number;
+            inspect_trn_size: string;
+            inspect_trn_url: string;
+            inspect_url: string;
+            inspect_version: number;
+            inspected_at: string;
+            original_icon_url: string;
+            paintindex: number;
+            paintseed: number;
+            stickers: Sticker[];
+            tournament_tags: CommonType.TournamentTag[];
+        }
+
+        export interface AssetInfo {
+            action_link: string;
+            appid: number;
+            assetid: string;
+            classid: string;
+            contextid: number;
+            goods_id: number;
+            has_tradable_cooldown: boolean;
+            info: Info;
+            instanceid: string;
+            paintwear: string;
+            tradable_cooldown_text: string;
+            tradable_unfrozen_time?: any;
+        }
+
+        export interface Item {
+            allow_bargain: boolean;
+            appid: number;
+            asset_info: AssetInfo;
+            background_image_url: string;
+            can_bargain: boolean;
+            can_use_inspect_trn_url: boolean;
+            cannot_bargain_reason: string;
+            coupon_infos?: any;
+            created_at: number;
+            description: string;
+            featured: number;
+            fee: string;
+            game: string;
+            goods_id: number;
+            id: string;
+            img_src: string;
+            income: string;
+            lowest_bargain_price: string;
+            mode: number;
+            price: string;
+            recent_average_duration?: any;
+            recent_deliver_rate?: any;
+            state: number;
+            supported_pay_methods: number[];
+            tradable_cooldown?: any;
+            updated_at: number;
+            user_id: string;
+        }
+
+        export interface PreviewScreenshots {
+            bg_img: string;
+            top_bookmark: string;
+        }
+
+        export interface Data {
+            brief_info: string;
+            fop_str: string;
+            game: string;
+            goods_infos: GoodsInfos;
+            items: Item[];
+            mode?: any;
+            page_num: number;
+            page_size: number;
+            preview_screenshots: PreviewScreenshots;
+            show_game_cms_icon: boolean;
+            src_url_background: string;
+            total_amount: string;
+            total_count: number;
+            total_page: number;
+            user_infos: CommonType.UserInfos;
         }
 
         export interface RootObject {

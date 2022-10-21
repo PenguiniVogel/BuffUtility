@@ -1,5 +1,6 @@
 module AdjustFavourites {
 
+    // imports
     import Settings = ExtensionSettings.Settings;
 
     function init(): void {
@@ -23,6 +24,47 @@ module AdjustFavourites {
             let wearContainer = row.querySelector('div.csgo_value');
             let targetId = row.querySelector('[data-target-id]');
 
+            // convert price
+            let contentTDList = row.querySelectorAll('td');
+            let priceTD = null;
+            for (let i = 0, l = contentTDList.length; i < l; i ++) {
+                if (contentTDList.item(i).innerText.indexOf(GlobalConstants.SYMBOL_YUAN) > -1) {
+                    priceTD = contentTDList.item(i);
+                    break;
+                }
+            }
+
+            if (priceTD) {
+                let priceCNY = +((/¥ (\d+(\.\d+)?)/.exec(priceTD.innerText) ?? [null, NaN])[1]);
+                if (isFinite(priceCNY)) {
+                    let priceStr = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(`${priceCNY}`)}`;
+                    const formattedPrice = Util.formatNumber(priceCNY);
+                    if (formattedPrice.wasCompressed || formattedPrice.wasFormatted) {
+                        priceStr = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
+                    }
+
+                    let converted_price_str = Util.convertCNY(priceCNY);
+                    const { convertedSymbol, convertedValue } = Util.convertCNYRaw(priceCNY);
+                    const formattedConverted = Util.formatNumber(convertedValue);
+                    if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
+                        converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;
+                    }
+
+                    priceTD.innerHTML = Util.buildHTML('p', {
+                        content: Util.buildHTML('strong', {
+                            attributes: {
+                                'title': `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(Util.formatNumber(priceCNY, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED).strNumber)}`
+                            },
+                            class: 'f_Strong',
+                            content: [ priceStr, formattedPrice.wasCompressed ? 'K' : '' ]
+                        })
+                    }) + Util.buildHTML('p', {
+                        class: 'c_Gray f_12px',
+                        content: [ '(', Util.embedDecimalSmall(converted_price_str), formattedConverted.wasCompressed ? 'K' : '', ')' ]
+                    });
+                }
+            }
+
             if (!imgContainer || !aAssetInfo || !(nameContainer?.innerText) || !targetId) continue;
 
             // item was sold or unlisted, skip
@@ -40,7 +82,9 @@ module AdjustFavourites {
             if (f_schemaData?.length > 0) {
                 let schemaData = f_schemaData[0];
 
-                console.debug(itemType, schemaData, assetInfo);
+                if (DEBUG) {
+                    console.debug(itemType, schemaData, assetInfo);
+                }
 
                 let aCopyGen = <HTMLElement>document.createElement('a');
 
@@ -67,21 +111,10 @@ module AdjustFavourites {
 
                 aCopyGen.setAttribute('class', 'ctag btn');
                 aCopyGen.setAttribute('style', 'margin-top: 3px;');
-
-                if (storedSettings[Settings.SHOW_TOAST_ON_ACTION]) {
-                    aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
-                } else {
-                    aCopyGen.setAttribute('href', 'javascript:;');
-                }
-
                 aCopyGen.setAttribute('title', gen);
 
-                aCopyGen.addEventListener('click', () => {
-                    navigator?.clipboard?.writeText(gen).then(() => {
-                        // alert(`Copied ${gen} to clipboard!`);
-                        console.debug(`[BuffUtility] Copy gen: ${gen}`);
-                    }).catch((e) => console.error('[BuffUtility]', e));
-                });
+                Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
+                Util.addAnchorClipboardAction(aCopyGen, gen);
 
                 wearContainer.appendChild(aCopyGen);
             }
@@ -94,7 +127,7 @@ module AdjustFavourites {
 
             nameContainer.parentElement.appendChild(aShare);
 
-            if (storedSettings[Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]) {
+            if (getSetting(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN)) {
                 // Note: this feature is yet unable to check if the seller has disabled bargaining
                 //       https://buff.163.com/api/market/buyer_bargain/create/preview?sell_order_id=220913T2001697026
                 //       will enable us to check the code if a bargain can be created, NEEDS to be optional, and off by default.
@@ -122,7 +155,7 @@ module AdjustFavourites {
                     parentBargain.querySelector('span').setAttribute('style', 'margin-left: 50px;');
                     parentBargain.querySelector('a').after(aBargain);
 
-                    if (storedSettings[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]) {
+                    if (getSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS)) {
                         let orderId = imgContainer.getAttribute('data-orderid');
                         if (orderId?.length > 0) {
                             fetch(`https://buff.163.com/api/market/buyer_bargain/create/preview?sell_order_id=${orderId}`)
@@ -138,11 +171,11 @@ module AdjustFavourites {
                 }
 
                 if (isBalanceYuan) {
-                    if (price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][0]) {
+                    if (price > nrBalance && getSetting(Settings.COLOR_LISTINGS)[0]) {
                         aBuy.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
                     }
 
-                    if (lowest_bargain_price > nrBalance && storedSettings[Settings.COLOR_LISTINGS][1]) {
+                    if (lowest_bargain_price > nrBalance && getSetting(Settings.COLOR_LISTINGS)[1]) {
                         aBargain.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
                     }
                 }

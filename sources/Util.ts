@@ -21,7 +21,7 @@ module Util {
          * @param publisherFee
          */
         function getFees(receivedAmount: number, publisherFee: number): { steam_fee: number, publisher_fee: number, fees: number, amount: number } {
-            const { wallet_fee_base, wallet_fee_percent, wallet_fee_minimum } = ExtensionSettings.steam_settings;
+            const { wallet_fee_base, wallet_fee_percent, wallet_fee_minimum } = ExtensionSettings.STEAM_SETTINGS;
 
             let nSteamFee = Math.floor(Math.max(receivedAmount * wallet_fee_percent, wallet_fee_minimum) + wallet_fee_base);
             let nPublisherFee = Math.floor(publisherFee > 0 ? Math.max(receivedAmount * publisherFee, 1) : 0);
@@ -35,7 +35,7 @@ module Util {
             };
         }
 
-        const { wallet_fee_base, wallet_fee_percent } = ExtensionSettings.steam_settings;
+        const { wallet_fee_base, wallet_fee_percent } = ExtensionSettings.STEAM_SETTINGS;
 
         // Since getFees has a Math.floor, we could be off a cent or two. Let's check:
         let iterations = 0; // shouldn't be needed, but included to be sure nothing unforeseen causes us to get stuck
@@ -82,14 +82,15 @@ module Util {
      * Convert the specified cny value to the selected currency
      *
      * @param cny
+     * @returns <e title="¥1 = currency_symbol rate">currency_symbol</e>(cny * rate).toFixed(fixPoint)
      */
     export function convertCNY(cny: number): string {
-        const selected_currency = storedSettings[Settings.SELECTED_CURRENCY];
+        const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
 
         if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
-            const custom_currency_name = storedSettings[Settings.CUSTOM_CURRENCY_NAME],
-                custom_currency_calculated_rate = storedSettings[Settings.CUSTOM_CURRENCY_CALCULATED_RATE],
-                custom_currency_leading_zeros = storedSettings[Settings.CUSTOM_CURRENCY_LEADING_ZEROS];
+            const custom_currency_name = getSetting(Settings.CUSTOM_CURRENCY_NAME);
+            const custom_currency_calculated_rate = getSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE);
+            const custom_currency_leading_zeros = getSetting(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
 
             return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${custom_currency_calculated_rate.toFixed(custom_currency_leading_zeros)}">CC </e>${(cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)}`;
         } else {
@@ -98,6 +99,39 @@ module Util {
             const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
 
             return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${symbol}${rate.toFixed(fixPoint)}">${symbol} </e>${(cny * rate).toFixed(fixPoint)}`;
+        }
+    }
+
+    /**
+     * Convert the specified cny value to the selected currency
+     *
+     * @param cny
+     * @returns An object containing the currency symbol and the converted value
+     */
+    export function convertCNYRaw(cny: number): {
+        convertedSymbol: string,
+        convertedValue: string
+    } {
+        const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
+
+        if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
+            const custom_currency_name = getSetting(Settings.CUSTOM_CURRENCY_NAME);
+            const custom_currency_calculated_rate = getSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE);
+            const custom_currency_leading_zeros = getSetting(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
+
+            return {
+                convertedSymbol: custom_currency_name,
+                convertedValue: (cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)
+            };
+        } else {
+            const { rates, symbols } = CurrencyHelper.getData();
+            const [ rate, fixPoint ] = rates[selected_currency];
+            const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
+
+            return {
+                convertedSymbol: symbol,
+                convertedValue: (cny * rate).toFixed(fixPoint)
+            };
         }
     }
 
@@ -302,9 +336,91 @@ module Util {
         return '';
     }
 
+    // <a> action injection
+
+    export function addAnchorToastAction(a: HTMLElement, text: string): void {
+        if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
+            a.setAttribute('href', `javascript:Buff.toast('${text}');`);
+        } else {
+            a.setAttribute('href', 'javascript:;');
+        }
+    }
+
+    export function addAnchorClipboardAction(a: HTMLElement, text: string): void {
+        a.addEventListener('click', () => {
+            navigator?.clipboard?.writeText(text).then(() => {
+                // alert(`Copied ${gen} to clipboard!`);
+                console.debug(`[BuffUtility] Copied: ${text}`);
+            }).catch((e) => console.error('[BuffUtility]', e));
+        });
+    }
+
+    // format number
+
+    export function formatNumber(inNumber: number | string, compress: boolean = false, overrideMode: ExtensionSettings.CurrencyNumberFormats = null): {
+        wasCompressed: boolean,
+        wasFormatted: boolean,
+        strNumber: string
+    } {
+        let _strNumber = `${inNumber}`;
+        let _parsedNumber = +_strNumber;
+
+        function _format(): ReturnType<typeof formatNumber> {
+            let formatted = new Intl.NumberFormat('en-US', {
+                maximumFractionDigits: 2
+            }).format(_parsedNumber);
+
+            return {
+                wasCompressed: false,
+                wasFormatted: true,
+                strNumber: formatted
+            };
+        }
+
+        function _compress(): ReturnType<typeof formatNumber> {
+            let _wasCompressed = false;
+            if (isFinite(_parsedNumber) && _parsedNumber > 1_000) {
+                _wasCompressed = true;
+                const strippedParsed = `${~~_parsedNumber}`;
+                _strNumber = `${strippedParsed.substring(0, strippedParsed.length - 3)}.${strippedParsed.substring(strippedParsed.length - 3)[0]}`;
+            }
+
+            return {
+                wasCompressed: _wasCompressed,
+                wasFormatted: false,
+                strNumber: _strNumber
+            };
+        }
+
+        const compare = overrideMode ?? getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY);
+        switch (compare) {
+            case ExtensionSettings.CurrencyNumberFormats.FORMATTED:
+                return _format();
+            case ExtensionSettings.CurrencyNumberFormats.COMPRESSED:
+                return _compress();
+            case ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH:
+                return compress ? _compress() : _format();
+        }
+
+        return {
+            wasCompressed: false,
+            wasFormatted: false,
+            strNumber: _strNumber
+        };
+    }
+
+    /**
+     * Embed decimals in a <small></small> element
+     *
+     * @param inStr
+     */
+    export function embedDecimalSmall(inStr: string): string {
+        return inStr.indexOf('.') > -1 ? inStr.replace(/(\d+)\.(\d+)/, '$1<small>.$2</small>') : inStr;
+    }
+
     // signal
 
-    export function signal(callOrder: string[], thisArg: any = null, args: any[] = []): void {
+    export function signal(callOrder: string[], thisArg: any = null, args: any = null): void {
         window.postMessage([GlobalConstants.BUFF_UTILITY_SIGNAL, callOrder, thisArg, args], '*');
     }
 
@@ -315,6 +431,15 @@ module Util {
         isBalanceYuan: boolean,
         nrBalance: number
     } {
+        // if user is not logged in, we can't read their balance
+        if (!document.querySelector('#navbar-cash-amount')) {
+            return {
+                strBalance: '',
+                isBalanceYuan: false,
+                nrBalance: 0
+            };
+        }
+
         let strBalance = (<HTMLElement>document.querySelector('#navbar-cash-amount')).innerText;
         let isBalanceYuan = strBalance.indexOf('¥') > -1;
         let nrBalance = isBalanceYuan ? +(strBalance.replace('¥', '')) : 0;
@@ -326,6 +451,105 @@ module Util {
             isBalanceYuan: isBalanceYuan,
             nrBalance: nrBalance
         };
+    }
+
+    /**
+     * Converts a boolean array to a number, or the binary equivalent. <br>
+     * Example: <br>
+     * Test data: <code>[false, true, false, true, true]</code> <br>
+     * Will then result in: <code>43</code> or the binary equivalent of <code>101011</code> <br>
+     * As you may realize, there is 6 binary digits when we only provided 5 values, why is that? <br>
+     * Explanation: <br>
+     * 1 - the sign bit, this is appended at the beginning to keep leading zeros if the array starts with <code>false</code> values. <br>
+     * 0 - <code>value[0]</code> -> <code>false</code> <br>
+     * 1 - <code>value[1]</code> -> <code>true</code> <br>
+     * 0 - <code>value[2]</code> -> <code>false</code> <br>
+     * 1 - <code>value[3]</code> -> <code>true</code> <br>
+     * 1 - <code>value[4]</code> -> <code>true</code> <br>
+     * Resulting in the input values.
+     *
+     * @param data The input boolean array
+     */
+    export function exportBooleansToBytes(data: boolean[]): number {
+        // data isn't an array and definitely not something we should process
+        if (!(typeof data == 'object' && data?.length >= 0)) {
+            return 0;
+        }
+
+        let byte = 1;
+
+        for (let i = 0, l = data.length; i < l; i ++) {
+            let value = data[i];
+            if (typeof value != 'boolean') {
+                console.warn('[BuffUtility] Provided value:', value, 'at index:', i, 'was not a boolean, converting ->', !!value);
+                value = !!value;
+            }
+
+            byte = (byte << 1) | (value ? 1 : 0);
+        }
+
+        return byte;
+    }
+
+    export function importBooleansFromBytes(data: number): boolean[] {
+        // if input data is not a number or less than 2 ( 10 in binary ) return empty array
+        if (typeof data != 'number' || data < 2) {
+            return [];
+        }
+
+        let radix = data.toString(2);
+
+        // if input bits are less than 2 it is only the signature bit, therefor empty
+        if (radix?.length < 2) {
+            return [];
+        }
+
+        // if the while loop exceeds 64 executions (a number is only 32 bit max), something is definitely wrong, and we should stop
+        let infiniteBreak = 64;
+
+        // sets the index of the array to the length of the binary string shifted by one to exclude the sign bit
+        let index = radix.length - 1;
+
+        let imported: boolean[] = [];
+
+        // Since the array gets generated from first to last value, we need to transverse backwards, as we read the last value first
+        while (data > 1 && index > -1 && infiniteBreak > 0) {
+            imported[index - 1] = !!(data & 1);
+
+            data = data >> 1;
+
+            index --;
+            infiniteBreak --;
+        }
+
+        return imported;
+    }
+
+    if (DEBUG) {
+        // test exportBooleansToBytes and importBooleansFromBytes
+        (() => {
+            // randomly generate 6 boolean states
+            const test_data = [
+                Math.random() > 0.5,
+                Math.random() > 0.5,
+                Math.random() > 0.5,
+                Math.random() > 0.5,
+                Math.random() > 0.5,
+                Math.random() > 0.5
+            ];
+
+            let exported = exportBooleansToBytes(test_data);
+
+            console.debug(test_data, '->', exported);
+
+            let imported = importBooleansFromBytes(exported);
+
+            console.debug(exported, '->', imported);
+
+            let filtered = imported.filter((x, i, a) => x != test_data[i]);
+
+            console.debug('If array is longer than 0, we failed:', filtered.length, filtered);
+        })();
     }
 
 }
@@ -353,7 +577,7 @@ module PopupHelper {
             <tr>
                 <td></td>
                 <td>
-                    <a href="javascript:;" class="i_Btn i_Btn_main i_Btn_disabled">Confirm</a>
+                    <a id="buff_utility_popup_confirm" href="javascript:;" class="i_Btn i_Btn_main i_Btn_disabled">Confirm</a>
                 </td>
             </tr>
         </tbody>
@@ -368,15 +592,24 @@ module PopupHelper {
         document.querySelector('html > body').append(storeE);
     }
 
-    export function show(content: any): void {
+    export function show(content: any, options?: {
+        onconfirm: () => void
+    }): void {
         // if not added, don't execute
         if (document.querySelector('#buff_utility_popup') == null) {
+            console.warn('[BuffUtility] Popup is not initialized.');
             return;
         }
 
         document.querySelector('#buff_utility_popup div.popup-good-summary').innerHTML = content;
 
-        Util.signal(['Popup', 'show'], null, ['buff_utility_popup']);
+        document.getElementById('buff_utility_popup_confirm').onclick = options?.onconfirm ?? (() => {});
+
+        Util.signal(['Popup', 'show'], 'Popup', 'buff_utility_popup');
+    }
+
+    export function hide(): void {
+        Util.signal(['Popup', 'hide'], 'Popup', null);
     }
 
 }

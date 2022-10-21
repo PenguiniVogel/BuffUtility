@@ -11,6 +11,8 @@ package-lock.json
 
 sources/*.js
 sources/csgostash/*.js
+SchemaData/*.js
 lib/*.js
+config.js
 
 *.zip
