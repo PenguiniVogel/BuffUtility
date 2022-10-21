@@ -1,6 +1,6 @@
 {
     "extends": "./base.tsconfig.json",
     "include": [
-        "lib/SchemaData.d.ts"
+        "SchemaData/SchemaData.ts"
     ]
 }

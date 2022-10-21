@@ -1,10 +1,6 @@
 # tsc
-echo "Building: --project tsconfig.json --inlineSources false --inlineSourceMap false --removeComments true --outDir .out"
-tsc --project tsconfig.json --inlineSources false --inlineSourceMap false --removeComments true --outDir .out
-echo " "
-
-echo "Building: SchemaData.ts --inlineSources false --inlineSourceMap false --removeComments true --outDir .out/SchemaData"
-tsc SchemaData/SchemaData.ts --inlineSources false --inlineSourceMap false --removeComments true --outDir .out/SchemaData
+echo "Building: --project build.tsconfig.json"
+tsc --project build.tsconfig.json
 echo " "
 
 # delete previous export
