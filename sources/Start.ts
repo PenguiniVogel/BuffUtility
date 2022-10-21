@@ -209,7 +209,7 @@ if (getSetting(Settings.USE_SCHEME)) {
 .dark-theme .user-wallet .user-pay-desc,
 .dark-theme .user-rights,
 .dark-theme .user-feedback {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
     color: ${getSetting(Settings.COLOR_SCHEME)[2]};
 }
 
