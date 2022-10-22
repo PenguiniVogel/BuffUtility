@@ -439,8 +439,8 @@ module Adjust_Listings {
                 price_str = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
             }
 
-            let converted_price_str = Util.convertCNY(price);
             const { convertedSymbol, convertedValue } = Util.convertCNYRaw(price);
+            let converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(convertedValue)}`;
             const formattedConverted = Util.formatNumber(convertedValue);
             if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
                 converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;
