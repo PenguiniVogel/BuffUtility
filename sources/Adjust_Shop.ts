@@ -7,6 +7,12 @@ module Adjust_Shop {
         if (transferData.url.match(/\/shop\/.+\/sell_order/)) {
             console.debug('[BuffUtility] Adjust_Shops (/sell_order)');
             adjustShopSellOrder(<InjectionService.TransferData<BuffTypes.ShopSellOrder.Data>>transferData);
+        } else if (transferData.url.match(/\/shop\/.+\/featured/)) {
+            console.debug('[BuffUtility] Adjust_Shops (/featured)');
+            adjustShopFeatured(<InjectionService.TransferData<BuffTypes.ShopFeatured.Data>>transferData);
+        } else if (transferData.url.match(/\/shop\/.+\/bill_order/)) {
+            console.debug('[BuffUtility] Adjust_Shops (/bill_order)');
+            adjustShopBillOrder(<InjectionService.TransferData<BuffTypes.ShopBillOrder.Data>>transferData);
         }
     }
 
@@ -27,6 +33,7 @@ module Adjust_Shop {
             const dataRow = data.items[i];
             const goodsInfo = data.goods_infos[dataRow.goods_id];
             const tagBox = <HTMLElement>liList.item(i).querySelector('.tagBox > .g_Right');
+            const priceBox = <HTMLElement>liList.item(i).querySelector('p > .f_Strong');
 
             const schemaData = SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
 
@@ -64,6 +71,60 @@ module Adjust_Shop {
                         tagBox.insertBefore(aCopyGen, tagBox.firstChild);
                     }
                 }
+            }
+
+            if (priceBox) {
+                const priceConv = Util.convertCNYRaw(Number(dataRow.price));
+                priceBox.innerHTML = `${priceConv.convertedSymbol} ${priceConv.convertedValue.split('.')[0]}<small>.${priceConv.convertedValue.split('.')[1]}</small>`;
+            }
+        }
+    }
+
+    function adjustShopFeatured(transferData: InjectionService.TransferData<BuffTypes.ShopFeatured.Data>): void {
+        // If experimental feature was disabled, ignore.
+        if (!getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
+            console.debug('[BuffUtility] Experimental feature \'Adjust Shop\' is disabled.');
+            return;
+        }
+        
+        const liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_recommend li');
+        let data = transferData.data;
+
+        // if we have no items don't adjust anything
+        if (!liList || data.items.length == 0) return;
+
+        for (let i = 0; i < liList.length; i ++) {
+            const dataRow = data.items[i];
+            const priceBox = <HTMLElement>liList.item(i).querySelector('p > .c_Yellow');
+
+            if (priceBox) {
+                const priceConv = Util.convertCNYRaw(Number(dataRow.price));
+                priceBox.innerHTML = `${priceConv.convertedSymbol} ${priceConv.convertedValue.split('.')[0]}<small>.${priceConv.convertedValue.split('.')[1]}</small>`;
+            }
+        }
+    }
+
+    function adjustShopBillOrder(transferData: InjectionService.TransferData<BuffTypes.ShopBillOrder.Data>): void {
+        // If experimental feature was disabled, ignore.
+        if (!getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
+            console.debug('[BuffUtility] Experimental feature \'Adjust Shop\' is disabled.');
+            return;
+        }
+        
+        const liList = <NodeListOf<HTMLElement>>document.querySelectorAll('.recent-deal li');
+        let data = transferData.data;
+
+        // if we have no items don't adjust anything
+        if (!liList || data.items.length == 0) return;
+
+        for (let i = 0; i < liList.length; i ++) {
+            const dataRow = data.items[i];
+            const textBox = <HTMLElement>liList.item(i).querySelector('p');
+
+            if (textBox) {
+                const priceConv = Util.convertCNYRaw(Number(dataRow.price));
+                const timePast = Number(textBox.innerText.split('天')[0]);
+                textBox.innerHTML = `${priceConv.convertedSymbol} ${priceConv.convertedValue} (${timePast}d ago)`;
             }
         }
     }
