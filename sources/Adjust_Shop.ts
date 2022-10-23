@@ -124,7 +124,7 @@ module Adjust_Shop {
             if (textBox) {
                 const priceConv = Util.convertCNYRaw(Number(dataRow.price));
                 const timePast = Number(textBox.innerText.split('天')[0]);
-                textBox.innerHTML = `${priceConv.convertedSymbol} ${priceConv.convertedValue} (${timePast}d ago)`;
+                textBox.innerHTML = `${priceConv.convertedSymbol} ${priceConv.convertedValue} (${isNaN(timePast)?0:timePast}d ago)`;
             }
         }
     }
