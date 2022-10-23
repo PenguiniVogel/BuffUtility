@@ -61,7 +61,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('', 't_Right')
+            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
         );
 
         table.append(tr);
@@ -103,7 +103,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('', 't_Right')
+            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
         );
 
         table.append(tr);
@@ -156,7 +156,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('', 't_Right')
+            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
         );
 
         table.append(tr);
@@ -208,7 +208,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('', 't_Right')
+            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
         );
 
         table.append(tr);
@@ -250,7 +250,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('', 't_Right')
+            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
         );
 
         table.append(tr);
@@ -348,8 +348,6 @@ module Adjust_Settings {
     function init(): void {
         console.debug('[BuffUtility] Adjust_Settings');
 
-        PopupHelper.setup();
-
         window.addEventListener('message', (e: MessageEvent) => {
             if (e.data == GlobalConstants.BUFF_UTILITY_SETTINGS) {
                 // check changes
@@ -436,6 +434,21 @@ module Adjust_Settings {
 
         // Get stuff
         const userSettings = document.querySelector('div.user-setting');
+
+        // styles
+        const customStyle = document.createElement('style');
+
+        customStyle.innerHTML = `
+tr button.buff-utility-reset {
+    display: none;
+}
+
+tr:hover button.buff-utility-reset {
+    display: block;
+}
+        `;
+
+        userSettings.append(customStyle);
 
         // Add normal settings
         const h3 = document.createElement('h3');

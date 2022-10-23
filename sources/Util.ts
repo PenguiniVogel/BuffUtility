@@ -595,6 +595,9 @@ module PopupHelper {
     export function show(content: any, options?: {
         onconfirm: () => void
     }): void {
+        // add necessary stuff
+        PopupHelper.setup();
+
         // if not added, don't execute
         if (document.querySelector('#buff_utility_popup') == null) {
             console.warn('[BuffUtility] Popup is not initialized.');
