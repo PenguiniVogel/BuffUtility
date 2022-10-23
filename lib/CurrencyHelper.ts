@@ -14,6 +14,7 @@ module CurrencyHelper {
 
     let data: Data;
 
+    let fetchDone: boolean = false;
     let recursionBreak: number = 0;
 
     /**
@@ -23,12 +24,20 @@ module CurrencyHelper {
      * @param onFetch callback when the response was received, only will happen if <code>fetchNew</code> is true
      */
     export function initialize(fetchNew: boolean = true, onFetch: (data: Data) => void = null): void {
+        // If fetchNew is false, we don't plan on loading anything, so we can just set fetchDone to true
+        fetchDone = !fetchNew;
+
         // shouldn't be necessary, but to prevent getting stuck, we kill it after 5 calls
         if (recursionBreak > 5) {
             return;
         } else {
             recursionBreak ++;
         }
+
+        // pre-parse raw to avoid timing errors
+        try {
+            data = JSON.parse(raw);
+        } catch (e) { }
 
         if (fetchNew) {
             try {
@@ -59,6 +68,10 @@ module CurrencyHelper {
     }
 
     export function getData(): Data {
+        if (!fetchDone) {
+            console.debug('[CurrencyHelper] Accessed data before fetch was complete.');
+        }
+
         return data;
     }
 
