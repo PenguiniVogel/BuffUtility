@@ -387,7 +387,8 @@ module Adjust_Settings {
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, readSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, readCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY));
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY, readSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY));
-
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ADJUST_SHOP, readCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_SHOP));
+                
                 // write settings
                 ExtensionSettings.finalize();
             }
@@ -776,6 +777,12 @@ tr:hover button.buff-utility-reset {
         ], {
             title: 'Compress Currency',
             description: '!!!BuffUtility!!!\n!!!Experimental!!!\nNone: Don\'t format at all.\nFormatted: Taken e.g. 1234.89 will be transformed to 1,234.89.\nCompressed: Taken e.g. 1234.89 will be transformed to 1.2K.\nSpace Match: Will either use Formatted or Compressed depending on space.'
+        }, ex_table);
+        
+        // experimental adjust market currency
+        makeCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
+            title: 'Adjust Shop Pages',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nAdjust the \'Shop\' pages. This adds features such as the Share link and Gen code.'
         }, ex_table);
 
         // append experimental settings

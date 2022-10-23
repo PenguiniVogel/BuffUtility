@@ -115,6 +115,8 @@ module ExtensionSettings {
         EXPERIMENTAL_ADJUST_MARKET_CURRENCY = 'adjust_market_currency',
         // 2.1.9 -> setting will be moved to advanced settings
         EXPERIMENTAL_FORMAT_CURRENCY = 'format_currency',
+        // [TBA] -> setting will be removed, default procedure
+        EXPERIMENTAL_ADJUST_SHOP = 'experimental_adjust_shop',
 
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
@@ -154,6 +156,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange;
         [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: CurrencyNumberFormats;
+        [Settings.EXPERIMENTAL_ADJUST_SHOP]: boolean;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
     }
@@ -368,7 +371,12 @@ module ExtensionSettings {
             transform: InternalStructureTransform.NONE,
             validator: validateNumber
         },
-
+        [Settings.EXPERIMENTAL_ADJUST_SHOP]: {
+            default: false,
+            export: '2x8',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
         [Settings.STORE_DANGER_AGREEMENTS]: {
             default: [false, false],
             export: '3x1',
