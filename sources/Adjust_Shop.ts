@@ -3,6 +3,16 @@ module Adjust_Shop {
     // imports
     import Settings = ExtensionSettings.Settings;
 
+    function init(): void {
+        window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
+
+        InjectionServiceLib.injectCSS(`
+            p strong.f_Strong small {
+                font-size: smaller !important;
+            }
+        `);
+    }
+
     function process(transferData: InjectionService.TransferData<unknown>): void {
         if (transferData.url.match(/\/shop\/.+\/sell_order/)) {
             console.debug('[BuffUtility] Adjust_Shops (/sell_order)');
@@ -55,14 +65,7 @@ module Adjust_Shop {
                 }
 
                 Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
-
-                aCopyGen.setAttribute('title', gen);
-                aCopyGen.setAttribute('style', 'cursor: pointer;');
-                aCopyGen.addEventListener('click', () => {
-                    navigator?.clipboard?.writeText(gen).then(() => {
-                        console.debug(`[BuffUtility] Copy gen: ${gen}`);
-                    }).catch((e) => console.error('[BuffUtility]', e));
-                });
+                Util.addAnchorClipboardAction(aCopyGen, gen);
 
                 if (tagBox.children.length == 2) {
                     tagBox.insertBefore(aShare, tagBox.firstChild);
@@ -74,8 +77,12 @@ module Adjust_Shop {
             }
 
             if (priceBox) {
-                const priceConv = Util.convertCNYRaw(Number(dataRow.price));
-                priceBox.innerHTML = `${priceConv.convertedSymbol} ${priceConv.convertedValue.split('.')[0]}<small>.${priceConv.convertedValue.split('.')[1]}</small>`;
+                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const priceConv = Util.convertCNYRaw(+dataRow.price);
+                    priceBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)}`;
+                } else {
+                    priceBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
+                }
             }
         }
     }
@@ -98,8 +105,12 @@ module Adjust_Shop {
             const priceBox = <HTMLElement>liList.item(i).querySelector('p > .c_Yellow');
 
             if (priceBox) {
-                const priceConv = Util.convertCNYRaw(Number(dataRow.price));
-                priceBox.innerHTML = `${priceConv.convertedSymbol} ${priceConv.convertedValue.split('.')[0]}<small>.${priceConv.convertedValue.split('.')[1]}</small>`;
+                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const priceConv = Util.convertCNYRaw(+dataRow.price);
+                    priceBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)}`;
+                } else {
+                    priceBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
+                }
             }
         }
     }
@@ -122,13 +133,19 @@ module Adjust_Shop {
             const textBox = <HTMLElement>liList.item(i).querySelector('p');
 
             if (textBox) {
-                const priceConv = Util.convertCNYRaw(Number(dataRow.price));
-                const timePast = Number(textBox.innerText.split('天')[0]);
-                textBox.innerHTML = `${priceConv.convertedSymbol} ${priceConv.convertedValue} (${isNaN(timePast)?0:timePast}d ago)`;
+                let timePast = +(textBox.innerText.split('天')[0]);
+                timePast = isFinite(timePast) ? timePast : 0;
+
+                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const priceConv = Util.convertCNYRaw(+dataRow.price);
+                    textBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)} (${timePast}d ago)`;
+                } else {
+                    textBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)} (${timePast}d ago)`;
+                }
             }
         }
     }
 
-    window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
+    init();
 
 }
