@@ -11,11 +11,6 @@ module Adjust_Settings {
         dangerous?: boolean
     }
 
-    const DANGER_SETTINGS: Settings[] = [
-        Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS,
-        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
-    ];
-
     function getOptionID(option: Settings): string {
         return `buff-utility-${option}`;
     }
@@ -61,7 +56,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
+            makeTD(`<button class="buff-utility-reset" onclick="window.postMessage(['${GlobalConstants.BUFF_UTILITY_RESET_SETTING}', '${mappedOption}'], '*');">Reset</button>`, 't_Right')
         );
 
         table.append(tr);
@@ -103,7 +98,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
+            makeTD(`<button class="buff-utility-reset" onclick="window.postMessage(['${GlobalConstants.BUFF_UTILITY_RESET_SETTING}', '${mappedOption}'], '*');">Reset</button>`, 't_Right')
         );
 
         table.append(tr);
@@ -156,7 +151,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
+            makeTD(`<button class="buff-utility-reset" onclick="window.postMessage(['${GlobalConstants.BUFF_UTILITY_RESET_SETTING}', '${mappedOption}'], '*');">Reset</button>`, 't_Right')
         );
 
         table.append(tr);
@@ -208,7 +203,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
+            makeTD(`<button class="buff-utility-reset" onclick="window.postMessage(['${GlobalConstants.BUFF_UTILITY_RESET_SETTING}', '${mappedOption}'], '*');">Reset</button>`, 't_Right')
         );
 
         table.append(tr);
@@ -250,7 +245,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD('<button class="buff-utility-reset">Reset</button>', 't_Right')
+            makeTD(`<button class="buff-utility-reset" onclick="window.postMessage(['${GlobalConstants.BUFF_UTILITY_RESET_SETTING}', '${mappedOption}'], '*');">Reset</button>`, 't_Right')
         );
 
         table.append(tr);
@@ -392,7 +387,7 @@ module Adjust_Settings {
                 ExtensionSettings.finalize();
             }
 
-            if (typeof e.data == 'object' && e.data['length'] == 2 && e.data[0] == GlobalConstants.BUFF_UTILITY_SETTINGS_AGREE_DANGER) {
+            if (Array.isArray(e.data) && e.data.length == 2 && e.data[0] == GlobalConstants.BUFF_UTILITY_SETTINGS_AGREE_DANGER) {
                 PopupHelper.show(Util.buildHTML('div', {
                     content: [
                         Util.buildHTML('div', {
@@ -429,6 +424,19 @@ module Adjust_Settings {
                         }
                     }
                 });
+            }
+
+            if (Array.isArray(e.data) && e.data.length == 2 && e.data[0] == GlobalConstants.BUFF_UTILITY_RESET_SETTING) {
+                let setting: Settings = e.data[1];
+                ExtensionSettings.resetSetting(setting);
+
+                if (setting == Settings.USE_SCHEME) {
+                    ExtensionSettings.resetSetting(Settings.COLOR_SCHEME);
+                }
+
+                if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
+                    Util.signal(['Buff', 'toast'], 'Buff', `Setting ${setting} was reverted to default value.`);
+                }
             }
         });
 

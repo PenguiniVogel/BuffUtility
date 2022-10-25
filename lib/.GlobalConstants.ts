@@ -1,5 +1,6 @@
 const enum GlobalConstants {
     BUFF_UTILITY_SETTINGS = 'BuffUtility_Settings',
+    BUFF_UTILITY_RESET_SETTING = 'BuffUtility_Reset_Setting',
     BUFF_UTILITY_SETTINGS_AGREE_DANGER = 'BuffUtility_Settings_AgreeDanger',
     BUFF_UTILITY_CURRENCY_CACHE = 'BuffUtility_Currency_Cache',
     // BUFF_UTILITY_LOADED_EVENT = 'BuffUtility_Loaded',

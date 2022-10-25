@@ -158,6 +158,11 @@ module ExtensionSettings {
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
     }
 
+    const DANGER_SETTINGS: Settings[] = [
+        Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS,
+        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
+    ];
+
     const enum InternalStructureTransform {
         NONE,
         BOOLEAN,
@@ -621,7 +626,12 @@ module ExtensionSettings {
      * @param setting The specified setting to update
      * @param newValue The new value of the setting
      */
-    export function setSetting<T extends Settings>(setting: T, newValue: any): void {
+    export function setSetting<T extends Settings, V extends SettingsTypes[T]>(setting: T, newValue: any | V): void {
+        if (!(setting in INTERNAL_SETTINGS)) {
+            console.debug(`[BuffUtility] Tried setting value for '${setting}', but that setting does not exist.`);
+            return;
+        }
+
         let oldValue = `${INTERNAL_SETTINGS[setting].value}`;
 
         if (oldValue != `${newValue}`) {
@@ -630,6 +640,27 @@ module ExtensionSettings {
 
             console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
         }
+    }
+
+    /**
+     * Reset the specified setting to the default value
+     *
+     * @param setting
+     */
+    export function resetSetting<T extends Settings>(setting: T): void {
+        console.debug(`[BuffUtility] Resetting '${setting}' to the default value.`);
+
+        setSetting(setting, <SettingsTypes[T]>INTERNAL_SETTINGS[setting].default);
+
+        let index;
+        if ((index = DANGER_SETTINGS.indexOf(setting)) > -1) {
+            let dangerAgreements = getSetting(Settings.STORE_DANGER_AGREEMENTS);
+            dangerAgreements[index] = false;
+
+            setSetting(Settings.STORE_DANGER_AGREEMENTS, dangerAgreements);
+        }
+
+        finalize();
     }
 
     /**
