@@ -186,14 +186,30 @@ if (getSetting(Settings.USE_SCHEME)) {
     border-color: ${getSetting(Settings.COLOR_SCHEME)[2]};
 }
 
+/* shop pages */
+.dark-theme .l_Layout .market-card, 
+.dark-theme .shop .list_card,
+.dark-theme .shop .shop-recommend-cont,
+.dark-theme .shop .shop-recommend-cont .slider-handle,
+.dark-theme .shop .shop-recommend-list li {
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
+}
+.dark-theme .shop .shop-recommend-list h3 a {
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+}
+
 /* settings */
 .dark-theme,
 .dark-theme .user-setting,
 .dark-theme .user-setting h3,
 .dark-theme .user-setting label[for],
 .dark-theme .user-setting select,
-.dark-theme .user-setting input[type] {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+.dark-theme .user-setting input[type],
+.dark-theme .user-wallet,
+.dark-theme .user-wallet .user-pay-desc,
+.dark-theme .user-rights,
+.dark-theme .user-feedback {
+    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
     color: ${getSetting(Settings.COLOR_SCHEME)[2]};
 }
 
@@ -266,16 +282,15 @@ if (getSetting(Settings.USE_SCHEME)) {
     background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 .dark-theme .popup_custom .popup_custom-title {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
 }
 /* confirmation popup */
 .dark-theme .popup_common {
     background: ${getSetting(Settings.COLOR_SCHEME)[0]};
 }
 .dark-theme .popup_common .popup-cont h2 {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]}
+    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
 }
-
 `);
 
     let body = document.querySelector('body');

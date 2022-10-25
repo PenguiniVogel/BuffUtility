@@ -70,6 +70,14 @@
         },
         {
             "js": [
+                "sources/Adjust_Shop.js"
+            ],
+            "matches": [
+                "https://buff.163.com/shop*"
+            ]
+        },
+        {
+            "js": [
                 "config.js",
                 "SchemaData/SchemaData.js",
                 "sources/Util.js",
