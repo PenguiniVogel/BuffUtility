@@ -1,29 +1,31 @@
 module Background {
 
-    import DelegationMethod = BrowserInterface.DelegationMethod;
+    console.debug('[BuffUtility:Background] Initialized.');
+
     BrowserInterface.addListener((request, sender, sendResponse) => {
         console.log(request, sender);
 
-        let inferred: BrowserInterface.UnknownDelegation = request;
-        if (request?.method) {
-            switch (request.method) {
-                case DelegationMethod.SchemaHelper_find:
-                    if ('name' in inferred.parameters && 'weaponOnly' in inferred.parameters && 'isVanilla' in inferred.parameters) {
-                        sendResponse(SchemaHelper.find(inferred.parameters.name, inferred.parameters.weaponOnly, inferred.parameters.isVanilla, inferred.parameters.reduceInformation));
-                    }
+        if ('method' in request){
+            if (request.method == BrowserInterface.DelegationMethod.SchemaHelper_find) {
+                sendResponse({
+                    received: true,
+                    type: request.method,
+                    data: SchemaHelper.find(request.parameters.name, request.parameters.weaponOnly, request.parameters.isVanilla, request.parameters.reduceInformation)
+                });
 
-                    break;
-                case DelegationMethod.BuffSchema_get:
-                    if ('name' in inferred.parameters) {
-                        sendResponse(SchemaData.BUFF_SCHEMA.hash_to_id[inferred.parameters.name]);
-                    }
+                return;
+            }
 
-                    break;
-                default:
-                    sendResponse({ received: true });
-                    break;
+            if (request.method == BrowserInterface.DelegationMethod.BuffSchema_get) {
+                sendResponse({
+                    received: true,
+                    type: request.method,
+                    data: SchemaData.BUFF_SCHEMA.hash_to_id[request.parameters.name]
+                });
             }
         }
+
+        sendResponse({ received: true, type: 'unknown', data: null });
     });
 
 }

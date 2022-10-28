@@ -218,7 +218,7 @@ module Adjust_Listings {
         let goodsInfo: BuffTypes.SellOrder.GoodsInfo = data.goods_infos[/goods_id=(\d+)/.exec(transferData.url)[1]];
         let steamPriceCNY = +goodsInfo.steam_price_cny;
 
-        const schemaData = (await SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna'))[0];
+        const schemaData = (await SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
         // only override stickers if we actually can have any
         if (schemaData?.sticker_amount > 0) {

@@ -47,9 +47,7 @@ module Adjust_Market {
             const h3 = <HTMLElement>li.querySelector('h3');
             const p = <HTMLElement>document.createElement('p');
 
-            console.debug(dataRow.short_name);
-            let weaponCollection = await SchemaHelper.find(dataRow.short_name, true, dataRow.goods_info.info?.tags?.exterior?.internal_name == 'wearcategoryna', true);
-            const schemaData = weaponCollection[0];
+            const schemaData = (await SchemaHelper.find(dataRow.short_name, true, dataRow.goods_info.info?.tags?.exterior?.internal_name == 'wearcategoryna', true)).data[0];
             if (DEBUG) {
                 console.debug(schemaData);
             }
@@ -252,7 +250,7 @@ module Adjust_Market {
             const li = liList.item(i);
             const tagBox = <HTMLElement>li.querySelector('.tagBox > .g_Right');
 
-            const schemaData = (await SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna'))[0];
+            const schemaData = (await SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
             if (dataRow.appid == 730) {
                 const aShare = document.createElement('a');

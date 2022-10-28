@@ -10,7 +10,7 @@ declare var g: BuffTypes.g;
     (async () => {
         if (DEBUG) {
             let start = Date.now();
-            let r = await BrowserInterface.sendMessageAsync({ method: 'test' });
+            let r = await BrowserInterface.sendMessage({ method: 'test' });
             let ms = Date.now() - start;
 
             console.group(`BrowserInterface Test`);

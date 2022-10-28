@@ -5,7 +5,7 @@
     "description": "Adds cosmetic functionality to buff.163.com",
     "manifest_version": 3,
     "background": {
-        "service_worker": "background/runtime/background/worker.js"
+        "service_worker": "background/merge_background.js"
     },
     "content_scripts": [
         {

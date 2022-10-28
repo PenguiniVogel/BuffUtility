@@ -5,6 +5,7 @@
         "inlineSources": true,
         "inlineSourceMap": true,
         "disableSizeLimit": true,
+        "importHelpers": true,
         "lib": [
             "dom",
             "ES2015"

@@ -71,7 +71,7 @@ module Add_Links_Skin {
                 parameters: {
                     name: hash_name
                 }
-            }));
+            })).data;
 
             if (DEBUG) {
                 console.debug(hash_name, goods_id);

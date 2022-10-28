@@ -1,7 +1,7 @@
 {
     "extends": "../tsconfig.json",
     "compilerOptions": {
-        "outDir": "runtime",
+        "outFile": "merge_background.js",
         "lib": [
             "webworker",
             "ES2015"
@@ -12,10 +12,9 @@
     ],
     "files": [
         "../typings/SchemaTypes.d.ts",
-        "../typings/SchemaData.d.ts",
+        "SchemaData/SchemaData.ts",
         "SchemaHelper.ts",
         "../lib/BrowserInterface.ts",
-        "background.ts",
-        "worker.ts"
+        "background.ts"
     ]
 }
