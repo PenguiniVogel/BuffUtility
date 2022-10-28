@@ -13,10 +13,8 @@ echo "Done."
 echo ""
 
 echo "Changing to background build..."
-cd ./background || exit
-
 echo "Building background project..."
-tsc -p build.tsconfig.json
+tsc -p ./background/tsconfig.json
 echo "Done."
 echo ""
 

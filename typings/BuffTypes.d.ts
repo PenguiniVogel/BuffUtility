@@ -1490,8 +1490,15 @@ declare module BuffTypes {
 
 // global buff.163 Functions
 
+declare function $(...params: any[]): JQuery;
+
 interface JQuery<TElement = HTMLElement> extends Iterable<TElement> {
     showLoading(): void;
+
+    on(event: string, selector: string, handler: () => void): void;
+
+    addClass(name: string): JQuery<TElement>;
+    removeClass(name: string): JQuery<TElement>;
 }
 
 declare function buff_utility_readNarrowOptions(selector: string): void;
