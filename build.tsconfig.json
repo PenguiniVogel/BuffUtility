@@ -1,5 +1,5 @@
 {
-    "extends": "./alt.tsconfig.json",
+    "extends": "./tsconfig.json",
     "compilerOptions": {
         "inlineSources": false,
         "inlineSourceMap": false,

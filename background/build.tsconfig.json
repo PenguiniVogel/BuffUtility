@@ -1,0 +1,16 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "inlineSources": false,
+        "inlineSourceMap": false,
+        "disableSizeLimit": false,
+        "removeComments": true
+    },
+    "files": [
+        "../typings/SchemaTypes.d.ts",
+        "SchemaData/SchemaData.ts",
+        "../lib/BrowserInterface.ts",
+        "background.ts",
+        "worker.ts"
+    ]
+}

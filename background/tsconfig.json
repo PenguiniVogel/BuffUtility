@@ -1,0 +1,21 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "runtime",
+        "lib": [
+            "webworker",
+            "ES2015"
+        ]
+    },
+    "exclude": [
+        "../node_modules"
+    ],
+    "files": [
+        "../typings/SchemaTypes.d.ts",
+        "../typings/SchemaData.d.ts",
+        "SchemaHelper.ts",
+        "../lib/BrowserInterface.ts",
+        "background.ts",
+        "worker.ts"
+    ]
+}

@@ -4,7 +4,7 @@ declare module SchemaData {
         [name: string]: string
     };
 
-    export const RAW_SCHEMA: SchemaHelper.Schema;
+    export const CSGO_SCHEMA: SchemaTypes.Schema;
 
     export const BUFF_SCHEMA: {
         hash_to_id: {

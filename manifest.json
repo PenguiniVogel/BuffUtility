@@ -1,13 +1,17 @@
 {
     "name": "Buff Utility (Dev)",
+    "author": "Felix Vogel aka. Penguini",
     "version": "2.1.8",
     "description": "Adds cosmetic functionality to buff.163.com",
     "manifest_version": 3,
+    "background": {
+        "service_worker": "background/runtime/background/worker.js"
+    },
     "content_scripts": [
         {
             "js": [
+                "lib/BrowserInterface.js",
                 "config.js",
-                "SchemaData/SchemaData.js",
                 "lib/SchemaHelper.js",
                 "lib/InjectionService.js",
                 "sources/Cookie.js"
@@ -78,8 +82,8 @@
         },
         {
             "js": [
+                "lib/BrowserInterface.js",
                 "config.js",
-                "SchemaData/SchemaData.js",
                 "sources/Util.js",
                 "sources/csgostash/Add_Links_Skin.js"
             ],

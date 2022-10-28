@@ -269,35 +269,6 @@ module Util {
         return `${result}${selfClosing ? '/>' : `</${tag}>`}`;
     }
 
-    // string compare
-
-    export function pStrCompare(first, second): number {
-        first = first.replace(/\s+/g, '');
-        second = second.replace(/\s+/g, '');
-
-        if (first === second) return 1;
-        if (first.length < 2 || second.length < 2) return 0;
-
-        let firstBigrams = {};
-        for (let i = 0; i < first.length - 1; i++) {
-            const bigram = first.substring(i, i + 2);
-            firstBigrams[bigram] = firstBigrams[bigram] ? firstBigrams[bigram] + 1 : 1;
-        }
-
-        let intersectionSize = 0;
-        for (let i = 0; i < second.length - 1; i++) {
-            const bigram = second.substring(i, i + 2);
-            const count = firstBigrams[bigram] ? firstBigrams[bigram] : 0;
-
-            if (count > 0) {
-                firstBigrams[bigram] = count - 1;
-                intersectionSize ++;
-            }
-        }
-
-        return (2.0 * intersectionSize) / (first.length + second.length - 2);
-    }
-
     // format Date
 
     export function formatDate(inDate: Date, format: string = 'yyyy-mm-dd'): string {
@@ -313,7 +284,7 @@ module Util {
 
     // !gen/!gengl generation code
 
-    export function generateInspectGen(weapon: SchemaHelper.Weapon, paintIndex: any, paintSeed: any, paintWear: any, stickers: { slot: number, sticker_id: any, wear: any }[]): string {
+    export function generateInspectGen(weapon: SchemaTypes.Weapon, paintIndex: any, paintSeed: any, paintWear: any, stickers: { slot: number, sticker_id: any, wear: any }[]): string {
         if (weapon) {
             if (weapon?.type == 'Gloves') {
                 // !gengl weapon_id paint_id pattern float

@@ -3,7 +3,7 @@ module AdjustFavourites {
     // imports
     import Settings = ExtensionSettings.Settings;
 
-    function init(): void {
+    async function init(): Promise<void> {
         // if not csgo, skip
         if (window.location.href.indexOf('game=csgo') == -1) return;
 
@@ -77,7 +77,7 @@ module AdjustFavourites {
             let itemType = nameContainer.innerText.split(' | ')[0].replace('（★）', '');
             itemType = SchemaData.NAME_MAPPING_CH[itemType] ?? itemType;
 
-            let f_schemaData = SchemaHelper.find(itemType, true);
+            let f_schemaData = await SchemaHelper.find(itemType, true);
 
             if (f_schemaData?.length > 0) {
                 let schemaData = f_schemaData[0];
