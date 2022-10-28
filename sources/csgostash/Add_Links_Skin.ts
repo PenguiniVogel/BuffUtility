@@ -1,13 +1,11 @@
 module Add_Links_Skin {
 
-    import BUFF_SCHEMA = SchemaData.BUFF_SCHEMA;
-
     const enum Constants {
         BUFF_IMG_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAFVBMVEVHcEwhIS0hISshISshISv///+QkJU/x7PBAAAABHRSTlMAJK7xdunbSwAAAFxJREFUeAFjYFR2QQJGAgzCLijAkEEFVcCJwQRVwJnBBQ2QKxAKBXgEwIpTw1AF3EJTEAJQBQgBhAKEQCqaoW5YbHGhuYAbqufCXFJRBVIoC1OMiMKISozIxkgOAEjZind3Npg5AAAAAElFTkSuQmCC',
         BUFF_TAB_ID = 'buffprices'
     }
 
-    function init(): void {
+    async function init(): Promise<void> {
         let itemHeader = document.querySelector('h2');
         let itemName = itemHeader.innerText.trim();
 
@@ -52,7 +50,7 @@ module Add_Links_Skin {
 
         let priceDetails = <HTMLElement>document.querySelector('div.price-details > div.tab-content');
 
-        function buildQuery(wear: string, specialQuality: boolean = false): string {
+        async function buildQuery(wear: string, specialQuality: boolean = false): Promise<string> {
             // search all
             if (wear?.length == 0) {
                 return `https://buff.163.com/market/csgo#tab=selling&page_num=1&search=${encodeURIComponent(itemName)}`;
@@ -68,7 +66,12 @@ module Add_Links_Skin {
             }
 
             const hash_name = `${isUnusual ? '★ ' : (specialQuality && hasSpecialQuality ? (hasStatTrack ? 'StatTrak™ ' : 'Souvenir ') : '')}${itemName} (${wear})`;
-            const goods_id = BUFF_SCHEMA.hash_to_id[hash_name];
+            const goods_id: number = (await BrowserInterface.delegate<BrowserInterface.BuffSchemaGetIdDelegation, number>({
+                method: BrowserInterface.DelegationMethod.BuffSchema_get,
+                parameters: {
+                    name: hash_name
+                }
+            })).data;
 
             if (DEBUG) {
                 console.debug(hash_name, goods_id);
@@ -81,96 +84,179 @@ module Add_Links_Skin {
             return `https://buff.163.com/market/csgo#tab=selling&page_num=1&search=${encodeURIComponent(`${itemName}${wear ? ` (${wear})` : ''}`)}${wear ? `&quality=${quality}` : ''}`;
         }
 
-        /*
-<div role="tabpanel" class="tab-pane active" id="buff">
-    <div class="btn-group-sm btn-group-justified price-bottom-space">
-        <a href="" target="_blank" rel="nofollow" class="btn btn-default btn-sm bitskins-button" data-gaevent="">Search Buff (All)</a>
-    </div>
-         */
-
-        let pricesTab = Util.buildHTML('div', {
-            id: Constants.BUFF_TAB_ID,
-            class: 'tab-pane',
-            attributes: {
-                'role': 'tabpanel'
+        type HTMLBuilderSection = {
+            type: {
+                isSpecial: boolean,
+                wear: string
             },
-            content: [
-                Util.buildHTML('div', {
-                    class: 'btn-group-sm btn-group-justified price-bottom-space',
+            html: string
+        };
+
+        const promiseSpecialQualityCollection: Promise<HTMLBuilderSection>[] = hasSpecialQuality ? ['Factory New', 'Minimal Wear', 'Field-Tested', 'Well-Worn', 'Battle-Scarred'].map(async wear => {
+            return {
+                type: {
+                    isSpecial: true,
+                    wear: wear
+                },
+                html: Util.buildHTML('div', {
+                    class: 'btn-group-sm btn-group-justified',
                     content: [Util.buildHTML('a', {
                         class: 'btn btn-default btn-sm',
                         attributes: {
-                            'href': buildQuery(''),
+                            'href': (await buildQuery(wear, hasSpecialQuality)),
                             'target': '_blank',
                             'rel': 'nofollow',
                             'data-gaevent': itemName
                         },
-                        content: [ 'Search Buff (All)' ]
+                        content: [
+                            Util.buildHTML('span', {
+                                class: `pull-left ${hasStatTrack ? 'price-details-st' : 'price-details-souv'}`,
+                                content: [hasStatTrack ? 'StatTrack' : 'Souvenir']
+                            }),
+                            Util.buildHTML('span', {
+                                class: 'pull-left',
+                                content: [wear]
+                            })
+                        ]
                     })]
-                }),
-                hasSpecialQuality ? `${['Factory New', 'Minimal Wear', 'Field-Tested', 'Well-Worn', 'Battle-Scarred'].map(wear => {
-                    /*
-                    <div class="btn-group-sm btn-group-justified">
-                        <a href="" target="_blank" rel="nofollow" class="btn btn-default btn-sm" data-gaevent="${skin_name}">
-                            <span class="pull-left ${isStatTrack ? 'price-details-st' : 'price-details-souv'}">${isStatTrack ? 'StatTracl' : 'Souvenir'}</span>
-                            <span class="pull-left">Factory New</span>
-                        </a>
-                    </div>
-                     */
-                    return Util.buildHTML('div', {
-                        class: 'btn-group-sm btn-group-justified',
-                        content: [Util.buildHTML('a', {
-                            class: 'btn btn-default btn-sm',
-                            attributes: {
-                                'href': buildQuery(wear, hasSpecialQuality),
-                                'target': '_blank',
-                                'rel': 'nofollow',
-                                'data-gaevent': itemName
-                            },
-                            content: [
-                                Util.buildHTML('span', {
-                                    class: `pull-left ${hasStatTrack ? 'price-details-st' : 'price-details-souv'}`,
-                                    content: [hasStatTrack ? 'StatTrack' : 'Souvenir']
-                                }),
-                                Util.buildHTML('span', {
-                                    class: 'pull-left',
-                                    content: [wear]
-                                })
-                            ]
-                        })]
-                    });
-                }).join('')}<div class="price-bottom-space"></div>` : '',
-                ['Factory New', 'Minimal Wear', 'Field-Tested', 'Well-Worn', 'Battle-Scarred'].map(wear => {
-                    /*
-                    <div class="btn-group-sm btn-group-justified">
-                        <a href="" target="_blank" rel="nofollow" class="btn btn-default btn-sm" data-gaevent="">
-                            <span class="pull-left">Factory New</span>
-                        </a>
-                    </div>
-                     */
-                    return Util.buildHTML('div', {
-                        class: 'btn-group-sm btn-group-justified',
-                        content: [Util.buildHTML('a', {
-                            class: 'btn btn-default btn-sm',
-                            attributes: {
-                                'href': buildQuery(wear),
-                                'target': '_blank',
-                                'rel': 'nofollow',
-                                'data-gaevent': itemName
-                            },
-                            content: [
-                                Util.buildHTML('span', {
-                                    class: 'pull-left',
-                                    content: [ wear ]
-                                })
-                            ]
-                        })]
-                    });
-                }).join('')
-            ]
+                })
+            };
+        }) : [];
+
+        const promiseNormalCollection: Promise<HTMLBuilderSection>[] = ['Factory New', 'Minimal Wear', 'Field-Tested', 'Well-Worn', 'Battle-Scarred'].map(async wear => {
+            return {
+                type: {
+                    isSpecial: false,
+                    wear: wear
+                },
+                html: Util.buildHTML('div', {
+                    class: 'btn-group-sm btn-group-justified',
+                    content: [Util.buildHTML('a', {
+                        class: 'btn btn-default btn-sm',
+                        attributes: {
+                            'href': (await buildQuery(wear)),
+                            'target': '_blank',
+                            'rel': 'nofollow',
+                            'data-gaevent': itemName
+                        },
+                        content: [
+                            Util.buildHTML('span', {
+                                class: 'pull-left',
+                                content: [wear]
+                            })
+                        ]
+                    })]
+                })
+            };
         });
 
-        priceDetails.innerHTML += pricesTab;
+        Promise.all([...promiseSpecialQualityCollection, ...promiseNormalCollection]).then(async values => {
+            const specialTabs = values.filter(x => x.type.isSpecial).map(x => x.html).join('');
+            const normalTabs = values.filter(x => !x.type.isSpecial).map(x => x.html).join('');
+
+            const pricesTab = Util.buildHTML('div', {
+                id: Constants.BUFF_TAB_ID,
+                class: 'tab-pane',
+                attributes: {
+                    'role': 'tabpanel'
+                },
+                content: [
+                    Util.buildHTML('div', {
+                        class: 'btn-group-sm btn-group-justified price-bottom-space',
+                        content: [Util.buildHTML('a', {
+                            class: 'btn btn-default btn-sm',
+                            attributes: {
+                                'href': (await buildQuery('')),
+                                'target': '_blank',
+                                'rel': 'nofollow',
+                                'data-gaevent': itemName
+                            },
+                            content: [ 'Search Buff (All)' ]
+                        })]
+                    }),
+                    hasSpecialQuality ? `${specialTabs}<div class="price-bottom-space"></div>` : '',
+                    normalTabs
+                ]
+            });
+
+            priceDetails.innerHTML += pricesTab;
+        });
+
+        // let pricesTab = Util.buildHTML('div', {
+        //     id: Constants.BUFF_TAB_ID,
+        //     class: 'tab-pane',
+        //     attributes: {
+        //         'role': 'tabpanel'
+        //     },
+        //     content: [
+        //         Util.buildHTML('div', {
+        //             class: 'btn-group-sm btn-group-justified price-bottom-space',
+        //             content: [Util.buildHTML('a', {
+        //                 class: 'btn btn-default btn-sm',
+        //                 attributes: {
+        //                     'href': (await buildQuery('')),
+        //                     'target': '_blank',
+        //                     'rel': 'nofollow',
+        //                     'data-gaevent': itemName
+        //                 },
+        //                 content: [ 'Search Buff (All)' ]
+        //             })]
+        //         }),
+        //         hasSpecialQuality ? `${['Factory New', 'Minimal Wear', 'Field-Tested', 'Well-Worn', 'Battle-Scarred'].map(async wear => {
+        //             return Util.buildHTML('div', {
+        //                 class: 'btn-group-sm btn-group-justified',
+        //                 content: [Util.buildHTML('a', {
+        //                     class: 'btn btn-default btn-sm',
+        //                     attributes: {
+        //                         'href': (await buildQuery(wear, hasSpecialQuality)),
+        //                         'target': '_blank',
+        //                         'rel': 'nofollow',
+        //                         'data-gaevent': itemName
+        //                     },
+        //                     content: [
+        //                         Util.buildHTML('span', {
+        //                             class: `pull-left ${hasStatTrack ? 'price-details-st' : 'price-details-souv'}`,
+        //                             content: [hasStatTrack ? 'StatTrack' : 'Souvenir']
+        //                         }),
+        //                         Util.buildHTML('span', {
+        //                             class: 'pull-left',
+        //                             content: [wear]
+        //                         })
+        //                     ]
+        //                 })]
+        //             });
+        //         }).join('')}<div class="price-bottom-space"></div>` : '',
+        //         ['Factory New', 'Minimal Wear', 'Field-Tested', 'Well-Worn', 'Battle-Scarred'].map(async wear => {
+        //             /*
+        //             <div class="btn-group-sm btn-group-justified">
+        //                 <a href="" target="_blank" rel="nofollow" class="btn btn-default btn-sm" data-gaevent="">
+        //                     <span class="pull-left">Factory New</span>
+        //                 </a>
+        //             </div>
+        //              */
+        //             return Util.buildHTML('div', {
+        //                 class: 'btn-group-sm btn-group-justified',
+        //                 content: [Util.buildHTML('a', {
+        //                     class: 'btn btn-default btn-sm',
+        //                     attributes: {
+        //                         'href': (await buildQuery(wear)),
+        //                         'target': '_blank',
+        //                         'rel': 'nofollow',
+        //                         'data-gaevent': itemName
+        //                     },
+        //                     content: [
+        //                         Util.buildHTML('span', {
+        //                             class: 'pull-left',
+        //                             content: [ wear ]
+        //                         })
+        //                     ]
+        //                 })]
+        //             });
+        //         }).join('')
+        //     ]
+        // });
+        //
+        // priceDetails.innerHTML += pricesTab;
     }
 
     init();

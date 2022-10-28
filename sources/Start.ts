@@ -5,9 +5,24 @@ import Settings = ExtensionSettings.Settings;
 
 declare var g: BuffTypes.g;
 
-SchemaHelper.init();
+// BrowserInterface test
+{
+    (async () => {
+        if (DEBUG) {
+            let start = Date.now();
+            let r = await BrowserInterface.sendMessage({ method: 'test' });
+            let ms = Date.now() - start;
 
-// currency stuff
+            console.group(`BrowserInterface Test`);
+            console.debug('Start:', start);
+            console.debug('Value:', r);
+            console.debug('End.', `${ms}ms`);
+            console.groupEnd();
+        }
+    })();
+}
+
+// currency stuff, scoped to avoid pollution
 {
     let currencyCache = Cookie.read(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
     let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache);

@@ -26,7 +26,7 @@ module Adjust_Shop {
         }
     }
 
-    function adjustShopSellOrder(transferData: InjectionService.TransferData<BuffTypes.ShopSellOrder.Data>): void {
+    async function adjustShopSellOrder(transferData: InjectionService.TransferData<BuffTypes.ShopSellOrder.Data>): Promise<void> {
         // If experimental feature was disabled, ignore.
         if (!getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
             console.debug('[BuffUtility] Experimental feature \'Adjust Shop\' is disabled.');
@@ -45,7 +45,7 @@ module Adjust_Shop {
             const tagBox = <HTMLElement>liList.item(i).querySelector('.tagBox > .g_Right');
             const priceBox = <HTMLElement>liList.item(i).querySelector('p > .f_Strong');
 
-            const schemaData = SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
+            const schemaData = (await SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
             if (dataRow.appid == 730) {
                 const aShare = document.createElement('a');

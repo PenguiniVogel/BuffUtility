@@ -9,10 +9,8 @@ V2Repository
 
 package-lock.json
 
-sources/*.js
-sources/csgostash/*.js
-SchemaData/*.js
-lib/*.js
-config.js
+**/*.js
+!options.js
+!rewrite-manifest.js
 
 *.zip

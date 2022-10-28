@@ -12,6 +12,13 @@ switch (argv2) {
         dest = '.export/BuffUtility_Firefox';
 
         manifest['manifest_version'] = 2;
+
+        manifest['background'] = {
+            'scripts': [
+                'ff_background.js'
+            ]
+        };
+
         manifest['browser_specific_settings'] = {
             'gecko': {
                 'id': 'buff.utility@penguinivogel.github.io',

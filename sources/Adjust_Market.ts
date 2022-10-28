@@ -31,7 +31,7 @@ module Adjust_Market {
         // }
     }
 
-    function adjustMarketGoodsOrBuying(transferData: InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>): void {
+    async function adjustMarketGoodsOrBuying(transferData: InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>): Promise<void> {
         const liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_list_card li');
 
         let info: string[] = [];
@@ -47,8 +47,10 @@ module Adjust_Market {
             const h3 = <HTMLElement>li.querySelector('h3');
             const p = <HTMLElement>document.createElement('p');
 
-            const schemaData = SchemaHelper.find(dataRow.short_name, true, dataRow.goods_info.info?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
-            // console.log(schemaData);
+            const schemaData = (await SchemaHelper.find(dataRow.short_name, true, dataRow.goods_info.info?.tags?.exterior?.internal_name == 'wearcategoryna', true)).data[0];
+            if (DEBUG) {
+                console.debug(schemaData);
+            }
 
             let aHrefList = li.querySelectorAll('a[href]');
             for (let x = 0, y = aHrefList.length; x < y; x ++) {
@@ -228,7 +230,7 @@ module Adjust_Market {
         }
     }
 
-    function adjustMarketTopBookmarked(transferData: InjectionService.TransferData<BuffTypes.TopPopular.Data>): void {
+    async function adjustMarketTopBookmarked(transferData: InjectionService.TransferData<BuffTypes.TopPopular.Data>): Promise<void> {
         // If experimental feature was disabled, ignore.
         if (!getSetting(Settings.EXPERIMENTAL_ADJUST_POPULAR)) {
             console.debug('[BuffUtility] Experimental feature \'Adjust Popular\' is disabled.');
@@ -248,7 +250,7 @@ module Adjust_Market {
             const li = liList.item(i);
             const tagBox = <HTMLElement>li.querySelector('.tagBox > .g_Right');
 
-            const schemaData = SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')[0];
+            const schemaData = (await SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
             if (dataRow.appid == 730) {
                 const aShare = document.createElement('a');

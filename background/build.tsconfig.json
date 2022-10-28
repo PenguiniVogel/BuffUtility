@@ -4,7 +4,6 @@
         "inlineSources": false,
         "inlineSourceMap": false,
         "disableSizeLimit": false,
-        "removeComments": true,
-        "outDir": ".out"
+        "removeComments": true
     }
 }
