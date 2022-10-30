@@ -70,6 +70,16 @@ declare var g: BuffTypes.g;
     }
 }
 
+{
+    if (window.location.href.indexOf('/user-center/profile') > -1) {
+        if (!getSetting(Settings.DATA_PROTECTION)) {
+            document.querySelectorAll('span#mobile:not([data-blur="false"]), a[href*="steamcommunity.com"]:not([data-blur="false"])').forEach(element => {
+                element.setAttribute('data-blur', 'false');
+            });
+        }
+    }
+}
+
 function adjustFloatBar(): void {
     let divFloatBar = document.querySelector('body > div.floatbar');
 
