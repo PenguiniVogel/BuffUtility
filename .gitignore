@@ -2,6 +2,7 @@
 .export
 .local
 .out
+.test
 
 test
 node_modules
@@ -10,7 +11,7 @@ V2Repository
 package-lock.json
 
 **/*.js
-!options.js
-!rewrite-manifest.js
+!resources/options.js
+!resources/rewrite-manifest.js
 
 *.zip

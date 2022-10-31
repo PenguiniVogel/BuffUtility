@@ -46,4 +46,4 @@ manifest['name'] = 'Buff Utility';
 fs.writeFileSync(`${dest}/manifest.json`, JSON.stringify(manifest, null, 4));
 
 // write config.js
-fs.writeFileSync(`${dest}/config.js`, 'var DEBUG = false;');
+fs.writeFileSync(`${dest}/sources/config.js`, 'var DEBUG = false;');

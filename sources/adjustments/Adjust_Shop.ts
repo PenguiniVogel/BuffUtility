@@ -45,7 +45,7 @@ module Adjust_Shop {
             const tagBox = <HTMLElement>liList.item(i).querySelector('.tagBox > .g_Right');
             const priceBox = <HTMLElement>liList.item(i).querySelector('p > .f_Strong');
 
-            const schemaData = (await SchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
+            const schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
             if (dataRow.appid == 730) {
                 const aShare = document.createElement('a');

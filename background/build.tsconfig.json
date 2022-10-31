@@ -4,6 +4,7 @@
         "inlineSources": false,
         "inlineSourceMap": false,
         "disableSizeLimit": false,
-        "removeComments": true
+        "removeComments": true,
+        "outFile": "../.out/background/merge_background.js"
     }
 }

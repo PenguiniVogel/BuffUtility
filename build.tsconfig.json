@@ -5,6 +5,6 @@
         "inlineSourceMap": false,
         "disableSizeLimit": false,
         "removeComments": true,
-        "outDir": ".out"
+        "outDir": ".out/sources"
     }
 }

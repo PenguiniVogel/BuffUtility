@@ -1,6 +1,6 @@
 {
     "name": "Buff Utility (Dev)",
-    "author": "Felix Vogel aka. Penguini",
+    "author": "MePenguini",
     "version": "2.1.8",
     "description": "Adds cosmetic functionality to buff.163.com",
     "manifest_version": 3,
@@ -10,10 +10,10 @@
     "content_scripts": [
         {
             "js": [
-                "lib/BrowserInterface.js",
-                "config.js",
-                "lib/SchemaHelper.js",
-                "lib/InjectionService.js",
+                "sources/config.js",
+                "sources/BrowserInterface.js",
+                "sources/ISchemaHelper.js",
+                "sources/InjectionService.js",
                 "sources/Cookie.js"
             ],
             "matches": [
@@ -25,7 +25,7 @@
             "js": [
                 "sources/Util.js",
                 "sources/ExtensionSettings.js",
-                "lib/CurrencyHelper.js",
+                "sources/CurrencyHelper.js",
                 "sources/Start.js"
             ],
             "matches": [
@@ -34,7 +34,7 @@
         },
         {
             "js": [
-                "sources/Adjust_Settings.js"
+                "sources/adjustments/Adjust_Settings.js"
             ],
             "matches": [
                 "https://buff.163.com/user-center/profile"
@@ -42,7 +42,7 @@
         },
         {
             "js": [
-                "sources/Adjust_Listings.js"
+                "sources/adjustments/Adjust_Listings.js"
             ],
             "matches": [
                 "https://buff.163.com/goods/*"
@@ -50,7 +50,7 @@
         },
         {
             "js": [
-                "sources/Adjust_Market.js"
+                "sources/adjustments/Adjust_Market.js"
             ],
             "matches": [
                 "https://buff.163.com/market/*"
@@ -58,7 +58,7 @@
         },
         {
             "js": [
-                "sources/Adjust_Sales.js"
+                "sources/adjustments/Adjust_Sales.js"
             ],
             "matches": [
                 "https://buff.163.com/market/sell_order/on_sale*"
@@ -66,7 +66,7 @@
         },
         {
             "js": [
-                "sources/Adjust_Favourites.js"
+                "sources/adjustments/Adjust_Favourites.js"
             ],
             "matches": [
                 "https://buff.163.com/user-center/bookmark/sell_order*"
@@ -74,7 +74,7 @@
         },
         {
             "js": [
-                "sources/Adjust_Shop.js"
+                "sources/adjustments/Adjust_Shop.js"
             ],
             "matches": [
                 "https://buff.163.com/shop*"
@@ -82,8 +82,8 @@
         },
         {
             "js": [
-                "lib/BrowserInterface.js",
-                "config.js",
+                "sources/config.js",
+                "sources/BrowserInterface.js",
                 "sources/Util.js",
                 "sources/csgostash/Add_Links_Skin.js"
             ],
@@ -94,9 +94,9 @@
     ],
     "permissions": [],
     "icons": {
-        "16": "icon16.png",
-        "48": "icon48.png",
-        "128": "icon128.png"
+        "16": "resources/icon/icon16.png",
+        "48": "resources/icon/icon48.png",
+        "128": "resources/icon/icon128.png"
     },
-    "options_page": "options.html"
+    "options_page": "resources/options.html"
 }

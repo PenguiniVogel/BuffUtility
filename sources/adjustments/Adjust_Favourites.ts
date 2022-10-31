@@ -77,7 +77,7 @@ module AdjustFavourites {
             let itemType = nameContainer.innerText.split(' | ')[0].replace('（★）', '');
             itemType = SchemaData.NAME_MAPPING_CH[itemType] ?? itemType;
 
-            let f_schemaData = (await SchemaHelper.find(itemType, true)).data;
+            let f_schemaData = (await ISchemaHelper.find(itemType, true)).data;
 
             if (f_schemaData?.length > 0) {
                 let schemaData = f_schemaData[0];

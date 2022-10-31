@@ -3,6 +3,11 @@ echo "Building: --project build.tsconfig.json"
 tsc --project build.tsconfig.json
 echo " "
 
+# tsc
+echo "Building background: --project build.tsconfig.json"
+tsc --project background/build.tsconfig.json
+echo " "
+
 # delete previous export
 echo "Deleting previous export..."
 rm -rf ".export"
@@ -13,63 +18,42 @@ read -p "Press [ENTER] to resume ..."
 
 # setup folder structure
 echo "Checking directory structure..."
-mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/{lib,SchemaData,sources/csgostash}
+mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/sources/{adjustments,csgostash}
+mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/resources/icon
+mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/background
 echo " "
 
 # f_copy
 f_copy() {
   for f in $1
   do
-    echo "Processing (cp) $f -> $DEST/${f:5}"
-    cp "$f" "$DEST/${f:5}"
+    echo "Processing (cp) $f -> $2/${f:$3}"
+    cp "$f" "$2/${f:$3}"
   done
 }
 
-# f_uglify
-#f_uglify() {
-#  for f in $1
-#  do
-#    echo "Processing (uglifyjs) $f -> $DEST/${f:5}"
-#    uglifyjs -c -o "$DEST/${f:5}" "$f"
-#  done
-#}
-
 # f_build
 f_build() {
-  # uglify files
-  #  f_uglify ".out/sources/*.js"
-  #  echo " "
-  #
-  #  f_uglify ".out/sources/csgostash/*.js"
-  #  echo " "
-  #
-  #  f_uglify ".out/lib/*.js"
-  #  echo " "
 
-  # copy lib
-  f_copy ".out/lib/*.js"
+  # copy sources/*.js
+  f_copy ".out/sources/*.js" "$DEST" 5
 
-  # copy SchemaData
-  f_copy ".out/SchemaData/*.js"
+  # copy sources/**/*.js
+  f_copy ".out/sources/**/*.js" "$DEST" 5
 
-  # copy sources
-  f_copy ".out/sources/*.js"
+  # copy background/merge_background.js
+  f_copy ".out/background/merge_background.js" "$DEST" 5
 
-  # copy csgostash
-  f_copy ".out/sources/csgostash/*.js"
-
-  # copy icons
-  for f in "icon128.png" "icon48.png" "icon16.png" "options.html" "options.js"
-  do
-    echo "Processing (cp) $f -> $DEST/$f"
-    cp "$f" "$DEST/$f"
-  done
-  echo " "
+  # copy resources
+  f_copy "resources/icon/*.png" "$DEST/resources/icon" 15
+  f_copy "resources/options.html" "$DEST/resources" 10
+  f_copy "resources/options.js" "$DEST/resources" 10
 
   # rewrite manifest
   echo "Writing manifest.json -> $DEST/manifest.json"
-  node rewrite-manifest.js "$1"
+  node ./resources/rewrite-manifest.js "$1"
   echo " "
+
 }
 
 # regular build

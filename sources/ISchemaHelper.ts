@@ -1,4 +1,4 @@
-module SchemaHelper {
+module ISchemaHelper {
 
     export async function find(name: string, weaponOnly: boolean = false, isVanilla: boolean = false, reduceInformation: boolean = false) {
         return await BrowserInterface.delegate<BrowserInterface.SchemaHelperFindDelegation, SchemaTypes.Weapon[]>({
