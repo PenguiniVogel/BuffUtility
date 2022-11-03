@@ -1,5 +1,17 @@
 declare module SchemaTypes {
 
+    export interface BuffSchema {
+        name_to_id: {
+            [key: string]: number
+        },
+        hash_to_id: {
+            [key: string]: number
+        },
+        id_to_name: {
+            [key: string]: string
+        }
+    }
+
     export interface Collection {
         key: string;
         name: string;
@@ -25,7 +37,7 @@ declare module SchemaTypes {
     export interface Paint {
         id: number;
         weapon_id: number;
-        collection: string;
+        collection?: string;
         max: number;
         min: number;
         name: string;

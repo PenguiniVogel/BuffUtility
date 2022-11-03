@@ -1,4 +1,4 @@
-if test "$1" != '-si'
+if test "$1" == '-install'
 then
   npm install
 else
@@ -8,13 +8,13 @@ fi
 echo ""
 
 echo "Building main project..."
-tsc -p tsconfig.json
+node_modules/.bin/tsc --project tsconfig.json
 echo "Done."
 echo ""
 
 echo "Changing to background build..."
 echo "Building background project..."
-tsc -p ./background/tsconfig.json
+node_modules/.bin/tsc --project background/tsconfig.json
 echo "Done."
 echo ""
 

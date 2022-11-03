@@ -75,7 +75,7 @@ module AdjustFavourites {
             let assetInfo: BuffTypes.SellOrder.AssetInfo = JSON.parse(aAssetInfo.getAttribute('data-asset-info'));
 
             let itemType = nameContainer.innerText.split(' | ')[0].replace('（★）', '');
-            itemType = SchemaData.NAME_MAPPING_CH[itemType] ?? itemType;
+            itemType = ISchemaHelper.NAME_MAPPING_CH[itemType] ?? itemType;
 
             let f_schemaData = (await ISchemaHelper.find(itemType, true)).data;
 

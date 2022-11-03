@@ -22,6 +22,8 @@ module Background {
                     type: request.method,
                     data: SchemaData.BUFF_SCHEMA.hash_to_id[request.parameters.name]
                 });
+
+                return;
             }
         }
 

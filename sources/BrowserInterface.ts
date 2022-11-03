@@ -91,6 +91,17 @@ module BrowserInterface {
         });
     }
 
+    export function setupPingSystem(): void {
+        function _ping(): void {
+            browserEnvironment.runtime.sendMessage({ ping: Date.now() }, (data) => {
+                // ping again after 15 seconds, inactive state arises after 30
+                setTimeout(() => _ping(), 15_000);
+            });
+        }
+
+        _ping();
+    }
+
     initializeBrowserEnvironment();
 
 }

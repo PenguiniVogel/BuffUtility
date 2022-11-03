@@ -1,11 +1,11 @@
 # tsc
 echo "Building: --project build.tsconfig.json"
-tsc --project build.tsconfig.json
+node_modules/.bin/tsc --project build.tsconfig.json
 echo " "
 
 # tsc
 echo "Building background: --project build.tsconfig.json"
-tsc --project background/build.tsconfig.json
+node_modules/.bin/tsc --project background/build.tsconfig.json
 echo " "
 
 # delete previous export

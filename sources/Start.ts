@@ -21,6 +21,10 @@ declare var g: BuffTypes.g;
         }
     })();
 }
+// BrowserInterface ping system
+{
+    BrowserInterface.setupPingSystem();
+}
 
 // currency stuff, scoped to avoid pollution
 {
@@ -149,10 +153,22 @@ adjustAccountBalance();
 
 if (getSetting(Settings.USE_SCHEME)) {
     InjectionServiceLib.injectCSS(`
+/* variables */
+.dark-theme {
+    /* #121212 */
+    --color-0: ${getSetting(Settings.COLOR_SCHEME)[0]}
+    /* #1f1f1f */
+    --color-1: ${getSetting(Settings.COLOR_SCHEME)[1]}
+    /* #bfbfbf */
+    --color-2: ${getSetting(Settings.COLOR_SCHEME)[2]}
+    /* #696969 */
+    --color-3: ${getSetting(Settings.COLOR_SCHEME)[3]}
+}
+
 /* market */
 .dark-theme #j_market_card,
 .dark-theme #j_list_card li {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--color-0, #121212);
 }
 
 .dark-theme #j_list_card li {

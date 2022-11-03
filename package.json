@@ -1,8 +1,12 @@
 {
     "name": "buffutility",
-    "version": "1.0.0",
+    "version": "2.1.8",
     "private": true,
     "dependencies": {
         "typescript": "4.5.5"
+    },
+    "scripts": {
+        "prestart": ".\\node_modules\\.bin\\tsc --project .\\background\\tsconfig.json",
+        "start": ".\\node_modules\\.bin\\tsc --project .\\tsconfig.json"
     }
 }
