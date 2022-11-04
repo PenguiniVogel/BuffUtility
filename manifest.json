@@ -82,6 +82,14 @@
         },
         {
             "js": [
+                "sources/adjustments/Adjust_Share.js"
+            ],
+            "matches": [
+                "https://buff.163.com/market/m/item_detail?*"
+            ]
+        },
+        {
+            "js": [
                 "sources/config.js",
                 "sources/BrowserInterface.js",
                 "sources/Util.js",

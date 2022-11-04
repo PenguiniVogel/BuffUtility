@@ -154,8 +154,9 @@ module InjectionService {
     }
 
     export let responseCache: TransferData<unknown>[] = [];
-    export let requireObjects: {
-        [n: string]: any
+
+    let pendingObjectResolvers: {
+        [key: number]: (data: any) => void
     } = {};
 
     window.addEventListener('message', (e) => {
@@ -189,17 +190,37 @@ module InjectionService {
                 window.dispatchEvent(new CustomEvent(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, { detail: transferData }));
             }, 150);
         } else if (e.data == 'buff_utility_debug') {
-            console.debug(responseCache, requireObjects);
-        } else if ((e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE) {
-            let _data = e.data ?? [];
-            let object = _data[1] ?? '';
-            if (requireObjects[object] == false) {
-                requireObjects[object] = _data[2];
+            console.debug(responseCache);
+        } else if ((e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE_ACK) {
+            // ASK/ACK key global/return
+            if (e.data.length == 3) {
+                const _d = e.data[1];
+                if (pendingObjectResolvers[_d]) {
+                    pendingObjectResolvers[_d](e.data[2]);
+
+                    delete pendingObjectResolvers[_d];
+                }
             }
         } else if ((e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_ASK_NARROW) {
             // TODO make narrow work
         }
     });
+
+    export async function requestObject<T>(global: string): Promise<T> {
+        const _d = Date.now();
+        const _p = new Promise<T>((resolve, _) => {
+            window.postMessage([GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE_ASK, _d, global], '*');
+            pendingObjectResolvers[_d] = resolve;
+
+            // resolve after 5 seconds
+            setTimeout(() => {
+                delete pendingObjectResolvers[_d];
+                resolve(null);
+            }, 5_000);
+        });
+
+        return await _p;
+    }
 
     function interceptNetworkRequests() {
         const open = window.XMLHttpRequest.prototype.open;
@@ -237,14 +258,16 @@ module InjectionService {
         }
     }
 
-    function buff_utility_post_object_service(object: string): void {
-        window.postMessage([GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE, object, window[object]], '*');
-    }
-
-    function buff_utility_signal_receiver(): void {
-        // [GlobalConstants.BUFF_UTILITY_SIGNAL, callOrder, thisArg = null, args = []]
+    function buff_utility_message_service(): void {
         window.addEventListener('message', (e) => {
-            if (typeof e.data == 'object' && e.data?.length == 4 && (e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_SIGNAL) {
+            let key = typeof e.data == 'object' && e.data?.length > 1 ? (e.data ?? [])[0] : null;
+
+            if (typeof key != 'string') {
+                return;
+            }
+
+            // signal receiver
+            if (key == GlobalConstants.BUFF_UTILITY_SIGNAL && e.data.length == 4) {
                 let callOrder: string[] = e.data[1];
                 let current: any = window;
                 for (let caller of callOrder) {
@@ -262,16 +285,42 @@ module InjectionService {
                     (<() => unknown>current).call(thisArg, e.data[3]);
                 }
             }
+
+            // object service
+            if (key == GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE_ASK && e.data.length == 3) {
+                // ASK/ACK key global/return
+                window.postMessage([
+                    GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE_ACK,
+                    e.data[1],
+                    window[e.data[2] ?? ''] ?? null
+                ], '*');
+            }
+
+            // assign service
+            if (key == GlobalConstants.BUFF_UTILITY_ASSIGN && e.data.length == 3) {
+                let who = window[e.data[1] ?? ''];
+
+                if (who) {
+                    let propertiesKeys = Object.keys(e.data[2] ?? {});
+
+                    for (let property of propertiesKeys) {
+                        who[property] = e.data[2][property];
+                    }
+                }
+            }
         });
     }
 
     function init(): void {
-        requireObjects['g'] = false;
-
         InjectionServiceLib.attempt_safe = false;
         InjectionServiceLib.html_check_run = 'html';
 
-        InjectionServiceLib.injectCode(`${buff_utility_signal_receiver.toString()}\nbuff_utility_signal_receiver();\n${buff_utility_post_object_service.toString()}\nbuff_utility_post_object_service('g');\n${interceptNetworkRequests.toString()}\ninterceptNetworkRequests();`, 'html');
+        InjectionServiceLib.injectCode(`
+${buff_utility_message_service.toString()}
+buff_utility_message_service();
+${interceptNetworkRequests.toString()}
+interceptNetworkRequests();
+`, 'html');
 
         if (window.location.href.indexOf('/user-center/profile') > -1) {
             InjectionServiceLib.injectCSS(`                

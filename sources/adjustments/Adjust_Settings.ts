@@ -305,12 +305,7 @@ module Adjust_Settings {
                 }
             }) : ''}`, 't_Left c_Gray'),
             containerTD,
-            makeTD(`<div id="bu_color_preview" style="background: ${option[0]}; padding: 10px;">
-<div style="text-align: center; background: ${option[0]}; color: ${option[2]}; border: 1px solid ${option[2]}; padding: 5px;">Text on normal <u>background</u></div>
-<div style="text-align: center; background: ${option[1]}; color: ${option[2]}; border: 1px solid ${option[2]}; padding: 5px;">Text on hover <u>background</u></div>
-<div style="text-align: center; background: ${option[0]}; color: ${option[3]}; border: 1px solid ${option[2]}; padding: 5px;">Disabled on <u>background</u></div>
-<div style="text-align: center; background: ${option[1]}; color: ${option[3]}; border: 1px solid ${option[2]}; padding: 5px;">Disabled on hover <u>background</u></div>
-</div>`, 't_Right')
+            makeTD(`<div id="bu_color_preview" style="background: ${option[0]}; padding: 10px;"></div>`, 't_Right')
         );
 
         table.append(tr);
@@ -319,12 +314,13 @@ module Adjust_Settings {
     function renderColorPreview(colors: string[]): void {
         let container = document.getElementById('bu_color_preview');
 
-        container.setAttribute('style', `background: ${colors[0]}; padding: 10px;`);
+        container.setAttribute('style', `background: ${colors[0]}; padding: 10px; --preview0: ${colors[0]}; --preview1: ${colors[1]}; --preview2: ${colors[2]}; --preview3: ${colors[3]};`);
 
-        container.innerHTML = `<div style="text-align: center; background: ${colors[0]}; color: ${colors[2]}; border: 1px solid ${colors[2]}; padding: 5px;">Text on normal <u>background</u></div>
-<div style="text-align: center; background: ${colors[1]}; color: ${colors[2]}; border: 1px solid ${colors[2]}; padding: 5px;">Text on hover <u>background</u></div>
-<div style="text-align: center; background: ${colors[0]}; color: ${colors[3]}; border: 1px solid ${colors[2]}; padding: 5px;">Disabled on <u>background</u></div>
-<div style="text-align: center; background: ${colors[1]}; color: ${colors[3]}; border: 1px solid ${colors[2]}; padding: 5px;">Disabled on hover <u>background</u></div>`;
+        container.innerHTML = `
+<div style="text-align: center; background: var(--preview0); color: var(--preview2); border: 1px solid var(--preview2); padding: 5px;">Text on normal <u>background</u></div>
+<div style="text-align: center; background: var(--preview1); color: var(--preview2); border: 1px solid var(--preview2); padding: 5px;">Text on hover <u>background</u></div>
+<div style="text-align: center; background: var(--preview0); color: var(--preview3); border: 1px solid var(--preview2); padding: 5px;">Disabled on <u>background</u></div>
+<div style="text-align: center; background: var(--preview1); color: var(--preview3); border: 1px solid var(--preview2); padding: 5px;">Disabled on hover <u>background</u></div>`;
     }
 
     function readColorOption(option: Settings): string[] {
@@ -694,6 +690,8 @@ tr:hover button.buff-utility-reset {
 
         userSettings.append(adv_h3, adv_table, adv_blank20);
 
+        setTimeout(() => renderColorPreview(getSetting(Settings.COLOR_SCHEME)), 100);
+
         // Add experimental settings
         const ex_h3 = document.createElement('h3');
         ex_h3.innerHTML = 'BuffUtility Experimental Settings';
@@ -720,35 +718,37 @@ tr:hover button.buff-utility-reset {
             description: '!!!BuffUtility!!!\n!!!Experimental!!!\nShow toast notification when currency rates were updated, happens once a day. Setting will be merged in 2.1.7 into \'Show Toast on Action\'.'
         }, ex_table);
 
+        // disabled for now until proxy works properly
         // experimental fetch bargain status
-        makeCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
-            title: 'Fetch Favourite Bargain Status',
-            description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
-            dangerous: true
-        }, ex_table);
+        // makeCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
+        //     title: 'Fetch Favourite Bargain Status',
+        //     description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+        //     dangerous: true
+        // }, ex_table);
 
+        // disabled for now until proxy works properly
         // experimental fetch item price history
-        makeSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, [
-            {
-                value: `${ExtensionSettings.PriceHistoryRange.OFF}`,
-                displayStr: 'Off',
-                selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.OFF
-            },
-            {
-                value: `${ExtensionSettings.PriceHistoryRange.WEEKLY}`,
-                displayStr: '7 Days',
-                selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.WEEKLY
-            },
-            {
-                value: `${ExtensionSettings.PriceHistoryRange.MONTHLY}`,
-                displayStr: '30 Days',
-                selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.MONTHLY
-            }
-        ], {
-            title: 'Fetch item price history',
-            description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
-            dangerous: true
-        }, ex_table);
+        // makeSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, [
+        //     {
+        //         value: `${ExtensionSettings.PriceHistoryRange.OFF}`,
+        //         displayStr: 'Off',
+        //         selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.OFF
+        //     },
+        //     {
+        //         value: `${ExtensionSettings.PriceHistoryRange.WEEKLY}`,
+        //         displayStr: '7 Days',
+        //         selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.WEEKLY
+        //     },
+        //     {
+        //         value: `${ExtensionSettings.PriceHistoryRange.MONTHLY}`,
+        //         displayStr: '30 Days',
+        //         selected: getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) == ExtensionSettings.PriceHistoryRange.MONTHLY
+        //     }
+        // ], {
+        //     title: 'Fetch item price history',
+        //     description: '!!!BuffUtility!!!\n!!!Experimental!!!\n!!!Danger!!!\n!!!READ!!!\nThis will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+        //     dangerous: true
+        // }, ex_table);
 
         // experimental adjust market currency
         makeCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {

@@ -25,9 +25,27 @@ module Background {
 
                 return;
             }
+
+            if (request.method == BrowserInterface.DelegationMethod.BuffBargain_fetch) {
+                fetch(`https://proxy-a.penguini-software.workers.dev/fetch_bargain_status`, {
+                    method: 'POST',
+                    body: JSON.stringify(request.parameters)
+                }).then(x => x.text().then(data => {
+                    sendResponse({
+                        received: true,
+                        type: request.method,
+                        data: data
+                    });
+                }));
+
+                // return true is important here to tell chrome to keep the port open for an async response
+                return true;
+            }
         }
 
         sendResponse({ received: true, type: 'unknown', data: null });
+
+        return;
     });
 
 }

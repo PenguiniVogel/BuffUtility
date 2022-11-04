@@ -5,22 +5,42 @@ import Settings = ExtensionSettings.Settings;
 
 declare var g: BuffTypes.g;
 
-// BrowserInterface test
-{
-    (async () => {
-        if (DEBUG) {
-            let start = Date.now();
-            let r = await BrowserInterface.sendMessage({ method: 'test' });
-            let ms = Date.now() - start;
+if (DEBUG) {
+    function tests() {
+        // BrowserInterface test
+        {
+            (async () => {
+                let start = Date.now();
+                let r = await BrowserInterface.sendMessage({ method: 'test' });
+                let ms = Date.now() - start;
 
-            console.group(`BrowserInterface Test`);
-            console.debug('Start:', start);
-            console.debug('Value:', r);
-            console.debug('End.', `${ms}ms`);
-            console.groupEnd();
+                console.group(`BrowserInterface Test`);
+                console.debug('Start:', start);
+                console.debug('Value:', r);
+                console.debug('End.', `${ms}ms`);
+                console.groupEnd();
+            })();
         }
-    })();
+
+        // object service test
+        {
+            (async () => {
+                let start = Date.now();
+                let r = await InjectionService.requestObject('g');
+                let ms = Date.now() - start;
+
+                console.group(`ObjectService Test`);
+                console.debug('Start:', start);
+                console.debug('Value:', r);
+                console.debug('End.', `${ms}ms`);
+                console.groupEnd();
+            })();
+        }
+    }
+
+    tests();
 }
+
 // BrowserInterface ping system
 {
     BrowserInterface.setupPingSystem();
@@ -156,45 +176,45 @@ if (getSetting(Settings.USE_SCHEME)) {
 /* variables */
 .dark-theme {
     /* #121212 */
-    --color-0: ${getSetting(Settings.COLOR_SCHEME)[0]}
+    --bu-color-0: ${getSetting(Settings.COLOR_SCHEME)[0]};
     /* #1f1f1f */
-    --color-1: ${getSetting(Settings.COLOR_SCHEME)[1]}
+    --bu-color-1: ${getSetting(Settings.COLOR_SCHEME)[1]};
     /* #bfbfbf */
-    --color-2: ${getSetting(Settings.COLOR_SCHEME)[2]}
+    ---bu-color-2: ${getSetting(Settings.COLOR_SCHEME)[2]};
     /* #696969 */
-    --color-3: ${getSetting(Settings.COLOR_SCHEME)[3]}
+    --bu-color-3: ${getSetting(Settings.COLOR_SCHEME)[3]};
 }
 
 /* market */
 .dark-theme #j_market_card,
 .dark-theme #j_list_card li {
-    background: var(--color-0, #121212);
+    background: var(--bu-color-0, #121212);
 }
 
 .dark-theme #j_list_card li {
-    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+    border-color: var(--bu-color-2, #bfbfbf);
 }
 
 .dark-theme #j_list_card li, 
 .dark-theme #j_list_card li a, 
 .dark-theme #j_list_card li p {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+    color: var(--bu-color-2, #bfbfbf);
 }
 
 .dark-theme .pager li.disabled * {
-    color: ${getSetting(Settings.COLOR_SCHEME)[3]} !important;
-    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
+    color: var(--bu-color-3, #696969) !important;
+    border-color: var(--bu-color-2, #bfbfbf) !important;
+    background: var(--bu-color-0, #121212) !important;
 }
 
 .dark-theme .pager .next, .dark-theme .pager .page-link {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    color: var(--bu-color-2, #bfbfbf) !important;
 }
 
 /* listings */
 .dark-theme .detail-tab-cont,
 .dark-theme div.desc_content {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 
 .dark-theme div.stickers {
@@ -204,16 +224,16 @@ if (getSetting(Settings.USE_SCHEME)) {
 .dark-theme .des_row,
 .dark-theme .pager li.disabled span,
 .dark-theme .list_tb th {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
-    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    background: var(--bu-color-0, #121212) !important;
+    border-color: var(--bu-color-2, #bfbfbf) !important;
 }
 
 .dark-theme .list_tb td {
-    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    border-color: var(--bu-color-2, #bfbfbf) !important;
 }
 
 .dark-theme .detail-tab-cont tr:hover {
-    background: ${getSetting(Settings.COLOR_SCHEME)[1]};
+    background: var(--bu-color-1, #1f1f1f);
 }
 
 .dark-theme tr[id], 
@@ -223,8 +243,8 @@ if (getSetting(Settings.USE_SCHEME)) {
 .dark-theme a.ctag,
 .dark-theme .pager li .page-link,
 .dark-theme .desc_content {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
-    border-color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+    color: var(--bu-color-2, #bfbfbf);
+    border-color: var(--bu-color-2, #bfbfbf);
 }
 
 /* shop pages */
@@ -233,10 +253,10 @@ if (getSetting(Settings.USE_SCHEME)) {
 .dark-theme .shop .shop-recommend-cont,
 .dark-theme .shop .shop-recommend-cont .slider-handle,
 .dark-theme .shop .shop-recommend-list li {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
+    background: var(--bu-color-0, #121212) !important;
 }
 .dark-theme .shop .shop-recommend-list h3 a {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+    color: var(--bu-color-2, #bfbfbf);
 }
 
 /* settings */
@@ -250,22 +270,22 @@ if (getSetting(Settings.USE_SCHEME)) {
 .dark-theme .user-wallet .user-pay-desc,
 .dark-theme .user-rights,
 .dark-theme .user-feedback {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]};
+    background: var(--bu-color-0, #121212) !important;
+    color: var(--bu-color-2, #bfbfbf);
 }
 
 /* inventory */
 .dark-theme .detail-tab-cont .market-card {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 
 /* favorites */
 .dark-theme .l_Layout .cont_main .user-record {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 .dark-theme .l_Layout .cont_main .user-record a,
 .dark-theme .l_Layout .cont_main .user-record .delete-bookmark {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    color: var(--bu-color-2, #bfbfbf) !important;
 }
 .dark-theme .l_Layout .cont_main .user-record .i_Btn_hollow {
     background-color: #959595;
@@ -277,60 +297,60 @@ if (getSetting(Settings.USE_SCHEME)) {
 .dark-theme .popup_supply .popup-cont,
 .dark-theme .popup_supply .popup-cont .popup-good-summary,
 .dark-theme .popup_supply .popup-cont .popup-good-summary .input-cont .j_filter {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 .dark-theme .popup_supply .input-cont .c_Gray {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    color: var(--bu-color-2, #bfbfbf) !important;
 }
 
 /* selling popup */
 .dark-theme .popup_charge .popup-header,
 .dark-theme .popup_charge .popup-cont {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 .dark-theme .popup_charge .popup-cont .list_tb_csgo tr:hover {
-    background: ${getSetting(Settings.COLOR_SCHEME)[1]};
+    background: var(--bu-color-1, #1f1f1f);
 }
 
 /* selling description popup */
 .dark-theme .popup_guide_sell .popup-header,
 .dark-theme .popup_guide_sell .popup-cont {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 .dark-theme .popup_guide_sell textarea {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    background: var(--bu-color-0, #121212);
+    color: var(--bu-color-2, #bfbfbf) !important;
 }
 
 /* applied sticker popup */
 .dark-theme .popup_flower .popup-header,
 .dark-theme .popup_flower .popup-cont,
 .dark-theme .popup_flower .popup-cont li {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]} !important;
+    background: var(--bu-color-0, #121212) !important;
 }
 .dark-theme .popup_flower .popup-cont tr:hover {
-    background: ${getSetting(Settings.COLOR_SCHEME)[1]} !important;
+    background: var(--bu-color-1, #1f1f1f) !important;
 }
 
 /* payment methods popup */
 .dark-theme .popup .popup-header,
 .dark-theme .popup .popup-tip,
 .dark-theme .popup .popup-cont {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 /* float range popup */
 .dark-theme .popup_custom {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 .dark-theme .popup_custom .popup_custom-title {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    color: var(--bu-color-2, #bfbfbf) !important;
 }
 /* confirmation popup */
 .dark-theme .popup_common {
-    background: ${getSetting(Settings.COLOR_SCHEME)[0]};
+    background: var(--bu-color-0, #121212);
 }
 .dark-theme .popup_common .popup-cont h2 {
-    color: ${getSetting(Settings.COLOR_SCHEME)[2]} !important;
+    color: var(--bu-color-2, #bfbfbf) !important;
 }
 `);
 

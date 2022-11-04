@@ -18,7 +18,8 @@ module BrowserInterface {
 
     export const enum DelegationMethod {
         SchemaHelper_find = 'SchemaHelper_find',
-        BuffSchema_get = 'BuffSchema_get'
+        BuffSchema_get = 'BuffSchema_get',
+        BuffBargain_fetch = 'BuffBargain_fetch'
     }
 
     export interface UnknownDelegation {
@@ -42,6 +43,16 @@ module BrowserInterface {
         method: DelegationMethod.BuffSchema_get,
         parameters: {
             name: string
+        }
+    }
+
+    export interface BuffBargainFetchDelegation extends UnknownDelegation {
+        method: DelegationMethod.BuffBargain_fetch,
+        parameters: {
+            classId: string,
+            instanceId: string,
+            assetId: string,
+            orderId: string
         }
     }
 

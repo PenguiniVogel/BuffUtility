@@ -117,7 +117,8 @@ module ExtensionSettings {
         EXPERIMENTAL_FORMAT_CURRENCY = 'format_currency',
         // [TBA] -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_SHOP = 'experimental_adjust_shop',
-
+        // 2.1.9 -> setting will be removed, default procedure
+        EXPERIMENTAL_ADJUST_SHARE = 'experimental_adjust_share',
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
     }
@@ -157,6 +158,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: CurrencyNumberFormats;
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: boolean;
+        [Settings.EXPERIMENTAL_ADJUST_SHARE]: boolean;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
     }
@@ -377,11 +379,18 @@ module ExtensionSettings {
             validator: validateNumber
         },
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: {
-            default: false,
+            default: true,
             export: '2x8',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
+        [Settings.EXPERIMENTAL_ADJUST_SHARE]: {
+            default: true,
+            export: '2x9',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+
         [Settings.STORE_DANGER_AGREEMENTS]: {
             default: [false, false],
             export: '3x1',
@@ -497,6 +506,13 @@ module ExtensionSettings {
                         break;
                     case InternalStructureTransform.BOOLEAN:
                         newValue = tempSettings[ l_key ] == 1;
+
+                        // forcefully disable for now
+                        // until proxy works properly
+                        if (l_key == INTERNAL_SETTINGS[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS].export || l_key == INTERNAL_SETTINGS[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY].export) {
+                            newValue = false;
+                        }
+
                         break;
                     case InternalStructureTransform.BOOLEAN_ARRAY:
                         newValue = Util.importBooleansFromBytes(tempSettings[ l_key ]);
@@ -512,24 +528,6 @@ module ExtensionSettings {
             console.debug('Loaded Settings:', INTERNAL_SETTINGS);
         }
     }
-
-    /*
-     * legacy, keep until 2.1.9
-     * Returns a cloned settings object
-     * @private
-     *
-    function getAll(): SettingsTypes {
-        let copy = <SettingsTypes>JSON.parse(JSON.stringify(settings));
-
-        const keys = Object.keys(VALIDATORS);
-        for (let l_key of keys) {
-            copy[l_key] = VALIDATORS[l_key](settings[l_key]);
-        }
-
-        console.debug('[BuffUtility] Getting all settings:', settings, '->', copy);
-
-        return copy;
-    }*/
 
     /**
      * Get the specified setting
@@ -639,26 +637,6 @@ module ExtensionSettings {
             setSetting(<Settings>key, tempSettings[key]);
         }
     }
-
-    /*
-     * legacy, keep until 2.1.9
-     * @private
-     *
-    function _finalize217(): void {
-        const defaultKeys = Object.keys(DEFAULT_SETTINGS);
-        const loadedKeys = Object.keys(settings);
-
-        for (let l_loadedKey of loadedKeys) {
-            if (defaultKeys.indexOf(l_loadedKey) > -1) continue;
-
-            // delete unused / old properties
-            delete settings[l_loadedKey];
-
-            console.debug(`[BuffUtility] Deleted old setting: ${l_loadedKey}`);
-        }
-
-        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(settings));
-    }*/
 
 }
 

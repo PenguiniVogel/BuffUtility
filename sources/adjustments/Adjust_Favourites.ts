@@ -156,16 +156,22 @@ module AdjustFavourites {
                     parentBargain.querySelector('a').after(aBargain);
 
                     if (getSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS)) {
+                        let classId = imgContainer.getAttribute('data-classid');
+                        let instanceId = imgContainer.getAttribute('data-instanceid');
+                        let assetId = imgContainer.getAttribute('data-assetid');
                         let orderId = imgContainer.getAttribute('data-orderid');
                         if (orderId?.length > 0) {
-                            fetch(`https://buff.163.com/api/market/buyer_bargain/create/preview?sell_order_id=${orderId}`)
-                                .then(x => x.json().then(data => {
-                                    // code is not OK or not defined, so probably cannot bargain, or API limited, lets hope not the latter :)
-                                    if (!(data && data['code'] && /OK/gi.test(data['code']))) {
-                                        aBargain.setAttribute('style', 'display: none !important;');
-                                        parentBargain.querySelector('span').setAttribute('style', '');
-                                    }
-                                }));
+                            BrowserInterface.delegate<BrowserInterface.BuffBargainFetchDelegation, string>({
+                                method: BrowserInterface.DelegationMethod.BuffBargain_fetch,
+                                parameters: {
+                                    classId: classId,
+                                    instanceId: instanceId,
+                                    assetId: assetId,
+                                    orderId: orderId
+                                }
+                            }).then(response => {
+
+                            });
                         }
                     }
                 }
