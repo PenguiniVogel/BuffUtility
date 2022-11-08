@@ -156,23 +156,24 @@ module AdjustFavourites {
                     parentBargain.querySelector('a').after(aBargain);
 
                     if (getSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS)) {
-                        let classId = imgContainer.getAttribute('data-classid');
-                        let instanceId = imgContainer.getAttribute('data-instanceid');
-                        let assetId = imgContainer.getAttribute('data-assetid');
-                        let orderId = imgContainer.getAttribute('data-orderid');
-                        if (orderId?.length > 0) {
-                            BrowserInterface.delegate<BrowserInterface.BuffBargainFetchDelegation, string>({
-                                method: BrowserInterface.DelegationMethod.BuffBargain_fetch,
-                                parameters: {
-                                    classId: classId,
-                                    instanceId: instanceId,
-                                    assetId: assetId,
-                                    orderId: orderId
-                                }
-                            }).then(response => {
-
-                            });
-                        }
+                        // Disabled for now until proxy properly works
+                        //
+                        // let classId = imgContainer.getAttribute('data-classid');
+                        // let instanceId = imgContainer.getAttribute('data-instanceid');
+                        // let assetId = imgContainer.getAttribute('data-assetid');
+                        // let orderId = imgContainer.getAttribute('data-orderid');
+                        // if (orderId?.length > 0) {
+                        //     BrowserInterface.delegate<BrowserInterface.BuffBargainFetchDelegation, string>({
+                        //         method: BrowserInterface.DelegationMethod.BuffBargain_fetch,
+                        //         async: true,
+                        //         parameters: {
+                        //             classId: classId,
+                        //             instanceId: instanceId,
+                        //             assetId: assetId,
+                        //             orderId: orderId
+                        //         }
+                        //     }).then(response => { });
+                        // }
                     }
                 }
 

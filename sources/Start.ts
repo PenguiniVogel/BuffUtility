@@ -94,6 +94,7 @@ if (DEBUG) {
     }
 }
 
+// actually disable DATA_PROTECTION if it is disabled
 {
     if (window.location.href.indexOf('/user-center/profile') > -1) {
         if (!getSetting(Settings.DATA_PROTECTION)) {
@@ -149,7 +150,6 @@ function adjustFloatBar(): void {
     }
 }
 
-// TODO this needs to be executed upon transactions to update the converted balance
 function adjustAccountBalance(): void {
     let balanceDiv = document.querySelector('div.store-account > h4');
     if (!balanceDiv) return;
@@ -170,6 +170,8 @@ function adjustAccountBalance(): void {
 
 adjustFloatBar();
 adjustAccountBalance();
+
+// scheme css
 
 if (getSetting(Settings.USE_SCHEME)) {
     InjectionServiceLib.injectCSS(`

@@ -379,7 +379,8 @@ module Adjust_Settings {
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, readCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY));
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY, readSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY));
                 ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ADJUST_SHOP, readCheckboxSelected(Settings.EXPERIMENTAL_ADJUST_SHOP));
-                
+                ExtensionSettings.setSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY, readCheckboxSelected(Settings.EXPERIMENTAL_ALLOW_BULK_BUY));
+
                 // write settings
                 ExtensionSettings.finalize();
             }
@@ -791,6 +792,12 @@ tr:hover button.buff-utility-reset {
         makeCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
             title: 'Adjust Shop Pages',
             description: '!!!BuffUtility!!!\n!!!Experimental!!!\nAdjust the \'Shop\' pages. This adds features such as the Share link and Gen code.'
+        }, ex_table);
+
+        // experimental allow bulk buy
+        makeCheckboxOption(Settings.EXPERIMENTAL_ALLOW_BULK_BUY, {
+            title: 'Allow bulk buy',
+            description: '!!!BuffUtility!!!\n!!!Experimental!!!\nAllow the bulk buy function to be used on the web version of Buff.'
         }, ex_table);
 
         // append experimental settings

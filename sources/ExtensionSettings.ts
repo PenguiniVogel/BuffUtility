@@ -119,6 +119,8 @@ module ExtensionSettings {
         EXPERIMENTAL_ADJUST_SHOP = 'experimental_adjust_shop',
         // 2.1.9 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_SHARE = 'experimental_adjust_share',
+        // 2.1.9 -> setting will be moved to advanced settings
+        EXPERIMENTAL_ALLOW_BULK_BUY = 'allow_bulk_buy',
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
     }
@@ -159,6 +161,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: CurrencyNumberFormats;
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHARE]: boolean;
+        [Settings.EXPERIMENTAL_ALLOW_BULK_BUY]: boolean;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
     }
@@ -387,6 +390,12 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ADJUST_SHARE]: {
             default: true,
             export: '2x9',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.EXPERIMENTAL_ALLOW_BULK_BUY]: {
+            default: false,
+            export: '2x10',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },

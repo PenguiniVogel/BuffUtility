@@ -5,47 +5,49 @@ module Background {
     BrowserInterface.addListener((request, sender, sendResponse) => {
         console.log(request, sender);
 
-        if ('method' in request){
-            if (request.method == BrowserInterface.DelegationMethod.SchemaHelper_find) {
+        const safe = (request ?? {} as BrowserInterface.UnknownDelegation);
+        const async = 'async' in safe ? (safe.async ?? false) : false;
+
+        if ('method' in safe && 'parameters' in safe) {
+            if (safe.method == BrowserInterface.DelegationMethod.SchemaHelper_find) {
                 sendResponse({
                     received: true,
-                    type: request.method,
-                    data: SchemaHelper.find(request.parameters.name, request.parameters.weaponOnly, request.parameters.isVanilla, request.parameters.reduceInformation)
+                    type: safe.method,
+                    data: SchemaHelper.find(safe.parameters.name, safe.parameters.weaponOnly, safe.parameters.isVanilla, safe.parameters.reduceInformation)
                 });
 
-                return;
+                return async;
             }
 
-            if (request.method == BrowserInterface.DelegationMethod.BuffSchema_get) {
+            if (safe.method == BrowserInterface.DelegationMethod.BuffSchema_get) {
                 sendResponse({
                     received: true,
-                    type: request.method,
-                    data: SchemaData.BUFF_SCHEMA.hash_to_id[request.parameters.name]
+                    type: safe.method,
+                    data: SchemaData.BUFF_SCHEMA.hash_to_id[safe.parameters.name]
                 });
 
-                return;
+                return async;
             }
 
-            if (request.method == BrowserInterface.DelegationMethod.BuffBargain_fetch) {
+            if (safe.method == BrowserInterface.DelegationMethod.BuffBargain_fetch) {
                 fetch(`https://proxy-a.penguini-software.workers.dev/fetch_bargain_status`, {
                     method: 'POST',
-                    body: JSON.stringify(request.parameters)
+                    body: JSON.stringify(safe.parameters)
                 }).then(x => x.text().then(data => {
                     sendResponse({
                         received: true,
-                        type: request.method,
+                        type: safe.method,
                         data: data
                     });
                 }));
 
-                // return true is important here to tell chrome to keep the port open for an async response
-                return true;
+                return async;
             }
         }
 
         sendResponse({ received: true, type: 'unknown', data: null });
 
-        return;
+        return async;
     });
 
 }

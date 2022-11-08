@@ -53,7 +53,24 @@ module Adjust_Listings {
                 });
             }
 
-            InjectionServiceLib.injectCode(`${buff_utility_forceNewestReload.toString()}`);
+            function buff_utility_override_bulk_buy(): void {
+                let bulkBuy = <HTMLElement>document.getElementById('batch-buy-btn');
+                let body = <HTMLElement>document.querySelector('body');
+                if (body && bulkBuy) {
+                    bulkBuy.setAttribute('id', 'batch-buy-btn-override');
+                    let filtered = $._data(body)?.events['click']?.filter(e => e?.selector?.indexOf('batch-buy-btn') > -1);
+                    if (filtered.length > 0) {
+                        for (let events of filtered) {
+                            events.selector = `${events.selector}, #batch-buy-btn-override`;
+                        }
+                    }
+                }
+            }
+
+            InjectionServiceLib.injectCode(`
+                ${buff_utility_forceNewestReload.toString()}
+                ${getSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY) ? `${buff_utility_override_bulk_buy.toString()}\nbuff_utility_override_bulk_buy();` : ''}
+            `);
 
             let a = document.createElement('a');
             a.setAttribute('href', 'javascript:buff_utility_forceNewestReload();');
@@ -65,7 +82,7 @@ module Adjust_Listings {
                 case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE:
                     break;
                 case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK:
-                    document.querySelector('#batch-buy-btn')?.parentElement?.appendChild(a);
+                    (document.querySelector('#batch-buy-btn') ?? document.querySelector('#batch-buy-btn-override'))?.parentElement?.appendChild(a);
                     break;
                 case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.SORT:
                     document.querySelector('#asset_tag-filter div.l_Right div.w-Select-Multi[name="sort"]')?.parentElement?.appendChild(a);

@@ -24,6 +24,7 @@ module BrowserInterface {
 
     export interface UnknownDelegation {
         method: DelegationMethod,
+        async?: boolean,
         parameters: {
             [key: string]: any
         }
@@ -82,7 +83,7 @@ module BrowserInterface {
         throw new Error('[BrowserInterface] Neither chrome or browser was found in global, this browser is not supported.');
     }
 
-    export function addListener(handler: (request: UnknownDelegation | any, sender: any, sendResponse: (data: MessageResponse<any>) => void) => void): void {
+    export function addListener(handler: (request: UnknownDelegation, sender: any, sendResponse: (data: MessageResponse<any>) => void) => boolean): void {
         browserEnvironment.runtime.onMessage.addListener(handler);
     }
 
