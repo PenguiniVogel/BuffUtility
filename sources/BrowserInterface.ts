@@ -1,11 +1,33 @@
-declare type BrowserEnvironment = {
+/**
+ * Represents a browser environment with matched functions
+ */
+declare interface BrowserEnvironment {
     runtime: {
+        /**
+         * The extension id
+         */
+        id?: string,
+
+        /**
+         * onMessage event
+         */
         onMessage: {
+            /**
+             * Add a listener to the event
+             *
+             * @param handler
+             */
             addListener(handler: (request: any, sender: any, sendResponse: (data: any) => void) => void): void
         },
+        /**
+         * Send a message to the background script (Firefox) / service worker (Chrome)
+         *
+         * @param data
+         * @param response
+         */
         sendMessage(data: any, response: (data: any) => void): void
     }
-};
+}
 
 declare var chrome: BrowserEnvironment;
 declare var browser: BrowserEnvironment;

@@ -137,7 +137,6 @@ module Adjust_Listings {
         if (transferData.url.indexOf('/sell_order') > -1) {
             console.debug('[BuffUtility] Adjust_Listings (sell_order)');
 
-            // adjust listings
             adjustSellOrderListings(<InjectionService.TransferData<BuffTypes.SellOrder.Data>>transferData);
         } else if (transferData.url.indexOf('/buy_order') > -1) {
             console.debug('[BuffUtility] Adjust_Listings (buy_order)');
@@ -147,6 +146,7 @@ module Adjust_Listings {
 
         if (!document.querySelector('span.buffutility-pricerange') && getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
+
             adjustHeaderListings();
         }
     }
