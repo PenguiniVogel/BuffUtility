@@ -87,6 +87,11 @@ module BrowserInterface {
 
     let browserEnvironment: BrowserEnvironment;
 
+    /**
+     * Initialize the environment, mapping the current respective browser
+     *
+     * @private
+     */
     function initializeBrowserEnvironment(): BrowserEnvironment {
         if (browserEnvironment) {
             return browserEnvironment;
@@ -105,10 +110,20 @@ module BrowserInterface {
         throw new Error('[BrowserInterface] Neither chrome or browser was found in global, this browser is not supported.');
     }
 
+    /**
+     * Add a listener to the onMessage event
+     *
+     * @param handler
+     */
     export function addListener(handler: (request: UnknownDelegation, sender: any, sendResponse: (data: MessageResponse<any>) => void) => boolean): void {
         browserEnvironment.runtime.onMessage.addListener(handler);
     }
 
+    /**
+     * Send a message to the background script / worker
+     *
+     * @param data
+     */
     export async function sendMessage<T>(data: any): Promise<MessageResponse<T>> {
         return await new Promise<MessageResponse<T>>((resolve, _) => {
             browserEnvironment.runtime.sendMessage(data, (data) => {
@@ -117,6 +132,11 @@ module BrowserInterface {
         });
     }
 
+    /**
+     * Delegate an operation to the background script / worker
+     *
+     * @param delegate
+     */
     export async function delegate<T extends UnknownDelegation, R>(delegate: T): Promise<MessageResponse<R>> {
         return await new Promise<MessageResponse<R>>((resolve, _) => {
             browserEnvironment.runtime.sendMessage(delegate, (data) => {
@@ -125,6 +145,9 @@ module BrowserInterface {
         });
     }
 
+    /**
+     * Start the ping system to upkeep the background worker and stop it from dying randomly
+     */
     export function setupPingSystem(): void {
         function _ping(): void {
             browserEnvironment.runtime.sendMessage({ ping: Date.now() }, (data) => {
@@ -136,6 +159,7 @@ module BrowserInterface {
         _ping();
     }
 
+    // initialize environment once loaded
     initializeBrowserEnvironment();
 
 }
