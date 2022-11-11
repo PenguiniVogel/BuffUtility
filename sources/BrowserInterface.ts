@@ -125,10 +125,14 @@ module BrowserInterface {
      * @param data
      */
     export async function sendMessage<T>(data: any): Promise<MessageResponse<T>> {
-        return await new Promise<MessageResponse<T>>((resolve, _) => {
-            browserEnvironment.runtime.sendMessage(data, (data) => {
-                resolve(data);
-            });
+        return await new Promise<MessageResponse<T>>((resolve, reject) => {
+            if (isAvailable()) {
+                browserEnvironment.runtime.sendMessage(data, (data) => {
+                    resolve(data);
+                });
+            } else {
+                reject('[BrowserInterface] Extension context was not available.');
+            }
         });
     }
 
@@ -139,10 +143,17 @@ module BrowserInterface {
      */
     export async function delegate<T extends UnknownDelegation, R>(delegate: T): Promise<MessageResponse<R>> {
         return await new Promise<MessageResponse<R>>((resolve, _) => {
-            browserEnvironment.runtime.sendMessage(delegate, (data) => {
-                resolve(data);
-            });
+            sendMessage<R>(delegate)
+                .then(result => resolve(result))
+                .catch(error => console.debug('[BrowserInterface.delegate] Failed.', error));
         });
+    }
+
+    /**
+     * Get the status if the extension context is available
+     */
+    export function isAvailable(): boolean {
+        return !!(browserEnvironment?.runtime?.id);
     }
 
     /**
@@ -150,10 +161,12 @@ module BrowserInterface {
      */
     export function setupPingSystem(): void {
         function _ping(): void {
-            browserEnvironment.runtime.sendMessage({ ping: Date.now() }, (data) => {
-                // ping again after 15 seconds, inactive state arises after 30
-                setTimeout(() => _ping(), 15_000);
-            });
+            sendMessage({ ping: Date.now() })
+                .then(_ => setTimeout(() => _ping(), 15_000))
+                .catch(error => {
+                    console.debug('[BrowserInterface.ping] Failed.', error);
+                    setTimeout(() => _ping(), 15_000);
+                });
         }
 
         _ping();
