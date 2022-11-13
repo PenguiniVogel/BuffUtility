@@ -85,21 +85,24 @@ module Util {
      * @returns <e title="¥1 = currency_symbol rate">currency_symbol</e>(cny * rate).toFixed(fixPoint)
      */
     export function convertCNY(cny: number): string {
-        const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
+        const converted = convertCNYRaw(cny);
 
-        if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
-            const custom_currency_name = getSetting(Settings.CUSTOM_CURRENCY_NAME);
-            const custom_currency_calculated_rate = getSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE);
-            const custom_currency_leading_zeros = getSetting(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
-
-            return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${custom_currency_calculated_rate.toFixed(custom_currency_leading_zeros)}">CC </e>${(cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)}`;
-        } else {
-            const { rates, symbols } = CurrencyHelper.getData();
-            const [ rate, fixPoint ] = rates[selected_currency];
-            const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
-
-            return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${symbol}${rate.toFixed(fixPoint)}">${symbol} </e>${(cny * rate).toFixed(fixPoint)}`;
-        }
+        return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${converted.convertedSymbol}${converted.convertedRate.toFixed(converted.convertedLeadingZeros)}">${converted.convertedSymbol} </e>${(converted.convertedValue)}`;
+        // const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
+        //
+        // if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
+        //     const custom_currency_name = getSetting(Settings.CUSTOM_CURRENCY_NAME);
+        //     const custom_currency_calculated_rate = getSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE);
+        //     const custom_currency_leading_zeros = getSetting(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
+        //
+        //     return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${custom_currency_calculated_rate.toFixed(custom_currency_leading_zeros)}">CC </e>${(cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)}`;
+        // } else {
+        //     const { rates, symbols } = CurrencyHelper.getData();
+        //     const [ rate, fixPoint ] = rates[selected_currency];
+        //     const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
+        //
+        //     return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${symbol}${rate.toFixed(fixPoint)}">${symbol} </e>${(cny * rate).toFixed(fixPoint)}`;
+        // }
     }
 
     /**
@@ -110,7 +113,10 @@ module Util {
      */
     export function convertCNYRaw(cny: number): {
         convertedSymbol: string,
-        convertedValue: string
+        convertedValue: string,
+        convertedName: string,
+        convertedRate: number,
+        convertedLeadingZeros: number
     } {
         const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
 
@@ -121,7 +127,10 @@ module Util {
 
             return {
                 convertedSymbol: custom_currency_name,
-                convertedValue: (cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)
+                convertedValue: (cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros),
+                convertedName: custom_currency_name,
+                convertedRate: custom_currency_calculated_rate,
+                convertedLeadingZeros: custom_currency_leading_zeros
             };
         } else {
             const { rates, symbols } = CurrencyHelper.getData();
@@ -130,7 +139,10 @@ module Util {
 
             return {
                 convertedSymbol: symbol,
-                convertedValue: (cny * rate).toFixed(fixPoint)
+                convertedValue: (cny * rate).toFixed(fixPoint),
+                convertedName: selected_currency,
+                convertedRate: rate,
+                convertedLeadingZeros: fixPoint
             };
         }
     }

@@ -13,6 +13,8 @@ if "%1" equ "-install" (
 
 echo Running bundled tsc --project .\background\tsconfig.json
 call .\node_modules\.bin\tsc --project .\background\tsconfig.json
+echo Running bundled tsc --project .\resources\tsconfig.json
+call .\node_modules\.bin\tsc --project .\resources\tsconfig.json
 echo Running bundled tsc --project .\tsconfig.json
 call .\node_modules\.bin\tsc --project .\tsconfig.json
 

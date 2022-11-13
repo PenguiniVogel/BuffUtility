@@ -18,5 +18,11 @@ node_modules/.bin/tsc --project background/tsconfig.json
 echo "Done."
 echo ""
 
+echo "Changing to option build..."
+echo "Building background project..."
+node_modules/.bin/tsc --project resources/tsconfig.json
+echo "Done."
+echo ""
+
 # pause
 read -p "Press [ENTER] to resume ..."

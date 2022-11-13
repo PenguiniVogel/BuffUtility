@@ -488,10 +488,19 @@ module ExtensionSettings {
 
     // general
 
-    export function load(): void {
-        let tempSettings = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS)) ?? {};
+    let resolveLoad: (value: boolean) => void = null;
+    let loaded = new Promise<boolean>((resolve, _) => {
+        resolveLoad = resolve;
+    });
 
-        if (tempSettings[Settings.VERSION]?.length < 1) {
+    export async function isLoaded(): Promise<boolean> {
+        return await loaded;
+    }
+
+    export async function load(): Promise<void> {
+        const _versionCheck = await BrowserInterface.Storage.get<SettingsTypes[Settings.VERSION]>(INTERNAL_SETTINGS[Settings.VERSION].export);
+
+        if (_versionCheck?.length < 1) {
             _upgrade218();
         } else {
             // map export structure dynamically
@@ -504,6 +513,8 @@ module ExtensionSettings {
                 export_structure[exportKey] = k;
                 return exportKey;
             });
+
+            let tempSettings = await BrowserInterface.Storage.getAll<any>(keys);
 
             for (let l_key of keys) {
                 let struc: Settings = export_structure[l_key];
@@ -532,6 +543,8 @@ module ExtensionSettings {
                 INTERNAL_SETTINGS[struc].value = validator(struc, newValue);
             }
         }
+
+        resolveLoad(true);
 
         if (DEBUG) {
             console.debug('Loaded Settings:', INTERNAL_SETTINGS);
@@ -616,7 +629,10 @@ module ExtensionSettings {
             }
         }
 
-        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(exportSettings));
+        BrowserInterface.Storage.set(exportSettings).then(_ => DEBUG && console.debug('[BuffUtility] Wrote settings.', exportSettings));
+
+        // delete cookie
+        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, '0', 0);
     }
 
     export function hasBeenAgreed(setting: Settings): boolean {
@@ -649,6 +665,8 @@ module ExtensionSettings {
 
 }
 
+ExtensionSettings.load();
+
 /**
  * Exposed function to avoid imports <br>
  * Get the specified setting
@@ -657,5 +675,3 @@ module ExtensionSettings {
  * @returns The value from the specified setting, return type is determined by passed setting
  */
 const getSetting = ExtensionSettings.getSetting;
-
-ExtensionSettings.load();

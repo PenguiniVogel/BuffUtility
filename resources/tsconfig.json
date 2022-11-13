@@ -4,7 +4,6 @@
         "target": "es5",
         "inlineSources": true,
         "inlineSourceMap": true,
-        "disableSizeLimit": true,
         "lib": [
             "dom",
             "ES2015"
@@ -14,9 +13,9 @@
         "node_modules"
     ],
     "files": [
-        "sources/.GlobalConstants.ts"
-    ],
-    "include": [
-        "sources/**/*.ts"
+        "../sources/ExtensionSettings.ts",
+        "../sources/Util.ts",
+        "../sources/BrowserInterface.ts",
+        "options.ts"
     ]
 }

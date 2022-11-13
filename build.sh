@@ -8,6 +8,11 @@ echo "Building background: --project build.tsconfig.json"
 node_modules/.bin/tsc --project background/build.tsconfig.json
 echo " "
 
+# tsc
+echo "Building options: --project build.tsconfig.json"
+node_modules/.bin/tsc --project resources/build.tsconfig.json
+echo " "
+
 # delete previous export
 echo "Deleting previous export..."
 rm -rf ".export"
