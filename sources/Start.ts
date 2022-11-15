@@ -1,6 +1,3 @@
-// imports
-import Settings = ExtensionSettings.Settings;
-
 // Start the extension
 
 declare var g: BuffTypes.g;
@@ -67,7 +64,6 @@ if (DEBUG) {
 // currency stuff, scoped to avoid pollution
 {
     async function getCurrencyCache(): Promise<void> {
-        // delete cookie
         let currencyCache = await BrowserInterface.Storage.get<any>(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
         let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache);
         let dateToday = Util.formatDate(new Date());
@@ -113,9 +109,7 @@ if (DEBUG) {
         }
 
         // delete cookie
-        if (!!Cookie.read(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE)) {
-            Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, '0', 0);
-        }
+        Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, '0', 0);
     }
 
     // pre parse to avoid async timing errors

@@ -1,10 +1,5 @@
 module Util {
 
-    // imports
-    import Settings = ExtensionSettings.Settings;
-
-    // module
-
     /**
      * Calculate the steam seller price <br>
      * Stolen and slightly optimized from Steams' economy_common.js
@@ -262,7 +257,7 @@ module Util {
 
             result += content;
         } else {
-            if (content && content.length > 0) {
+            if (Array.isArray(content) && content.length > 0) {
                 for (let l_Content of <string[]>content) {
                     if (!l_Content || l_Content.length == 0) continue;
 

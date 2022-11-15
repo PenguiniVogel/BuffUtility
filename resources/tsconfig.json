@@ -13,6 +13,8 @@
         "node_modules"
     ],
     "files": [
+        "../sources/Cookie.ts",
+        "../sources/CurrencyHelper.ts",
         "../sources/ExtensionSettings.ts",
         "../sources/Util.ts",
         "../sources/BrowserInterface.ts",

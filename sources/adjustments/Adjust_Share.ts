@@ -1,10 +1,5 @@
 module Adjust_Share {
 
-    // imports
-    import Settings = ExtensionSettings.Settings;
-
-    // module
-
     interface LaunchData {
         type?: unknown,
         param?: string

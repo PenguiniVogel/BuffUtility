@@ -581,6 +581,8 @@ module ExtensionSettings {
             INTERNAL_SETTINGS[setting].value = validator(setting, newValue);
 
             console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
+
+            finalize();
         }
     }
 
@@ -667,11 +669,5 @@ module ExtensionSettings {
 
 ExtensionSettings.load();
 
-/**
- * Exposed function to avoid imports <br>
- * Get the specified setting
- *
- * @param setting The value of the setting to get
- * @returns The value from the specified setting, return type is determined by passed setting
- */
-const getSetting = ExtensionSettings.getSetting;
+import Settings = ExtensionSettings.Settings;
+import getSetting = ExtensionSettings.getSetting;

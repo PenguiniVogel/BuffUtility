@@ -19,6 +19,11 @@ module Cookie {
      * @param days
      */
     export function write(name: string, value: string, days: number = 365 * 20): void {
+        if (!read(name)) {
+            DEBUG && console.debug(`[BuffUtility] Deleting cookie ${name} was deemed to be unnecessary. (err_no_value_read)`);
+            return;
+        }
+
         let date = new Date();
 
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
