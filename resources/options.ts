@@ -14,7 +14,7 @@ module Options {
         value: any
     }
 
-    function createSettingHTML(info: DisplayInfo, settingHTML: string): string {
+    function createSettingHTML(setting: Settings, info: DisplayInfo, settingHTML: string): string {
         return Util.buildHTML('tr', {
             content: [
                 Util.buildHTML('td', {
@@ -31,6 +31,12 @@ module Options {
                             class: 'setting-description text-expanded',
                             content: [ info.description ]
                         }),
+                        Util.buildHTML('button', {
+                            attributes: {
+                                'data-reset': setting
+                            },
+                            content: [ 'Reset' ]
+                        })
                     ]
                 }),
                 Util.buildHTML('td', {
@@ -46,7 +52,7 @@ module Options {
     }
 
     function createInputOption(setting: Settings, info: DisplayInfo, type: string, value: any): string {
-        return createSettingHTML(info, Util.buildHTML('input', {
+        return createSettingHTML(setting, info, Util.buildHTML('input', {
             id: setting,
             attributes: {
                 'type': type,
@@ -57,7 +63,7 @@ module Options {
     }
 
     function createCheckboxOption(setting: Settings, info: DisplayInfo): string {
-        return createSettingHTML(info, Util.buildHTML('input', {
+        return createSettingHTML(setting, info, Util.buildHTML('input', {
             id: setting,
             attributes: {
                 'type': 'checkbox',
@@ -68,7 +74,7 @@ module Options {
     }
 
     function createSelectOption(setting: Settings, info: DisplayInfo, options: SelectOption[], selectedOption?: any): string {
-        return createSettingHTML(info, Util.buildHTML('select', {
+        return createSettingHTML(setting, info, Util.buildHTML('select', {
             id: setting,
             attributes: {
                 'data-target': 'select'
@@ -79,7 +85,7 @@ module Options {
 
     function createMultiCheckboxOption(setting: Settings, info: DisplayInfo, options: string[]): string {
         const values: boolean[] = getSetting(setting);
-        return createSettingHTML(info, Util.buildHTML('div', {
+        return createSettingHTML(setting, info, Util.buildHTML('div', {
             id: setting,
             content: options.map((option, index) => Util.buildHTML('div', {
                 content: [
@@ -119,7 +125,7 @@ module Options {
         const currencyData = CurrencyHelper.getData();
         normalSettings += createSelectOption(Settings.SELECTED_CURRENCY, {
             title: 'Display Currency',
-            description: 'Set the display currency to be used across BuffUtility'
+            description: 'Set the display currency to be used across BuffUtility.'
         }, Object.keys(currencyData.rates).map(key => {
             return {
                 displayText: `${key} - ${currencyData.symbols[key] ?? '?'}`,
@@ -160,7 +166,7 @@ module Options {
         // Settings.LISTING_OPTIONS
         normalSettings += createMultiCheckboxOption(Settings.LISTING_OPTIONS, {
             title: 'Listing options',
-            description: 'Define what options show up on each listing'
+            description: 'Define what options show up on each listing.'
         }, [
             '3D Inspect',
             'Inspect in server',
@@ -188,7 +194,7 @@ module Options {
         // Settings.USE_SCHEME
         createCheckboxOption(Settings.USE_SCHEME, {
             title: 'Use Color Scheme',
-            description: 'Use the defined color scheme (dark mode by default)'
+            description: 'Use the defined color scheme (dark mode by default).'
         });
 
         // --- Advanced Settings ---
@@ -210,7 +216,7 @@ module Options {
         // Settings.DEFAULT_SORT_BY
         advancedSettings += createSelectOption(Settings.DEFAULT_SORT_BY, {
             title: 'Default sort by',
-            description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Hot Descending: by popularity'
+            description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Hot Descending: by popularity.'
         }, Object.keys(ExtensionSettings.FILTER_SORT_BY).map(option => {
             return {
                 displayText: option,
@@ -246,35 +252,174 @@ module Options {
 
         // Settings.CUSTOM_FOP
         advancedSettings += createSelectOption(Settings.CUSTOM_FOP, {
-            title: 'Custom FOP',
-            description: 'Set the factor (or field) of preview, you should <b>not</b> change this from \'Auto\'.'
+            title: 'Custom Preview resolution',
+            description: 'Set the resolution of preview images. You should <b>not</b> change this from <b>Auto</b> unless you have slow internet, then you should choose one of the lower values (e.g. 245, 490 or 980).'
         }, [
-
+            {
+                displayText: 'Auto',
+                value: ExtensionSettings.FOP_VALUES.Auto
+            },
+            {
+                displayText: 'w245/h230',
+                value: ExtensionSettings.FOP_VALUES.w245xh230
+            },
+            {
+                displayText: 'w490/h460',
+                value: ExtensionSettings.FOP_VALUES.w490xh460
+            },
+            {
+                displayText: 'w980/h920',
+                value: ExtensionSettings.FOP_VALUES.w980xh920
+            },
+            {
+                displayText: 'w1960/h1840',
+                value: ExtensionSettings.FOP_VALUES.w1960xh1840
+            },
+            {
+                displayText: 'w3920/h3680',
+                value: ExtensionSettings.FOP_VALUES.w3920xh3680
+            }
         ], getSetting(Settings.CUSTOM_FOP));
 
         // Settings.LOCATION_RELOAD_NEWEST
+        advancedSettings += createSelectOption(Settings.LOCATION_RELOAD_NEWEST, {
+            title: 'Location Reload Newest',
+            description: 'Sets the location of the forced newest reload.<br>None: Don\'t show<br>Bulk: Next to "Bulk Buy"<br>Sort: Next to sorting<br>Center: In the center<br>Left: Left most position.'
+        }, [
+            {
+                displayText: 'None',
+                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE
+            },
+            {
+                displayText: 'Bulk',
+                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK
+            },
+            {
+                displayText: 'Sort',
+                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.SORT
+            },
+            {
+                displayText: 'Center',
+                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.CENTER
+            },
+            {
+                displayText: 'Left',
+                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.LEFT
+            }
+        ], getSetting(Settings.LOCATION_RELOAD_NEWEST));
+
         // Settings.CUSTOM_CURRENCY_RATE
+        advancedSettings += createInputOption(Settings.CUSTOM_CURRENCY_RATE, {
+            title: 'Custom currency rate',
+            description: 'Set the rate of the custom currency e.g.<br>10 RMB -> 1 CC<br>Only active if "Custom" was selected in the "Display Currency" option.'
+        }, 'number', getSetting(Settings.CUSTOM_CURRENCY_RATE));
+
         // Settings.CUSTOM_CURRENCY_NAME
+        advancedSettings += createInputOption(Settings.CUSTOM_CURRENCY_NAME, {
+            title: 'Custom currency name',
+            description: 'Set the name of the custom currency.<br>Only active if "Custom" was selected in the "Display Currency" option.'
+        }, 'text', getSetting(Settings.CUSTOM_CURRENCY_NAME));
+
         // Settings.DATA_PROTECTION
+        advancedSettings += createCheckboxOption(Settings.DATA_PROTECTION, {
+            title: 'Data protection',
+            description: 'Blur some settings on the account page to protect yourself.'
+        });
+
         // Settings.COLOR_SCHEME
+        // TODO color option
 
         // --- Experimental Settings ---
         // Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN
+        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, {
+            title: 'Favourite Bargain',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show the "Bargain" feature on favourites.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
+        });
+
         // Settings.EXPERIMENTAL_ADJUST_POPULAR
+        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_POPULAR, {
+            title: 'Adjust Popular Tab',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed with 2.1.9 and become default.</small>'
+        });
+
         // Settings.EXPERIMENTAL_FETCH_NOTIFICATION
-        // Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS - disabled
-        // Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY - disabled
+        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, {
+            title: 'Currency Fetch Notification',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show toast notification when currency rates were updated, happens once a day.<br><small>* Setting will be merged in 2.1.9 into "Show Toast on Action".</small>'
+        });
+
+        // Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS - disabled until proxy works
+        // experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
+        //     title: 'Fetch Favourite Bargain Status',
+        //     description: '!!!BuffUtility!!!\\n!!!Experimental!!!\\n!!!Danger!!!\\n!!!READ!!!\\nThis will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
+        // });
+
+        // Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY - disabled until proxy works
+        // experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, {
+        //     title: 'Fetch item price history',
+        //     description: '!!!BuffUtility!!!\\n!!!Experimental!!!\\n!!!Danger!!!\\n!!!READ!!!\\nThis will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
+        // }, [
+        //     {
+        //         displayText: 'Off',
+        //         value: ExtensionSettings.PriceHistoryRange.OFF
+        //     },
+        //     {
+        //         displayText: '7 Days',
+        //         value: ExtensionSettings.PriceHistoryRange.WEEKLY
+        //     },
+        //     {
+        //         displayText: '30 Days',
+        //         value: ExtensionSettings.PriceHistoryRange.MONTHLY
+        //     }
+        // ], getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+
         // Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY
+        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {
+            title: 'Adjust Market Currency',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust shown market currency to selected currency.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
+        });
+
         // Settings.EXPERIMENTAL_FORMAT_CURRENCY
+        experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY, {
+            title: 'Compress Currency',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>None: Don\'t format at all.<br>Formatted: Taken e.g. 1234.89 will be transformed to 1,234.89.<br>Compressed: Taken e.g. 1234.89 will be transformed to 1.2<small>K</small>.<br>Space Match: Will either use Formatted or Compressed depending on space.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
+        }, [
+            {
+                displayText: 'None',
+                value: ExtensionSettings.CurrencyNumberFormats.NONE
+            },
+            {
+                displayText: 'Formatted',
+                value: ExtensionSettings.CurrencyNumberFormats.FORMATTED
+            },
+            {
+                displayText: 'Compressed',
+                value: ExtensionSettings.CurrencyNumberFormats.COMPRESSED
+            },
+            {
+                displayText: 'Space Match',
+                value: ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH
+            }
+        ], getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY));
+
         // Settings.EXPERIMENTAL_ADJUST_SHOP
+        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
+            title: 'Adjust Shop Pages',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with 2.1.9 and become default behaviour.</small>'
+        });
+
         // Settings.EXPERIMENTAL_ALLOW_BULK_BUY
+        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_BULK_BUY, {
+            title: 'Allow bulk buy',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Allow the bulk buy function to be used on the web version of Buff.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
+        });
 
         // append html
         document.querySelector('#settings-normal tbody').innerHTML = normalSettings;
         document.querySelector('#settings-advanced tbody').innerHTML = advancedSettings;
         document.querySelector('#settings-experimental tbody').innerHTML = experimentalSettings;
 
-        // add events
+        // add events [data-target]
         (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-target]')).forEach(element => {
             switch (element.getAttribute('data-target')) {
                 case 'checkbox':
@@ -311,6 +456,14 @@ module Options {
             }
         });
 
+        // add events .setting-table button[data-reset]
+        (<NodeListOf<HTMLElement>>document.querySelectorAll('.setting-table button[data-reset]')).forEach(element => {
+            element.onclick = () => {
+                resetSetting(<Settings>element.getAttribute('data-reset'));
+            };
+        });
+
+        // add events .setting-description.action
         (<NodeListOf<HTMLElement>>document.querySelectorAll('.setting-description.action')).forEach(element => {
             element.onclick = () => {
                 let collapsedText = <HTMLElement>element.parentElement.querySelector('.setting-description.text-collapsed');

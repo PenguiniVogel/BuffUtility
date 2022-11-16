@@ -13,6 +13,9 @@
         "node_modules"
     ],
     "files": [
+        "../sources/@typings/SchemaTypes.d.ts",
+        "../sources/config.ts",
+        "../sources/.GlobalConstants.ts",
         "../sources/Cookie.ts",
         "../sources/CurrencyHelper.ts",
         "../sources/ExtensionSettings.ts",

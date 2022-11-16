@@ -11,12 +11,12 @@ module ExtensionSettings {
     }
 
     export const enum FOP_VALUES {
-       Auto,
-       w245xh230,
-       w490xh460,
-       w980xh920,
-       w1960xh1840,
-       w3920xh3680,
+        Auto,
+        w245xh230,
+        w490xh460,
+        w980xh920,
+        w1960xh1840,
+        w3920xh3680,
     }
 
     export const enum LOCATION_RELOAD_NEWEST_VALUES {
@@ -177,14 +177,16 @@ module ExtensionSettings {
         BOOLEAN_ARRAY
     }
 
+    type InternalSetting<T extends Settings> = {
+        value?: SettingsTypes[T],
+        readonly default: SettingsTypes[T],
+        readonly export: string,
+        readonly transform: InternalStructureTransform,
+        readonly validator: (key: Settings, value: any) => any
+    };
+    
     type InternalSettingStructure = {
-        [key in Settings]: {
-            value?: SettingsTypes[key],
-            readonly default: SettingsTypes[key],
-            readonly export: string,
-            readonly transform: InternalStructureTransform,
-            readonly validator: (key: Settings, value: any) => any
-        }
+        [key in Settings]: InternalSetting<key>
     }
 
     const INTERNAL_SETTINGS: InternalSettingStructure = {
@@ -582,7 +584,7 @@ module ExtensionSettings {
 
             console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
 
-            finalize();
+            finalize(setting);
         }
     }
 
@@ -603,20 +605,20 @@ module ExtensionSettings {
 
             setSetting(Settings.STORE_DANGER_AGREEMENTS, dangerAgreements);
         }
-
-        finalize();
     }
 
     /**
      * This will write the current settings to the cookie storage
+     *
+     * @param setting Define the setting to write, for optimization purposes
      */
-    export function finalize(): void {
-        const keys = Object.keys(INTERNAL_SETTINGS);
+    export function finalize(setting?: Settings): void {
+        const keys = !!setting ? [setting] : Object.keys(INTERNAL_SETTINGS);
 
         let exportSettings = {};
 
         for (let l_key of keys) {
-            let struc = INTERNAL_SETTINGS[<Settings>l_key];
+            let struc: InternalSetting<any> = INTERNAL_SETTINGS[<Settings>l_key];
 
             switch (struc.transform) {
                 case InternalStructureTransform.NONE:
@@ -648,7 +650,7 @@ module ExtensionSettings {
         }
     }
 
-    // --- upgrade 2.1.7 -> 2.1.8
+    // --- upgrade <=2.1.7 -> 2.1.8
 
     function _upgrade218(): void {
         _load217();
