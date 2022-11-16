@@ -28,6 +28,11 @@ switch (argv2) {
 
         delete manifest['options_page'];
 
+        manifest['options_ui'] = {
+            "page": "options/options.html",
+            "chrome_style": true
+        };
+
         manifest['permissions'] = [
             "*://penguinivogel.github.io/currency-repository/rates.json",
             "*://buff.163.com/*",

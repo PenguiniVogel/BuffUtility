@@ -2,11 +2,13 @@
     "compilerOptions": {
         "module": "none",
         "target": "es5",
-        "inlineSources": true,
-        "inlineSourceMap": true,
+        "inlineSourceMap": false,
+        "inlineSources": false,
+        "removeComments": true,
+        "outFile": "../.out/background/merge_background.js",
         "lib": [
-            "dom",
-            "ES2015"
+            "ES2015",
+            "WebWorker"
         ]
     },
     "exclude": [
@@ -14,13 +16,11 @@
     ],
     "files": [
         "../sources/@typings/SchemaTypes.d.ts",
-        "../sources/config.ts",
         "../sources/.GlobalConstants.ts",
-        "../sources/Cookie.ts",
-        "../sources/CurrencyHelper.ts",
-        "../sources/ExtensionSettings.ts",
-        "../sources/Util.ts",
+        "../sources/config.ts",
         "../sources/BrowserInterface.ts",
-        "options.ts"
+        "SchemaData.ts",
+        "SchemaHelper.ts",
+        "background.ts"
     ]
 }

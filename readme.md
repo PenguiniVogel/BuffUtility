@@ -26,9 +26,9 @@ No worries! We now have a [support discord](https://discord.gg/yeYuuKZxbP).
 * Whether to show the difference on the listing page in your selected currency or RMB.
 
 Setting **ON** <br>
-![Apply Currency to difference ON](docs/resources/setting_display/Apply%20Currency%20to%20difference%20ON.jpg) <br>
+![Apply Currency to difference ON](resources/setting_display/Apply%20Currency%20to%20difference%20ON.jpg) <br>
 Setting **OFF** <br>
-![Apply Currency to difference OFF](docs/resources/setting_display/Apply%20Currency%20to%20difference%20OFF.jpg)
+![Apply Currency to difference OFF](resources/setting_display/Apply%20Currency%20to%20difference%20OFF.jpg)
 
 ---
 
@@ -36,7 +36,7 @@ Setting **OFF** <br>
 * Can previews be expanded on sell listings. This only works if 'Preview screenshots' is turned on and if the item has been inspected.
   
 Setting **ON** <br>
-![Can expand preview ON](docs/resources/setting_display/Can%20expand%20preview%20ON.jpg) <br>
+![Can expand preview ON](resources/setting_display/Can%20expand%20preview%20ON.jpg) <br>
 Setting **OFF** <br>
 Well *nothing* happens when you hover the preview image.
 
@@ -47,9 +47,9 @@ Well *nothing* happens when you hover the preview image.
 
 Setting **ON** <br>
 *Note the slightly transparent black background* <br>
-![Can expand preview ON](docs/resources/setting_display/Can%20expand%20preview%20ON.jpg) <br>
+![Can expand preview ON](resources/setting_display/Can%20expand%20preview%20ON.jpg) <br>
 Setting **OFF** <br>
-![Expanded preview backdrop OFF](docs/resources/setting_display/Expanded%20preview%20backdrop%20OFF.jpg)
+![Expanded preview backdrop OFF](resources/setting_display/Expanded%20preview%20backdrop%20OFF.jpg)
 
 ---
 
@@ -68,10 +68,10 @@ Setting **OFF** <br>
 * Define what options show up on each listing
 
 Setting **ALL ENABLED** <br>
-![Listing Options ALL](docs/resources/setting_display/Listing%20Options%20ALL.jpg) <br>
+![Listing Options ALL](resources/setting_display/Listing%20Options%20ALL.jpg) <br>
 Setting **CONFIGURED** <br>
 *In this example I only have `Copy !gen/!gengl` and `Share` configured.* <br>
-![Listing Options CONFIGURED](docs/resources/setting_display/Listing%20Options%20CONFIGURED.jpg)
+![Listing Options CONFIGURED](resources/setting_display/Listing%20Options%20CONFIGURED.jpg)
 
 ---
 
@@ -84,7 +84,7 @@ Setting **CONFIGURED** <br>
 * Color purchase options, this will paint purchase options red if not affordable with the current held balance.
 
 Example: <br>
-![Color purchase options SET](docs/resources/setting_display/Color%20purchase%20options%20SET.jpg) <br>
+![Color purchase options SET](resources/setting_display/Color%20purchase%20options%20SET.jpg) <br>
 
 ---
 

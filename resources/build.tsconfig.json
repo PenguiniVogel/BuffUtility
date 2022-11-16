@@ -1,9 +1,0 @@
-{
-    "extends": "./tsconfig.json",
-    "compilerOptions": {
-        "inlineSources": false,
-        "inlineSourceMap": false,
-        "disableSizeLimit": false,
-        "removeComments": true
-    }
-}

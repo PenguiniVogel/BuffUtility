@@ -1,16 +1,16 @@
 # tsc
-echo "Building: --project build.tsconfig.json"
-node_modules/.bin/tsc --project build.tsconfig.json
+echo "Building main: -p tsconfig.build.json"
+node_modules/.bin/tsc -p tsconfig.build.json
 echo " "
 
 # tsc
-echo "Building background: --project build.tsconfig.json"
-node_modules/.bin/tsc --project background/build.tsconfig.json
+echo "Building background: -p background/tsconfig.build.json"
+node_modules/.bin/tsc -p background/tsconfig.build.json
 echo " "
 
 # tsc
-echo "Building options: --project build.tsconfig.json"
-node_modules/.bin/tsc --project resources/build.tsconfig.json
+echo "Building options: -p options/tsconfig.build.json"
+node_modules/.bin/tsc -p options/tsconfig.build.json
 echo " "
 
 # delete previous export
@@ -25,7 +25,7 @@ read -p "Press [ENTER] to resume ..."
 echo "Checking directory structure..."
 mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/sources/{adjustments,csgostash}
 mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/resources/icon
-mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/background
+mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/{background,options}
 echo " "
 
 # f_copy
@@ -49,10 +49,14 @@ f_build() {
   # copy background/merge_background.js
   f_copy ".out/background/merge_background.js" "$DEST" 5
 
+  # copy options/merge_options.js
+  f_copy ".out/options/merge_options.js" "$DEST" 5
+
+  # copy options/options.html
+  f_copy "options/options.html" "$DEST" 0
+
   # copy resources
   f_copy "resources/icon/*.png" "$DEST/resources/icon" 15
-  f_copy "resources/options.html" "$DEST/resources" 10
-  f_copy "resources/options.js" "$DEST/resources" 10
 
   # rewrite manifest
   echo "Writing manifest.json -> $DEST/manifest.json"
