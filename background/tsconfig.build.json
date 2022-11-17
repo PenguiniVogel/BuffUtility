@@ -2,9 +2,10 @@
     "compilerOptions": {
         "module": "none",
         "target": "es5",
-        "inlineSourceMap": true,
-        "inlineSources": true,
-        "outFile": "merge_background.js",
+        "inlineSourceMap": false,
+        "inlineSources": false,
+        "removeComments": true,
+        "outFile": "../.out/background/merge_background.js",
         "lib": [
             "ES2015",
             "WebWorker"

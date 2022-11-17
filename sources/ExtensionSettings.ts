@@ -11,12 +11,12 @@ module ExtensionSettings {
     }
 
     export const enum FOP_VALUES {
-       Auto,
-       w245xh230,
-       w490xh460,
-       w980xh920,
-       w1960xh1840,
-       w3920xh3680,
+        Auto,
+        w245xh230,
+        w490xh460,
+        w980xh920,
+        w1960xh1840,
+        w3920xh3680,
     }
 
     export const enum LOCATION_RELOAD_NEWEST_VALUES {
@@ -177,14 +177,16 @@ module ExtensionSettings {
         BOOLEAN_ARRAY
     }
 
+    type InternalSetting<T extends Settings> = {
+        value?: SettingsTypes[T],
+        readonly default: SettingsTypes[T],
+        readonly export: string,
+        readonly transform: InternalStructureTransform,
+        readonly validator: (key: Settings, value: any) => any
+    };
+    
     type InternalSettingStructure = {
-        [key in Settings]: {
-            value?: SettingsTypes[key],
-            readonly default: SettingsTypes[key],
-            readonly export: string,
-            readonly transform: InternalStructureTransform,
-            readonly validator: (key: Settings, value: any) => any
-        }
+        [key in Settings]: InternalSetting<key>
     }
 
     const INTERNAL_SETTINGS: InternalSettingStructure = {
@@ -488,10 +490,19 @@ module ExtensionSettings {
 
     // general
 
-    export function load(): void {
-        let tempSettings = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS)) ?? {};
+    let resolveLoad: (value: boolean) => void = null;
+    let loaded = new Promise<boolean>((resolve, _) => {
+        resolveLoad = resolve;
+    });
 
-        if (tempSettings[Settings.VERSION]?.length < 1) {
+    export async function isLoaded(): Promise<boolean> {
+        return await loaded;
+    }
+
+    export async function load(): Promise<void> {
+        const _versionCheck = await BrowserInterface.Storage.get<SettingsTypes[Settings.VERSION]>(INTERNAL_SETTINGS[Settings.VERSION].export);
+
+        if (_versionCheck?.length < 1) {
             _upgrade218();
         } else {
             // map export structure dynamically
@@ -504,6 +515,8 @@ module ExtensionSettings {
                 export_structure[exportKey] = k;
                 return exportKey;
             });
+
+            let tempSettings = await BrowserInterface.Storage.getAll<any>(keys);
 
             for (let l_key of keys) {
                 let struc: Settings = export_structure[l_key];
@@ -532,6 +545,8 @@ module ExtensionSettings {
                 INTERNAL_SETTINGS[struc].value = validator(struc, newValue);
             }
         }
+
+        resolveLoad(true);
 
         if (DEBUG) {
             console.debug('Loaded Settings:', INTERNAL_SETTINGS);
@@ -568,6 +583,8 @@ module ExtensionSettings {
             INTERNAL_SETTINGS[setting].value = validator(setting, newValue);
 
             console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
+
+            finalize(setting);
         }
     }
 
@@ -588,20 +605,20 @@ module ExtensionSettings {
 
             setSetting(Settings.STORE_DANGER_AGREEMENTS, dangerAgreements);
         }
-
-        finalize();
     }
 
     /**
      * This will write the current settings to the cookie storage
+     *
+     * @param setting Define the setting to write, for optimization purposes
      */
-    export function finalize(): void {
-        const keys = Object.keys(INTERNAL_SETTINGS);
+    export function finalize(setting?: Settings): void {
+        const keys = !!setting ? [setting] : Object.keys(INTERNAL_SETTINGS);
 
         let exportSettings = {};
 
         for (let l_key of keys) {
-            let struc = INTERNAL_SETTINGS[<Settings>l_key];
+            let struc: InternalSetting<any> = INTERNAL_SETTINGS[<Settings>l_key];
 
             switch (struc.transform) {
                 case InternalStructureTransform.NONE:
@@ -616,7 +633,10 @@ module ExtensionSettings {
             }
         }
 
-        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, JSON.stringify(exportSettings));
+        BrowserInterface.Storage.set(exportSettings).then(_ => DEBUG && console.debug('[BuffUtility] Wrote settings.', exportSettings));
+
+        // delete cookie
+        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, '0', 0);
     }
 
     export function hasBeenAgreed(setting: Settings): boolean {
@@ -630,7 +650,7 @@ module ExtensionSettings {
         }
     }
 
-    // --- upgrade 2.1.7 -> 2.1.8
+    // --- upgrade <=2.1.7 -> 2.1.8
 
     function _upgrade218(): void {
         _load217();
@@ -649,13 +669,7 @@ module ExtensionSettings {
 
 }
 
-/**
- * Exposed function to avoid imports <br>
- * Get the specified setting
- *
- * @param setting The value of the setting to get
- * @returns The value from the specified setting, return type is determined by passed setting
- */
-const getSetting = ExtensionSettings.getSetting;
-
 ExtensionSettings.load();
+
+import Settings = ExtensionSettings.Settings;
+import getSetting = ExtensionSettings.getSetting;

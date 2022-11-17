@@ -1,7 +1,4 @@
 module Adjust_Shop {
-    
-    // imports
-    import Settings = ExtensionSettings.Settings;
 
     function init(): void {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
