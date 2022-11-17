@@ -475,10 +475,13 @@ module Options {
                     element.onclick = () => {
                         console.debug('multi-checkbox', element, (<HTMLInputElement>element).checked);
 
-                        let values: boolean[] = getSetting(<Settings>element.getAttribute('data-setting'));
-                        let index = parseInt(element.getAttribute('data-index'));
+                        const setting: Settings = <Settings>element.getAttribute('data-setting');
+                        const index = parseInt(element.getAttribute('data-index'));
+
+                        let values: boolean[] = getSetting(setting);
                         values[index] = (<HTMLInputElement>element).checked;
-                        setSetting(<Settings>element.getAttribute('data-setting'), values);
+
+                        setSetting(setting, values);
                     };
                     break;
                 case 'select':
@@ -493,9 +496,11 @@ module Options {
                         console.debug('multi-input', element, (<HTMLInputElement>element).value);
 
                         const setting: Settings = <Settings>element.getAttribute('data-setting');
-                        const values: any[] = getSetting(setting);
                         const index = parseInt(element.getAttribute('data-index'));
+
+                        let values: any[] = getSetting(setting);
                         values[index] = (<HTMLInputElement>element).value;
+
                         setSetting(setting, values);
                     };
                     break;
