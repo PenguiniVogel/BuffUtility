@@ -100,11 +100,13 @@
             ]
         }
     ],
-    "permissions": [],
+    "permissions": [
+        "storage"
+    ],
     "icons": {
         "16": "resources/icon/icon16.png",
         "48": "resources/icon/icon48.png",
         "128": "resources/icon/icon128.png"
     },
-    "options_page": "resources/options.html"
+    "options_page": "options/options.html"
 }

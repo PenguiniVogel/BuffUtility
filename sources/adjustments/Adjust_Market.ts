@@ -1,10 +1,5 @@
 module Adjust_Market {
 
-    // imports
-    import Settings = ExtensionSettings.Settings;
-
-    // module
-
     function process(transferData: InjectionService.TransferData<unknown>): void {
         if (transferData.url.indexOf('/market/') == -1) {
             return;

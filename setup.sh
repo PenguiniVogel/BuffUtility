@@ -8,13 +8,17 @@ fi
 echo ""
 
 echo "Building main project..."
-node_modules/.bin/tsc --project tsconfig.json
+node_modules/.bin/tsc -p tsconfig.json
 echo "Done."
 echo ""
 
-echo "Changing to background build..."
 echo "Building background project..."
-node_modules/.bin/tsc --project background/tsconfig.json
+node_modules/.bin/tsc -p background/tsconfig.json
+echo "Done."
+echo ""
+
+echo "Building option project..."
+node_modules/.bin/tsc -p options/tsconfig.json
 echo "Done."
 echo ""
 

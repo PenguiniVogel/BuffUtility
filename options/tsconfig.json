@@ -4,10 +4,10 @@
         "target": "es5",
         "inlineSourceMap": true,
         "inlineSources": true,
-        "outFile": "merge_background.js",
+        "outFile": "merge_options.js",
         "lib": [
             "ES2015",
-            "WebWorker"
+            "dom"
         ]
     },
     "exclude": [
@@ -17,9 +17,11 @@
         "../sources/@typings/SchemaTypes.d.ts",
         "../sources/.GlobalConstants.ts",
         "../sources/config.ts",
+        "../sources/Cookie.ts",
+        "../sources/CurrencyHelper.ts",
         "../sources/BrowserInterface.ts",
-        "SchemaData.ts",
-        "SchemaHelper.ts",
-        "background.ts"
+        "../sources/ExtensionSettings.ts",
+        "../sources/Util.ts",
+        "options.ts"
     ]
 }

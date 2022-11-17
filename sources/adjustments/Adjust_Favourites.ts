@@ -1,8 +1,5 @@
 module AdjustFavourites {
 
-    // imports
-    import Settings = ExtensionSettings.Settings;
-
     async function init(): Promise<void> {
         // if not csgo, skip
         if (window.location.href.indexOf('game=csgo') == -1) return;

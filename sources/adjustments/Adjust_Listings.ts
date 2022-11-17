@@ -1,10 +1,5 @@
 module Adjust_Listings {
 
-    // imports
-    import Settings = ExtensionSettings.Settings;
-
-    // module
-
     function init(): void {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
 

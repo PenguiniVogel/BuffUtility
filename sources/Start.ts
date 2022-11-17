@@ -1,15 +1,12 @@
-// imports
-import Settings = ExtensionSettings.Settings;
-
 // Start the extension
 
 declare var g: BuffTypes.g;
 
 if (DEBUG) {
-    function tests() {
+    async function tests() {
         // BrowserInterface test
         {
-            (async () => {
+            await (async () => {
                 let start = Date.now();
                 let r = await BrowserInterface.sendMessage({ method: 'test' });
                 let ms = Date.now() - start;
@@ -24,7 +21,7 @@ if (DEBUG) {
 
         // object service test
         {
-            (async () => {
+            await (async () => {
                 let start = Date.now();
                 let r = await InjectionService.requestObject('g');
                 let ms = Date.now() - start;
@@ -33,6 +30,24 @@ if (DEBUG) {
                 console.debug('Start:', start);
                 console.debug('Value:', r);
                 console.debug('End.', `${ms}ms`);
+                console.groupEnd();
+            })();
+        }
+
+        // storage test
+        {
+            await (async () => {
+                console.group(`Storage Test`);
+
+                await BrowserInterface.Storage.set({
+                    test: 'a'
+                });
+
+                console.debug('Wrote test: a');
+
+                let read = await BrowserInterface.Storage.get<string>('test');
+
+                console.debug(`Read test: ${read}`);
                 console.groupEnd();
             })();
         }
@@ -48,50 +63,59 @@ if (DEBUG) {
 
 // currency stuff, scoped to avoid pollution
 {
-    let currencyCache = Cookie.read(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
-    let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache);
-    let dateToday = Util.formatDate(new Date());
+    async function getCurrencyCache(): Promise<void> {
+        let currencyCache = await BrowserInterface.Storage.get<any>(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
+        let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache);
+        let dateToday = Util.formatDate(new Date());
 
-    function cacheCurrency(date: string): void {
-        let currencyName: string = getSetting(Settings.SELECTED_CURRENCY);
-        let rates = CurrencyHelper.getData().rates[currencyName];
+        async function cacheCurrency(date: string): Promise<void> {
+            let currencyName: string = getSetting(Settings.SELECTED_CURRENCY);
+            let rates = CurrencyHelper.getData().rates[currencyName];
 
-        let segment: CurrencyHelper.Data = {
-            date: date,
-            rates: {
-                [currencyName]: rates
-            },
-            symbols: {}
-        };
+            let segment: CurrencyHelper.Data = {
+                date: date,
+                rates: {
+                    [currencyName]: rates
+                },
+                symbols: {}
+            };
 
-        console.debug(segment);
+            console.debug(segment);
 
-        if (getSetting(Settings.EXPERIMENTAL_FETCH_NOTIFICATION)) {
-            Util.signal(['Buff', 'toast'], null, [`Fetched current conversion rates: ${currencyName} -> ${rates[0].toFixed(rates[1])}`]);
+            if (getSetting(Settings.EXPERIMENTAL_FETCH_NOTIFICATION)) {
+                Util.signal(['Buff', 'toast'], null, [`Fetched current conversion rates: ${currencyName} -> ${rates[0].toFixed(rates[1])}`]);
+            }
+
+            await BrowserInterface.Storage.set({[GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE]: segment});
         }
 
-        Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, JSON.stringify(segment));
-    }
-
-    if (parsedCurrencyCache) {
-        console.debug(parsedCurrencyCache.date, dateToday);
-        if (parsedCurrencyCache.date != dateToday) {
+        if (parsedCurrencyCache) {
+            console.debug(parsedCurrencyCache.date, dateToday);
+            if (parsedCurrencyCache.date != dateToday) {
+                CurrencyHelper.initialize(true, () => {
+                    cacheCurrency(dateToday);
+                });
+            } else {
+                let cachedRates = Object.keys(parsedCurrencyCache.rates);
+                for (let key of cachedRates) {
+                    console.debug(`[BuffUtility] Reading cached current rates for ${key}: [${CurrencyHelper.getData().date}] ${CurrencyHelper.getData().rates[key]} -> [${parsedCurrencyCache.date}] ${parsedCurrencyCache.rates[key]}`);
+                    CurrencyHelper.getData().rates[key] = parsedCurrencyCache.rates[key];
+                }
+            }
+        } else {
             CurrencyHelper.initialize(true, () => {
                 cacheCurrency(dateToday);
             });
-        } else {
-            CurrencyHelper.initialize(false);
-            let cachedRates = Object.keys(parsedCurrencyCache.rates);
-            for (let key of cachedRates) {
-                console.debug(`[BuffUtility] Reading cached current rates for ${key}: [${CurrencyHelper.getData().date}] ${CurrencyHelper.getData().rates[key]} -> [${parsedCurrencyCache.date}] ${parsedCurrencyCache.rates[key]}`);
-                CurrencyHelper.getData().rates[key] = parsedCurrencyCache.rates[key];
-            }
         }
-    } else {
-        CurrencyHelper.initialize(true, () => {
-            cacheCurrency(dateToday);
-        });
+
+        // delete cookie
+        Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, '0', 0);
     }
+
+    // pre parse to avoid async timing errors
+    CurrencyHelper.initialize(false);
+
+    getCurrencyCache();
 }
 
 // actually disable DATA_PROTECTION if it is disabled
@@ -150,22 +174,29 @@ function adjustFloatBar(): void {
     }
 }
 
-function adjustAccountBalance(): void {
+async function adjustAccountBalance(): Promise<void> {
     let balanceDiv = document.querySelector('div.store-account > h4');
     if (!balanceDiv) return;
     let balYuan: number = +(<HTMLElement>balanceDiv.querySelector('#navbar-cash-amount')).innerText.replace('¥ ', '');
 
-    let balConverted = Util.buildHTML('span', {
-        content: [
-            '<br>',
-            Util.buildHTML('span', {
-                class: 'c_Gray f_12px',
-                content: [ `(${Util.convertCNY(balYuan)})` ]
-            })
-        ]
-    });
+    if (isFinite(balYuan)) {
+        await ExtensionSettings.isLoaded();
 
-    balanceDiv.innerHTML += balConverted;
+        let { convertedSymbol, convertedValue } = Util.convertCNYRaw(balYuan);
+        let formatted = Util.formatNumber(convertedValue, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
+
+        let balConverted = Util.buildHTML('span', {
+            content: [
+                '<br>',
+                Util.buildHTML('span', {
+                    class: 'c_Gray f_12px',
+                    content: [ `(${convertedSymbol} ${Util.embedDecimalSmall(formatted.strNumber)})` ]
+                })
+            ]
+        });
+
+        balanceDiv.innerHTML += balConverted;
+    }
 }
 
 adjustFloatBar();

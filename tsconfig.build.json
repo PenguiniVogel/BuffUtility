@@ -2,12 +2,14 @@
     "compilerOptions": {
         "module": "none",
         "target": "es5",
-        "inlineSourceMap": true,
-        "inlineSources": true,
+        "inlineSourceMap": false,
+        "inlineSources": false,
+        "removeComments": true,
         "lib": [
             "ES2015",
             "dom"
-        ]
+        ],
+        "outDir": ".out/sources"
     },
     "exclude": [
         "node_modules"

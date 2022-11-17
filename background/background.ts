@@ -5,7 +5,7 @@ module Background {
     BrowserInterface.addListener((request, sender, sendResponse) => {
         console.log(request, sender);
 
-        const safe = (request ?? {} as BrowserInterface.UnknownDelegation);
+        const safe = (request ?? {} as BrowserInterface.BaseDelegation);
         const async = 'async' in safe ? (safe.async ?? false) : false;
 
         if ('method' in safe && 'parameters' in safe) {
@@ -40,6 +40,11 @@ module Background {
                         data: data
                     });
                 }));
+
+                return async;
+            }
+
+            if (safe.method == BrowserInterface.DelegationMethod.CurrencyCache_get) {
 
                 return async;
             }
