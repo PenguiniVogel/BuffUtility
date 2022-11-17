@@ -117,8 +117,8 @@ module Util {
 
         if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
             const custom_currency_name = getSetting(Settings.CUSTOM_CURRENCY_NAME);
-            const custom_currency_calculated_rate = getSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE);
-            const custom_currency_leading_zeros = getSetting(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
+            const custom_currency_calculated_rate = 1 / getSetting(Settings.CUSTOM_CURRENCY_RATE);
+            const custom_currency_leading_zeros = (/^0\.([^1-9]+)/.exec(`${custom_currency_calculated_rate}`) ?? [null, ''])[1].length + 2;
 
             return {
                 convertedSymbol: custom_currency_name,

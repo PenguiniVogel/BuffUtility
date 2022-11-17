@@ -62,10 +62,12 @@ module Adjust_Listings {
                 }
             }
 
-            InjectionServiceLib.injectCode(`
-                ${buff_utility_forceNewestReload.toString()}
-                ${getSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY) ? `${buff_utility_override_bulk_buy.toString()}\nbuff_utility_override_bulk_buy();` : ''}
-            `);
+            InjectionServiceLib.injectCode(`${buff_utility_forceNewestReload.toString()}`);
+
+            (async () => {
+                await ExtensionSettings.isLoaded();
+                InjectionServiceLib.injectCode(`${getSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY) ? `${buff_utility_override_bulk_buy.toString()}\nbuff_utility_override_bulk_buy();` : ''}`);
+            })();
 
             let a = document.createElement('a');
             a.setAttribute('href', 'javascript:buff_utility_forceNewestReload();');
@@ -73,24 +75,30 @@ module Adjust_Listings {
             a.setAttribute('style', 'margin: 0; min-width: 32px;');
             a.innerHTML = '<i class="icon icon_refresh" style=" margin: 0 0 3px 0; filter: grayscale(1) brightness(2);"></i>';
 
-            switch (getSetting(Settings.LOCATION_RELOAD_NEWEST)) {
-                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE:
-                    break;
-                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK:
-                    (document.querySelector('#batch-buy-btn') ?? document.querySelector('#batch-buy-btn-override'))?.parentElement?.appendChild(a);
-                    break;
-                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.SORT:
-                    document.querySelector('#asset_tag-filter div.l_Right div.w-Select-Multi[name="sort"]')?.parentElement?.appendChild(a);
-                    break;
-                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.CENTER:
-                    document.querySelector('#asset_tag-filter div.l_Left')?.parentElement?.appendChild(a);
-                    break;
-                case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.LEFT:
-                    document.querySelector('#asset_tag-filter div.l_Left')?.prepend(a);
-                    break;
-                default:
-                    break;
+            async function addReloadNewest(): Promise<void> {
+                await ExtensionSettings.isLoaded();
+
+                switch (getSetting(Settings.LOCATION_RELOAD_NEWEST)) {
+                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE:
+                        break;
+                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK:
+                        (document.querySelector('#batch-buy-btn') ?? document.querySelector('#batch-buy-btn-override'))?.parentElement?.appendChild(a);
+                        break;
+                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.SORT:
+                        document.querySelector('#asset_tag-filter div.l_Right div.w-Select-Multi[name="sort"]')?.parentElement?.appendChild(a);
+                        break;
+                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.CENTER:
+                        document.querySelector('#asset_tag-filter div.l_Left')?.parentElement?.appendChild(a);
+                        break;
+                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.LEFT:
+                        document.querySelector('#asset_tag-filter div.l_Left')?.prepend(a);
+                        break;
+                    default:
+                        break;
+                }
             }
+
+            addReloadNewest();
 
             InjectionServiceLib.injectCSS(`
                 .f_Strong.f_Strong_Blue {
@@ -433,7 +441,7 @@ module Adjust_Listings {
 
             let priceDiffStr;
             if (getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
-                let { convertedSymbol, convertedValue } = Util.convertCNYRaw(price);
+                let { convertedSymbol, convertedValue } = Util.convertCNYRaw(priceDiff);
                 const formattedDiff = Util.formatNumber(convertedValue);
 
                 if (formattedDiff.wasCompressed || formattedDiff.wasFormatted) {

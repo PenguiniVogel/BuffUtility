@@ -56,8 +56,10 @@ module Adjust_Market {
                     switch (getSetting(Settings.DEFAULT_STICKER_SEARCH)) {
                         case ExtensionSettings.FILTER_STICKER_SEARCH['All']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers']:
+                        case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers 100%']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['No Stickers']:
-                        case ExtensionSettings.FILTER_STICKER_SEARCH['Squad Combos']:
+                        case ExtensionSettings.FILTER_STICKER_SEARCH['Quad Combos']:
+                        case ExtensionSettings.FILTER_STICKER_SEARCH['Quad Combos 100%']:
                             stickerSearch = getSetting(Settings.DEFAULT_STICKER_SEARCH);
                             break;
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Save Custom']:

@@ -80,8 +80,6 @@ module ExtensionSettings {
         SELECTED_CURRENCY = 'selected_currency',
         CUSTOM_CURRENCY_RATE = 'custom_currency_rate',
         CUSTOM_CURRENCY_NAME = 'custom_currency_name',
-        CUSTOM_CURRENCY_CALCULATED_RATE = 'custom_currency_calculated_rate',
-        CUSTOM_CURRENCY_LEADING_ZEROS = 'custom_currency_leading_zeros',
         CAN_EXPAND_SCREENSHOTS = 'can_expand_screenshots',
         EXPAND_SCREENSHOTS_BACKDROP = 'expand_screenshots_backdrop',
         DIFFERENCE_DOMINATOR = 'difference_dominator',
@@ -131,8 +129,6 @@ module ExtensionSettings {
         [Settings.SELECTED_CURRENCY]: string;
         [Settings.CUSTOM_CURRENCY_RATE]: number;
         [Settings.CUSTOM_CURRENCY_NAME]: string;
-        [Settings.CUSTOM_CURRENCY_CALCULATED_RATE]: number;
-        [Settings.CUSTOM_CURRENCY_LEADING_ZEROS]: number;
         [Settings.CAN_EXPAND_SCREENSHOTS]: boolean;
         [Settings.EXPAND_SCREENSHOTS_BACKDROP]: boolean;
         [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator;
@@ -214,18 +210,6 @@ module ExtensionSettings {
             export: '0x3',
             transform: InternalStructureTransform.NONE,
             validator: validateNotNull
-        },
-        [Settings.CUSTOM_CURRENCY_CALCULATED_RATE]: {
-            default: 1,
-            export: '0x4',
-            transform: InternalStructureTransform.NONE,
-            validator: validateNumber
-        },
-        [Settings.CUSTOM_CURRENCY_LEADING_ZEROS]: {
-            default: 2,
-            export: '0x5',
-            transform: InternalStructureTransform.NONE,
-            validator: validateNumber
         },
         [Settings.CAN_EXPAND_SCREENSHOTS]: {
             default: false,

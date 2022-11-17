@@ -4,6 +4,8 @@ module AdjustFavourites {
         // if not csgo, skip
         if (window.location.href.indexOf('game=csgo') == -1) return;
 
+        await ExtensionSettings.isLoaded();
+
         console.debug('[BuffUtility] Adjust_Favourites');
 
         let rows = <NodeListOf<HTMLElement>>(document.querySelector('table.list_tb.list_tb_csgo')?.querySelectorAll('tr'));

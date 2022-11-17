@@ -153,12 +153,18 @@ module Options {
         normalSettings += createSelectOption(Settings.SELECTED_CURRENCY, {
             title: 'Display Currency',
             description: 'Set the display currency to be used across BuffUtility.'
-        }, Object.keys(currencyData.rates).map(key => {
-            return {
-                displayText: `${key} - ${currencyData.symbols[key] ?? '?'}`,
-                value: key
-            };
-        }), getSetting(Settings.SELECTED_CURRENCY));
+        }, [
+            ...Object.keys(currencyData.rates).map(key => {
+                return {
+                    displayText: `${key} - ${currencyData.symbols[key] ?? '?'}`,
+                    value: key
+                };
+            }),
+            {
+                displayText: 'Custom - CC',
+                value: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY
+            }
+        ], getSetting(Settings.SELECTED_CURRENCY));
 
         // Settings.APPLY_CURRENCY_TO_DIFFERENCE
         normalSettings += createCheckboxOption(Settings.APPLY_CURRENCY_TO_DIFFERENCE, {
@@ -492,7 +498,7 @@ module Options {
                     };
                     break;
                 case 'multi-input':
-                    element.onkeyup = () => {
+                    element.onchange = () => {
                         console.debug('multi-input', element, (<HTMLInputElement>element).value);
 
                         const setting: Settings = <Settings>element.getAttribute('data-setting');
