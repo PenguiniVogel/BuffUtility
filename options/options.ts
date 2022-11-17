@@ -99,10 +99,37 @@ module Options {
                         id: `${setting}-${index}`,
                         attributes: {
                             'type': 'checkbox',
-                            'data-target': 'multi',
+                            'data-target': 'multi-checkbox',
                             'data-setting': setting,
                             'data-index': `${index}`,
                             [values[index] ? 'checked' : 'no-checked']: ''
+                        }
+                    })
+                ]
+            }))
+        }));
+    }
+
+    function createMultiInputOption(setting: Settings, info: DisplayInfo, type: string, options: string[]): string {
+        const values: any[] = getSetting(setting);
+        return createSettingHTML(setting, info, Util.buildHTML('div', {
+            id: setting,
+            content: options.map((option, index) => Util.buildHTML('div', {
+                content: [
+                    Util.buildHTML('label', {
+                        attributes: {
+                            'for': `${setting}-${index}`
+                        },
+                        content: option
+                    }),
+                    Util.buildHTML('input', {
+                        id: `${setting}-${index}`,
+                        attributes: {
+                            'type': type,
+                            'data-target': 'multi-input',
+                            'data-setting': setting,
+                            'data-index': `${index}`,
+                            'value': `${values[index]}`
                         }
                     })
                 ]
@@ -183,7 +210,7 @@ module Options {
         });
 
         // Settings.COLOR_LISTINGS
-        createMultiCheckboxOption(Settings.COLOR_LISTINGS, {
+        normalSettings += createMultiCheckboxOption(Settings.COLOR_LISTINGS, {
             title: 'Color purchase options',
             description: 'Color purchase options, this will paint purchase options red if not affordable with the current held balance.'
         }, [
@@ -192,7 +219,7 @@ module Options {
         ]);
 
         // Settings.USE_SCHEME
-        createCheckboxOption(Settings.USE_SCHEME, {
+        normalSettings += createCheckboxOption(Settings.USE_SCHEME, {
             title: 'Use Color Scheme',
             description: 'Use the defined color scheme (dark mode by default).'
         });
@@ -327,7 +354,15 @@ module Options {
         });
 
         // Settings.COLOR_SCHEME
-        // TODO color option
+        advancedSettings += createMultiInputOption(Settings.COLOR_SCHEME, {
+            title: 'Color Scheme',
+            description: 'Color Scheme for whatever theme you want (Dark-Theme by default)'
+        }, 'color', [
+            'Background',
+            'Background Hover',
+            'Text Color',
+            'Text Color Disabled'
+        ]);
 
         // --- Experimental Settings ---
         // Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN
@@ -381,7 +416,7 @@ module Options {
 
         // Settings.EXPERIMENTAL_FORMAT_CURRENCY
         experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY, {
-            title: 'Compress Currency',
+            title: 'Format Currency',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>None: Don\'t format at all.<br>Formatted: Taken e.g. 1234.89 will be transformed to 1,234.89.<br>Compressed: Taken e.g. 1234.89 will be transformed to 1.2<small>K</small>.<br>Space Match: Will either use Formatted or Compressed depending on space.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
         }, [
             {
@@ -436,9 +471,9 @@ module Options {
                         setSetting(<Settings>element.getAttribute('id'), (<HTMLInputElement>element).value);
                     };
                     break;
-                case 'multi':
+                case 'multi-checkbox':
                     element.onclick = () => {
-                        console.debug('checkbox', element, (<HTMLInputElement>element).checked);
+                        console.debug('multi-checkbox', element, (<HTMLInputElement>element).checked);
 
                         let values: boolean[] = getSetting(<Settings>element.getAttribute('data-setting'));
                         let index = parseInt(element.getAttribute('data-index'));
@@ -451,6 +486,17 @@ module Options {
                         console.debug('select', element, (<HTMLSelectElement>element).selectedOptions[0]);
 
                         setSetting(<Settings>element.getAttribute('id'), (<HTMLSelectElement>element).selectedOptions[0].getAttribute('value') ?? 'USD');
+                    };
+                    break;
+                case 'multi-input':
+                    element.onkeyup = () => {
+                        console.debug('multi-input', element, (<HTMLInputElement>element).value);
+
+                        const setting: Settings = <Settings>element.getAttribute('data-setting');
+                        const values: any[] = getSetting(setting);
+                        const index = parseInt(element.getAttribute('data-index'));
+                        values[index] = (<HTMLInputElement>element).value;
+                        setSetting(setting, values);
                     };
                     break;
             }

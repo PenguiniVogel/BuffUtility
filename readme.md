@@ -4,7 +4,7 @@ Get it for:
 * Chrome [here](https://chrome.google.com/webstore/detail/buff-utility/gfjnmalnjjmjahaddeaamlkeliginpaf)
 * Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/buff-utility/)
 * ~~Or run it unpacked via release here~~
-  * Starting version 2.1.6 unpacked builds are no longer handed out.
+    * Starting version 2.1.6 unpacked builds are no longer handed out.
 
 ---
 
@@ -13,7 +13,7 @@ No worries! We now have a [support discord](https://discord.gg/yeYuuKZxbP).
 
 ---
 
-### The settings and what they do:
+### The normal settings and what they do:
 
 ---
 
@@ -34,7 +34,7 @@ Setting **OFF** <br>
 
 #### Can expand preview
 * Can previews be expanded on sell listings. This only works if 'Preview screenshots' is turned on and if the item has been inspected.
-  
+
 Setting **ON** <br>
 ![Can expand preview ON](resources/setting_display/Can%20expand%20preview%20ON.jpg) <br>
 Setting **OFF** <br>
@@ -109,7 +109,7 @@ Example: <br>
   Price Descending: high to low <br>
   Float Ascending: low to high <br>
   Float Descending: high to low <br>
-  Hot Descending: by heat..?
+  Hot Descending: by popularity
 
 ---
 
@@ -123,8 +123,18 @@ Example: <br>
 
 ---
 
-#### Custom FOP
-* Set the factor (or field) of preview, you should ***not*** change this to anything but `Auto`.
+#### Custom Preview resolution
+* Set the resolution of preview images. You ***should not*** change this from **Auto** unless you have slow internet, then you should choose one of the lower values (e.g. 245, 490 or 980).
+
+---
+
+#### Location Reload Newest
+* Sets the location of the forced newest reload. <br>
+  None: Don't show <br>
+  Bulk: Next to "Bulk Buy" <br>
+  Sort: Next to sorting <br>
+  Center: In the center <br>
+  Left: Left most position.
 
 ---
 
@@ -172,19 +182,33 @@ Example: <br>
 
 ---
 
-#### Fetch Favourite Bargain Status
-* Will fetch if the item can actually be bargained, **disabled** by default, and should not be enabled unless you are aware of the dangers.
+#### Adjust Market Currency
+* Adjust shown market currency to selected display currency.
 
 ---
 
-#### Fetch item price history
-* Will display the selected price history in the item header to easily see min and max pricing, **disabled** by default, and should not be enabled unless you are aware of the dangers.
+#### Format Currency
+* Format currency <br>
+  None: Don't format at all. <br>
+  Formatted: Taken e.g. 1234.89 will be transformed to 1,234.89 <br>
+  Compressed: Taken e.g. 1234.89 will be transformed to 1.2K <br>
+  Space Match: Will either use Formatted or Compressed depending on space.
+
+---
+
+#### Adjust Shop Pages
+* Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.
+
+---
+
+#### Allow bulk buy
+* Allow the bulk buy function to be used on the web version of Buff.
 
 ---
 
 **Thank you:**
 * GODrums
-  * For all your contributions!
+    * For all your contributions!
 * Futeish
     * For making me an awesome new extension icon!
 * Scarlet
