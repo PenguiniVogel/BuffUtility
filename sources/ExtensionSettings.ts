@@ -577,16 +577,14 @@ module ExtensionSettings {
             return;
         }
 
-        let oldValue = `${INTERNAL_SETTINGS[setting].value}`;
+        let oldValue: any = INTERNAL_SETTINGS[setting].value;
 
-        if (oldValue != `${newValue}`) {
-            let validator = INTERNAL_SETTINGS[setting].validator ?? ((_, value) => value);
-            INTERNAL_SETTINGS[setting].value = validator(setting, newValue);
+        let validator = INTERNAL_SETTINGS[setting].validator ?? ((_, value) => value);
+        INTERNAL_SETTINGS[setting].value = validator(setting, newValue);
 
-            console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
+        console.debug(`[BuffUtility] Saved setting: ${setting}\n${oldValue} -> ${newValue}`);
 
-            finalize(setting);
-        }
+        finalize(setting);
     }
 
     /**
