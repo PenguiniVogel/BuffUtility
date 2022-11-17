@@ -243,7 +243,7 @@ module Options {
         // Settings.DEFAULT_SORT_BY
         advancedSettings += createSelectOption(Settings.DEFAULT_SORT_BY, {
             title: 'Default sort by',
-            description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Hot Descending: by popularity.'
+            description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Hot Descending: by popularity.<br>Sticker: By Sticker price descending.'
         }, Object.keys(ExtensionSettings.FILTER_SORT_BY).map(option => {
             return {
                 displayText: option,

@@ -47,7 +47,8 @@ module ExtensionSettings {
         'Price Descending': 'price.desc',
         'Float Ascending': 'paintwear.asc',
         'Float Descending': 'paintwear.desc',
-        'Hot Descending': 'heat.desc'
+        'Hot Descending': 'heat.desc',
+        'Sticker': 'sticker.desc'
     };
 
     export const FILTER_STICKER_SEARCH = {
