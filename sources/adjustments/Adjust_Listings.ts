@@ -65,8 +65,7 @@ module Adjust_Listings {
             InjectionServiceLib.injectCode(`${buff_utility_forceNewestReload.toString()}`);
 
             (async () => {
-                await ExtensionSettings.isLoaded();
-                InjectionServiceLib.injectCode(`${getSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY) ? `${buff_utility_override_bulk_buy.toString()}\nbuff_utility_override_bulk_buy();` : ''}`);
+                InjectionServiceLib.injectCode(`${await getSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY) ? `${buff_utility_override_bulk_buy.toString()}\nbuff_utility_override_bulk_buy();` : ''}`);
             })();
 
             let a = document.createElement('a');
@@ -76,9 +75,7 @@ module Adjust_Listings {
             a.innerHTML = '<i class="icon icon_refresh" style=" margin: 0 0 3px 0; filter: grayscale(1) brightness(2);"></i>';
 
             async function addReloadNewest(): Promise<void> {
-                await ExtensionSettings.isLoaded();
-
-                switch (getSetting(Settings.LOCATION_RELOAD_NEWEST)) {
+                switch (await getSetting(Settings.LOCATION_RELOAD_NEWEST)) {
                     case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE:
                         break;
                     case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK:
@@ -136,7 +133,7 @@ module Adjust_Listings {
         });
     }
 
-    function process(transferData: InjectionService.TransferData<unknown>): void {
+    async function process(transferData: InjectionService.TransferData<unknown>): Promise<void> {
         if (transferData.url.indexOf('/sell_order') > -1) {
             console.debug('[BuffUtility] Adjust_Listings (sell_order)');
 
@@ -147,7 +144,7 @@ module Adjust_Listings {
             adjustBuyOrderListings(<InjectionService.TransferData<BuffTypes.BuyOrder.Data>>transferData);
         }
 
-        if (!document.querySelector('span.buffutility-pricerange') && getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
+        if (!document.querySelector('span.buffutility-pricerange') && await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
 
             adjustHeaderListings();
@@ -157,9 +154,9 @@ module Adjust_Listings {
     /**
      * Adds a price range to the item overview ("header"). Supports 7 or 30 days ranges (default: 7).
      */
-    function adjustHeaderListings() {
+    async function adjustHeaderListings(): Promise<void> {
         // default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
-        const days: ExtensionSettings.PriceHistoryRange = getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
+        const days: ExtensionSettings.PriceHistoryRange = await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
         const goods_id = document.querySelector('div.detail-cont div.add-bookmark').getAttribute('data-target-id');
 
         // skip to prevent doubles
@@ -262,35 +259,29 @@ module Adjust_Listings {
         }
 
         const preview_screenshots = document.getElementById('preview_screenshots');
-        const can_expand_screenshots = getSetting(Settings.CAN_EXPAND_SCREENSHOTS) && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
-        const expand_classes = can_expand_screenshots ? `img_td can_expand ${getSetting(Settings.EXPAND_SCREENSHOTS_BACKDROP) ? 'expand_backdrop' : ''}` : 'img_td';
+        const can_expand_screenshots = await getSetting(Settings.CAN_EXPAND_SCREENSHOTS) && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
+        const expand_classes = can_expand_screenshots ? `img_td can_expand ${await getSetting(Settings.EXPAND_SCREENSHOTS_BACKDROP) ? 'expand_backdrop' : ''}` : 'img_td';
 
         let fopString = '';
         if (can_expand_screenshots) {
-            switch (getSetting(Settings.CUSTOM_FOP)) {
+            switch (await getSetting(Settings.CUSTOM_FOP)) {
                 case ExtensionSettings.FOP_VALUES.Auto:
                     fopString = '';
-
                     break;
                 case ExtensionSettings.FOP_VALUES.w245xh230:
                     fopString = '?fop=imageView/2/w/245/h/230';
-
                     break;
                 case ExtensionSettings.FOP_VALUES.w490xh460:
                     fopString = '?fop=imageView/2/w/490/h/460';
-
                     break;
                 case ExtensionSettings.FOP_VALUES.w980xh920:
                     fopString = '?fop=imageView/2/w/980/h/920';
-
                     break;
                 case ExtensionSettings.FOP_VALUES.w1960xh1840:
                     fopString = '?fop=imageView/2/w/1960/h/1840';
-
                     break;
                 case ExtensionSettings.FOP_VALUES.w3920xh3680:
                     fopString = '?fop=imageView/2/w/3920/h/3680';
-
                     break;
                 default:
                     break;
@@ -298,7 +289,7 @@ module Adjust_Listings {
         }
 
         // adjust reference price
-        if (getSetting(Settings.APPLY_STEAM_TAX)) {
+        if (await getSetting(Settings.APPLY_STEAM_TAX)) {
             let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
             let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
@@ -397,7 +388,7 @@ module Adjust_Listings {
 
                 wearContainer.appendChild(document.createElement('br'));
 
-                let enabledOptions: boolean[] = getSetting(Settings.LISTING_OPTIONS);
+                let enabledOptions: boolean[] = await getSetting(Settings.LISTING_OPTIONS);
 
                 let ctags = wearContainer.querySelectorAll('a.ctag');
                 if (ctags?.length >= 2) {
@@ -440,8 +431,8 @@ module Adjust_Listings {
             let priceDiff = price - steamPriceCNY;
 
             let priceDiffStr;
-            if (getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
-                let { convertedSymbol, convertedValue } = Util.convertCNYRaw(priceDiff);
+            if (await getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
+                let { convertedSymbol, convertedValue } = await Util.convertCNYRaw(priceDiff);
                 const formattedDiff = Util.formatNumber(convertedValue);
 
                 if (formattedDiff.wasCompressed || formattedDiff.wasFormatted) {
@@ -459,7 +450,7 @@ module Adjust_Listings {
                 price_str = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
             }
 
-            const { convertedSymbol, convertedValue } = Util.convertCNYRaw(price);
+            const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(price);
             let converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(convertedValue)}`;
             const formattedConverted = Util.formatNumber(convertedValue);
             if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
@@ -499,7 +490,7 @@ module Adjust_Listings {
             if (can_expand_screenshots && dataRow.can_use_inspect_trn_url) {
                 let img_src = dataRow.img_src + data.fop_str;
 
-                switch (getSetting(Settings.EXPAND_TYPE)) {
+                switch (await getSetting(Settings.EXPAND_TYPE)) {
                     case ExtensionSettings.ExpandScreenshotType.PREVIEW:
                         img_src = `${dataRow.img_src}${fopString}`;
 
@@ -521,22 +512,22 @@ module Adjust_Listings {
                 let aBargain = dataRow.can_bargain ? row.querySelector('td a.bargain[data-asset-info]') : null;
                 // console.debug(aBuy, aBargain);
 
-                if (aBuy && price > nrBalance && getSetting(Settings.COLOR_LISTINGS)[0]) {
+                if (aBuy && price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[0]) {
                     aBuy.setAttribute('style', `background: ${GlobalConstants.COLOR_BAD};`);
                 }
 
-                if (aBargain && +dataRow.lowest_bargain_price > nrBalance && getSetting(Settings.COLOR_LISTINGS)[1]) {
+                if (aBargain && +dataRow.lowest_bargain_price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[1]) {
                     aBargain.setAttribute('style', `color: ${GlobalConstants.COLOR_BAD} !important;`);
                 }
             }
         }
 
         if (updated_preview > 0) {
-            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview == 1 ? '.' : 's.'}`, 'type:', getSetting(Settings.EXPAND_TYPE) == 0 ? 'PREVIEW' : 'INSPECT');
+            console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview == 1 ? '.' : 's.'}`, 'type:', await getSetting(Settings.EXPAND_TYPE) == 0 ? 'PREVIEW' : 'INSPECT');
         }
     }
 
-    function adjustBuyOrderListings(transferData: InjectionService.TransferData<BuffTypes.BuyOrder.Data>): void {
+    async function adjustBuyOrderListings(transferData: InjectionService.TransferData<BuffTypes.BuyOrder.Data>): Promise<void> {
         let data = transferData.data;
         let rows = <NodeListOf<HTMLElement>>document.querySelectorAll('table.list_tb tr');
 
@@ -552,8 +543,8 @@ module Adjust_Listings {
                 priceStr = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
             }
 
-            let converted_price_str = Util.convertCNY(price);
-            const { convertedSymbol, convertedValue } = Util.convertCNYRaw(price);
+            let converted_price_str = await Util.convertCNY(price);
+            const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(price);
             const formattedConverted = Util.formatNumber(convertedValue);
             if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
                 converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;

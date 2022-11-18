@@ -281,7 +281,9 @@ module BrowserInterface {
                         chrome.storage.sync.get<T>(keys, (result) => resolve(result));
                         break;
                     case 'browser':
-                        browser.storage.sync.get<T>(keys).then(result => resolve(result));
+                        browser.storage.sync.get<T>(keys)
+                            .then(result => resolve(result))
+                            .catch(_ => resolve(null));
                         break;
                 }
             });

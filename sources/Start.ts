@@ -69,7 +69,7 @@ if (DEBUG) {
         let dateToday = Util.formatDate(new Date());
 
         async function cacheCurrency(date: string): Promise<void> {
-            let currencyName: string = getSetting(Settings.SELECTED_CURRENCY);
+            let currencyName: string = await getSetting(Settings.SELECTED_CURRENCY);
             let rates = CurrencyHelper.getData().rates[currencyName];
 
             let segment: CurrencyHelper.Data = {
@@ -82,11 +82,11 @@ if (DEBUG) {
 
             console.debug(segment);
 
-            if (getSetting(Settings.EXPERIMENTAL_FETCH_NOTIFICATION)) {
+            if (await getSetting(Settings.EXPERIMENTAL_FETCH_NOTIFICATION)) {
                 Util.signal(['Buff', 'toast'], null, [`Fetched current conversion rates: ${currencyName} -> ${rates[0].toFixed(rates[1])}`]);
             }
 
-            await BrowserInterface.Storage.set({[GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE]: segment});
+            await BrowserInterface.Storage.set({ [GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE]: segment });
         }
 
         if (parsedCurrencyCache) {
@@ -120,9 +120,8 @@ if (DEBUG) {
 
 // actually disable DATA_PROTECTION if it is disabled
 (async () => {
-    await ExtensionSettings.isLoaded();
     if (window.location.href.indexOf('/user-center/profile') > -1) {
-        if (!getSetting(Settings.DATA_PROTECTION)) {
+        if (!await getSetting(Settings.DATA_PROTECTION)) {
             document.querySelectorAll('span#mobile:not([data-blur="false"]), a[href*="steamcommunity.com"]:not([data-blur="false"])').forEach(element => {
                 element.setAttribute('data-blur', 'false');
             });
@@ -131,8 +130,6 @@ if (DEBUG) {
 })();
 
 async function adjustFloatBar(): Promise<void> {
-    await ExtensionSettings.isLoaded();
-
     let divFloatBar = document.querySelector('body > div.floatbar');
 
     // if not present, skip
@@ -170,7 +167,7 @@ async function adjustFloatBar(): Promise<void> {
 
     divFloatBar.parentElement.appendChild(divExpandFloatBar);
 
-    if (getSetting(Settings.SHOW_FLOAT_BAR)) {
+    if (await getSetting(Settings.SHOW_FLOAT_BAR)) {
         showFloatBar();
     } else {
         hideFloatBar();
@@ -185,7 +182,7 @@ async function adjustAccountBalance(): Promise<void> {
     if (isFinite(balYuan)) {
         await ExtensionSettings.isLoaded();
 
-        let { convertedSymbol, convertedValue } = Util.convertCNYRaw(balYuan);
+        let { convertedSymbol, convertedValue } = await Util.convertCNYRaw(balYuan);
         let formatted = Util.formatNumber(convertedValue, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
 
         let balConverted = Util.buildHTML('span', {
@@ -208,20 +205,19 @@ adjustAccountBalance();
 // scheme css
 
 async function addSchemeCSS(): Promise<void> {
-    await ExtensionSettings.isLoaded();
-
-    if (getSetting(Settings.USE_SCHEME)) {
+    if (await getSetting(Settings.USE_SCHEME)) {
+        let colors = await getSetting(Settings.COLOR_SCHEME);
         InjectionServiceLib.injectCSS(`
     /* variables */
     .dark-theme {
         /* #121212 */
-        --bu-color-0: ${getSetting(Settings.COLOR_SCHEME)[0]};
+        --bu-color-0: ${colors[0]};
         /* #1f1f1f */
-        --bu-color-1: ${getSetting(Settings.COLOR_SCHEME)[1]};
+        --bu-color-1: ${colors[1]};
         /* #bfbfbf */
-        ---bu-color-2: ${getSetting(Settings.COLOR_SCHEME)[2]};
+        ---bu-color-2: ${colors[2]};
         /* #696969 */
-        --bu-color-3: ${getSetting(Settings.COLOR_SCHEME)[3]};
+        --bu-color-3: ${colors[3]};
     }
     
     /* market */

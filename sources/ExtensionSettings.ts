@@ -176,6 +176,7 @@ module ExtensionSettings {
 
     type InternalSetting<T extends Settings> = {
         value?: SettingsTypes[T],
+        resolved?: boolean,
         readonly default: SettingsTypes[T],
         readonly export: string,
         readonly transform: InternalStructureTransform,
@@ -480,10 +481,16 @@ module ExtensionSettings {
         resolveLoad = resolve;
     });
 
+    /**
+     * @deprecated
+     */
     export async function isLoaded(): Promise<boolean> {
         return await loaded;
     }
 
+    /**
+     * @deprecated
+     */
     export async function load(): Promise<void> {
         const _versionCheck = await BrowserInterface.Storage.get<SettingsTypes[Settings.VERSION]>(INTERNAL_SETTINGS[Settings.VERSION].export);
 
@@ -544,8 +551,49 @@ module ExtensionSettings {
      * @param setting The value of the setting to get
      * @returns The value from the specified setting, return type is determined by passed setting
      */
-    export function getSetting<T extends Settings, R extends SettingsTypes[T]>(setting: T): R {
-        return <R>INTERNAL_SETTINGS[setting].value;
+    export async function getSetting<T extends Settings, R extends SettingsTypes[T]>(setting: T): Promise<R> {
+        return await new Promise<R>((resolve, _) => {
+            let internal: InternalSetting<any> = INTERNAL_SETTINGS[setting];
+
+            // setting doesnt exist
+            if (!internal) {
+                resolve(null);
+                return;
+            }
+
+            // if setting has been resolved (loaded) already, return value
+            if (internal.resolved) {
+                resolve(internal.value);
+                return;
+            }
+
+            BrowserInterface.Storage.get<any>(internal.export).then(value => {
+                let newValue = value;
+                switch (internal.transform) {
+                    case InternalStructureTransform.NONE:
+                        break;
+                    case InternalStructureTransform.BOOLEAN:
+                        newValue = value == 1;
+
+                        // forcefully disable for now until proxy works properly
+                        if (setting == Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS || setting == Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) {
+                            newValue = false;
+                        }
+
+                        break;
+                    case InternalStructureTransform.BOOLEAN_ARRAY:
+                        newValue = Util.importBooleansFromBytes(value);
+                        break;
+                }
+
+                let validator = internal.validator ?? ((_, value) => value);
+                internal.value = validator(setting, newValue);
+
+                internal.resolved = true;
+
+                resolve(internal.value);
+            });
+        });
     }
 
     /**
@@ -591,12 +639,44 @@ module ExtensionSettings {
     }
 
     /**
-     * This will write the current settings to the cookie storage
+     * This will write the specified settings to the storage
      *
      * @param setting Define the setting to write, for optimization purposes
      */
-    export function finalize(setting?: Settings): void {
-        const keys = !!setting ? [setting] : Object.keys(INTERNAL_SETTINGS);
+    export function finalize(setting: Settings): void {
+        let internal: InternalSetting<any> = INTERNAL_SETTINGS[setting];
+
+        if (!internal) {
+            DEBUG && console.debug(`[BuffUtility] Cannot finalize setting "${setting}", it does not exist.`);
+            return;
+        }
+
+        let exportValue: any = null;
+        switch (internal.transform) {
+            case InternalStructureTransform.NONE:
+                exportValue = internal.value;
+                break;
+            case InternalStructureTransform.BOOLEAN:
+                exportValue = internal.value == true ? 1 : 0;
+                break;
+            case InternalStructureTransform.BOOLEAN_ARRAY:
+                exportValue = Util.exportBooleansToBytes(<boolean[]>internal.value);
+                break;
+        }
+
+        BrowserInterface.Storage.set({
+            [internal.export]: exportValue
+        }).then(_ => DEBUG && console.debug('[BuffUtility] Wrote setting:', setting, `(${internal.export})`, '->', exportValue));
+
+        // delete cookie
+        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, '0', 0);
+    }
+
+    /**
+     * @deprecated
+     */
+    function _finalizeAll(): void {
+        const keys = Object.keys(INTERNAL_SETTINGS);
 
         let exportSettings = {};
 
@@ -637,7 +717,7 @@ module ExtensionSettings {
 
     function _upgrade218(): void {
         _load217();
-        finalize();
+        _finalizeAll();
     }
 
     function _load217(): void {
@@ -651,8 +731,6 @@ module ExtensionSettings {
     }
 
 }
-
-ExtensionSettings.load();
 
 import Settings = ExtensionSettings.Settings;
 import getSetting = ExtensionSettings.getSetting;

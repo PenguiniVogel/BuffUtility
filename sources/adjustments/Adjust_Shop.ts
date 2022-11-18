@@ -10,7 +10,7 @@ module Adjust_Shop {
         `);
     }
 
-    function process(transferData: InjectionService.TransferData<unknown>): void {
+    async function process(transferData: InjectionService.TransferData<unknown>): Promise<void> {
         if (transferData.url.match(/\/shop\/.+\/sell_order/)) {
             console.debug('[BuffUtility] Adjust_Shops (/sell_order)');
             adjustShopSellOrder(<InjectionService.TransferData<BuffTypes.ShopSellOrder.Data>>transferData);
@@ -25,7 +25,7 @@ module Adjust_Shop {
 
     async function adjustShopSellOrder(transferData: InjectionService.TransferData<BuffTypes.ShopSellOrder.Data>): Promise<void> {
         // If experimental feature was disabled, ignore.
-        if (!getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
+        if (!await getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
             console.debug('[BuffUtility] Experimental feature \'Adjust Shop\' is disabled.');
             return;
         }
@@ -74,8 +74,8 @@ module Adjust_Shop {
             }
 
             if (priceBox) {
-                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
-                    const priceConv = Util.convertCNYRaw(+dataRow.price);
+                if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const priceConv = await Util.convertCNYRaw(+dataRow.price);
                     priceBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)}`;
                 } else {
                     priceBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
@@ -84,9 +84,9 @@ module Adjust_Shop {
         }
     }
 
-    function adjustShopFeatured(transferData: InjectionService.TransferData<BuffTypes.ShopFeatured.Data>): void {
+    async function adjustShopFeatured(transferData: InjectionService.TransferData<BuffTypes.ShopFeatured.Data>): Promise<void> {
         // If experimental feature was disabled, ignore.
-        if (!getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
+        if (!await getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
             console.debug('[BuffUtility] Experimental feature \'Adjust Shop\' is disabled.');
             return;
         }
@@ -102,8 +102,8 @@ module Adjust_Shop {
             const priceBox = <HTMLElement>liList.item(i).querySelector('p > .c_Yellow');
 
             if (priceBox) {
-                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
-                    const priceConv = Util.convertCNYRaw(+dataRow.price);
+                if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const priceConv = await Util.convertCNYRaw(+dataRow.price);
                     priceBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)}`;
                 } else {
                     priceBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
@@ -112,9 +112,9 @@ module Adjust_Shop {
         }
     }
 
-    function adjustShopBillOrder(transferData: InjectionService.TransferData<BuffTypes.ShopBillOrder.Data>): void {
+    async function adjustShopBillOrder(transferData: InjectionService.TransferData<BuffTypes.ShopBillOrder.Data>): Promise<void> {
         // If experimental feature was disabled, ignore.
-        if (!getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
+        if (!await getSetting(Settings.EXPERIMENTAL_ADJUST_SHOP)) {
             console.debug('[BuffUtility] Experimental feature \'Adjust Shop\' is disabled.');
             return;
         }
@@ -133,8 +133,8 @@ module Adjust_Shop {
                 let timePast = +(textBox.innerText.split('天')[0]);
                 timePast = isFinite(timePast) ? timePast : 0;
 
-                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
-                    const priceConv = Util.convertCNYRaw(+dataRow.price);
+                if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const priceConv = await Util.convertCNYRaw(+dataRow.price);
                     textBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)} (${timePast}d ago)`;
                 } else {
                     textBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)} (${timePast}d ago)`;

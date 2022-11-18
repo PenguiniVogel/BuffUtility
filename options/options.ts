@@ -67,23 +67,15 @@ module Options {
                 })
             ]
         }));
-        // return createSettingHTML(setting, info, Util.buildHTML('input', {
-        //     id: setting,
-        //     attributes: {
-        //         'type': type,
-        //         'data-target': 'input',
-        //         'value': `${value}`
-        //     }
-        // }));
     }
 
-    function createCheckboxOption(setting: Settings, info: DisplayInfo): string {
+    async function createCheckboxOption(setting: Settings, info: DisplayInfo): Promise<string> {
         return createSettingHTML(setting, info, Util.buildHTML('input', {
             id: setting,
             attributes: {
                 'type': 'checkbox',
                 'data-target': 'checkbox',
-                [getSetting(setting) ? 'checked' : 'no-checked']: ''
+                [await getSetting(setting) ? 'checked' : 'no-checked']: ''
             }
         }));
     }
@@ -98,72 +90,73 @@ module Options {
         }));
     }
 
-    function createMultiCheckboxOption(setting: Settings, info: DisplayInfo, options: string[]): string {
-        const values: boolean[] = getSetting(setting);
+    async function createMultiCheckboxOption(setting: Settings, info: DisplayInfo, options: string[]): Promise<string> {
+        const values: boolean[] = await getSetting(setting);
+
         return createSettingHTML(setting, info, Util.buildHTML('div', {
             id: setting,
-            content: options.map((option, index) => Util.buildHTML('div', {
-                class: 'label-then-input',
-                content: [
-                    Util.buildHTML('label', {
-                        attributes: {
-                            'for': `${setting}-${index}`
-                        },
-                        style: {
-                            'padding-right': '5px'
-                        },
-                        content: option
-                    }),
-                    Util.buildHTML('input', {
-                        id: `${setting}-${index}`,
-                        attributes: {
-                            'type': 'checkbox',
-                            'data-target': 'multi-checkbox',
-                            'data-setting': setting,
-                            'data-index': `${index}`,
-                            [values[index] ? 'checked' : 'no-checked']: ''
-                        }
-                    })
-                ]
+            style: {
+                'display': 'grid',
+                'grid-template-columns': 'auto auto'
+            },
+            content: options.map((option, index) => Util.buildHTML('label', {
+                attributes: {
+                    'for': `${setting}-${index}`
+                },
+                style: {
+                    'line-height': '25px',
+                    'padding-right': '5px',
+                    'border-bottom': '1px solid var(--color-light2-accent)'
+                },
+                content: option
+            }) + Util.buildHTML('input', {
+                id: `${setting}-${index}`,
+                attributes: {
+                    'type': 'checkbox',
+                    'data-target': 'multi-checkbox',
+                    'data-setting': setting,
+                    'data-index': `${index}`,
+                    [values[index] ? 'checked' : 'no-checked']: ''
+                }
             }))
         }));
     }
 
-    function createMultiInputOption(setting: Settings, info: DisplayInfo, type: string, options: string[]): string {
-        const values: any[] = getSetting(setting);
+    async function createMultiInputOption(setting: Settings, info: DisplayInfo, type: string, options: string[]): Promise<string> {
+        const values: any[] = await getSetting(setting);
+
         return createSettingHTML(setting, info, Util.buildHTML('div', {
             id: setting,
-            content: options.map((option, index) => Util.buildHTML('div', {
-                class: 'label-then-input',
-                content: [
-                    Util.buildHTML('label', {
-                        attributes: {
-                            'for': `${setting}-${index}`
-                        },
-                        style: {
-                            'padding-right': '5px'
-                        },
-                        content: option
-                    }),
-                    Util.buildHTML('input', {
-                        id: `${setting}-${index}`,
-                        attributes: {
-                            'type': type,
-                            'data-target': 'multi-input',
-                            'data-setting': setting,
-                            'data-index': `${index}`,
-                            'value': `${values[index]}`
-                        }
-                    })
-                ]
-            }))
+            style: {
+                'display': 'grid',
+                'grid-template-columns': 'auto auto'
+            },
+            content: options.map((option, index) =>
+                Util.buildHTML('label', {
+                    attributes: {
+                        'for': `${setting}-${index}`
+                    },
+                    style: {
+                        'line-height': '25px',
+                        'padding-right': '5px',
+                        'border-bottom': '1px solid var(--color-light2-accent)'
+                    },
+                    content: option
+                }) + Util.buildHTML('input', {
+                    id: `${setting}-${index}`,
+                    attributes: {
+                        'type': type,
+                        'data-target': 'multi-input',
+                        'data-setting': setting,
+                        'data-index': `${index}`,
+                        'value': `${values[index]}`
+                    }
+                })
+            )
         }));
     }
 
     async function init(): Promise<void> {
-        // make sure settings are loaded
-        await ExtensionSettings.isLoaded();
-
         let normalSettings: string = '';
         let advancedSettings: string = '';
         let experimentalSettings: string = '';
@@ -187,40 +180,40 @@ module Options {
                 displayText: 'Custom - CC',
                 value: GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY
             }
-        ], getSetting(Settings.SELECTED_CURRENCY));
+        ], await getSetting(Settings.SELECTED_CURRENCY));
 
         // Settings.APPLY_CURRENCY_TO_DIFFERENCE
-        normalSettings += createCheckboxOption(Settings.APPLY_CURRENCY_TO_DIFFERENCE, {
+        normalSettings += await createCheckboxOption(Settings.APPLY_CURRENCY_TO_DIFFERENCE, {
             title: 'Apply Currency to difference',
             description: 'Whether to show the difference on the listing page in your selected currency or RMB.'
         });
 
         // Settings.CAN_EXPAND_SCREENSHOTS
-        normalSettings += createCheckboxOption(Settings.CAN_EXPAND_SCREENSHOTS, {
+        normalSettings += await createCheckboxOption(Settings.CAN_EXPAND_SCREENSHOTS, {
             title: 'Can expand preview',
             description: 'Can previews be expanded on sell listings. This only works if "Preview screenshots" is turned on and if the item has been inspected.'
         });
 
         // Settings.EXPAND_SCREENSHOTS_BACKDROP
-        normalSettings += createCheckboxOption(Settings.EXPAND_SCREENSHOTS_BACKDROP, {
+        normalSettings += await createCheckboxOption(Settings.EXPAND_SCREENSHOTS_BACKDROP, {
             title: 'Expanded preview backdrop',
             description: 'Adds a transparent black backdrop to preview images to add some contrast.'
         });
 
         // Settings.APPLY_STEAM_TAX
-        normalSettings += createCheckboxOption(Settings.APPLY_STEAM_TAX, {
+        normalSettings += await createCheckboxOption(Settings.APPLY_STEAM_TAX, {
             title: 'Apply Steam Tax',
             description: 'Apply Steam Tax before calculating differences.<br/>This will calculate the steam seller price from the provided reference price.'
         });
 
         // Settings.SHOW_TOAST_ON_ACTION
-        normalSettings += createCheckboxOption(Settings.SHOW_TOAST_ON_ACTION, {
+        normalSettings += await createCheckboxOption(Settings.SHOW_TOAST_ON_ACTION, {
             title: 'Show Toast on action',
             description: 'If enabled, certain BuffUtility components will inform you via Buffs Toast system.'
         });
 
         // Settings.LISTING_OPTIONS
-        normalSettings += createMultiCheckboxOption(Settings.LISTING_OPTIONS, {
+        normalSettings += await createMultiCheckboxOption(Settings.LISTING_OPTIONS, {
             title: 'Listing options',
             description: 'Define what options show up on each listing.'
         }, [
@@ -233,13 +226,13 @@ module Options {
         ]);
 
         // Settings.SHOW_FLOAT_BAR
-        normalSettings += createCheckboxOption(Settings.SHOW_FLOAT_BAR, {
+        normalSettings += await createCheckboxOption(Settings.SHOW_FLOAT_BAR, {
             title: 'Show float-bar',
             description: 'Show the float-bar buff has on the side, can be expanded back if hidden!'
         });
 
         // Settings.COLOR_LISTINGS
-        normalSettings += createMultiCheckboxOption(Settings.COLOR_LISTINGS, {
+        normalSettings += await createMultiCheckboxOption(Settings.COLOR_LISTINGS, {
             title: 'Color purchase options',
             description: 'Color purchase options, this will paint purchase options red if not affordable with the current held balance.'
         }, [
@@ -248,7 +241,7 @@ module Options {
         ]);
 
         // Settings.USE_SCHEME
-        normalSettings += createCheckboxOption(Settings.USE_SCHEME, {
+        normalSettings += await createCheckboxOption(Settings.USE_SCHEME, {
             title: 'Use Color Scheme',
             description: 'Use the defined color scheme (dark mode by default).'
         });
@@ -267,7 +260,7 @@ module Options {
                 displayText: 'Buff',
                 value: ExtensionSettings.DifferenceDominator.BUFF
             }
-        ], getSetting(Settings.DIFFERENCE_DOMINATOR));
+        ], await getSetting(Settings.DIFFERENCE_DOMINATOR));
 
         // Settings.DEFAULT_SORT_BY
         advancedSettings += createSelectOption(Settings.DEFAULT_SORT_BY, {
@@ -278,7 +271,7 @@ module Options {
                 displayText: option,
                 value: ExtensionSettings.FILTER_SORT_BY[option]
             };
-        }), getSetting(Settings.DEFAULT_SORT_BY));
+        }), await getSetting(Settings.DEFAULT_SORT_BY));
 
         // Settings.DEFAULT_STICKER_SEARCH
         advancedSettings += createSelectOption(Settings.DEFAULT_STICKER_SEARCH, {
@@ -289,7 +282,7 @@ module Options {
                 displayText: option,
                 value: ExtensionSettings.FILTER_STICKER_SEARCH[option]
             };
-        }), getSetting(Settings.DEFAULT_STICKER_SEARCH));
+        }), await getSetting(Settings.DEFAULT_STICKER_SEARCH));
 
         // Settings.EXPAND_TYPE
         advancedSettings += createSelectOption(Settings.EXPAND_TYPE, {
@@ -304,7 +297,7 @@ module Options {
                 displayText: 'Inspect',
                 value: ExtensionSettings.ExpandScreenshotType.INSPECT
             }
-        ], getSetting(Settings.EXPAND_TYPE));
+        ], await getSetting(Settings.EXPAND_TYPE));
 
         // Settings.CUSTOM_FOP
         advancedSettings += createSelectOption(Settings.CUSTOM_FOP, {
@@ -335,7 +328,7 @@ module Options {
                 displayText: 'w3920/h3680',
                 value: ExtensionSettings.FOP_VALUES.w3920xh3680
             }
-        ], getSetting(Settings.CUSTOM_FOP));
+        ], await getSetting(Settings.CUSTOM_FOP));
 
         // Settings.LOCATION_RELOAD_NEWEST
         advancedSettings += createSelectOption(Settings.LOCATION_RELOAD_NEWEST, {
@@ -362,28 +355,28 @@ module Options {
                 displayText: 'Left',
                 value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.LEFT
             }
-        ], getSetting(Settings.LOCATION_RELOAD_NEWEST));
+        ], await getSetting(Settings.LOCATION_RELOAD_NEWEST));
 
         // Settings.CUSTOM_CURRENCY_RATE
         advancedSettings += createInputOption(Settings.CUSTOM_CURRENCY_RATE, {
             title: 'Custom currency rate',
             description: 'Set the rate of the custom currency e.g.<br>10 RMB -> 1 CC<br>Only active if "Custom" was selected in the "Display Currency" option.'
-        }, 'number', getSetting(Settings.CUSTOM_CURRENCY_RATE));
+        }, 'number', await getSetting(Settings.CUSTOM_CURRENCY_RATE));
 
         // Settings.CUSTOM_CURRENCY_NAME
         advancedSettings += createInputOption(Settings.CUSTOM_CURRENCY_NAME, {
             title: 'Custom currency name',
             description: 'Set the name of the custom currency.<br>Only active if "Custom" was selected in the "Display Currency" option.'
-        }, 'text', getSetting(Settings.CUSTOM_CURRENCY_NAME));
+        }, 'text', await getSetting(Settings.CUSTOM_CURRENCY_NAME));
 
         // Settings.DATA_PROTECTION
-        advancedSettings += createCheckboxOption(Settings.DATA_PROTECTION, {
+        advancedSettings += await createCheckboxOption(Settings.DATA_PROTECTION, {
             title: 'Data protection',
             description: 'Blur some settings on the account page to protect yourself.'
         });
 
         // Settings.COLOR_SCHEME
-        advancedSettings += createMultiInputOption(Settings.COLOR_SCHEME, {
+        advancedSettings += await createMultiInputOption(Settings.COLOR_SCHEME, {
             title: 'Color Scheme',
             description: 'Color Scheme for whatever theme you want (Dark-Theme by default)'
         }, 'color', [
@@ -395,19 +388,19 @@ module Options {
 
         // --- Experimental Settings ---
         // Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN
-        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, {
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, {
             title: 'Favourite Bargain',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show the "Bargain" feature on favourites.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
         });
 
         // Settings.EXPERIMENTAL_ADJUST_POPULAR
-        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_POPULAR, {
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_POPULAR, {
             title: 'Adjust Popular Tab',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed with 2.1.9 and become default.</small>'
         });
 
         // Settings.EXPERIMENTAL_FETCH_NOTIFICATION
-        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, {
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, {
             title: 'Currency Fetch Notification',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show toast notification when currency rates were updated, happens once a day.<br><small>* Setting will be merged in 2.1.9 into "Show Toast on Action".</small>'
         });
@@ -438,7 +431,7 @@ module Options {
         // ], getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
 
         // Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY
-        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {
             title: 'Adjust Market Currency',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust shown market currency to selected currency.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
         });
@@ -464,16 +457,16 @@ module Options {
                 displayText: 'Space Match',
                 value: ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH
             }
-        ], getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY));
+        ], await getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY));
 
         // Settings.EXPERIMENTAL_ADJUST_SHOP
-        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
             title: 'Adjust Shop Pages',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with 2.1.9 and become default behaviour.</small>'
         });
 
         // Settings.EXPERIMENTAL_ALLOW_BULK_BUY
-        experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_BULK_BUY, {
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_BULK_BUY, {
             title: 'Allow bulk buy',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Allow the bulk buy function to be used on the web version of Buff.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
         });
@@ -501,13 +494,13 @@ module Options {
                     };
                     break;
                 case 'multi-checkbox':
-                    element.onclick = () => {
+                    element.onclick = async () => {
                         console.debug('multi-checkbox', element, (<HTMLInputElement>element).checked);
 
                         const setting: Settings = <Settings>element.getAttribute('data-setting');
                         const index = parseInt(element.getAttribute('data-index'));
 
-                        let values: boolean[] = getSetting(setting);
+                        let values: boolean[] = await getSetting(setting);
                         values[index] = (<HTMLInputElement>element).checked;
 
                         setSetting(setting, values);
@@ -521,13 +514,13 @@ module Options {
                     };
                     break;
                 case 'multi-input':
-                    element.onchange = () => {
+                    element.onchange = async () => {
                         console.debug('multi-input', element, (<HTMLInputElement>element).value);
 
                         const setting: Settings = <Settings>element.getAttribute('data-setting');
                         const index = parseInt(element.getAttribute('data-index'));
 
-                        let values: any[] = getSetting(setting);
+                        let values: any[] = await getSetting(setting);
                         values[index] = (<HTMLInputElement>element).value;
 
                         setSetting(setting, values);
@@ -562,6 +555,19 @@ module Options {
                     symExpanded.innerText = '+';
                     symExpanded.setAttribute('class', 'setting-description sym-collapsed');
                 }
+            };
+        });
+
+        // add events [data-page]
+        (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-page]')).forEach(element => {
+            element.onclick = () => {
+                let selfPage = element.getAttribute('data-page');
+                (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-page]')).forEach(_page => {
+                    let isSelf = selfPage == _page.getAttribute('data-page');
+
+                    _page.setAttribute('class', isSelf ? 'active' : '');
+                    document.querySelector(`#page-${_page.getAttribute('data-page')}`).setAttribute('style', isSelf ? '' : 'display: none;');
+                });
             };
         });
     }

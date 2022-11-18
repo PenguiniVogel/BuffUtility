@@ -12,9 +12,10 @@
             --color-dark-shadow: #15121c;
 
             --color-light: #ddb362;
-            --color-light-accent: #cfa555;
+            --color-light-accent: #997c43;
 
             --color-light2: #cecece;
+            --color-light2-accent: #8c8c8c;
 
             --color-green: #009800;
             --color-red: #c90000;
@@ -30,6 +31,70 @@
             padding: 0;
 
             font: 14px/1.2em Microsoft Yahei,"Hiragino Sans GB","Hiragino Sans GB W3",arial;
+        }
+
+        nav .nav-container {
+            width: 80%;
+            height: 40px;
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+            justify-content: space-evenly;
+            align-items: center;
+            padding-bottom: 0;
+            background: var(--color-dark-shadow);
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        nav {
+            background: var(--color-dark-shadow);
+        }
+
+        nav .nav-container div {
+            font-weight: 700;
+            background: var(--color-dark-shadow);
+            cursor: pointer;
+        }
+
+        nav .nav-container div:not(.active):hover {
+            border-bottom: 1px solid var(--color-light2);
+        }
+
+        nav .nav-container div.active {
+            color: var(--color-light);
+            border-bottom: 1px solid var(--color-light);
+            font-weight: 800;
+            background: var(--color-dark-shadow);
+        }
+
+        .scroll-container {
+            max-height: calc(100vh - 40px);
+            overflow: hidden auto;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 20px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: var(--color-dark-accent);
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: var(--color-light2);
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: var(--color-light);
+        }
+
+        .scroll-container::-webkit-scrollbar-button {
+            background: var(--color-light2-accent);
+        }
+
+        .scroll-container::-webkit-scrollbar-button:hover {
+            background: var(--color-light-accent);
         }
 
         .container {
@@ -136,14 +201,6 @@
             padding-left: 10px;
         }
 
-        .label-then-input {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            align-content: center;
-            justify-content: flex-start;
-        }
-
         .label-over-input {
             display: flex;
             flex-direction: column;
@@ -156,41 +213,46 @@
     <script src="merge_options.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <div class="setting-table">
-            <h3>Normal Settings</h3>
-            <table id="settings-normal">
-                <colgroup>
-                    <col style="width: 50%;" />
-                    <col style="width: 20%;" />
-                    <col style="width: 10%;" />
-                </colgroup>
-                <tbody></tbody>
-            </table>
+    <nav>
+        <div class="nav-container">
+            <div data-page="normal" class="active">Normal Settings</div>
+            <div data-page="advanced">Advanced Settings</div>
+            <div data-page="experimental">Experimental Settings</div>
         </div>
-        <div class="setting-table">
-            <h3>Advanced Settings</h3>
-            <table id="settings-advanced">
-                <colgroup>
-                    <col style="width: 50%;" />
-                    <col style="width: 20%;" />
-                    <col style="width: 10%;" />
-                </colgroup>
-                <tbody></tbody>
-            </table>
-        </div>
-        <div class="setting-table">
-            <h3>Experimental Settings</h3>
-            <table id="settings-experimental">
-                <colgroup>
-                    <col style="width: 50%;" />
-                    <col style="width: 20%;" />
-                    <col style="width: 10%;" />
-                </colgroup>
-                <tbody></tbody>
-            </table>
+    </nav>
+    <div class="scroll-container">
+        <div class="container">
+            <div id="page-normal" class="setting-table">
+                <table id="settings-normal">
+                    <colgroup>
+                        <col style="width: 50%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
+                    </colgroup>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="page-advanced" style="display: none;" class="setting-table">
+                <table id="settings-advanced">
+                    <colgroup>
+                        <col style="width: 50%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
+                    </colgroup>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="page-experimental" style="display: none;" class="setting-table">
+                <table id="settings-experimental">
+                    <colgroup>
+                        <col style="width: 50%;" />
+                        <col style="width: 20%;" />
+                        <col style="width: 10%;" />
+                    </colgroup>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
-
 </body>
 </html>

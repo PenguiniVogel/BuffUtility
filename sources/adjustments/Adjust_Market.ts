@@ -53,30 +53,30 @@ module Adjust_Market {
 
                 let stickerSearch = '';
                 if (schemaData && schemaData.sticker_amount > 0) {
-                    switch (getSetting(Settings.DEFAULT_STICKER_SEARCH)) {
+                    switch (await getSetting(Settings.DEFAULT_STICKER_SEARCH)) {
                         case ExtensionSettings.FILTER_STICKER_SEARCH['All']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers 100%']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['No Stickers']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Quad Combos']:
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Quad Combos 100%']:
-                            stickerSearch = getSetting(Settings.DEFAULT_STICKER_SEARCH);
+                            stickerSearch = await getSetting(Settings.DEFAULT_STICKER_SEARCH);
                             break;
                         case ExtensionSettings.FILTER_STICKER_SEARCH['Save Custom']:
-                            if (getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH).length > 0) {
-                                stickerSearch = getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH);
+                            if ((await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH)).length > 0) {
+                                stickerSearch = await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH);
                             }
                             break;
                     }
                 }
 
-                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${getSetting(Settings.DEFAULT_SORT_BY)}${stickerSearch}`);
+                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${await getSetting(Settings.DEFAULT_SORT_BY)}${stickerSearch}`);
             }
 
             let buffPrice = +dataRow.sell_min_price;
             let steamPriceCNY = +dataRow.goods_info.steam_price_cny;
 
-            if (getSetting(Settings.APPLY_STEAM_TAX)) {
+            if (await getSetting(Settings.APPLY_STEAM_TAX)) {
                 let steam = Util.calculateSellerPrice(~~(steamPriceCNY * 100));
                 let f_steamPriceCNY = (steam.amount - steam.fees) / 100;
 
@@ -86,7 +86,7 @@ module Adjust_Market {
             }
 
             let priceDiff;
-            switch (getSetting(Settings.DIFFERENCE_DOMINATOR)) {
+            switch (await getSetting(Settings.DIFFERENCE_DOMINATOR)) {
                 case ExtensionSettings.DifferenceDominator.STEAM:
                     priceDiff = ((steamPriceCNY - buffPrice) / steamPriceCNY) * -1 * 100;
                     break;
@@ -105,8 +105,8 @@ module Adjust_Market {
                 let sell_min_price_str = `${dataRow.sell_min_price}`;
                 const sell_min_price_title = Util.formatNumber(sell_min_price_str, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
 
-                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
-                    const { convertedSymbol, convertedValue } = Util.convertCNYRaw(+dataRow.sell_min_price);
+                if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(+dataRow.sell_min_price);
                     sell_min_price_sym = convertedSymbol;
                     sell_min_price_str = convertedValue;
                 }
@@ -153,8 +153,8 @@ module Adjust_Market {
                 let buy_max_price_str = `${dataRow.buy_max_price}`;
                 const buy_max_price_title = Util.formatNumber(buy_max_price_str, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
 
-                if (getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
-                    const { convertedSymbol, convertedValue } = Util.convertCNYRaw(+dataRow.buy_max_price);
+                if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
+                    const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(+dataRow.buy_max_price);
                     buy_max_price_sym = convertedSymbol;
                     buy_max_price_str = convertedValue;
                 }
@@ -229,7 +229,7 @@ module Adjust_Market {
 
     async function adjustMarketTopBookmarked(transferData: InjectionService.TransferData<BuffTypes.TopPopular.Data>): Promise<void> {
         // If experimental feature was disabled, ignore.
-        if (!getSetting(Settings.EXPERIMENTAL_ADJUST_POPULAR)) {
+        if (!await getSetting(Settings.EXPERIMENTAL_ADJUST_POPULAR)) {
             console.debug('[BuffUtility] Experimental feature \'Adjust Popular\' is disabled.');
             return;
         }

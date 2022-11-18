@@ -12,6 +12,12 @@ module Adjust_Share {
         sell_order_id?: string
     }
 
+    async function init(): Promise<void> {
+        if (await getSetting(Settings.EXPERIMENTAL_ADJUST_SHARE)) {
+            process();
+        }
+    }
+
     async function process(): Promise<void> {
         let data: LaunchData = (await InjectionService.requestObject('launchData')) ?? {};
 
@@ -29,7 +35,7 @@ module Adjust_Share {
             return;
         }
 
-        let baseURL = `https://buff.163.com/goods/${parsedParam.goods_id}?from=market#tab=selling&sort_by=${getSetting(Settings.DEFAULT_SORT_BY)}&min_price=${parsedParam.price}&max_price=${(+parsedParam.price + 0.01)}`;
+        let baseURL = `https://buff.163.com/goods/${parsedParam.goods_id}?from=market#tab=selling&sort_by=${await getSetting(Settings.DEFAULT_SORT_BY)}&min_price=${parsedParam.price}&max_price=${(+parsedParam.price + 0.01)}`;
 
         const information = <NodeListOf<HTMLElement>>document.querySelectorAll('div.title-info-wrapper p');
 
@@ -76,7 +82,7 @@ module Adjust_Share {
 
         const goodsDetailFooter = <HTMLElement>document.querySelector('div.good-detail-footer');
 
-        const { convertedSymbol, convertedValue } = Util.convertCNYRaw(+parsedParam.price);
+        const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(+parsedParam.price);
         const convertedSpan = goodsDetailFooter.querySelector('h6 span.c_Gray');
 
         convertedSpan.setAttribute('class', 'c_Gray f_12px');
@@ -101,8 +107,6 @@ module Adjust_Share {
         goodsDetailFooter.append(spacer);
     }
 
-    if (getSetting(Settings.EXPERIMENTAL_ADJUST_SHARE)) {
-        process();
-    }
+    init();
 
 }

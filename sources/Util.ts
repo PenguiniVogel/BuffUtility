@@ -74,30 +74,16 @@ module Util {
     }
 
     /**
+     * @deprecated Please use {@link convertCNYRaw}
      * Convert the specified cny value to the selected currency
      *
      * @param cny
      * @returns <e title="¥1 = currency_symbol rate">currency_symbol</e>(cny * rate).toFixed(fixPoint)
      */
-    export function convertCNY(cny: number): string {
-        const converted = convertCNYRaw(cny);
+    export async function convertCNY(cny: number): Promise<string> {
+        const converted = await convertCNYRaw(cny);
 
         return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${converted.convertedSymbol}${converted.convertedRate.toFixed(converted.convertedLeadingZeros)}">${converted.convertedSymbol} </e>${(converted.convertedValue)}`;
-        // const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
-        //
-        // if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
-        //     const custom_currency_name = getSetting(Settings.CUSTOM_CURRENCY_NAME);
-        //     const custom_currency_calculated_rate = getSetting(Settings.CUSTOM_CURRENCY_CALCULATED_RATE);
-        //     const custom_currency_leading_zeros = getSetting(Settings.CUSTOM_CURRENCY_LEADING_ZEROS);
-        //
-        //     return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${custom_currency_name} ${custom_currency_calculated_rate.toFixed(custom_currency_leading_zeros)}">CC </e>${(cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros)}`;
-        // } else {
-        //     const { rates, symbols } = CurrencyHelper.getData();
-        //     const [ rate, fixPoint ] = rates[selected_currency];
-        //     const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
-        //
-        //     return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${symbol}${rate.toFixed(fixPoint)}">${symbol} </e>${(cny * rate).toFixed(fixPoint)}`;
-        // }
     }
 
     /**
@@ -106,18 +92,18 @@ module Util {
      * @param cny
      * @returns An object containing the currency symbol and the converted value
      */
-    export function convertCNYRaw(cny: number): {
+    export async function convertCNYRaw(cny: number): Promise<{
         convertedSymbol: string,
         convertedValue: string,
         convertedName: string,
         convertedRate: number,
         convertedLeadingZeros: number
-    } {
-        const selected_currency = getSetting(Settings.SELECTED_CURRENCY);
+    }> {
+        const selected_currency = await getSetting(Settings.SELECTED_CURRENCY);
 
         if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
-            const custom_currency_name = getSetting(Settings.CUSTOM_CURRENCY_NAME);
-            const custom_currency_calculated_rate = 1 / getSetting(Settings.CUSTOM_CURRENCY_RATE);
+            const custom_currency_name = await getSetting(Settings.CUSTOM_CURRENCY_NAME);
+            const custom_currency_calculated_rate = 1 / await getSetting(Settings.CUSTOM_CURRENCY_RATE);
             const custom_currency_leading_zeros = (/^0\.([^1-9]+)/.exec(`${custom_currency_calculated_rate}`) ?? [null, ''])[1].length + 2;
 
             return {
