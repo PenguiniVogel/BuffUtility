@@ -44,22 +44,37 @@ module Options {
                 }),
                 Util.buildHTML('td')
             ]
-        }) + Util.buildHTML('tr', {
-            content: [
-                '<td><hr /></td>'
-            ]
         });
     }
 
     function createInputOption(setting: Settings, info: DisplayInfo, type: string, value: any): string {
-        return createSettingHTML(setting, info, Util.buildHTML('input', {
-            id: setting,
-            attributes: {
-                'type': type,
-                'data-target': 'input',
-                'value': `${value}`
-            }
+        return createSettingHTML(setting, info, Util.buildHTML('div', {
+            class: 'label-over-input',
+            content: [
+                Util.buildHTML('label', {
+                    attributes: {
+                        'for': setting
+                    },
+                    content: [ 'Value:' ]
+                }),
+                Util.buildHTML('input', {
+                    id: setting,
+                    attributes: {
+                        'type': type,
+                        'data-target': 'input',
+                        'value': `${value}`
+                    }
+                })
+            ]
         }));
+        // return createSettingHTML(setting, info, Util.buildHTML('input', {
+        //     id: setting,
+        //     attributes: {
+        //         'type': type,
+        //         'data-target': 'input',
+        //         'value': `${value}`
+        //     }
+        // }));
     }
 
     function createCheckboxOption(setting: Settings, info: DisplayInfo): string {
@@ -88,10 +103,14 @@ module Options {
         return createSettingHTML(setting, info, Util.buildHTML('div', {
             id: setting,
             content: options.map((option, index) => Util.buildHTML('div', {
+                class: 'label-then-input',
                 content: [
                     Util.buildHTML('label', {
                         attributes: {
                             'for': `${setting}-${index}`
+                        },
+                        style: {
+                            'padding-right': '5px'
                         },
                         content: option
                     }),
@@ -115,10 +134,14 @@ module Options {
         return createSettingHTML(setting, info, Util.buildHTML('div', {
             id: setting,
             content: options.map((option, index) => Util.buildHTML('div', {
+                class: 'label-then-input',
                 content: [
                     Util.buildHTML('label', {
                         attributes: {
                             'for': `${setting}-${index}`
+                        },
+                        style: {
+                            'padding-right': '5px'
                         },
                         content: option
                     }),
@@ -234,7 +257,7 @@ module Options {
         // Settings.DIFFERENCE_DOMINATOR
         advancedSettings += createSelectOption(Settings.DIFFERENCE_DOMINATOR, {
             title: 'Difference Dominator',
-            description: 'Specify the dominator meaning:<br>Steam: (scmp-bp)/scmp\nBuff: (scmp-bp)/bp<br>Unless you know the difference might not want to change this setting.'
+            description: 'Specify the dominator meaning:<br>Steam: <code>(steam_price - buff_price) / steam_price</code><br>Buff: <code>(steam_price - buff_price) / buff_price</code><br>Unless you know the difference might not want to change this setting.'
         }, [
             {
                 displayText: 'Steam',
@@ -423,7 +446,7 @@ module Options {
         // Settings.EXPERIMENTAL_FORMAT_CURRENCY
         experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY, {
             title: 'Format Currency',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>None: Don\'t format at all.<br>Formatted: Taken e.g. 1234.89 will be transformed to 1,234.89.<br>Compressed: Taken e.g. 1234.89 will be transformed to 1.2<small>K</small>.<br>Space Match: Will either use Formatted or Compressed depending on space.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>None: <code>Don\'t format at all</code><br>Formatted: <code>Taken e.g. 1234.89 will be transformed to 1,234.89</code><br>Compressed: <code>Taken e.g. 1234.89 will be transformed to 1.<small>2</small>K</code><br>Space Match: <code>Will use Formatted or Compressed by space</code><br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
         }, [
             {
                 displayText: 'None',
