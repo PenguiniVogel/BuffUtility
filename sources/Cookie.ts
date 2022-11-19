@@ -1,5 +1,7 @@
 module Cookie {
 
+    DEBUG && console.debug('Start.Cookie');
+
     /**
      * @deprecated please use {@link BrowserInterface.Storage.get} now
      *

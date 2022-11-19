@@ -11,9 +11,9 @@
         {
             "js": [
                 "sources/config.js",
+                "sources/InjectionService.js",
                 "sources/BrowserInterface.js",
                 "sources/ISchemaHelper.js",
-                "sources/InjectionService.js",
                 "sources/Cookie.js"
             ],
             "matches": [

@@ -299,11 +299,11 @@ module Adjust_Listings {
         }
 
         // add expand handler
-        function setCanExpand(td_img_td: HTMLElement, img_src: string): void {
+        async function setCanExpand(td_img_td: HTMLElement, img_src: string): Promise<void> {
             let divContainer = td_img_td.querySelector('div');
             let expandImg = document.createElement('img');
 
-            expandImg.setAttribute('data-buff-utility-expand-image', `${getSetting(Settings.EXPAND_TYPE)}`);
+            expandImg.setAttribute('data-buff-utility-expand-image', `${await getSetting(Settings.EXPAND_TYPE)}`);
             // expandImg.setAttribute('style', 'display: none;');
 
             // set image source

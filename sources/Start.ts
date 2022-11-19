@@ -1,8 +1,38 @@
-// Start the extension
+/**
+ * Start extension
+ */
+/** */
+module Start {
 
-declare var g: BuffTypes.g;
+    DEBUG && console.debug('Start');
 
-if (DEBUG) {
+    function init(): void {
+        // BrowserInterface ping system
+        BrowserInterface.setupPingSystem();
+
+        // pre parse to avoid async timing errors
+        CurrencyHelper.initialize(false);
+
+        // fetch currency and make sure selected rate is up-to-date
+        getCurrencyCache();
+
+        // make sure blur is off if disabled
+        checkDataProtection();
+
+        // float bar adjustment
+        adjustFloatBar();
+
+        // adjust account balance
+        adjustAccountBalance();
+
+        // add scheme css
+        addSchemeCSS();
+
+        if (DEBUG) {
+            tests();
+        }
+    }
+
     async function tests() {
         // BrowserInterface test
         {
@@ -51,18 +81,33 @@ if (DEBUG) {
                 console.groupEnd();
             })();
         }
+
+        // test exportBooleansToBytes and importBooleansFromBytes
+        {
+            // randomly generate 6 boolean states
+            const test_data = [
+                Math.random() > 0.5,
+                Math.random() > 0.5,
+                Math.random() > 0.5,
+                Math.random() > 0.5,
+                Math.random() > 0.5,
+                Math.random() > 0.5
+            ];
+
+            let exported = Util.exportBooleansToBytes(test_data);
+
+            console.debug(test_data, '->', exported);
+
+            let imported = Util.importBooleansFromBytes(exported);
+
+            console.debug(exported, '->', imported);
+
+            let filtered = imported.filter((x, i) => x != test_data[i]);
+
+            console.debug('If array is longer than 0, we failed:', filtered.length, filtered);
+        }
     }
 
-    tests();
-}
-
-// BrowserInterface ping system
-{
-    BrowserInterface.setupPingSystem();
-}
-
-// currency stuff, scoped to avoid pollution
-{
     async function getCurrencyCache(): Promise<void> {
         let currencyCache = await BrowserInterface.Storage.get<any>(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
         let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache);
@@ -112,100 +157,89 @@ if (DEBUG) {
         Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, '0', 0);
     }
 
-    // pre parse to avoid async timing errors
-    CurrencyHelper.initialize(false);
-
-    getCurrencyCache();
-}
-
-// actually disable DATA_PROTECTION if it is disabled
-(async () => {
-    if (window.location.href.indexOf('/user-center/profile') > -1) {
-        if (!await getSetting(Settings.DATA_PROTECTION)) {
-            document.querySelectorAll('span#mobile:not([data-blur="false"]), a[href*="steamcommunity.com"]:not([data-blur="false"])').forEach(element => {
-                element.setAttribute('data-blur', 'false');
-            });
+    async function checkDataProtection(): Promise<void> {
+        // actually disable DATA_PROTECTION if it is disabled
+        if (window.location.href.indexOf('/user-center/profile') > -1) {
+            if (!await getSetting(Settings.DATA_PROTECTION)) {
+                document.querySelectorAll('span#mobile:not([data-blur="false"]), a[href*="steamcommunity.com"]:not([data-blur="false"])').forEach(element => {
+                    element.setAttribute('data-blur', 'false');
+                });
+            }
         }
     }
-})();
 
-async function adjustFloatBar(): Promise<void> {
-    let divFloatBar = document.querySelector('body > div.floatbar');
+    async function adjustFloatBar(): Promise<void> {
+        let divFloatBar = document.querySelector('body > div.floatbar');
 
-    // if not present, skip
-    if (!divFloatBar) return;
+        // if not present, skip
+        if (!divFloatBar) return;
 
-    divFloatBar.setAttribute('id', GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR);
+        divFloatBar.setAttribute('id', GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR);
 
-    let hideFloatBar = function () {
-        document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'display: none;');
-        document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'padding: 10px 4px; cursor: pointer; user-select: none; text-align: center; background: #2f3744; color: #959595; text-decoration: none;');
-    };
+        let hideFloatBar = function () {
+            document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'display: none;');
+            document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'padding: 10px 4px; cursor: pointer; user-select: none; text-align: center; background: #2f3744; color: #959595; text-decoration: none;');
+        };
 
-    let showFloatBar = function () {
-        document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR}`).setAttribute('style', '');
-        document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'display: none;');
-    };
+        let showFloatBar = function () {
+            document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_HIDE_CUSTOM_FLOAT_BAR}`).setAttribute('style', '');
+            document.querySelector(`#${GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR}`).setAttribute('style', 'display: none;');
+        };
 
-    let p = <HTMLElement>document.createElement('p');
+        let p = <HTMLElement>document.createElement('p');
 
-    p.setAttribute('class', 'gotop');
-    p.setAttribute('style', 'cursor: pointer; user-select: none; text-align: center; padding: 22px 0px; color: #959595; text-decoration: none;');
-    p.setAttribute('onclick', `(${hideFloatBar.toString()})();`);
+        p.setAttribute('class', 'gotop');
+        p.setAttribute('style', 'cursor: pointer; user-select: none; text-align: center; padding: 22px 0px; color: #959595; text-decoration: none;');
+        p.setAttribute('onclick', `(${hideFloatBar.toString()})();`);
 
-    p.innerText = '>';
+        p.innerText = '>';
 
-    divFloatBar.appendChild(p);
+        divFloatBar.appendChild(p);
 
-    let divExpandFloatBar = document.createElement('div');
+        let divExpandFloatBar = document.createElement('div');
 
-    divExpandFloatBar.setAttribute('id', GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR);
-    divExpandFloatBar.setAttribute('class', 'floatbar');
-    divExpandFloatBar.setAttribute('onclick', `(${showFloatBar.toString()})();`);
+        divExpandFloatBar.setAttribute('id', GlobalConstants.BUFF_UTILITY_ID_EXPAND_CUSTOM_FLOAT_BAR);
+        divExpandFloatBar.setAttribute('class', 'floatbar');
+        divExpandFloatBar.setAttribute('onclick', `(${showFloatBar.toString()})();`);
 
-    divExpandFloatBar.innerText = '<';
+        divExpandFloatBar.innerText = '<';
 
-    divFloatBar.parentElement.appendChild(divExpandFloatBar);
+        divFloatBar.parentElement.appendChild(divExpandFloatBar);
 
-    if (await getSetting(Settings.SHOW_FLOAT_BAR)) {
-        showFloatBar();
-    } else {
-        hideFloatBar();
+        if (await getSetting(Settings.SHOW_FLOAT_BAR)) {
+            showFloatBar();
+        } else {
+            hideFloatBar();
+        }
     }
-}
 
-async function adjustAccountBalance(): Promise<void> {
-    let balanceDiv = document.querySelector('div.store-account > h4');
-    if (!balanceDiv) return;
-    let balYuan: number = +(<HTMLElement>balanceDiv.querySelector('#navbar-cash-amount')).innerText.replace('¥ ', '');
+    async function adjustAccountBalance(): Promise<void> {
+        let balanceDiv = document.querySelector('div.store-account > h4');
+        if (!balanceDiv) return;
+        let balYuan: number = +(<HTMLElement>balanceDiv.querySelector('#navbar-cash-amount')).innerText.replace('¥ ', '');
 
-    if (isFinite(balYuan)) {
-        let { convertedSymbol, convertedValue } = await Util.convertCNYRaw(balYuan);
-        let formatted = Util.formatNumber(convertedValue, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
+        if (isFinite(balYuan)) {
+            let { convertedSymbol, convertedValue } = await Util.convertCNYRaw(balYuan);
+            let formatted = Util.formatNumber(convertedValue, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
 
-        let balConverted = Util.buildHTML('span', {
-            content: [
-                '<br>',
-                Util.buildHTML('span', {
-                    class: 'c_Gray f_12px',
-                    content: [ `(${convertedSymbol} ${Util.embedDecimalSmall(formatted.strNumber)})` ]
-                })
-            ]
-        });
+            let balConverted = Util.buildHTML('span', {
+                content: [
+                    '<br>',
+                    Util.buildHTML('span', {
+                        class: 'c_Gray f_12px',
+                        content: [ `(${convertedSymbol} ${Util.embedDecimalSmall(formatted.strNumber)})` ]
+                    })
+                ]
+            });
 
-        balanceDiv.innerHTML += balConverted;
+            balanceDiv.innerHTML += balConverted;
+        }
     }
-}
 
-adjustFloatBar();
-adjustAccountBalance();
-
-// scheme css
-
-async function addSchemeCSS(): Promise<void> {
-    if (await getSetting(Settings.USE_SCHEME)) {
-        let colors = await getSetting(Settings.COLOR_SCHEME);
-        InjectionServiceLib.injectCSS(`
+    async function addSchemeCSS(): Promise<void> {
+        if (await getSetting(Settings.USE_SCHEME)) {
+            let colors = await getSetting(Settings.COLOR_SCHEME);
+            InjectionServiceLib.injectCSS(`
     /* variables */
     .dark-theme {
         /* #121212 */
@@ -387,9 +421,11 @@ async function addSchemeCSS(): Promise<void> {
     }
     `);
 
-        let body = document.querySelector('body');
-        body.setAttribute('class', `${body.getAttribute('class')} dark-theme`);
+            let body = document.querySelector('body');
+            body.setAttribute('class', `${body.getAttribute('class')} dark-theme`);
+        }
     }
-}
 
-addSchemeCSS();
+    init();
+
+}

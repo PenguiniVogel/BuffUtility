@@ -1,5 +1,7 @@
 module Util {
 
+    DEBUG && console.debug('Start.Util');
+
     /**
      * Calculate the steam seller price <br>
      * Stolen and slightly optimized from Steams' economy_common.js
@@ -302,8 +304,8 @@ module Util {
 
     // <a> action injection
 
-    export function addAnchorToastAction(a: HTMLElement, text: string): void {
-        if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
+    export async function addAnchorToastAction(a: HTMLElement, text: string): Promise<void> {
+        if (await getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
             a.setAttribute('href', `javascript:Buff.toast('${text}');`);
         } else {
             a.setAttribute('href', 'javascript:;');
@@ -497,33 +499,6 @@ module Util {
         }
 
         return imported;
-    }
-
-    if (DEBUG) {
-        // test exportBooleansToBytes and importBooleansFromBytes
-        (() => {
-            // randomly generate 6 boolean states
-            const test_data = [
-                Math.random() > 0.5,
-                Math.random() > 0.5,
-                Math.random() > 0.5,
-                Math.random() > 0.5,
-                Math.random() > 0.5,
-                Math.random() > 0.5
-            ];
-
-            let exported = exportBooleansToBytes(test_data);
-
-            console.debug(test_data, '->', exported);
-
-            let imported = importBooleansFromBytes(exported);
-
-            console.debug(exported, '->', imported);
-
-            let filtered = imported.filter((x, i) => x != test_data[i]);
-
-            console.debug('If array is longer than 0, we failed:', filtered.length, filtered);
-        })();
     }
 
 }

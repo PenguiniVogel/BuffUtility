@@ -1,5 +1,7 @@
 module CurrencyHelper {
 
+    DEBUG && console.debug('Start.CurrencyHelper');
+
     export interface Data {
         'date': string,
         'rates': {

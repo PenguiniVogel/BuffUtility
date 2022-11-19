@@ -1,5 +1,7 @@
 module InjectionServiceLib {
 
+    console.debug('Loading InjectionServiceLib');
+
     const ISL_READY = 'EVENT_ISL_READY';
 
     let injectionsPending: number = 0;
@@ -104,6 +106,67 @@ module InjectionServiceLib {
     }
 
     /**
+     * Inject code <br>
+     * This will add a new script tag to the document immediately
+     *
+     * @param code The code to append
+     * @param destroyAfter Destroy the added script tag after injection
+     */
+    export function injectCodeImmediately(code: string, destroyAfter: boolean = false): void {
+        console.debug('[InjectionService] Injecting code immediately.');
+
+        function _internalInjectSafe(): void {
+            let script;
+            try {
+                script = document.createElement('script');
+                script.appendChild(document.createTextNode(code));
+                document.children[0].appendChild(script);
+            } catch (ex) {
+                _internalInjectEncoded();
+            }
+
+            if (script && destroyAfter) {
+                script.remove();
+                script.textContent = '';
+            }
+        }
+
+        function _internalInjectEncoded(): void {
+            if (cspMeta) {
+                let s = document.createElement('script');
+
+                s.setAttribute('data-isl', 'injected-script');
+
+                s.innerHTML = code;
+
+                document.children[0].appendChild(s);
+            } else {
+                let a = document.createElement('a');
+
+                let inner = `s.innerHTML=\`${code}\``;
+                if (encode_content) {
+                    code = btoa(encodeURIComponent(code));
+                    inner = `s.innerHTML=decodeURIComponent(atob('${code}'))`;
+                }
+
+                a.setAttribute('style', 'display: none !important;');
+                a.setAttribute('onclick', `(function() { let s = document.createElement('script');s.setAttribute('data-isl', 'injected-script');${inner};document.children[0].appendChild(s); })();`);
+
+                if (append_on_document) document.children[0].appendChild(a);
+
+                a.click();
+                a.remove();
+            }
+        }
+
+        if (attempt_safe) {
+            _internalInjectSafe();
+        } else {
+            _internalInjectEncoded();
+        }
+    }
+
+    /**
      * Inject css <br>
      * Appends css to the head in a new style tag
      *
@@ -133,7 +196,7 @@ module InjectionServiceLib {
     function checkReady(): void {
         if (!!document.querySelector(html_check_run)) {
             ready = true;
-            console.debug(`[InjectionService] Ready (took x${readyRetry}), injecting x${injectionsPending}`);
+            console.debug(`[InjectionService] Ready (took x${readyRetry}, injecting x${injectionsPending})`);
             window.dispatchEvent(new CustomEvent(ISL_READY));
         } else {
             readyRetry ++;
@@ -146,6 +209,8 @@ module InjectionServiceLib {
 }
 
 module InjectionService {
+
+    DEBUG && console.debug('Start.InjectionService');
 
     export interface TransferData<T> {
         status: string,
@@ -315,12 +380,12 @@ module InjectionService {
         InjectionServiceLib.attempt_safe = false;
         InjectionServiceLib.html_check_run = 'html';
 
-        InjectionServiceLib.injectCode(`
+        InjectionServiceLib.injectCodeImmediately(`
 ${buff_utility_message_service.toString()}
 buff_utility_message_service();
 ${interceptNetworkRequests.toString()}
 interceptNetworkRequests();
-`, 'html');
+`);
 
         if (window.location.href.indexOf('/user-center/profile') > -1) {
             InjectionServiceLib.injectCSS(`                

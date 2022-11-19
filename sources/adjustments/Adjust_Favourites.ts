@@ -22,7 +22,7 @@ module AdjustFavourites {
             let targetId = row.querySelector('[data-target-id]');
 
             // convert price
-            let contentTDList = row.querySelectorAll('td');
+            let contentTDList = <NodeListOf<HTMLElement>>row.querySelectorAll('td');
             let priceTD = null;
             for (let i = 0, l = contentTDList.length; i < l; i ++) {
                 if (contentTDList.item(i).innerText.indexOf(GlobalConstants.SYMBOL_YUAN) > -1) {
