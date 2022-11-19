@@ -390,6 +390,16 @@ module Util {
 
     // get account balance
 
+    /**
+     * Get account balance, if user is not logged in, we will receive <br>
+     * <code>
+     * {
+     *     strBalance: '',
+     *     isBalanceYuan: false,
+     *     nrBalance: 0
+     * }
+     * </code>
+     */
     export function getAccountBalance(): {
         strBalance: string,
         isBalanceYuan: boolean,
@@ -510,7 +520,7 @@ module Util {
 
             console.debug(exported, '->', imported);
 
-            let filtered = imported.filter((x, i, a) => x != test_data[i]);
+            let filtered = imported.filter((x, i) => x != test_data[i]);
 
             console.debug('If array is longer than 0, we failed:', filtered.length, filtered);
         })();

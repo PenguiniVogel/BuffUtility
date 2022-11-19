@@ -180,8 +180,6 @@ async function adjustAccountBalance(): Promise<void> {
     let balYuan: number = +(<HTMLElement>balanceDiv.querySelector('#navbar-cash-amount')).innerText.replace('¥ ', '');
 
     if (isFinite(balYuan)) {
-        await ExtensionSettings.isLoaded();
-
         let { convertedSymbol, convertedValue } = await Util.convertCNYRaw(balYuan);
         let formatted = Util.formatNumber(convertedValue, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
 

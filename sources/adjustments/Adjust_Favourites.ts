@@ -4,8 +4,6 @@ module AdjustFavourites {
         // if not csgo, skip
         if (window.location.href.indexOf('game=csgo') == -1) return;
 
-        await ExtensionSettings.isLoaded();
-
         console.debug('[BuffUtility] Adjust_Favourites');
 
         let rows = <NodeListOf<HTMLElement>>(document.querySelector('table.list_tb.list_tb_csgo')?.querySelectorAll('tr'));
@@ -13,7 +11,7 @@ module AdjustFavourites {
         // if no rows, skip
         if (rows?.length == 0) return;
 
-        let { strBalance, isBalanceYuan, nrBalance } = Util.getAccountBalance();
+        let { isBalanceYuan, nrBalance } = Util.getAccountBalance();
 
         for (let i = 0, l = rows.length; i < l; i++) {
             let row = rows.item(i);
@@ -42,11 +40,11 @@ module AdjustFavourites {
                         priceStr = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
                     }
 
-                    let converted_price_str = await Util.convertCNY(priceCNY);
                     const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(priceCNY);
+                    let converted_price_str = `${convertedSymbol} ${convertedValue}`;
                     const formattedConverted = Util.formatNumber(convertedValue);
                     if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
-                        converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;
+                        converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(formattedConverted.strNumber)}`;
                     }
 
                     priceTD.innerHTML = Util.buildHTML('p', {
@@ -177,11 +175,11 @@ module AdjustFavourites {
                 }
 
                 if (isBalanceYuan) {
-                    if (price > nrBalance && await getSetting(Settings.COLOR_LISTINGS)[0]) {
+                    if (price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[0]) {
                         aBuy.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
                     }
 
-                    if (lowest_bargain_price > nrBalance && await getSetting(Settings.COLOR_LISTINGS)[1]) {
+                    if (lowest_bargain_price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[1]) {
                         aBargain.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
                     }
                 }

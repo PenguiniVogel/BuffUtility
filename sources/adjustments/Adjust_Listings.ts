@@ -177,7 +177,7 @@ module Adjust_Listings {
             let priceMax = Math.max(...history);
 
             let header = <HTMLElement>document.querySelector('body > div.market-list > div > div.detail-header.black');
-            let priceParent = <HTMLElement>header.querySelector("div.detail-summ");
+            let priceParent = <HTMLElement>header.querySelector('div.detail-summ');
 
             let priceSpan = document.createElement('span');
             let priceLabel = document.createElement('label');
@@ -187,7 +187,7 @@ module Adjust_Listings {
             priceSpan.setAttribute('class', 'buff-utility-price-range');
             priceLabel.innerText = `Buff Price Trend (${days}D) |`;
 
-            priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> — <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
+            priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> - <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
 
             priceSpan.appendChild(priceLabel);
             priceSpan.appendChild(priceStrong);
@@ -225,7 +225,7 @@ module Adjust_Listings {
         // if we have no items or no rows don't adjust anything
         if (!data?.items?.length || !rows) return;
 
-        let { strBalance, isBalanceYuan, nrBalance } = Util.getAccountBalance();
+        let { isBalanceYuan, nrBalance } = Util.getAccountBalance();
 
         // let strBalance = (<HTMLElement>document.querySelector('#navbar-cash-amount')).innerText;
         // let isBalanceYuan = strBalance.indexOf('¥') > -1;
@@ -543,11 +543,11 @@ module Adjust_Listings {
                 priceStr = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
             }
 
-            let converted_price_str = await Util.convertCNY(price);
             const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(price);
+            let converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(convertedValue)}`;
             const formattedConverted = Util.formatNumber(convertedValue);
             if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
-                converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;
+                converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(formattedConverted.strNumber)}`;
             }
 
             let newHTML = Util.buildHTML('div', {
