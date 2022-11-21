@@ -73,9 +73,7 @@ module Add_Links_Skin {
                 }
             })).data;
 
-            if (DEBUG) {
-                console.debug(hash_name, goods_id);
-            }
+            DEBUG && console.debug(hash_name, goods_id);
 
             if (typeof goods_id == 'number') {
                 return `https://buff.163.com/goods/${goods_id}?from=market#tab=selling&sort_by=default`;

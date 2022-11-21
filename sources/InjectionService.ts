@@ -295,14 +295,14 @@ module InjectionService {
         if (isNative) {
             // shadow open and capture onLoad
             window.XMLHttpRequest.prototype.open = function() {
-                this.addEventListener('load', (e) => {
+                (<XMLHttpRequest>this).addEventListener('load', (e) => {
                     let current = <XMLHttpRequest>e.currentTarget;
 
                     // simple try-parse
                     function tryParseJSON(r: string): any {
                         try {
                             return JSON.parse(r);
-                        } catch (e) {
+                        } catch (_) {
                             return undefined;
                         }
                     }

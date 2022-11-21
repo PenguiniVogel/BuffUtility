@@ -1,5 +1,11 @@
 module Adjust_Share {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+    import getSetting = ExtensionSettings.getSetting;
+
+    // module
+
     interface LaunchData {
         type?: unknown,
         param?: string
@@ -30,7 +36,7 @@ module Adjust_Share {
         let parsedParam: LaunchParams = JSON.parse(data.param);
 
         // if not csgo, skip
-        // if no price, skip, as its not on sale
+        // if no price, skip, as it is not on sale
         if (parsedParam.game != 'csgo' || !('price' in parsedParam)) {
             return;
         }

@@ -1,5 +1,11 @@
 module AdjustFavourites {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+    import getSetting = ExtensionSettings.getSetting;
+
+    // module
+
     async function init(): Promise<void> {
         // if not csgo, skip
         if (window.location.href.indexOf('game=csgo') == -1) return;
@@ -34,30 +40,18 @@ module AdjustFavourites {
             if (priceTD) {
                 let priceCNY = +((/¥ (\d+(\.\d+)?)/.exec(priceTD.innerText) ?? [null, NaN])[1]);
                 if (isFinite(priceCNY)) {
-                    let priceStr = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(`${priceCNY}`)}`;
-                    const formattedPrice = Util.formatNumber(priceCNY);
-                    if (formattedPrice.wasCompressed || formattedPrice.wasFormatted) {
-                        priceStr = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
-                    }
+                    let priceStr = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(priceCNY)}`;
 
-                    const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(priceCNY);
-                    let converted_price_str = `${convertedSymbol} ${convertedValue}`;
-                    const formattedConverted = Util.formatNumber(convertedValue);
-                    if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
-                        converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(formattedConverted.strNumber)}`;
-                    }
+                    const { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(priceCNY);
 
                     priceTD.innerHTML = Util.buildHTML('p', {
-                        content: Util.buildHTML('strong', {
-                            attributes: {
-                                'title': `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(Util.formatNumber(priceCNY, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED).strNumber)}`
-                            },
+                        content: [Util.buildHTML('strong', {
                             class: 'f_Strong',
-                            content: [ priceStr, formattedPrice.wasCompressed ? 'K' : '' ]
-                        })
+                            content: [ priceStr ]
+                        })]
                     }) + Util.buildHTML('p', {
                         class: 'c_Gray f_12px',
-                        content: [ '(', Util.embedDecimalSmall(converted_price_str), formattedConverted.wasCompressed ? 'K' : '', ')' ]
+                        content: [ `(${convertedSymbol} ${convertedFormattedValue})` ]
                     });
                 }
             }
@@ -79,9 +73,7 @@ module AdjustFavourites {
             if (f_schemaData?.length > 0) {
                 let schemaData = f_schemaData[0];
 
-                if (DEBUG) {
-                    console.debug(itemType, schemaData, assetInfo);
-                }
+                DEBUG && console.debug(itemType, schemaData, assetInfo);
 
                 let aCopyGen = <HTMLElement>document.createElement('a');
 
@@ -124,17 +116,20 @@ module AdjustFavourites {
 
             nameContainer.parentElement.appendChild(aShare);
 
+            let parentBargain = row.lastElementChild;
+            let aBuy = <HTMLElement>parentBargain.querySelector('a');
+            let aBargain = null;
+
+            let price = +aBuy.getAttribute('data-price');
+            let lowest_bargain_price = price * 0.8;
+
             if (await getSetting(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN)) {
                 // Note: this feature is yet unable to check if the seller has disabled bargaining
                 //       https://buff.163.com/api/market/buyer_bargain/create/preview?sell_order_id=220913T2001697026
                 //       will enable us to check the code if a bargain can be created, NEEDS to be optional, and off by default.
                 //       To avoid a rate limit exceed and potentially being flagged, one page is rather limited in size though.
-                let parentBargain = row.lastElementChild;
-                let aBuy = <HTMLElement>parentBargain.querySelector('a');
-                let aBargain = <HTMLElement>aBuy.cloneNode(true);
 
-                let price = +aBuy.getAttribute('data-price');
-                let lowest_bargain_price = price * 0.8;
+                aBargain = <HTMLElement>aBuy.cloneNode(true);
 
                 // items below 100 yuan cannot be bargained
                 if (price >= 100) {
@@ -152,36 +147,35 @@ module AdjustFavourites {
                     parentBargain.querySelector('span').setAttribute('style', 'margin-left: 50px;');
                     parentBargain.querySelector('a').after(aBargain);
 
-                    if (await getSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS)) {
-                        // Disabled for now until proxy properly works
-                        //
-                        // let classId = imgContainer.getAttribute('data-classid');
-                        // let instanceId = imgContainer.getAttribute('data-instanceid');
-                        // let assetId = imgContainer.getAttribute('data-assetid');
-                        // let orderId = imgContainer.getAttribute('data-orderid');
-                        // if (orderId?.length > 0) {
-                        //     BrowserInterface.delegate<BrowserInterface.BuffBargainFetchDelegation, string>({
-                        //         method: BrowserInterface.DelegationMethod.BuffBargain_fetch,
-                        //         async: true,
-                        //         parameters: {
-                        //             classId: classId,
-                        //             instanceId: instanceId,
-                        //             assetId: assetId,
-                        //             orderId: orderId
-                        //         }
-                        //     }).then(response => { });
-                        // }
-                    }
+                    // Disabled for now until proxy properly works
+                    // if (await getSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS)) {
+                    //     let classId = imgContainer.getAttribute('data-classid');
+                    //     let instanceId = imgContainer.getAttribute('data-instanceid');
+                    //     let assetId = imgContainer.getAttribute('data-assetid');
+                    //     let orderId = imgContainer.getAttribute('data-orderid');
+                    //     if (orderId?.length > 0) {
+                    //         BrowserInterface.delegate<BrowserInterface.BuffBargainFetchDelegation, string>({
+                    //             method: BrowserInterface.DelegationMethod.BuffBargain_fetch,
+                    //             async: true,
+                    //             parameters: {
+                    //                 classId: classId,
+                    //                 instanceId: instanceId,
+                    //                 assetId: assetId,
+                    //                 orderId: orderId
+                    //             }
+                    //         }).then(response => { });
+                    //     }
+                    // }
+                }
+            }
+
+            if (isBalanceYuan) {
+                if (aBuy && price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[0]) {
+                    aBuy.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
                 }
 
-                if (isBalanceYuan) {
-                    if (price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[0]) {
-                        aBuy.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
-                    }
-
-                    if (lowest_bargain_price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[1]) {
-                        aBargain.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
-                    }
+                if (aBargain && lowest_bargain_price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[1]) {
+                    aBargain.setAttribute('style', `margin-left: 5px; background: ${GlobalConstants.COLOR_BAD} !important;`);
                 }
             }
         }

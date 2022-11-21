@@ -1,5 +1,11 @@
 module Adjust_Listings {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+    import getSetting = ExtensionSettings.getSetting;
+
+    // module
+
     function init(): void {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
 
@@ -144,7 +150,8 @@ module Adjust_Listings {
             adjustBuyOrderListings(<InjectionService.TransferData<BuffTypes.BuyOrder.Data>>transferData);
         }
 
-        if (!document.querySelector('span.buffutility-pricerange') && await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
+        // don't run until proxy is fixed
+        if (false && !document.querySelector('span.buffutility-pricerange') && await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
 
             adjustHeaderListings();
@@ -164,40 +171,41 @@ module Adjust_Listings {
             return;
         }
 
-        fetchPriceHistory(goods_id, days, (response) => {
-            // skip if empty, 503/507 or 425 http maybe
-            if (response.length == 0) {
-                return;
-            }
-
-            // discard dates from prices as not used
-            let history = response.map(arr => arr[1]);
-
-            let priceMin = Math.min(...history);
-            let priceMax = Math.max(...history);
-
-            let header = <HTMLElement>document.querySelector('body > div.market-list > div > div.detail-header.black');
-            let priceParent = <HTMLElement>header.querySelector('div.detail-summ');
-
-            let priceSpan = document.createElement('span');
-            let priceLabel = document.createElement('label');
-            let priceStrong = document.createElement('strong');
-
-            priceParent.setAttribute('style', 'line-height: 200%;');
-            priceSpan.setAttribute('class', 'buff-utility-price-range');
-            priceLabel.innerText = `Buff Price Trend (${days}D) |`;
-
-            priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> - <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
-
-            priceSpan.appendChild(priceLabel);
-            priceSpan.appendChild(priceStrong);
-
-            // prevent the double adding of the element caused by the async nature of the function
-            if (document.querySelector('span.buff-utility-price-range') == null) {
-                priceParent.appendChild(document.createElement('br'));
-                priceParent.appendChild(priceSpan);
-            }
-        });
+        // disable until proxy works
+        // fetchPriceHistory(goods_id, days, (response) => {
+        //     // skip if empty, 503/507 or 425 http maybe
+        //     if (response.length == 0) {
+        //         return;
+        //     }
+        //
+        //     // discard dates from prices as not used
+        //     let history = response.map(arr => arr[1]);
+        //
+        //     let priceMin = Math.min(...history);
+        //     let priceMax = Math.max(...history);
+        //
+        //     let header = <HTMLElement>document.querySelector('body > div.market-list > div > div.detail-header.black');
+        //     let priceParent = <HTMLElement>header.querySelector('div.detail-summ');
+        //
+        //     let priceSpan = document.createElement('span');
+        //     let priceLabel = document.createElement('label');
+        //     let priceStrong = document.createElement('strong');
+        //
+        //     priceParent.setAttribute('style', 'line-height: 200%;');
+        //     priceSpan.setAttribute('class', 'buff-utility-price-range');
+        //     priceLabel.innerText = `Buff Price Trend (${days}D) |`;
+        //
+        //     priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> - <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
+        //
+        //     priceSpan.appendChild(priceLabel);
+        //     priceSpan.appendChild(priceStrong);
+        //
+        //     // prevent the double adding of the element caused by the async nature of the function
+        //     if (document.querySelector('span.buff-utility-price-range') == null) {
+        //         priceParent.appendChild(document.createElement('br'));
+        //         priceParent.appendChild(priceSpan);
+        //     }
+        // });
     }
 
     /**
@@ -432,30 +440,15 @@ module Adjust_Listings {
 
             let priceDiffStr;
             if (await getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
-                let { convertedSymbol, convertedValue } = await Util.convertCNYRaw(priceDiff);
-                const formattedDiff = Util.formatNumber(convertedValue);
-
-                if (formattedDiff.wasCompressed || formattedDiff.wasFormatted) {
-                    priceDiffStr = `${convertedSymbol} ${Util.embedDecimalSmall(formattedDiff.strNumber)}${formattedDiff.wasCompressed ? 'K' : ''}`;
-                } else {
-                    priceDiffStr = `${convertedSymbol} ${Util.embedDecimalSmall(convertedValue)}`;
-                }
+                let { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(priceDiff);
+                priceDiffStr = `${convertedSymbol} ${convertedFormattedValue}`;
             } else {
-                priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(priceDiff.toFixed(2))}`;
+                priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(priceDiff)}`;
             }
 
-            let price_str = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
-            const formattedPrice = Util.formatNumber(dataRow.price);
-            if (formattedPrice.wasCompressed || formattedPrice.wasFormatted) {
-                price_str = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
-            }
+            let price_str = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.price, 2)}`;
 
-            const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(price);
-            let converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(convertedValue)}`;
-            const formattedConverted = Util.formatNumber(convertedValue);
-            if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
-                converted_price_str = `${convertedSymbol} ${formattedConverted.strNumber}`;
-            }
+            const { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(price);
 
             let newHTML = Util.buildHTML('div', {
                 style: {
@@ -464,16 +457,13 @@ module Adjust_Listings {
                 content: [
                     Util.buildHTML('strong', {
                         class: 'f_Strong',
-                        attributes: {
-                            'title': `${GlobalConstants.SYMBOL_YUAN} ${Util.formatNumber(dataRow.price, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED).strNumber}`
-                        },
-                        content: [ Util.embedDecimalSmall(price_str), formattedPrice.wasCompressed ? 'K' : '' ]
+                        content: [ price_str ]
                     }),
                     Util.buildHTML('p', {
                         content: [
                             Util.buildHTML('span', {
                                 class: 'c_Gray f_12px',
-                                content: [ `(${Util.embedDecimalSmall(converted_price_str)}`, formattedConverted.wasCompressed ? 'K' : '', ')' ]
+                                content: [ `(${convertedSymbol} ${convertedFormattedValue})` ]
                             }),
                             Util.buildHTML('div', {
                                 class: 'f_12px',
@@ -535,20 +525,7 @@ module Adjust_Listings {
             let dataRow = data.items[i - 1];
             let row = rows.item(i);
 
-            let price = +dataRow.price;
-
-            let priceStr = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
-            const formattedPrice = Util.formatNumber(dataRow.price);
-            if (formattedPrice.wasCompressed || formattedPrice.wasFormatted) {
-                priceStr = `${GlobalConstants.SYMBOL_YUAN} ${formattedPrice.strNumber}`;
-            }
-
-            const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(price);
-            let converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(convertedValue)}`;
-            const formattedConverted = Util.formatNumber(convertedValue);
-            if (formattedConverted.wasCompressed || formattedConverted.wasFormatted) {
-                converted_price_str = `${convertedSymbol} ${Util.embedDecimalSmall(formattedConverted.strNumber)}`;
-            }
+            const { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(dataRow.price);
 
             let newHTML = Util.buildHTML('div', {
                 style: {
@@ -557,13 +534,13 @@ module Adjust_Listings {
                 content: [
                     Util.buildHTML('strong', {
                         class: 'f_Strong',
-                        content: [ Util.embedDecimalSmall(priceStr), formattedPrice.wasCompressed ? 'K' : '' ]
+                        content: [ `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.price)}` ]
                     }),
                     Util.buildHTML('p', {
                         content: [
                             Util.buildHTML('span', {
                                 class: 'c_Gray f_12px',
-                                content: [ `(${Util.embedDecimalSmall(converted_price_str)}`, formattedConverted.wasCompressed ? 'K' : '', ')' ]
+                                content: [ `(${convertedSymbol} ${convertedFormattedValue})` ]
                             })
                         ]
                     })

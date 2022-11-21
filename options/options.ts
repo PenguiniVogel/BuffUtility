@@ -1,8 +1,12 @@
 module Options {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
     import resetSetting = ExtensionSettings.resetSetting;
     import setSetting = ExtensionSettings.setSetting;
     import getSetting = ExtensionSettings.getSetting;
+
+    // module
 
     interface DisplayInfo {
         title: string,
@@ -108,7 +112,7 @@ module Options {
                     'padding-right': '5px',
                     'border-bottom': '1px solid var(--color-light2-accent)'
                 },
-                content: option
+                content: [ option ]
             }) + Util.buildHTML('input', {
                 id: `${setting}-${index}`,
                 attributes: {
@@ -141,7 +145,7 @@ module Options {
                         'padding-right': '5px',
                         'border-bottom': '1px solid var(--color-light2-accent)'
                     },
-                    content: option
+                    content: [ option ]
                 }) + Util.buildHTML('input', {
                     id: `${setting}-${index}`,
                     attributes: {
@@ -437,27 +441,10 @@ module Options {
         });
 
         // Settings.EXPERIMENTAL_FORMAT_CURRENCY
-        experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY, {
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY, {
             title: 'Format Currency',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>None: <code>Don\'t format at all</code><br>Formatted: <code>Taken e.g. 1234.89 will be transformed to 1,234.89</code><br>Compressed: <code>Taken e.g. 1234.89 will be transformed to 1.<small>2</small>K</code><br>Space Match: <code>Will use Formatted or Compressed by space</code><br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
-        }, [
-            {
-                displayText: 'None',
-                value: ExtensionSettings.CurrencyNumberFormats.NONE
-            },
-            {
-                displayText: 'Formatted',
-                value: ExtensionSettings.CurrencyNumberFormats.FORMATTED
-            },
-            {
-                displayText: 'Compressed',
-                value: ExtensionSettings.CurrencyNumberFormats.COMPRESSED
-            },
-            {
-                displayText: 'Space Match',
-                value: ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH
-            }
-        ], await getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY));
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>If set, will format numbers.<br>e.g. given 1234.56 will turn into 1,234.56'
+        });
 
         // Settings.EXPERIMENTAL_ADJUST_SHOP
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {

@@ -1,5 +1,11 @@
 module Adjust_Shop {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+    import getSetting = ExtensionSettings.getSetting;
+
+    // module
+
     function init(): void {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
 
@@ -39,47 +45,51 @@ module Adjust_Shop {
         for (let i = 0; i < liList.length; i ++) {
             const dataRow = data.items[i];
             const goodsInfo = data.goods_infos[dataRow.goods_id];
-            const tagBox = <HTMLElement>liList.item(i).querySelector('.tagBox > .g_Right');
-            const priceBox = <HTMLElement>liList.item(i).querySelector('p > .f_Strong');
+            const li = liList.item(i);
+            const tagBox = li.querySelector('.tagBox > .g_Right');
+            const priceBox = li.querySelector('p > .f_Strong');
+            const priceParent = priceBox?.parentElement;
 
             const schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
             if (dataRow.appid == 730) {
-                const aShare = document.createElement('a');
-                aShare.setAttribute('style', 'cursor: pointer;');
-                aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
-                aShare.setAttribute('target', '_blank');
-                aShare.innerHTML = '<i class="icon icon_link j_tips_handler" data-direction="bottom" data-title="Share"></i>';
-
-                let aCopyGen = document.createElement('a');
-                let gen = Util.generateInspectGen(schemaData, dataRow.asset_info.info.paintindex, dataRow.asset_info.info.paintseed, dataRow.asset_info.paintwear, dataRow.asset_info?.info?.stickers ?? []);
-                if (schemaData) {
-                    if (schemaData?.type == 'Gloves') {
-                        aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gengl" style="-webkit-filter: invert(50%);"></i>';
-                    } else {
-                        aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gen"  style="-webkit-filter: invert(50%);"></i>';
-                    }
-                }
-
-                Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
-                Util.addAnchorClipboardAction(aCopyGen, gen);
-
                 if (tagBox.children.length == 2) {
-                    tagBox.insertBefore(aShare, tagBox.firstChild);
+                    tagBox.insertBefore(Util.addAnchorShareAction(dataRow.asset_info.classid, dataRow.asset_info.instanceid, dataRow.asset_info.assetid, dataRow.id), tagBox.firstChild);
                     // only append if we have schema data, which we always should have, but some items have weird CH mappings
                     if (schemaData) {
+                        let aCopyGen = document.createElement('a');
+                        let gen = Util.generateInspectGen(schemaData, dataRow.asset_info.info.paintindex, dataRow.asset_info.info.paintseed, dataRow.asset_info.paintwear, dataRow.asset_info?.info?.stickers ?? []);
+
+                        if (schemaData?.type == 'Gloves') {
+                            aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gengl" style="-webkit-filter: invert(50%);"></i>';
+                        } else {
+                            aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gen"  style="-webkit-filter: invert(50%);"></i>';
+                        }
+
+                        Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
+
+                        aCopyGen.setAttribute('title', gen);
+                        aCopyGen.setAttribute('style', 'cursor: pointer;');
+
+                        Util.addAnchorClipboardAction(aCopyGen, gen);
+
                         tagBox.insertBefore(aCopyGen, tagBox.firstChild);
                     }
                 }
             }
 
             if (priceBox) {
-                if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
-                    const priceConv = await Util.convertCNYRaw(+dataRow.price);
-                    priceBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)}`;
-                } else {
-                    priceBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
-                }
+                priceBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.price)}`;
+            }
+
+            if (priceParent) {
+                const { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(dataRow.price);
+                const convertedSpan = document.createElement('span');
+
+                convertedSpan.setAttribute('class', 'c_Gray f_12px');
+                convertedSpan.innerHTML = ` (${convertedSymbol} ${convertedFormattedValue})`;
+
+                priceParent.append(convertedSpan);
             }
         }
     }
@@ -127,18 +137,28 @@ module Adjust_Shop {
 
         for (let i = 0; i < liList.length; i ++) {
             const dataRow = data.items[i];
-            const textBox = <HTMLElement>liList.item(i).querySelector('p');
+            const li = liList.item(i);
+            const textBox = li.querySelector('p');
 
             if (textBox) {
+                li.setAttribute('style', 'padding-top: 10px; padding-bottom: 10px; border-bottom: 1px solid;');
+                const aImgContainer = li.querySelector('a.recent-deal-img');
+                if (aImgContainer) {
+                    aImgContainer.setAttribute('style', 'margin-bottom: 10px;');
+                }
+
                 let timePast = +(textBox.innerText.split('天')[0]);
                 timePast = isFinite(timePast) ? timePast : 0;
 
-                if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
-                    const priceConv = await Util.convertCNYRaw(+dataRow.price);
-                    textBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)} (${timePast}d ago)`;
-                } else {
-                    textBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)} (${timePast}d ago)`;
-                }
+                textBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.price)} (${timePast}d ago)`;
+
+                const convertedP = document.createElement('p');
+                const { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(dataRow.price);
+
+                convertedP.setAttribute('class', 'f_12px');
+                convertedP.innerHTML = `${convertedSymbol} ${convertedFormattedValue}`;
+
+                li.append(convertedP);
             }
         }
     }

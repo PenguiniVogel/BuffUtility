@@ -1,6 +1,19 @@
 module Adjust_Market {
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+    import getSetting = ExtensionSettings.getSetting;
+
+    // module
+
+    function init(): void {
+        window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
+    }
+
     function process(transferData: InjectionService.TransferData<unknown>): void {
+        // if not csgo, skip
+        if (transferData.url.indexOf('game=csgo') == -1) return;
+
         if (transferData.url.indexOf('/market/') == -1) {
             return;
         } else if (transferData.url.indexOf('/market/goods') > -1) {
@@ -12,18 +25,6 @@ module Adjust_Market {
         } else {
             console.debug(`[BuffUtility] Adjust_Market MISSING (${(/(\/market\/.*)[?#]/g.exec(transferData.url) ?? [null, transferData.url])[1]})`);
         }
-
-        // if (transferData.url.indexOf('/market/') > -1) {
-        //     if ((<InjectionService.TransferData<BuffTypes.TopBookmarked.Data>>transferData)?.data?.goods_infos) {
-        //         console.debug('[BuffUtility] Adjust_Market (MISSING)');
-        //     } else {
-        //         console.debug('[BuffUtility] Adjust_Market (/goods | /buying)');
-        //
-        //         adjustMarketGoodsOrBuying(<InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>>transferData);
-        //     }
-        //
-        //     addSpecialTab();
-        // }
     }
 
     async function adjustMarketGoodsOrBuying(transferData: InjectionService.TransferData<BuffTypes.GoodsOrBuying.Data>): Promise<void> {
@@ -43,9 +44,8 @@ module Adjust_Market {
             const p = <HTMLElement>document.createElement('p');
 
             const schemaData = (await ISchemaHelper.find(dataRow.short_name, true, dataRow.goods_info.info?.tags?.exterior?.internal_name == 'wearcategoryna', true)).data[0];
-            if (DEBUG) {
-                console.debug(schemaData);
-            }
+
+            DEBUG && console.debug(schemaData);
 
             let aHrefList = li.querySelectorAll('a[href]');
             for (let x = 0, y = aHrefList.length; x < y; x ++) {
@@ -102,8 +102,7 @@ module Adjust_Market {
 
             if (dataRow.sell_num > 0) {
                 let sell_min_price_sym: string = GlobalConstants.SYMBOL_YUAN;
-                let sell_min_price_str = `${dataRow.sell_min_price}`;
-                const sell_min_price_title = Util.formatNumber(sell_min_price_str, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
+                let sell_min_price_str = dataRow.sell_min_price;
 
                 if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
                     const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(+dataRow.sell_min_price);
@@ -111,12 +110,7 @@ module Adjust_Market {
                     sell_min_price_str = convertedValue;
                 }
 
-                let { wasCompressed, wasFormatted, strNumber } = Util.formatNumber(sell_min_price_str, true);
-                if (wasCompressed || wasFormatted) {
-                    sell_min_price_str = strNumber;
-                }
-
-                sell_min_price_str = `${Util.embedDecimalSmall(sell_min_price_str)}${wasCompressed ? 'K' : ''}`;
+                sell_min_price_str = await Util.formatNumber(sell_min_price_str);
 
                 newHTML.push(Util.buildHTML('span', {
                     class: 'f_12px',
@@ -125,7 +119,7 @@ module Adjust_Market {
                         'overflow': 'hidden'
                     },
                     attributes: {
-                        'title': `${GlobalConstants.SYMBOL_YUAN} ${sell_min_price_title.strNumber} selling (${dataRow.sell_num})`
+                        'title': `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.sell_min_price)} selling (${dataRow.sell_num})`
                     },
                     content: [
                         Util.buildHTML('span', {
@@ -150,8 +144,7 @@ module Adjust_Market {
 
             if (dataRow.buy_num > 0) {
                 let buy_max_price_sym: string = GlobalConstants.SYMBOL_YUAN;
-                let buy_max_price_str = `${dataRow.buy_max_price}`;
-                const buy_max_price_title = Util.formatNumber(buy_max_price_str, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
+                let buy_max_price_str = dataRow.buy_max_price;
 
                 if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
                     const { convertedSymbol, convertedValue } = await Util.convertCNYRaw(+dataRow.buy_max_price);
@@ -159,12 +152,7 @@ module Adjust_Market {
                     buy_max_price_str = convertedValue;
                 }
 
-                let { wasCompressed, wasFormatted, strNumber } = Util.formatNumber(buy_max_price_str, true);
-                if (wasCompressed || wasFormatted) {
-                    buy_max_price_str = strNumber;
-                }
-
-                buy_max_price_str = `${Util.embedDecimalSmall(buy_max_price_str)}${wasCompressed ? 'K' : ''}`;
+                buy_max_price_str = await Util.formatNumber(buy_max_price_str);
 
                 newHTML.push(Util.buildHTML('span', {
                     class: 'f_12px',
@@ -172,7 +160,7 @@ module Adjust_Market {
                         'grid-column': '1'
                     },
                     attributes: {
-                        'title': `${GlobalConstants.SYMBOL_YUAN} ${buy_max_price_title.strNumber} buying (${dataRow.buy_num})`
+                        'title': `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.buy_max_price)} buying (${dataRow.buy_num})`
                     },
                     content: [
                         Util.buildHTML('span', {
@@ -236,58 +224,55 @@ module Adjust_Market {
 
         const liList = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_list_card li');
         let data = transferData.data;
-        let goods_infos = data.goods_infos;
+        let goodsInfos = data.goods_infos;
 
         // if we have no items don't adjust anything
         if (!data?.items?.length) return;
 
         for (let i = 0, l = liList.length; i < l; i ++) {
             const dataRow = data.items[i];
-            const goodsInfo = goods_infos[dataRow.goods_id];
+            const goodsInfo = goodsInfos[dataRow.goods_id];
             const li = liList.item(i);
             const tagBox = <HTMLElement>li.querySelector('.tagBox > .g_Right');
+            const priceStrong = <HTMLElement>li.querySelector('p > strong.sell_order_price');
+
+            if (priceStrong) {
+                const priceBox = priceStrong?.parentElement;
+
+                let span = document.createElement('span');
+
+                span.setAttribute('class', 'c_Gray f_12px');
+
+                let { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(dataRow.price);
+
+                span.innerHTML = ` (${convertedSymbol} ${convertedFormattedValue})`;
+
+                priceBox.append(span);
+            }
+
+            tagBox.insertBefore(Util.addAnchorShareAction(dataRow.asset_info.classid, dataRow.asset_info.instanceid, dataRow.asset_info.assetid, dataRow.id), tagBox.firstChild);
 
             const schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
-            if (dataRow.appid == 730) {
-                const aShare = document.createElement('a');
-                aShare.setAttribute('style', 'cursor: pointer;');
-                aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
-                aShare.setAttribute('target', '_blank');
-                aShare.innerHTML = '<i class="icon icon_link j_tips_handler" data-direction="bottom" data-title="Share"></i>';
-
+            // only append if we have schema data, which we always should have, but some items have weird CH mappings
+            if (schemaData) {
                 let aCopyGen = document.createElement('a');
                 let gen = Util.generateInspectGen(schemaData, dataRow.asset_info.info.paintindex, dataRow.asset_info.info.paintseed, dataRow.asset_info.paintwear, dataRow.asset_info?.info?.stickers ?? []);
-                if (schemaData) {
-                    if (schemaData?.type == 'Gloves') {
-                        aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gengl" style="-webkit-filter: invert(50%);"></i>';
-                    } else {
-                        aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gen"  style="-webkit-filter: invert(50%);"></i>';
-                    }
+
+                if (schemaData?.type == 'Gloves') {
+                    aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gengl" style="-webkit-filter: invert(50%);"></i>';
+                } else {
+                    aCopyGen.innerHTML = '<i class="icon icon_notes j_tips_handler" data-direction="bottom" data-title="Copy !gen"  style="-webkit-filter: invert(50%);"></i>';
                 }
 
                 Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
-                // if (getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
-                //     aCopyGen.setAttribute('href', `javascript:Buff.toast('Copied ${gen} to clipboard!');`);
-                // } else {
-                //     aCopyGen.setAttribute('href', 'javascript:;');
-                // }
 
                 aCopyGen.setAttribute('title', gen);
                 aCopyGen.setAttribute('style', 'cursor: pointer;');
-                aCopyGen.addEventListener('click', () => {
-                    navigator?.clipboard?.writeText(gen).then(() => {
-                        // alert(`Copied ${gen} to clipboard!`);
-                        console.debug(`[BuffUtility] Copy gen: ${gen}`);
-                    }).catch((e) => console.error('[BuffUtility]', e));
-                });
 
-                tagBox.insertBefore(aShare, tagBox.firstChild);
+                Util.addAnchorClipboardAction(aCopyGen, gen);
 
-                // only append if we have schema data, which we always should have, but some items have weird CH mappings
-                if (schemaData) {
-                    tagBox.insertBefore(aCopyGen, tagBox.firstChild);
-                }
+                tagBox.insertBefore(aCopyGen, tagBox.firstChild);
             }
         }
     }
@@ -365,8 +350,7 @@ module Adjust_Market {
         InjectionServiceLib.injectCode(`${buff_utility_overrides.toString()}buff_utility_overrides();`, 'body');
     }
 
-    // init();
-    window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
+    init();
 
 }
 

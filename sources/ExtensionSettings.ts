@@ -35,13 +35,6 @@ module ExtensionSettings {
         MONTHLY = 30
     }
 
-    export const enum CurrencyNumberFormats {
-        NONE,
-        FORMATTED,
-        COMPRESSED,
-        SPACE_MATCH
-    }
-
     export const FILTER_SORT_BY = {
         'Default': 'default',
         'Newest': 'created.desc',
@@ -157,7 +150,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: boolean;
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange;
         [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: boolean;
-        [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: CurrencyNumberFormats;
+        [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHARE]: boolean;
         [Settings.EXPERIMENTAL_ALLOW_BULK_BUY]: boolean;
@@ -366,10 +359,10 @@ module ExtensionSettings {
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: {
-            default: CurrencyNumberFormats.NONE,
+            default: false,
             export: '2x7',
             transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: {
             default: true,
@@ -415,7 +408,7 @@ module ExtensionSettings {
     }
 
     function validateNumber(key: Settings, value: any): number {
-        checkTypeValidation(key, typeof 0);
+        checkTypeValidation(key, 'number');
 
         if (!isFinite(+value) || +value == null) {
             return <number>INTERNAL_SETTINGS[key].default;
@@ -437,13 +430,13 @@ module ExtensionSettings {
     }
 
     function validateBoolean(key: Settings, value: any): boolean {
-        checkTypeValidation(key, typeof true);
+        checkTypeValidation(key, 'boolean');
 
         return _validateBoolean(value) ?? <boolean>INTERNAL_SETTINGS[key].default;
     }
 
     function validateBooleanArray(key: Settings, value: any): boolean[] {
-        checkTypeValidation(key, typeof []);
+        checkTypeValidation(key, 'object');
 
         value = value ?? INTERNAL_SETTINGS[key].default;
 
@@ -460,7 +453,7 @@ module ExtensionSettings {
     }
 
     function validateColor(key: Settings, value: any): string {
-        checkTypeValidation(key, typeof '');
+        checkTypeValidation(key, 'string');
 
         return _validateColor(value) ?? <string>INTERNAL_SETTINGS[key].default;
     }
@@ -478,75 +471,6 @@ module ExtensionSettings {
 
     // general
 
-    let resolveLoad: (value: boolean) => void = null;
-    let loaded = new Promise<boolean>((resolve, _) => {
-        resolveLoad = resolve;
-    });
-
-    /**
-     * @deprecated
-     */
-    export async function isLoaded(): Promise<boolean> {
-        return await loaded;
-    }
-
-    /**
-     * @deprecated
-     */
-    export async function load(): Promise<void> {
-        const _versionCheck = await BrowserInterface.Storage.get<SettingsTypes[Settings.VERSION]>(INTERNAL_SETTINGS[Settings.VERSION].export);
-
-        if (_versionCheck?.length < 1) {
-            _upgrade218();
-        } else {
-            // map export structure dynamically
-            let export_structure: {
-                [key: string]: Settings
-            } = {};
-
-            const keys = (<Settings[]>Object.keys(INTERNAL_SETTINGS)).map<string>(k => {
-                const exportKey = INTERNAL_SETTINGS[k].export;
-                export_structure[exportKey] = k;
-                return exportKey;
-            });
-
-            let tempSettings = await BrowserInterface.Storage.getAll<any>(keys);
-
-            for (let l_key of keys) {
-                let struc: Settings = export_structure[l_key];
-                let newValue = null;
-
-                switch (INTERNAL_SETTINGS[struc].transform) {
-                    case InternalStructureTransform.NONE:
-                        newValue = tempSettings[ l_key ];
-                        break;
-                    case InternalStructureTransform.BOOLEAN:
-                        newValue = tempSettings[ l_key ] == 1;
-
-                        // forcefully disable for now
-                        // until proxy works properly
-                        if (l_key == INTERNAL_SETTINGS[Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS].export || l_key == INTERNAL_SETTINGS[Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY].export) {
-                            newValue = false;
-                        }
-
-                        break;
-                    case InternalStructureTransform.BOOLEAN_ARRAY:
-                        newValue = Util.importBooleansFromBytes(tempSettings[ l_key ]);
-                        break;
-                }
-
-                let validator = INTERNAL_SETTINGS[struc].validator ?? ((_, value) => value);
-                INTERNAL_SETTINGS[struc].value = validator(struc, newValue);
-            }
-        }
-
-        resolveLoad(true);
-
-        if (DEBUG) {
-            console.debug('Loaded Settings:', INTERNAL_SETTINGS);
-        }
-    }
-
     /**
      * Get the specified setting
      *
@@ -559,12 +483,14 @@ module ExtensionSettings {
 
             // setting doesnt exist
             if (!internal) {
+                console.debug(`[BuffUtility] Attempted loading setting ${setting} failed. Setting does not exist.`);
                 resolve(null);
                 return;
             }
 
             // if setting has been resolved (loaded) already, return value
             if (internal.resolved) {
+                // console.debug(`[BuffUtility] Loading resolved setting ${setting}:`, internal.value);
                 resolve(internal.value);
                 return;
             }
@@ -592,6 +518,8 @@ module ExtensionSettings {
                 internal.value = validator(setting, newValue);
 
                 internal.resolved = true;
+
+                DEBUG && console.debug(`[BuffUtility] Resolved setting ${setting}:`, internal.value);
 
                 resolve(internal.value);
             });
@@ -629,15 +557,11 @@ module ExtensionSettings {
     export function resetSetting<T extends Settings>(setting: T): void {
         console.debug(`[BuffUtility] Resetting '${setting}' to the default value.`);
 
-        setSetting(setting, <SettingsTypes[T]>INTERNAL_SETTINGS[setting].default);
-
-        let index;
-        if ((index = DANGER_SETTINGS.indexOf(setting)) > -1) {
-            let dangerAgreements = getSetting(Settings.STORE_DANGER_AGREEMENTS);
-            dangerAgreements[index] = false;
-
-            setSetting(Settings.STORE_DANGER_AGREEMENTS, dangerAgreements);
+        if (DANGER_SETTINGS.indexOf(setting) > -1) {
+            setSetting(Settings.STORE_DANGER_AGREEMENTS, [false, false]);
         }
+
+        setSetting(setting, <SettingsTypes[T]>INTERNAL_SETTINGS[setting].default);
     }
 
     /**
@@ -669,41 +593,13 @@ module ExtensionSettings {
         BrowserInterface.Storage.set({
             [internal.export]: exportValue
         }).then(_ => DEBUG && console.debug('[BuffUtility] Wrote setting:', setting, `(${internal.export})`, '->', exportValue));
-
-        // delete cookie
-        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, '0', 0);
     }
 
     /**
      * @deprecated
+     *
+     * @param setting
      */
-    function _finalizeAll(): void {
-        const keys = Object.keys(INTERNAL_SETTINGS);
-
-        let exportSettings = {};
-
-        for (let l_key of keys) {
-            let struc: InternalSetting<any> = INTERNAL_SETTINGS[<Settings>l_key];
-
-            switch (struc.transform) {
-                case InternalStructureTransform.NONE:
-                    exportSettings[struc.export] = struc.value;
-                    break;
-                case InternalStructureTransform.BOOLEAN:
-                    exportSettings[struc.export] = struc.value == true ? 1 : 0;
-                    break;
-                case InternalStructureTransform.BOOLEAN_ARRAY:
-                    exportSettings[struc.export] = Util.exportBooleansToBytes(<boolean[]>struc.value);
-                    break;
-            }
-        }
-
-        BrowserInterface.Storage.set(exportSettings).then(_ => DEBUG && console.debug('[BuffUtility] Wrote settings.', exportSettings));
-
-        // delete cookie
-        Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, '0', 0);
-    }
-
     export function hasBeenAgreed(setting: Settings): boolean {
         switch (setting) {
             case Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS:
@@ -715,24 +611,30 @@ module ExtensionSettings {
         }
     }
 
-    // --- upgrade <=2.1.7 -> 2.1.8
+    // --- upgrade ~2.1.7 -> 2.1.8+
 
-    function _upgrade218(): void {
-        _load217();
-        _finalizeAll();
-    }
-
+    /**
+     * @deprecated
+     */
     function _load217(): void {
         let tempSettings = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS));
 
-        const defaultKeys = Object.keys(INTERNAL_SETTINGS);
+        if (tempSettings) {
+            const defaultKeys = Object.keys(INTERNAL_SETTINGS);
 
-        for (let key of defaultKeys) {
-            setSetting(<Settings>key, tempSettings[key]);
+            for (let key of defaultKeys) {
+                setSetting(<Settings>key, tempSettings[key]);
+            }
+
+            console.debug('[BuffUtility] Finished migrating Settings from ~2.1.6 to 2.1.8+');
+
+            Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, '0', 0);
         }
     }
 
-}
+    // only attempt migration if we are browsing where the cookie once was present
+    if (window.location.href.indexOf('buff.163.com') > -1) {
+        _load217();
+    }
 
-import Settings = ExtensionSettings.Settings;
-import getSetting = ExtensionSettings.getSetting;
+}

@@ -2,6 +2,8 @@ module Util {
 
     DEBUG && console.debug('Start.Util');
 
+    // module
+
     /**
      * Calculate the steam seller price <br>
      * Stolen and slightly optimized from Steams' economy_common.js
@@ -83,34 +85,75 @@ module Util {
      * @returns <e title="¥1 = currency_symbol rate">currency_symbol</e>(cny * rate).toFixed(fixPoint)
      */
     export async function convertCNY(cny: number): Promise<string> {
-        const converted = await convertCNYRaw(cny);
+        throw new Error('[BuffUtility] Util.convertCNY is obsolete, please use Util.convertCNYRaw');
+    }
 
-        return `<e title="${GlobalConstants.SYMBOL_YUAN}1 = ${converted.convertedSymbol}${converted.convertedRate.toFixed(converted.convertedLeadingZeros)}">${converted.convertedSymbol} </e>${(converted.convertedValue)}`;
+    /**
+     * Return type for {@link convertCNYRaw}
+     */
+    interface ReturnConvertCNYRaw {
+        /**
+         * The currency symbol
+         */
+        convertedSymbol: string,
+
+        /**
+         * The converted value
+         */
+        convertedValue: string,
+
+        /**
+         * The converted formatted value <br>
+         * e.g. {@link ExtensionSettings.Settings.EXPERIMENTAL_FORMAT_CURRENCY EXPERIMENTAL_FORMAT_CURRENCY} = false -> 1234<small>.56</small> <br>
+         * e.g. {@link ExtensionSettings.Settings.EXPERIMENTAL_FORMAT_CURRENCY EXPERIMENTAL_FORMAT_CURRENCY} = true -> 1,234<small>.56</small> <br>
+         */
+        convertedFormattedValue: string,
+
+        /**
+         * The original converted number
+         */
+        convertedValueRaw: number,
+
+        /**
+         * The currency we converted to
+         */
+        convertedName: string,
+
+        /**
+         * The rate we converted with
+         */
+        convertedRate: number,
+
+        /**
+         * How many fraction zeros should be preserved, 2+
+         */
+        convertedLeadingZeros: number
     }
 
     /**
      * Convert the specified cny value to the selected currency
      *
      * @param cny
-     * @returns An object containing the currency symbol and the converted value
+     * @returns {@link ReturnConvertCNYRaw}
      */
-    export async function convertCNYRaw(cny: number): Promise<{
-        convertedSymbol: string,
-        convertedValue: string,
-        convertedName: string,
-        convertedRate: number,
-        convertedLeadingZeros: number
-    }> {
-        const selected_currency = await getSetting(Settings.SELECTED_CURRENCY);
+    export async function convertCNYRaw(cny: number | string): Promise<ReturnConvertCNYRaw> {
+        if (typeof cny == 'string') {
+            cny = parseFloat(cny);
+        }
+
+        const selected_currency = await ExtensionSettings.getSetting(ExtensionSettings.Settings.SELECTED_CURRENCY);
 
         if (selected_currency == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
-            const custom_currency_name = await getSetting(Settings.CUSTOM_CURRENCY_NAME);
-            const custom_currency_calculated_rate = 1 / await getSetting(Settings.CUSTOM_CURRENCY_RATE);
-            const custom_currency_leading_zeros = (/^0\.([^1-9]+)/.exec(`${custom_currency_calculated_rate}`) ?? [null, ''])[1].length + 2;
+            const custom_currency_name = await ExtensionSettings.getSetting(ExtensionSettings.Settings.CUSTOM_CURRENCY_NAME);
+            const custom_currency_calculated_rate = 1 / await ExtensionSettings.getSetting(ExtensionSettings.Settings.CUSTOM_CURRENCY_RATE);
+            const custom_currency_leading_zeros = Math.max(2, (/^0\.([^1-9]+)/.exec(`${custom_currency_calculated_rate}`) ?? [null, ''])[1].length);
+            const calculated = cny * custom_currency_calculated_rate;
 
             return {
                 convertedSymbol: custom_currency_name,
-                convertedValue: (cny * custom_currency_calculated_rate).toFixed(custom_currency_leading_zeros),
+                convertedValue: calculated.toFixed(custom_currency_leading_zeros),
+                convertedFormattedValue: await Util.formatNumber(calculated, custom_currency_leading_zeros),
+                convertedValueRaw: calculated,
                 convertedName: custom_currency_name,
                 convertedRate: custom_currency_calculated_rate,
                 convertedLeadingZeros: custom_currency_leading_zeros
@@ -119,10 +162,13 @@ module Util {
             const { rates, symbols } = CurrencyHelper.getData();
             const [ rate, fixPoint ] = rates[selected_currency];
             const symbol = symbols[selected_currency].length == 0 ? '?' : symbols[selected_currency];
+            const calculated = cny * rate;
 
             return {
                 convertedSymbol: symbol,
-                convertedValue: (cny * rate).toFixed(fixPoint),
+                convertedValue: calculated.toFixed(fixPoint),
+                convertedFormattedValue: await Util.formatNumber(calculated, fixPoint),
+                convertedValueRaw: calculated,
                 convertedName: selected_currency,
                 convertedRate: rate,
                 convertedLeadingZeros: fixPoint
@@ -165,7 +211,7 @@ module Util {
         class?: string;
         style?: { [key: string]: string };
         attributes?: { [key: string]: string };
-        content?: string | string[];
+        content?: string[];
     }
 
     /**
@@ -234,32 +280,46 @@ module Util {
 
         // add content, will disable selfClosing as self-closing tags cannot have content
         let content = options.content;
+        if (Array.isArray(content) && content.length > 0) {
+            for (let l_Content of content) {
+                if (!l_Content || typeof l_Content != 'string' || l_Content.length == 0) continue;
 
-        if (content && typeof content == 'string' && content.length > 0) {
-            if (!isPreContentSet) {
-                // isPreContentSet = true;
-                selfClosing = false;
+                if (!isPreContentSet) {
+                    isPreContentSet = true;
+                    selfClosing = false;
 
-                result += '>';
-            }
-
-            result += content;
-        } else {
-            if (Array.isArray(content) && content.length > 0) {
-                for (let l_Content of <string[]>content) {
-                    if (!l_Content || l_Content.length == 0) continue;
-
-                    if (!isPreContentSet) {
-                        isPreContentSet = true;
-                        selfClosing = false;
-
-                        result += '>';
-                    }
-
-                    result += l_Content;
+                    result += '>';
                 }
+
+                result += l_Content;
             }
         }
+
+        // if (content && typeof content == 'string' && content.length > 0) {
+        //     if (!isPreContentSet) {
+        //         // isPreContentSet = true;
+        //         selfClosing = false;
+        //
+        //         result += '>';
+        //     }
+        //
+        //     result += content;
+        // } else {
+        //     if (Array.isArray(content) && content.length > 0) {
+        //         for (let l_Content of <string[]>content) {
+        //             if (!l_Content || l_Content.length == 0) continue;
+        //
+        //             if (!isPreContentSet) {
+        //                 isPreContentSet = true;
+        //                 selfClosing = false;
+        //
+        //                 result += '>';
+        //             }
+        //
+        //             result += l_Content;
+        //         }
+        //     }
+        // }
 
         return `${result}${selfClosing ? '/>' : `</${tag}>`}`;
     }
@@ -275,6 +335,22 @@ module Util {
             .replace('yyyy', year)
             .replace('mm', month)
             .replace('dd', day);
+    }
+
+    // format number
+
+    export async function formatNumber(inNum: number | string, fractionDigits: number = 2): Promise<string> {
+        if (typeof inNum == 'string') {
+            inNum = parseFloat(inNum);
+        }
+
+        if ((await ExtensionSettings.getSetting(ExtensionSettings.Settings.EXPERIMENTAL_FORMAT_CURRENCY))) {
+            return Util.embedDecimalSmall(new Intl.NumberFormat('en-US', {
+                maximumFractionDigits: fractionDigits
+            }).format(inNum));
+        } else {
+            return Util.embedDecimalSmall(inNum.toFixed(fractionDigits));
+        }
     }
 
     // !gen/!gengl generation code
@@ -304,8 +380,18 @@ module Util {
 
     // <a> action injection
 
+    export function addAnchorShareAction(classid: string, instanceid: string, assetid: string, sellOrderId: string): HTMLElement {
+        const aShare = document.createElement('a');
+        aShare.setAttribute('style', 'cursor: pointer;');
+        aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${classid}&instanceid=${instanceid}&game=csgo&assetid=${assetid}&sell_order_id=${sellOrderId}`);
+        aShare.setAttribute('target', '_blank');
+        aShare.innerHTML = '<i class="icon icon_link j_tips_handler" data-direction="bottom" data-title="Share"></i>';
+
+        return aShare;
+    }
+
     export async function addAnchorToastAction(a: HTMLElement, text: string): Promise<void> {
-        if (await getSetting(Settings.SHOW_TOAST_ON_ACTION)) {
+        if (await ExtensionSettings.getSetting(ExtensionSettings.Settings.SHOW_TOAST_ON_ACTION)) {
             a.setAttribute('href', `javascript:Buff.toast('${text}');`);
         } else {
             a.setAttribute('href', 'javascript:;');
@@ -321,67 +407,14 @@ module Util {
         });
     }
 
-    // format number
-
-    export function formatNumber(inNumber: number | string, compress: boolean = false, overrideMode: ExtensionSettings.CurrencyNumberFormats = null): {
-        wasCompressed: boolean,
-        wasFormatted: boolean,
-        strNumber: string
-    } {
-        let _strNumber = `${inNumber}`;
-        let _parsedNumber = +_strNumber;
-
-        function _format(): ReturnType<typeof formatNumber> {
-            let formatted = new Intl.NumberFormat('en-US', {
-                maximumFractionDigits: 2
-            }).format(_parsedNumber);
-
-            return {
-                wasCompressed: false,
-                wasFormatted: true,
-                strNumber: formatted
-            };
-        }
-
-        function _compress(): ReturnType<typeof formatNumber> {
-            let _wasCompressed = false;
-            if (isFinite(_parsedNumber) && _parsedNumber > 1_000) {
-                _wasCompressed = true;
-                const strippedParsed = `${~~_parsedNumber}`;
-                _strNumber = `${strippedParsed.substring(0, strippedParsed.length - 3)}.${strippedParsed.substring(strippedParsed.length - 3)[0]}`;
-            }
-
-            return {
-                wasCompressed: _wasCompressed,
-                wasFormatted: false,
-                strNumber: _strNumber
-            };
-        }
-
-        const compare = overrideMode ?? getSetting(Settings.EXPERIMENTAL_FORMAT_CURRENCY);
-        switch (compare) {
-            case ExtensionSettings.CurrencyNumberFormats.FORMATTED:
-                return _format();
-            case ExtensionSettings.CurrencyNumberFormats.COMPRESSED:
-                return _compress();
-            case ExtensionSettings.CurrencyNumberFormats.SPACE_MATCH:
-                return compress ? _compress() : _format();
-        }
-
-        return {
-            wasCompressed: false,
-            wasFormatted: false,
-            strNumber: _strNumber
-        };
-    }
-
     /**
      * Embed decimals in a <small></small> element
      *
      * @param inStr
      */
     export function embedDecimalSmall(inStr: string): string {
-        return inStr.indexOf('.') > -1 ? inStr.replace(/(\d+)\.(\d+)/, '$1<small>.$2</small>') : inStr;
+        if (inStr.indexOf('.') == -1) return inStr;
+        return inStr.replace(/(\d+)\.(\d+)/, `$1<small>.$2</small>`);
     }
 
     // signal

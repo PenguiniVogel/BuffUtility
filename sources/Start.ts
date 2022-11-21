@@ -6,6 +6,12 @@ module Start {
 
     DEBUG && console.debug('Start');
 
+    // imports
+    import Settings = ExtensionSettings.Settings;
+    import getSetting = ExtensionSettings.getSetting;
+
+    // module
+
     function init(): void {
         // BrowserInterface ping system
         BrowserInterface.setupPingSystem();
@@ -219,15 +225,14 @@ module Start {
         let balYuan: number = +(<HTMLElement>balanceDiv.querySelector('#navbar-cash-amount')).innerText.replace('¥ ', '');
 
         if (isFinite(balYuan)) {
-            let { convertedSymbol, convertedValue } = await Util.convertCNYRaw(balYuan);
-            let formatted = Util.formatNumber(convertedValue, false, ExtensionSettings.CurrencyNumberFormats.FORMATTED);
+            let { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(balYuan);
 
             let balConverted = Util.buildHTML('span', {
                 content: [
                     '<br>',
                     Util.buildHTML('span', {
                         class: 'c_Gray f_12px',
-                        content: [ `(${convertedSymbol} ${Util.embedDecimalSmall(formatted.strNumber)})` ]
+                        content: [ `(${convertedSymbol} ${convertedFormattedValue})` ]
                     })
                 ]
             });

@@ -28,11 +28,7 @@ module Cookie {
 
         let date = new Date();
 
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-
-        if (DEBUG) {
-            console.debug(`${name}=${value};path=/;expires=${date.toUTCString()}`);
-        }
+        DEBUG && console.debug(`Deleting Cookie: ${name}=${value};path=/;expires=${date.toUTCString()}`);
 
         document.cookie = `${name}=${value};path=/;expires=${date.toUTCString()}`;
     }
