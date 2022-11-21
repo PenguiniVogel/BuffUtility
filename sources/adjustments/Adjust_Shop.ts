@@ -109,15 +109,27 @@ module Adjust_Shop {
 
         for (let i = 0; i < liList.length; i ++) {
             const dataRow = data.items[i];
-            const priceBox = <HTMLElement>liList.item(i).querySelector('p > .c_Yellow');
+            const li = <HTMLElement>liList.item(i);
+            const priceContainer = li.querySelector('p');
+            const priceBox = priceContainer.querySelector('.c_Yellow');
 
             if (priceBox) {
-                if (await getSetting(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY)) {
-                    const priceConv = await Util.convertCNYRaw(+dataRow.price);
-                    priceBox.innerHTML = `${priceConv.convertedSymbol} ${Util.embedDecimalSmall(priceConv.convertedValue)}`;
-                } else {
-                    priceBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${Util.embedDecimalSmall(dataRow.price)}`;
-                }
+                const h3 = li.querySelector('h3');
+
+                h3.setAttribute('style', 'margin-bottom: 0;');
+                priceContainer.setAttribute('style', 'margin-top: 0;');
+
+                priceBox.innerHTML = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.price)}`;
+
+                const convertedSpan = document.createElement('span');
+
+                convertedSpan.setAttribute('class', 'c_Gray f_12px');
+
+                const { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(dataRow.price);
+
+                convertedSpan.innerHTML = `(${convertedSymbol} ${convertedFormattedValue})`;
+
+                priceContainer.append(document.createElement('br'), convertedSpan);
             }
         }
     }
