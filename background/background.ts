@@ -45,6 +45,13 @@ module Background {
             }
 
             if (safe.method == BrowserInterface.DelegationMethod.CurrencyCache_get) {
+                CurrencyHelper.initialize(true, (data) => {
+                    sendResponse({
+                        received: true,
+                        type: safe.method,
+                        data: data
+                    });
+                });
 
                 return async;
             }

@@ -19,6 +19,7 @@
         "../sources/.GlobalConstants.ts",
         "../sources/config.ts",
         "../sources/BrowserInterface.ts",
+        "../sources/CurrencyHelper.ts",
         "SchemaData.ts",
         "SchemaHelper.ts",
         "background.ts"

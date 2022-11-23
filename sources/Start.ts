@@ -4,6 +4,7 @@
 /** */
 module Start {
 
+    import CurrencyCacheGet = BrowserInterface.CurrencyCacheGet;
     DEBUG && console.debug('Start');
 
     // imports
@@ -12,7 +13,7 @@ module Start {
 
     // module
 
-    function init(): void {
+    async function init(): Promise<void> {
         // BrowserInterface ping system
         BrowserInterface.setupPingSystem();
 
@@ -20,7 +21,7 @@ module Start {
         CurrencyHelper.initialize(false);
 
         // fetch currency and make sure selected rate is up-to-date
-        getCurrencyCache();
+        await getCurrencyCache();
 
         // make sure blur is off if disabled
         checkDataProtection();
@@ -115,13 +116,16 @@ module Start {
     }
 
     async function getCurrencyCache(): Promise<void> {
+        let currencyName: string = await getSetting(Settings.SELECTED_CURRENCY);
         let currencyCache = await BrowserInterface.Storage.get<any>(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
-        let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache);
+        let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache) ?? {} as CurrencyHelper.Data;
         let dateToday = Util.formatDate(new Date());
 
-        async function cacheCurrency(date: string): Promise<void> {
-            let currencyName: string = await getSetting(Settings.SELECTED_CURRENCY);
-            let rates = CurrencyHelper.getData().rates[currencyName];
+        let cachedDate = parsedCurrencyCache?.date ?? '';
+        let cachedRates = parsedCurrencyCache?.rates ?? {};
+
+        async function cacheCurrency(date: string, data: CurrencyHelper.Data): Promise<void> {
+            let rates = data.rates[currencyName];
 
             let segment: CurrencyHelper.Data = {
                 date: date,
@@ -131,7 +135,7 @@ module Start {
                 symbols: {}
             };
 
-            console.debug(segment);
+            DEBUG && console.debug(segment);
 
             if (await getSetting(Settings.EXPERIMENTAL_FETCH_NOTIFICATION)) {
                 Util.signal(['Buff', 'toast'], null, [`Fetched current conversion rates: ${currencyName} -> ${rates[0].toFixed(rates[1])}`]);
@@ -140,24 +144,20 @@ module Start {
             await BrowserInterface.Storage.set({ [GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE]: segment });
         }
 
-        if (parsedCurrencyCache) {
-            console.debug(parsedCurrencyCache.date, dateToday);
-            if (parsedCurrencyCache.date != dateToday) {
-                CurrencyHelper.initialize(true, () => {
-                    cacheCurrency(dateToday);
-                });
-            } else {
-                let cachedRates = Object.keys(parsedCurrencyCache.rates);
-                for (let key of cachedRates) {
-                    console.debug(`[BuffUtility] Reading cached current rates for ${key}: [${CurrencyHelper.getData().date}] ${CurrencyHelper.getData().rates[key]} -> [${parsedCurrencyCache.date}] ${parsedCurrencyCache.rates[key]}`);
-                    CurrencyHelper.getData().rates[key] = parsedCurrencyCache.rates[key];
-                }
-            }
-        } else {
-            CurrencyHelper.initialize(true, () => {
-                cacheCurrency(dateToday);
+        if (cachedDate != dateToday || !(currencyName in cachedRates)) {
+            let response = await BrowserInterface.delegate<CurrencyCacheGet, CurrencyHelper.Data>({
+                method: BrowserInterface.DelegationMethod.CurrencyCache_get,
+                parameters: {},
+                async: true
             });
+
+            parsedCurrencyCache = response.data;
+
+            await cacheCurrency(dateToday, response.data);
         }
+
+        console.debug(`[BuffUtility] Reading cached current rates for ${currencyName}: [${CurrencyHelper.getData().date}] ${CurrencyHelper.getData().rates[currencyName]} -> [${parsedCurrencyCache.date}] ${parsedCurrencyCache.rates[currencyName]}`);
+        CurrencyHelper.getData().rates[currencyName] = parsedCurrencyCache.rates[currencyName];
 
         // delete cookie
         Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, '0', 0);

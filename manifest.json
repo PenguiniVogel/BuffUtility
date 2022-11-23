@@ -14,7 +14,10 @@
                 "sources/InjectionService.js",
                 "sources/BrowserInterface.js",
                 "sources/ISchemaHelper.js",
-                "sources/Cookie.js"
+                "sources/Cookie.js",
+                "sources/Util.js",
+                "sources/ExtensionSettings.js",
+                "sources/CurrencyHelper.js"
             ],
             "matches": [
                 "https://buff.163.com/*"
@@ -23,9 +26,6 @@
         },
         {
             "js": [
-                "sources/Util.js",
-                "sources/ExtensionSettings.js",
-                "sources/CurrencyHelper.js",
                 "sources/Start.js"
             ],
             "matches": [

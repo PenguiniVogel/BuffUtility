@@ -128,9 +128,7 @@ module BrowserInterface {
 
     export interface CurrencyCacheGet extends BaseDelegation {
         method: DelegationMethod.CurrencyCache_get,
-        parameters: {
-            currencyName: string
-        }
+        parameters: { }
     }
 
     export interface MessageResponse<T> {
