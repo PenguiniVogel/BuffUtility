@@ -1,6 +1,6 @@
 module InjectionServiceLib {
 
-    console.debug('Loading InjectionServiceLib');
+    console.debug('Module.InjectionServiceLib');
 
     const ISL_READY = 'EVENT_ISL_READY';
 
@@ -210,7 +210,7 @@ module InjectionServiceLib {
 
 module InjectionService {
 
-    DEBUG && console.debug('Start.InjectionService');
+    DEBUG && console.debug('Module.InjectionService');
 
     export interface TransferData<T> {
         status: string,

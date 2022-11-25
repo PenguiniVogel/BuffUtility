@@ -1,4 +1,4 @@
-console.debug('Start.config');
+console.debug('Module.config');
 
 /**
  * Mark if the current build is a DEBUG one, this gets preloaded as flag before other scripts

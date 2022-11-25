@@ -1,4 +1,6 @@
-module AdjustFavourites {
+module Adjust_Favourites {
+
+    DEBUG && console.debug('Module.Adjust_Favourites');
 
     // imports
     import Settings = ExtensionSettings.Settings;

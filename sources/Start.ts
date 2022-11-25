@@ -4,7 +4,7 @@
 /** */
 module Start {
 
-    DEBUG && console.debug('Start');
+    DEBUG && console.debug('Module.Start');
 
     // imports
     import Settings = ExtensionSettings.Settings;

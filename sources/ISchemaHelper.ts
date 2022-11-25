@@ -1,6 +1,6 @@
 module ISchemaHelper {
 
-    DEBUG && console.debug('Start.ISchemaHelper');
+    DEBUG && console.debug('Module.ISchemaHelper');
 
     export const NAME_MAPPING_CH: {
         [name: string]: string

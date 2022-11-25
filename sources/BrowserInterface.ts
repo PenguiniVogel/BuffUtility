@@ -4,7 +4,7 @@
 /** */
 module BrowserInterface {
 
-    DEBUG && console.debug('Start.BrowserInterface');
+    DEBUG && console.debug('Module.BrowserInterface');
 
     /**
      * Represents a browser environment with matched functions

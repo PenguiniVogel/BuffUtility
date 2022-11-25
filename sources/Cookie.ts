@@ -1,6 +1,6 @@
 module Cookie {
 
-    DEBUG && console.debug('Start.Cookie');
+    DEBUG && console.debug('Module.Cookie');
 
     /**
      * @deprecated please use {@link BrowserInterface.Storage.get} now

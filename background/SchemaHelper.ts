@@ -1,5 +1,7 @@
 module SchemaHelper {
 
+    DEBUG && console.debug('Module.SchemaHelper');
+
     // imports
     import Schema = SchemaTypes.Schema;
     import Weapon = SchemaTypes.Weapon;

@@ -1,6 +1,6 @@
 module Util {
 
-    DEBUG && console.debug('Start.Util');
+    DEBUG && console.debug('Module.Util');
 
     // module
 

@@ -5,7 +5,7 @@
 /** */
 module Preload {
 
-    DEBUG && console.debug('Start.preload');
+    DEBUG && console.debug('Module.preload');
 
     // imports
     import Settings = ExtensionSettings.Settings;

@@ -1,6 +1,6 @@
 module ExtensionSettings {
 
-    DEBUG && console.debug('Start.ExtensionSettings');
+    DEBUG && console.debug('Module.ExtensionSettings');
 
     export const enum DifferenceDominator {
         STEAM,

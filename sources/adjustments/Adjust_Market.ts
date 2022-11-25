@@ -1,5 +1,7 @@
 module Adjust_Market {
 
+    DEBUG && console.debug('Module.Adjust_Market');
+
     // imports
     import Settings = ExtensionSettings.Settings;
     import getSetting = ExtensionSettings.getSetting;

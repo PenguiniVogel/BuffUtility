@@ -1,5 +1,7 @@
 module Adjust_Shop {
 
+    DEBUG && console.debug('Module.Adjust_Shop');
+
     // imports
     import Settings = ExtensionSettings.Settings;
     import getSetting = ExtensionSettings.getSetting;

@@ -1,5 +1,7 @@
 module Options {
 
+    DEBUG && console.debug('Module.Options');
+
     // imports
     import Settings = ExtensionSettings.Settings;
     import resetSetting = ExtensionSettings.resetSetting;

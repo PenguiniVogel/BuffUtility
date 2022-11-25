@@ -1,5 +1,7 @@
 module Adjust_Settings {
 
+    DEBUG && console.debug('Module.Adjust_Settings');
+
     // add settings
 
     function init(): void {
