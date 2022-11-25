@@ -17,7 +17,8 @@
                 "sources/Cookie.js",
                 "sources/Util.js",
                 "sources/ExtensionSettings.js",
-                "sources/CurrencyHelper.js"
+                "sources/CurrencyHelper.js",
+                "sources/preload.js"
             ],
             "matches": [
                 "https://buff.163.com/*"
