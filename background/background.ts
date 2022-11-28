@@ -23,7 +23,7 @@ module Background {
                 sendResponse({
                     received: true,
                     type: safe.method,
-                    data: SchemaData.BUFF_SCHEMA.hash_to_id[safe.parameters.name]
+                    data: SchemaData.BUFF_SCHEMA[safe.parameters.name]
                 });
 
                 return async;

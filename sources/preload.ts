@@ -26,6 +26,14 @@ module Preload {
 
     async function getCurrencyCache(): Promise<void> {
         let currencyName: string = await getSetting(Settings.SELECTED_CURRENCY);
+
+        /**
+         * If custom currency, ignore
+         */
+        if (currencyName == GlobalConstants.BUFF_UTILITY_CUSTOM_CURRENCY) {
+            return;
+        }
+
         let currencyCache = await BrowserInterface.Storage.get<any>(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE);
         let parsedCurrencyCache = Util.tryParseJson<CurrencyHelper.Data>(currencyCache) ?? {} as CurrencyHelper.Data;
         let dateToday = Util.formatDate(new Date());

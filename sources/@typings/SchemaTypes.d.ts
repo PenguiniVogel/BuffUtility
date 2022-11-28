@@ -1,15 +1,7 @@
 declare module SchemaTypes {
 
     export interface BuffSchema {
-        name_to_id: {
-            [key: string]: number
-        },
-        hash_to_id: {
-            [key: string]: number
-        },
-        id_to_name: {
-            [key: string]: string
-        }
+        [p: string]: string
     }
 
     export interface Collection {

@@ -109,7 +109,7 @@ module BrowserInterface {
         }
     }
 
-    export interface BuffSchemaGetIdDelegation extends BaseDelegation {
+    export interface BuffSchemaGetIdOrNameDelegation extends BaseDelegation {
         method: DelegationMethod.BuffSchema_get,
         parameters: {
             name: string

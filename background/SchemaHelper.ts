@@ -24,7 +24,7 @@ module SchemaHelper {
         };
     }
 
-    export const LAST_UPDATE = '2.1.4-16.05.2022';
+    export const LAST_UPDATE = '2.1.8-28.11.2022';
 
     let parsed: Schema = <Schema>SchemaData.CSGO_SCHEMA;
 
