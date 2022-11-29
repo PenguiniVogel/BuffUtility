@@ -15,7 +15,7 @@ switch (argv2) {
 
         manifest['background'] = {
             'scripts': [
-                'ff_background.js'
+                'background/merge_background.js'
             ]
         };
 
@@ -29,14 +29,15 @@ switch (argv2) {
         delete manifest['options_page'];
 
         manifest['options_ui'] = {
-            "page": "options/options.html",
-            "chrome_style": true
+            'page': 'options/options.html',
+            'browser_style': true
         };
 
         manifest['permissions'] = [
-            "*://penguinivogel.github.io/currency-repository/rates.json",
-            "*://buff.163.com/*",
-            "*://csgostash.com/*"
+            'storage',
+            '*://penguinivogel.github.io/currency-repository/rates.json',
+            '*://buff.163.com/*',
+            '*://csgostash.com/*'
         ];
 
         break;

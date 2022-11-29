@@ -1,4 +1,11 @@
 /**
+ * The global content_script space,
+ * necessary because in chrome you can find it with <code>self</code>
+ * but in firefox you require this reference
+ */
+let _globalScope = this;
+
+/**
  * Module to manage communication between content and background scripts
  */
 /** */
@@ -149,16 +156,18 @@ module BrowserInterface {
             return browserEnvironment;
         }
 
-        if ('chrome' in self) {
-            environment = 'chrome';
-            browserEnvironment = chrome;
+        // check for firefox first
+        if ('browser' in _globalScope || 'browser' in self) {
+            environment = 'browser';
+            browserEnvironment = browser;
 
             return browserEnvironment;
         }
 
-        if ('browser' in self) {
-            environment = 'browser';
-            browserEnvironment = browser;
+        // check for chrome
+        if ('chrome' in self) {
+            environment = 'chrome';
+            browserEnvironment = chrome;
 
             return browserEnvironment;
         }
