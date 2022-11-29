@@ -7,4 +7,5 @@ Prerequisites:
 * Windows 10
 
 ### How to build
-run `build.sh` the Firefox build of the extension can be found in `.export/BuffUtility_Firefox`
+1. run `setup.sh -install`
+2. run `build.sh` the Firefox build of the extension can be found in `.export/BuffUtility_Firefox`
