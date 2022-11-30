@@ -1,6 +1,6 @@
 module Adjust_Favourites {
 
-    DEBUG && console.debug('Module.Adjust_Favourites');
+    DEBUG && console.debug('[BuffUtility] Module.Adjust_Favourites');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -9,9 +9,6 @@ module Adjust_Favourites {
     // module
 
     async function init(): Promise<void> {
-        // if not csgo, skip
-        if (window.location.href.indexOf('game=csgo') == -1) return;
-
         console.debug('[BuffUtility] Adjust_Favourites');
 
         let rows = <NodeListOf<HTMLElement>>(document.querySelector('table.list_tb.list_tb_csgo')?.querySelectorAll('tr'));
@@ -67,47 +64,53 @@ module Adjust_Favourites {
 
             let assetInfo: BuffTypes.SellOrder.AssetInfo = JSON.parse(aAssetInfo.getAttribute('data-asset-info'));
 
-            let itemType = nameContainer.innerText.split(' | ')[0].replace('（★）', '');
-            itemType = ISchemaHelper.NAME_MAPPING_CH[itemType] ?? itemType;
+            async function _csgoSpecific(): Promise<void> {
+                let itemType = nameContainer.innerText.split(' | ')[0].replace('（★）', '');
+                itemType = ISchemaHelper.NAME_MAPPING_CH[itemType] ?? itemType;
 
-            let f_schemaData = (await ISchemaHelper.find(itemType, true)).data;
+                let f_schemaData = (await ISchemaHelper.find(itemType, true)).data;
 
-            if (f_schemaData?.length > 0) {
-                let schemaData = f_schemaData[0];
+                if (f_schemaData?.length > 0) {
+                    let schemaData = f_schemaData[0];
 
-                DEBUG && console.debug(itemType, schemaData, assetInfo);
+                    DEBUG && console.debug(itemType, schemaData, assetInfo);
 
-                let aCopyGen = <HTMLElement>document.createElement('a');
+                    let aCopyGen = <HTMLElement>document.createElement('a');
 
-                let gen;
-                if (schemaData.type == 'Gloves') {
-                    aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gengl';
-                    // !gengl weapon_id paint_id pattern float
-                    gen = `!gengl ${schemaData.id} ${assetInfo.info.paintindex} ${assetInfo.info.paintseed} ${assetInfo.paintwear}`;
-                } else {
-                    aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
-                    // !gen weapon_id paint_id pattern float sticker1 wear1...
-                    gen = `!gen ${schemaData.id} ${assetInfo.info.paintindex} ${assetInfo.info.paintseed} ${assetInfo.paintwear}`;
+                    let gen;
+                    if (schemaData.type == 'Gloves') {
+                        aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gengl';
+                        // !gengl weapon_id paint_id pattern float
+                        gen = `!gengl ${schemaData.id} ${assetInfo.info.paintindex} ${assetInfo.info.paintseed} ${assetInfo.paintwear}`;
+                    } else {
+                        aCopyGen.innerHTML = '<b><i class="icon icon_notes"></i></b>Copy !gen';
+                        // !gen weapon_id paint_id pattern float sticker1 wear1...
+                        gen = `!gen ${schemaData.id} ${assetInfo.info.paintindex} ${assetInfo.info.paintseed} ${assetInfo.paintwear}`;
 
-                    if (assetInfo.info?.stickers?.length > 0) {
-                        let stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
+                        if (assetInfo.info?.stickers?.length > 0) {
+                            let stickers: string[] = ['0 0', '0 0', '0 0', '0 0'];
 
-                        for (let l_sticker of assetInfo.info.stickers) {
-                            stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
+                            for (let l_sticker of assetInfo.info.stickers) {
+                                stickers[l_sticker.slot] = `${l_sticker.sticker_id} ${l_sticker.wear}`;
+                            }
+
+                            gen += ` ${stickers.join(' ')}`;
                         }
-
-                        gen += ` ${stickers.join(' ')}`;
                     }
+
+                    aCopyGen.setAttribute('class', 'ctag btn');
+                    aCopyGen.setAttribute('style', 'margin-top: 3px;');
+                    aCopyGen.setAttribute('title', gen);
+
+                    Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
+                    Util.addAnchorClipboardAction(aCopyGen, gen);
+
+                    wearContainer.appendChild(aCopyGen);
                 }
+            }
 
-                aCopyGen.setAttribute('class', 'ctag btn');
-                aCopyGen.setAttribute('style', 'margin-top: 3px;');
-                aCopyGen.setAttribute('title', gen);
-
-                Util.addAnchorToastAction(aCopyGen, `Copied ${gen} to clipboard!`);
-                Util.addAnchorClipboardAction(aCopyGen, gen);
-
-                wearContainer.appendChild(aCopyGen);
+            if ((await InjectionService.getGame()) == 'csgo') {
+                await _csgoSpecific();
             }
 
             let aShare = document.createElement('a');
@@ -148,26 +151,6 @@ module Adjust_Favourites {
 
                     parentBargain.querySelector('span').setAttribute('style', 'margin-left: 50px;');
                     parentBargain.querySelector('a').after(aBargain);
-
-                    // Disabled for now until proxy properly works
-                    // if (await getSetting(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS)) {
-                    //     let classId = imgContainer.getAttribute('data-classid');
-                    //     let instanceId = imgContainer.getAttribute('data-instanceid');
-                    //     let assetId = imgContainer.getAttribute('data-assetid');
-                    //     let orderId = imgContainer.getAttribute('data-orderid');
-                    //     if (orderId?.length > 0) {
-                    //         BrowserInterface.delegate<BrowserInterface.BuffBargainFetchDelegation, string>({
-                    //             method: BrowserInterface.DelegationMethod.BuffBargain_fetch,
-                    //             async: true,
-                    //             parameters: {
-                    //                 classId: classId,
-                    //                 instanceId: instanceId,
-                    //                 assetId: assetId,
-                    //                 orderId: orderId
-                    //             }
-                    //         }).then(response => { });
-                    //     }
-                    // }
                 }
             }
 

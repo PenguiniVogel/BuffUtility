@@ -1,6 +1,6 @@
 module Adjust_Shop {
 
-    DEBUG && console.debug('Module.Adjust_Shop');
+    DEBUG && console.debug('[BuffUtility] Module.Adjust_Shop');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -52,9 +52,9 @@ module Adjust_Shop {
             const priceBox = li.querySelector('p > .f_Strong');
             const priceParent = priceBox?.parentElement;
 
-            const schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
-
             if (dataRow.appid == 730) {
+                const schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
+
                 if (tagBox.children.length == 2) {
                     tagBox.insertBefore(Util.addAnchorShareAction(dataRow.asset_info.classid, dataRow.asset_info.instanceid, dataRow.asset_info.assetid, dataRow.id), tagBox.firstChild);
                     // only append if we have schema data, which we always should have, but some items have weird CH mappings

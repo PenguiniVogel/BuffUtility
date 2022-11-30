@@ -1,7 +1,7 @@
 {
     "name": "Buff Utility (Dev)",
     "author": "MePenguini",
-    "version": "2.1.8",
+    "version": "2.1.9",
     "description": "Adds cosmetic functionality to buff.163.com",
     "manifest_version": 3,
     "background": {
@@ -23,7 +23,8 @@
             "matches": [
                 "https://buff.163.com/*"
             ],
-            "run_at": "document_start"
+            "run_at": "document_start",
+            "all_frames": true
         },
         {
             "js": [
@@ -31,7 +32,8 @@
             ],
             "matches": [
                 "https://buff.163.com/*"
-            ]
+            ],
+            "all_frames": true
         },
         {
             "js": [
@@ -39,7 +41,8 @@
             ],
             "matches": [
                 "https://buff.163.com/user-center/profile"
-            ]
+            ],
+            "all_frames": true
         },
         {
             "js": [
@@ -47,7 +50,8 @@
             ],
             "matches": [
                 "https://buff.163.com/goods/*"
-            ]
+            ],
+            "all_frames": true
         },
         {
             "js": [
@@ -55,7 +59,8 @@
             ],
             "matches": [
                 "https://buff.163.com/market/*"
-            ]
+            ],
+            "all_frames": true
         },
         {
             "js": [
@@ -63,7 +68,8 @@
             ],
             "matches": [
                 "https://buff.163.com/market/sell_order/on_sale*"
-            ]
+            ],
+            "all_frames": true
         },
         {
             "js": [
@@ -71,7 +77,8 @@
             ],
             "matches": [
                 "https://buff.163.com/user-center/bookmark/sell_order*"
-            ]
+            ],
+            "all_frames": true
         },
         {
             "js": [
@@ -79,7 +86,8 @@
             ],
             "matches": [
                 "https://buff.163.com/shop*"
-            ]
+            ],
+            "all_frames": true
         },
         {
             "js": [
@@ -87,7 +95,8 @@
             ],
             "matches": [
                 "https://buff.163.com/market/m/item_detail?*"
-            ]
+            ],
+            "all_frames": true
         },
         {
             "js": [
@@ -98,7 +107,8 @@
             ],
             "matches": [
                 "https://csgostash.com/skin/*"
-            ]
+            ],
+            "all_frames": true
         }
     ],
     "permissions": [

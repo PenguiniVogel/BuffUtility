@@ -1,6 +1,6 @@
 module Adjust_Market {
 
-    DEBUG && console.debug('Module.Adjust_Market');
+    DEBUG && console.debug('[BuffUtility] Module.Adjust_Market');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -13,9 +13,6 @@ module Adjust_Market {
     }
 
     function process(transferData: InjectionService.TransferData<unknown>): void {
-        // if not csgo, skip
-        if (transferData.url.indexOf('game=csgo') == -1) return;
-
         if (transferData.url.indexOf('/market/') == -1) {
             return;
         } else if (transferData.url.indexOf('/market/goods') > -1) {
@@ -45,34 +42,37 @@ module Adjust_Market {
             const h3 = <HTMLElement>li.querySelector('h3');
             const p = <HTMLElement>document.createElement('p');
 
-            const schemaData = (await ISchemaHelper.find(dataRow.short_name, true, dataRow.goods_info.info?.tags?.exterior?.internal_name == 'wearcategoryna', true)).data[0];
+            // only apply to csgo
+            if (dataRow.appid == 730) {
+                const schemaData = (await ISchemaHelper.find(dataRow.short_name, true, dataRow.goods_info.info?.tags?.exterior?.internal_name == 'wearcategoryna', true)).data[0];
 
-            DEBUG && console.debug(schemaData);
+                DEBUG && console.debug(schemaData);
 
-            let aHrefList = li.querySelectorAll('a[href]');
-            for (let x = 0, y = aHrefList.length; x < y; x ++) {
-                let aHref = aHrefList.item(x);
+                let aHrefList = li.querySelectorAll('a[href]');
+                for (let x = 0, y = aHrefList.length; x < y; x ++) {
+                    let aHref = aHrefList.item(x);
 
-                let stickerSearch = '';
-                if (schemaData && schemaData.sticker_amount > 0) {
-                    switch (await getSetting(Settings.DEFAULT_STICKER_SEARCH)) {
-                        case ExtensionSettings.FILTER_STICKER_SEARCH['All']:
-                        case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers']:
-                        case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers 100%']:
-                        case ExtensionSettings.FILTER_STICKER_SEARCH['No Stickers']:
-                        case ExtensionSettings.FILTER_STICKER_SEARCH['Quad Combos']:
-                        case ExtensionSettings.FILTER_STICKER_SEARCH['Quad Combos 100%']:
-                            stickerSearch = await getSetting(Settings.DEFAULT_STICKER_SEARCH);
-                            break;
-                        case ExtensionSettings.FILTER_STICKER_SEARCH['Save Custom']:
-                            if ((await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH)).length > 0) {
-                                stickerSearch = await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH);
-                            }
-                            break;
+                    let stickerSearch = '';
+                    if (schemaData && schemaData.sticker_amount > 0) {
+                        switch (await getSetting(Settings.DEFAULT_STICKER_SEARCH)) {
+                            case ExtensionSettings.FILTER_STICKER_SEARCH['All']:
+                            case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers']:
+                            case ExtensionSettings.FILTER_STICKER_SEARCH['Stickers 100%']:
+                            case ExtensionSettings.FILTER_STICKER_SEARCH['No Stickers']:
+                            case ExtensionSettings.FILTER_STICKER_SEARCH['Quad Combos']:
+                            case ExtensionSettings.FILTER_STICKER_SEARCH['Quad Combos 100%']:
+                                stickerSearch = await getSetting(Settings.DEFAULT_STICKER_SEARCH);
+                                break;
+                            case ExtensionSettings.FILTER_STICKER_SEARCH['Save Custom']:
+                                if ((await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH)).length > 0) {
+                                    stickerSearch = await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH);
+                                }
+                                break;
+                        }
                     }
-                }
 
-                aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${await getSetting(Settings.DEFAULT_SORT_BY)}${stickerSearch}`);
+                    aHref.setAttribute('href', `${aHref.getAttribute('href')}&sort_by=${await getSetting(Settings.DEFAULT_SORT_BY)}${stickerSearch}`);
+                }
             }
 
             let buffPrice = +dataRow.sell_min_price;

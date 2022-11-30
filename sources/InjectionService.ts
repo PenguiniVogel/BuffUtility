@@ -210,7 +210,7 @@ module InjectionServiceLib {
 
 module InjectionService {
 
-    DEBUG && console.debug('Module.InjectionService');
+    DEBUG && console.debug('[BuffUtility] Module.InjectionService');
 
     export interface TransferData<T> {
         status: string,
@@ -219,6 +219,10 @@ module InjectionService {
     }
 
     export let responseCache: TransferData<unknown>[] = [];
+
+    let requestedObjects: {
+        [key: string]: any
+    } = {};
 
     let pendingObjectResolvers: {
         [key: number]: (data: any) => void
@@ -258,10 +262,12 @@ module InjectionService {
             console.debug(responseCache);
         } else if ((e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE_ACK) {
             // ASK/ACK key global/return
-            if (e.data.length == 3) {
+            if (e.data.length == 4) {
                 const _d = e.data[1];
                 if (pendingObjectResolvers[_d]) {
-                    pendingObjectResolvers[_d](e.data[2]);
+                    let object = e.data[2];
+                    requestedObjects[e.data[3]] = object;
+                    pendingObjectResolvers[_d](object);
 
                     delete pendingObjectResolvers[_d];
                 }
@@ -271,9 +277,20 @@ module InjectionService {
         }
     });
 
+    export async function getGame(): Promise<string> {
+        let g: BuffTypes.g = await requestObject('g');
+
+        return g?.game ?? 'unknown';
+    }
+
     export async function requestObject<T>(global: string): Promise<T> {
         const _d = Date.now();
         const _p = new Promise<T>((resolve, _) => {
+            if (requestedObjects[global] != null) {
+                resolve(requestedObjects[global]);
+                return;
+            }
+
             window.postMessage([GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE_ASK, _d, global], '*');
             pendingObjectResolvers[_d] = resolve;
 
@@ -357,7 +374,8 @@ module InjectionService {
                 window.postMessage([
                     GlobalConstants.BUFF_UTILITY_OBJECT_SERVICE_ACK,
                     e.data[1],
-                    window[e.data[2] ?? ''] ?? null
+                    window[e.data[2] ?? ''] ?? null,
+                    e.data[2] ?? ''
                 ], '*');
             }
 

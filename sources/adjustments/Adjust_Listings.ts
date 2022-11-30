@@ -1,6 +1,6 @@
 module Adjust_Listings {
 
-    DEBUG && console.debug('Module.Adjust_Listings');
+    DEBUG && console.debug('[BuffUtility] Module.Adjust_Listings');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -237,20 +237,8 @@ module Adjust_Listings {
 
         let { isBalanceYuan, nrBalance } = Util.getAccountBalance();
 
-        // let strBalance = (<HTMLElement>document.querySelector('#navbar-cash-amount')).innerText;
-        // let isBalanceYuan = strBalance.indexOf('¥') > -1;
-        // let nrBalance = isBalanceYuan ? +(strBalance.replace('¥', '')) : 0;
-        // console.debug('[BuffUtility] Balance:', strBalance, '->', isBalanceYuan, '->', nrBalance);
-
         let goodsInfo: BuffTypes.SellOrder.GoodsInfo = data.goods_infos[/goods_id=(\d+)/.exec(transferData.url)[1]];
         let steamPriceCNY = +goodsInfo.steam_price_cny;
-
-        const schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
-
-        // only override stickers if we actually can have any
-        if (schemaData?.sticker_amount > 0) {
-            ExtensionSettings.setSetting(Settings.STORED_CUSTOM_STICKER_SEARCH, (/&extra_tag_ids=[^&#]+/g.exec(transferData.url) ?? [''])[0]);
-        }
 
         let floatdb_category;
         switch (goodsInfo.tags?.quality?.internal_name ?? 'normal') {
@@ -271,32 +259,6 @@ module Adjust_Listings {
         const preview_screenshots = document.getElementById('preview_screenshots');
         const can_expand_screenshots = await getSetting(Settings.CAN_EXPAND_SCREENSHOTS) && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
         const expand_classes = can_expand_screenshots ? `img_td can_expand ${await getSetting(Settings.EXPAND_SCREENSHOTS_BACKDROP) ? 'expand_backdrop' : ''}` : 'img_td';
-
-        let fopString = '';
-        if (can_expand_screenshots) {
-            switch (await getSetting(Settings.CUSTOM_FOP)) {
-                case ExtensionSettings.FOP_VALUES.Auto:
-                    fopString = '';
-                    break;
-                case ExtensionSettings.FOP_VALUES.w245xh230:
-                    fopString = '?fop=imageView/2/w/245/h/230';
-                    break;
-                case ExtensionSettings.FOP_VALUES.w490xh460:
-                    fopString = '?fop=imageView/2/w/490/h/460';
-                    break;
-                case ExtensionSettings.FOP_VALUES.w980xh920:
-                    fopString = '?fop=imageView/2/w/980/h/920';
-                    break;
-                case ExtensionSettings.FOP_VALUES.w1960xh1840:
-                    fopString = '?fop=imageView/2/w/1960/h/1840';
-                    break;
-                case ExtensionSettings.FOP_VALUES.w3920xh3680:
-                    fopString = '?fop=imageView/2/w/3920/h/3680';
-                    break;
-                default:
-                    break;
-            }
-        }
 
         // adjust reference price
         if (await getSetting(Settings.APPLY_STEAM_TAX)) {
@@ -343,6 +305,16 @@ module Adjust_Listings {
             if (stickers) html += buildCheckbox('Stickers', 'stickers', stickers);
 
             return `${html}</tbody></table></div>`;
+        }
+
+        let schemaData = null;
+        if ((await InjectionService.getGame()) == 'csgo') {
+            schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
+
+            // only override stickers if we actually can have any
+            if (schemaData?.sticker_amount > 0) {
+                ExtensionSettings.setSetting(Settings.STORED_CUSTOM_STICKER_SEARCH, (/&extra_tag_ids=[^&#]+/g.exec(transferData.url) ?? [''])[0]);
+            }
         }
 
         // go over all rows
@@ -481,6 +453,32 @@ module Adjust_Listings {
 
             if (can_expand_screenshots && dataRow.can_use_inspect_trn_url) {
                 let img_src = dataRow.img_src + data.fop_str;
+
+                let fopString = '';
+                if (can_expand_screenshots) {
+                    switch (await getSetting(Settings.CUSTOM_FOP)) {
+                        case ExtensionSettings.FOP_VALUES.Auto:
+                            fopString = '';
+                            break;
+                        case ExtensionSettings.FOP_VALUES.w245xh230:
+                            fopString = '?fop=imageView/2/w/245/h/230';
+                            break;
+                        case ExtensionSettings.FOP_VALUES.w490xh460:
+                            fopString = '?fop=imageView/2/w/490/h/460';
+                            break;
+                        case ExtensionSettings.FOP_VALUES.w980xh920:
+                            fopString = '?fop=imageView/2/w/980/h/920';
+                            break;
+                        case ExtensionSettings.FOP_VALUES.w1960xh1840:
+                            fopString = '?fop=imageView/2/w/1960/h/1840';
+                            break;
+                        case ExtensionSettings.FOP_VALUES.w3920xh3680:
+                            fopString = '?fop=imageView/2/w/3920/h/3680';
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
                 switch (await getSetting(Settings.EXPAND_TYPE)) {
                     case ExtensionSettings.ExpandScreenshotType.PREVIEW:

@@ -1,6 +1,6 @@
 module Util {
 
-    DEBUG && console.debug('Module.Util');
+    DEBUG && console.debug('[BuffUtility] Module.Util');
 
     // module
 

@@ -5,7 +5,7 @@
 /** */
 module Preload {
 
-    DEBUG && console.debug('Module.preload');
+    DEBUG && console.debug('[BuffUtility] Module.preload');
 
     // imports
     import Settings = ExtensionSettings.Settings;

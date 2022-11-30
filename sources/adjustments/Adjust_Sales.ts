@@ -1,6 +1,6 @@
 module Adjust_Sales {
 
-    DEBUG && console.debug('Module.Adjust_Sales');
+    DEBUG && console.debug('[BuffUtility] Module.Adjust_Sales');
 
     function init(): void {
         // skip if not csgo

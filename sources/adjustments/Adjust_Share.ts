@@ -1,6 +1,6 @@
 module Adjust_Share {
 
-    DEBUG && console.debug('Module.Adjust_Share');
+    DEBUG && console.debug('[BuffUtility] Module.Adjust_Share');
 
     // imports
     import Settings = ExtensionSettings.Settings;

@@ -1,6 +1,6 @@
 module Adjust_Settings {
 
-    DEBUG && console.debug('Module.Adjust_Settings');
+    DEBUG && console.debug('[BuffUtility] Module.Adjust_Settings');
 
     // add settings
 

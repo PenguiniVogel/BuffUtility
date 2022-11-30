@@ -1,6 +1,6 @@
 module Background {
 
-    console.debug('[BuffUtility:Background] Initialized.');
+    console.debug('[BuffUtility] Module.Background');
 
     BrowserInterface.addListener((request, sender, sendResponse) => {
         console.log(request, sender);

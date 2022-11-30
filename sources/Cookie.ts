@@ -1,6 +1,6 @@
 module Cookie {
 
-    DEBUG && console.debug('Module.Cookie');
+    DEBUG && console.debug('[BuffUtility] Module.Cookie');
 
     /**
      * @deprecated please use {@link BrowserInterface.Storage.get} now

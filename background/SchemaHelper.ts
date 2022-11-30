@@ -1,6 +1,6 @@
 module SchemaHelper {
 
-    DEBUG && console.debug('Module.SchemaHelper');
+    DEBUG && console.debug('[BuffUtility] Module.SchemaHelper');
 
     // imports
     import Schema = SchemaTypes.Schema;

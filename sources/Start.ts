@@ -52,11 +52,17 @@ module Start {
                 let start = Date.now();
                 let r = await InjectionService.requestObject('g');
                 let ms = Date.now() - start;
+                let start_cached = Date.now();
+                let r_cached = await InjectionService.requestObject('g');
+                let ms_cached = Date.now() - start;
 
                 console.group(`ObjectService Test`);
                 console.debug('Start:', start);
                 console.debug('Value:', r);
                 console.debug('End.', `${ms}ms`);
+                console.debug('Start - cached:', start_cached);
+                console.debug('Value - cached:', r_cached);
+                console.debug('End. - cached', `${ms_cached}ms`);
                 console.groupEnd();
             })();
         }

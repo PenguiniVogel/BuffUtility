@@ -11,7 +11,7 @@ let _globalScope = this;
 /** */
 module BrowserInterface {
 
-    DEBUG && console.debug('Module.BrowserInterface');
+    DEBUG && console.debug('[BuffUtility] Module.BrowserInterface');
 
     /**
      * Represents a browser environment with matched functions

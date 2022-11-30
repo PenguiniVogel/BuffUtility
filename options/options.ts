@@ -1,6 +1,6 @@
 module Options {
 
-    DEBUG && console.debug('Module.Options');
+    DEBUG && console.debug('[BuffUtility] Module.Options');
 
     // imports
     import Settings = ExtensionSettings.Settings;
