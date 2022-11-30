@@ -12,7 +12,8 @@ module Options {
 
     interface DisplayInfo {
         title: string,
-        description: string
+        description: string,
+        csgoOnly?: boolean
     }
 
     interface SelectOption {
@@ -27,7 +28,7 @@ module Options {
                     content: [
                         Util.buildHTML('div', {
                             class: 'setting-title',
-                            content: [ info.title ]
+                            content: [ info.title, info.csgoOnly ? ' <u style="color: var(--color-light);">(CS:GO Only)</u>' : '' ]
                         }),
                         Util.buildHTML('div', {
                             class: 'setting-description action',
@@ -197,13 +198,15 @@ module Options {
         // Settings.CAN_EXPAND_SCREENSHOTS
         normalSettings += await createCheckboxOption(Settings.CAN_EXPAND_SCREENSHOTS, {
             title: 'Can expand preview',
-            description: 'Can previews be expanded on sell listings. This only works if "Preview screenshots" is turned on and if the item has been inspected.'
+            description: 'Can previews be expanded on sell listings. This only works if "Preview screenshots" is turned on and if the item has been inspected.',
+            csgoOnly: true
         });
 
         // Settings.EXPAND_SCREENSHOTS_BACKDROP
         normalSettings += await createCheckboxOption(Settings.EXPAND_SCREENSHOTS_BACKDROP, {
             title: 'Expanded preview backdrop',
-            description: 'Adds a transparent black backdrop to preview images to add some contrast.'
+            description: 'Adds a transparent black backdrop to preview images to add some contrast.',
+            csgoOnly: true
         });
 
         // Settings.APPLY_STEAM_TAX
@@ -221,14 +224,15 @@ module Options {
         // Settings.LISTING_OPTIONS
         normalSettings += await createMultiCheckboxOption(Settings.LISTING_OPTIONS, {
             title: 'Listing options',
-            description: 'Define what options show up on each listing.'
+            description: 'Define what options show up on each listing.',
+            csgoOnly: true
         }, [
             '3D Inspect',
             'Inspect in server',
             'Copy !gen/!gengl',
             'Share',
             'Match floatdb',
-            'Narrow'
+            'Find Similar'
         ]);
 
         // Settings.SHOW_FLOAT_BAR
@@ -271,7 +275,8 @@ module Options {
         // Settings.DEFAULT_SORT_BY
         advancedSettings += createSelectOption(Settings.DEFAULT_SORT_BY, {
             title: 'Default sort by',
-            description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Hot Descending: by popularity.<br>Sticker: By Sticker price descending.'
+            description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Hot Descending: by popularity.<br>Sticker: By Sticker price descending.',
+            csgoOnly: true
         }, Object.keys(ExtensionSettings.FILTER_SORT_BY).map(option => {
             return {
                 displayText: option,
@@ -282,7 +287,8 @@ module Options {
         // Settings.DEFAULT_STICKER_SEARCH
         advancedSettings += createSelectOption(Settings.DEFAULT_STICKER_SEARCH, {
             title: 'Default sticker search',
-            description: 'Search listings with sticker settings automatically.'
+            description: 'Search listings with sticker settings automatically.',
+            csgoOnly: true
         }, Object.keys(ExtensionSettings.FILTER_STICKER_SEARCH).map(option => {
             return {
                 displayText: option,
@@ -293,7 +299,8 @@ module Options {
         // Settings.EXPAND_TYPE
         advancedSettings += createSelectOption(Settings.EXPAND_TYPE, {
             title: 'Expand preview type',
-            description: 'Either expand into a zoomed preview image or expand into the inspect image.'
+            description: 'Either expand into a zoomed preview image or expand into the inspect image.',
+            csgoOnly: true
         }, [
             {
                 displayText: 'Preview',
@@ -308,7 +315,8 @@ module Options {
         // Settings.CUSTOM_FOP
         advancedSettings += createSelectOption(Settings.CUSTOM_FOP, {
             title: 'Custom Preview resolution',
-            description: 'Set the resolution of preview images. You should <b>not</b> change this from <b>Auto</b> unless you have slow internet, then you should choose one of the lower values (e.g. 245, 490 or 980).'
+            description: 'Set the resolution of preview images. You should <b>not</b> change this from <b>Auto</b> unless you have slow internet, then you should choose one of the lower values (e.g. 245, 490 or 980).',
+            csgoOnly: true
         }, [
             {
                 displayText: 'Auto',
@@ -402,7 +410,8 @@ module Options {
         // Settings.EXPERIMENTAL_ADJUST_POPULAR
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_POPULAR, {
             title: 'Adjust Popular Tab',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed with 2.1.9 and become default.</small>'
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed with 2.1.9 and become default.</small>',
+            csgoOnly: true
         });
 
         // Settings.EXPERIMENTAL_FETCH_NOTIFICATION
@@ -451,7 +460,8 @@ module Options {
         // Settings.EXPERIMENTAL_ADJUST_SHOP
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
             title: 'Adjust Shop Pages',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with 2.1.9 and become default behaviour.</small>'
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with 2.1.9 and become default behaviour.</small>',
+            csgoOnly: true
         });
 
         // Settings.EXPERIMENTAL_ALLOW_BULK_BUY

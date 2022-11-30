@@ -1,6 +1,6 @@
 module InjectionServiceLib {
 
-    console.debug('Module.InjectionServiceLib');
+    console.debug('[BuffUtility] Module.InjectionServiceLib');
 
     const ISL_READY = 'EVENT_ISL_READY';
 
@@ -272,17 +272,23 @@ module InjectionService {
                     delete pendingObjectResolvers[_d];
                 }
             }
-        } else if ((e.data ?? [])[0] == GlobalConstants.BUFF_UTILITY_ASK_NARROW) {
-            // TODO make narrow work
         }
     });
 
+    /**
+     * Get the current game we are browsing the market of
+     */
     export async function getGame(): Promise<string> {
         let g: BuffTypes.g = await requestObject('g');
 
         return g?.game ?? 'unknown';
     }
 
+    /**
+     * Request an object from the global scope in the website, must be cloneable
+     *
+     * @param global The global key (infers window[global])
+     */
     export async function requestObject<T>(global: string): Promise<T> {
         const _d = Date.now();
         const _p = new Promise<T>((resolve, _) => {
@@ -378,19 +384,6 @@ module InjectionService {
                     e.data[2] ?? ''
                 ], '*');
             }
-
-            // assign service
-            if (key == GlobalConstants.BUFF_UTILITY_ASSIGN && e.data.length == 3) {
-                let who = window[e.data[1] ?? ''];
-
-                if (who) {
-                    let propertiesKeys = Object.keys(e.data[2] ?? {});
-
-                    for (let property of propertiesKeys) {
-                        who[property] = e.data[2][property];
-                    }
-                }
-            }
         });
     }
 
@@ -399,19 +392,11 @@ module InjectionService {
         InjectionServiceLib.html_check_run = 'html';
 
         InjectionServiceLib.injectCodeImmediately(`
-${buff_utility_message_service.toString()}
-buff_utility_message_service();
-${interceptNetworkRequests.toString()}
-interceptNetworkRequests();
-`);
-
-        if (window.location.href.indexOf('/user-center/profile') > -1) {
-            InjectionServiceLib.injectCSS(`                
-                span#mobile:not([data-blur="false"]), a[href*="steamcommunity.com"]:not([data-blur="false"]) {
-                    filter: blur(5px);
-                }
-            `);
-        }
+            ${buff_utility_message_service.toString()}
+            buff_utility_message_service();
+            ${interceptNetworkRequests.toString()}
+            interceptNetworkRequests();
+        `);
     }
 
     init();

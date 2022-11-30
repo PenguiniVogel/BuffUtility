@@ -1,0 +1,183 @@
+/* remove grayscale from body */
+body {
+    filter: grayscale(0) !important;
+}
+
+/* market */
+.dark-theme #j_market_card,
+.dark-theme #j_list_card li {
+    background: var(--bu-color-0, #121212);
+}
+
+.dark-theme #j_list_card li {
+    border-color: var(--bu-color-2, #bfbfbf);
+}
+
+.dark-theme #j_list_card li,
+.dark-theme #j_list_card li a,
+.dark-theme #j_list_card li p {
+    color: var(--bu-color-2, #bfbfbf);
+}
+
+.dark-theme .pager li.disabled * {
+    color: var(--bu-color-3, #696969) !important;
+    border-color: var(--bu-color-2, #bfbfbf) !important;
+    background: var(--bu-color-0, #121212) !important;
+}
+
+.dark-theme .pager .next, .dark-theme .pager .page-link {
+    color: var(--bu-color-2, #bfbfbf) !important;
+}
+
+/* listings */
+.dark-theme .detail-tab-cont,
+.dark-theme div.desc_content {
+    background: var(--bu-color-0, #121212);
+}
+
+.dark-theme div.stickers {
+    background: transparent;
+}
+
+.dark-theme .des_row,
+.dark-theme .pager li.disabled span,
+.dark-theme .list_tb th {
+    background: var(--bu-color-0, #121212) !important;
+    border-color: var(--bu-color-2, #bfbfbf) !important;
+}
+
+.dark-theme .list_tb td {
+    border-color: var(--bu-color-2, #bfbfbf) !important;
+}
+
+.dark-theme .detail-tab-cont tr:hover {
+    background: var(--bu-color-1, #1f1f1f);
+}
+
+.dark-theme tr[id],
+.dark-theme span.c_Gray,
+.dark-theme .j_shoptip_handler,
+.dark-theme .wear-value,
+.dark-theme a.ctag,
+.dark-theme .pager li .page-link,
+.dark-theme .desc_content {
+    color: var(--bu-color-2, #bfbfbf);
+    border-color: var(--bu-color-2, #bfbfbf);
+}
+
+/* shop pages */
+.dark-theme .l_Layout .market-card,
+.dark-theme .shop .list_card,
+.dark-theme .shop .shop-recommend-cont,
+.dark-theme .shop .shop-recommend-cont .slider-handle,
+.dark-theme .shop .shop-recommend-list li {
+    background: var(--bu-color-0, #121212) !important;
+}
+
+.dark-theme .shop .shop-recommend-list h3 a {
+    color: var(--bu-color-2, #bfbfbf);
+}
+
+/* settings */
+.dark-theme,
+.dark-theme .user-setting,
+.dark-theme .user-setting h3,
+.dark-theme .user-setting label[for],
+.dark-theme .user-setting select,
+.dark-theme .user-setting input[type],
+.dark-theme .user-wallet,
+.dark-theme .user-wallet .user-pay-desc,
+.dark-theme .user-rights,
+.dark-theme .user-feedback {
+    background: var(--bu-color-0, #121212) !important;
+    color: var(--bu-color-2, #bfbfbf);
+}
+
+/* inventory */
+.dark-theme .detail-tab-cont .market-card {
+    background: var(--bu-color-0, #121212);
+}
+
+/* favorites */
+.dark-theme .l_Layout .cont_main .user-record {
+    background: var(--bu-color-0, #121212);
+}
+
+.dark-theme .l_Layout .cont_main .user-record a,
+.dark-theme .l_Layout .cont_main .user-record .delete-bookmark {
+    color: var(--bu-color-2, #bfbfbf) !important;
+}
+
+.dark-theme .l_Layout .cont_main .user-record .i_Btn_hollow {
+    background-color: #959595;
+    color: #fff;
+}
+
+/* bargain popup */
+.dark-theme .popup_supply .popup-header,
+.dark-theme .popup_supply .popup-cont,
+.dark-theme .popup_supply .popup-cont .popup-good-summary,
+.dark-theme .popup_supply .popup-cont .popup-good-summary .input-cont .j_filter {
+    background: var(--bu-color-0, #121212);
+}
+
+.dark-theme .popup_supply .input-cont .c_Gray {
+    color: var(--bu-color-2, #bfbfbf) !important;
+}
+
+/* selling popup */
+.dark-theme .popup_charge .popup-header,
+.dark-theme .popup_charge .popup-cont {
+    background: var(--bu-color-0, #121212);
+}
+
+.dark-theme .popup_charge .popup-cont .list_tb_csgo tr:hover {
+    background: var(--bu-color-1, #1f1f1f);
+}
+
+/* selling description popup */
+.dark-theme .popup_guide_sell .popup-header,
+.dark-theme .popup_guide_sell .popup-cont {
+    background: var(--bu-color-0, #121212);
+}
+
+.dark-theme .popup_guide_sell textarea {
+    background: var(--bu-color-0, #121212);
+    color: var(--bu-color-2, #bfbfbf) !important;
+}
+
+/* applied sticker popup */
+.dark-theme .popup_flower .popup-header,
+.dark-theme .popup_flower .popup-cont,
+.dark-theme .popup_flower .popup-cont li {
+    background: var(--bu-color-0, #121212) !important;
+}
+
+.dark-theme .popup_flower .popup-cont tr:hover {
+    background: var(--bu-color-1, #1f1f1f) !important;
+}
+
+/* payment methods popup */
+.dark-theme .popup .popup-header,
+.dark-theme .popup .popup-tip,
+.dark-theme .popup .popup-cont {
+    background: var(--bu-color-0, #121212);
+}
+
+/* float range popup */
+.dark-theme .popup_custom {
+    background: var(--bu-color-0, #121212);
+}
+
+.dark-theme .popup_custom .popup_custom-title {
+    color: var(--bu-color-2, #bfbfbf) !important;
+}
+
+/* confirmation popup */
+.dark-theme .popup_common {
+    background: var(--bu-color-0, #121212);
+}
+
+.dark-theme .popup_common .popup-cont h2 {
+    color: var(--bu-color-2, #bfbfbf) !important;
+}

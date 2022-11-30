@@ -68,7 +68,7 @@ module Add_Links_Skin {
             }
 
             const hash_name = `${isUnusual ? '★ ' : (specialQuality && hasSpecialQuality ? (hasStatTrack ? 'StatTrak™ ' : 'Souvenir ') : '')}${itemName} (${wear})`;
-            const goods_id: number = (await BrowserInterface.delegate<BrowserInterface.BuffSchemaGetIdOrNameDelegation, number>({
+            const goods_id: string = (await BrowserInterface.delegate<BrowserInterface.BuffSchemaGetIdOrNameDelegation, string>({
                 method: BrowserInterface.DelegationMethod.BuffSchema_get,
                 parameters: {
                     name: hash_name
@@ -77,7 +77,7 @@ module Add_Links_Skin {
 
             DEBUG && console.debug(hash_name, goods_id);
 
-            if (typeof goods_id == 'number') {
+            if (goods_id != null) {
                 return `https://buff.163.com/goods/${goods_id}?from=market#tab=selling&sort_by=default`;
             }
 

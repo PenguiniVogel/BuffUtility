@@ -12,35 +12,6 @@ module Adjust_Listings {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
 
         InjectionServiceLib.onReady(() => {
-            // inject some code
-            function buff_utility_readNarrowOptions(selector: string): void {
-                let r: {
-                    [name: string]: {
-                        selected: boolean,
-                        value: string
-                    }
-                } = {};
-
-                // let modal = document.getElementById(selector);
-                let options = <NodeListOf<HTMLElement>>document.getElementById(selector.substring(1)).querySelectorAll(`[data-buff-utility]`);
-
-                for (let i = 0, l = options.length; i < l; i ++) {
-                    let e = options.item(i);
-                    let span = e.querySelector('span');
-
-                    r[e.getAttribute('data-buff-utility')] = {
-                        selected: span.getAttribute('class')?.indexOf('on') > -1,
-                        value: span.getAttribute('data-value')
-                    };
-                }
-
-                console.debug(r);
-
-                window.postMessage([GlobalConstants.BUFF_UTILITY_ASK_NARROW, r], '*');
-            }
-
-            InjectionServiceLib.injectCode(`${buff_utility_readNarrowOptions.toString()}`);
-
             function buff_utility_forceNewestReload(): void {
                 const reloadKey = 'bu_reload';
                 let hash = getParamsFromHash();
@@ -63,8 +34,8 @@ module Adjust_Listings {
                     bulkBuy.setAttribute('id', 'batch-buy-btn-override');
                     let filtered = $._data(body)?.events['click']?.filter(e => e?.selector?.indexOf('batch-buy-btn') > -1);
                     if (filtered.length > 0) {
-                        for (let events of filtered) {
-                            events.selector = `${events.selector}, #batch-buy-btn-override`;
+                        for (let event of filtered) {
+                            event.selector = `${event.selector}, #batch-buy-btn-override`;
                         }
                     }
                 }
@@ -104,40 +75,6 @@ module Adjust_Listings {
             }
 
             addReloadNewest();
-
-            InjectionServiceLib.injectCSS(`
-                .f_Strong.f_Strong_Blue {
-                    color: ${GlobalConstants.COLOR_BLUE};
-                }
-            
-                td.img_td.can_expand img[data-buff-utility-expand-image] {
-                    display: none;
-                }
-                    
-                td.img_td.can_expand:hover {
-                    padding: 20px 0px 20px 0px;
-                }
-                
-                td.img_td.can_expand:hover img[data-buff-utility-expand-image] {
-                    width: auto;
-                    height: auto;
-                    display: block;
-                    position: absolute;
-                    z-index: 99999;
-                }
-                
-                td.img_td.can_expand:hover img[data-buff-utility-expand-image="0"] {
-                    transform: scale(10) translate(70px, 0px);
-                }
-                
-                td.img_td.can_expand:hover img[data-buff-utility-expand-image="1"] {
-                    transform: scale(8) translate(99px, 10px);
-                }
-                
-                td.img_td.can_expand.expand_backdrop:hover img[data-buff-utility-expand-image="0"] {
-                    background-color: rgb(0 0 0 / 25%);
-                    background-color: rgba(0, 0, 0, 0.25);
-                }`);
         });
     }
 
@@ -292,21 +229,6 @@ module Adjust_Listings {
             divContainer.appendChild(expandImg);
         }
 
-        // build narrow
-        function buildNarrowModalContent(float: string, pattern: string, stickers: string): string {
-            function buildCheckbox(name: string, key: string, value: string): string {
-                return `<tr><td class="t_Left c_Gray">${name}</td><td style="padding-left: 10px;"><div class="w-Checkbox" data-buff-utility="${key}"><span data-value="${value}"><i class="icon icon_checkbox"></i> Open </span></div></td></tr>`;
-            }
-
-            let html = '<div style="padding: 10px;"><table><tbody>';
-
-            if (float) html += buildCheckbox('Float', 'float', float);
-            if (pattern) html += buildCheckbox('Pattern', 'pattern', pattern);
-            if (stickers) html += buildCheckbox('Stickers', 'stickers', stickers);
-
-            return `${html}</tbody></table></div>`;
-        }
-
         let schemaData = null;
         if ((await InjectionService.getGame()) == 'csgo') {
             schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
@@ -326,10 +248,10 @@ module Adjust_Listings {
             if (goodsInfo.appid == 730) {
                 const wearContainer = <HTMLElement>row.querySelector('td.t_Left div.csgo_value');
 
-                let aCopyGen = null;
-                let aMatchFloatDB = null;
-                let aNarrow = null;
-                if (schemaData?.type) {
+                let aCopyGen: HTMLElement = null;
+                let aMatchFloatDB: HTMLElement = null;
+                let aFindSimilar: HTMLElement = null;
+                if (schemaData && schemaData.type) {
                     aCopyGen = document.createElement('a');
 
                     let gen = Util.generateInspectGen(schemaData, dataRow.asset_info.info.paintindex, dataRow.asset_info.info.paintseed, dataRow.asset_info.paintwear, dataRow.asset_info?.info?.stickers ?? []);
@@ -356,14 +278,27 @@ module Adjust_Listings {
                     aMatchFloatDB.setAttribute('href', `https://csgofloat.com/db?name=${schemaData.name}&defIndex=${schemaData.id}&paintIndex=${dataRow.asset_info.info.paintindex}&paintSeed=${dataRow.asset_info.info.paintseed}&category=${floatdb_category}&min=${`${min}`.slice(0, 5)}&max=${`${max}`.slice(0, 5)}`);
                     aMatchFloatDB.setAttribute('target', '_blank');
 
-                    aNarrow = document.createElement('a');
-                    aNarrow.innerHTML = '<b><i style="" class="icon icon_search"></i></b>Narrow<br>';
-                    aNarrow.setAttribute('class', 'ctag btn');
-                    aNarrow.setAttribute('href', `javascript:Buff.dialog({title:'Narrow Search',content:'${buildNarrowModalContent(`${dataRow.asset_info.paintwear}`, `${dataRow.asset_info.info.paintseed}`, schemaData?.sticker_amount > 0 ? JSON.stringify(dataRow.asset_info.info.stickers) : null)}',onConfirm:function(data){buff_utility_readNarrowOptions(data.selector);Popup.hide(data.selector);}});`);
+                    aFindSimilar = document.createElement('a');
+                    aFindSimilar.innerHTML = '<b><i style="filter: invert(1);" class="icon icon_search"></i></b>Find Similar<br>';
+                    aFindSimilar.setAttribute('class', 'ctag btn');
+
+                    aFindSimilar.addEventListener('click', () => {
+                        console.debug('[BuffUtility] Find Similar');
+                        let range: [string, string] = ['0.00', '1.00'];
+
+                        for (let _range of ExtensionSettings.FLOAT_RANGES) {
+                            if (_range[0] > min) {
+                                range = _range[1];
+                                break;
+                            }
+                        }
+
+                        console.debug(range);
+                    });
                 }
 
                 const aShare = document.createElement('a');
-                aShare.innerHTML = '<b><i style="margin: -3px 3px 0 0;" class="icon icon_link"></i></b>Share';
+                aShare.innerHTML = '<b><i style="margin: -4px 0 0 0; filter: brightness(0);" class="icon icon_link"></i></b>Share';
                 aShare.setAttribute('class', 'ctag btn');
                 aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
                 aShare.setAttribute('target', '_blank');
@@ -399,9 +334,8 @@ module Adjust_Listings {
                     wearContainer.appendChild(aMatchFloatDB);
                 }
 
-                // TODO make narrow work
-                if (aNarrow && enabledOptions[5] && false) {
-                    wearContainer.append(document.createElement('br'), aNarrow);
+                if (false && aFindSimilar && enabledOptions[5]) {
+                    wearContainer.append(document.createElement('br'), aFindSimilar);
                 }
             }
 

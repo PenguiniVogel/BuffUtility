@@ -24,7 +24,7 @@ read -p "Press [ENTER] to resume ..."
 # setup folder structure
 echo "Checking directory structure..."
 mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/sources/{adjustments,csgostash}
-mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/resources/icon
+mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/resources/{css,icon}
 mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/{background,options}
 echo " "
 
@@ -55,7 +55,10 @@ f_build() {
   # copy options/options.html
   f_copy "options/options.html" "$DEST" 0
 
-  # copy resources
+  # copy resources css
+  f_copy "resources/css/*.css" "$DEST/resources/css" 14
+
+  # copy resources icon
   f_copy "resources/icon/*.png" "$DEST/resources/icon" 15
 
   # rewrite manifest

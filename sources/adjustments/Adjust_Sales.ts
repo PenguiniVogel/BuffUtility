@@ -13,12 +13,6 @@ module Adjust_Sales {
         // if no list is present, skip
         if (liList?.length == 0) return;
 
-        InjectionServiceLib.injectCSS(`
-        .bu_icon_link:hover {
-            filter: brightness(2.0);
-        }
-        `);
-
         for (let i = 0, l = liList.length; i < l; i++) {
             let li = liList.item(i);
             let a = li.querySelector('a');

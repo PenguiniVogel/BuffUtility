@@ -43,7 +43,7 @@ module Adjust_Share {
             return;
         }
 
-        let baseURL = `https://buff.163.com/goods/${parsedParam.goods_id}?from=market#tab=selling&sort_by=${await getSetting(Settings.DEFAULT_SORT_BY)}&min_price=${parsedParam.price}&max_price=${(+parsedParam.price + 0.01)}`;
+        let baseURL = `https://buff.163.com/goods/${parsedParam.goods_id}?from=market#tab=selling&sort_by=default&min_price=${parsedParam.price}&max_price=${(+parsedParam.price + 0.01)}`;
 
         const information = <NodeListOf<HTMLElement>>document.querySelectorAll('div.title-info-wrapper p');
 

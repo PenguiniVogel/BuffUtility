@@ -320,35 +320,6 @@ module Adjust_Market {
             overrideTabHandle();
         }
 
-        InjectionServiceLib.injectCSS(`
-        .tab li_x {
-            display: list-item;
-            float: left;
-            font-size: 15px;
-            text-align: center;
-            cursor: pointer;
-            color: #929394;
-            border-right: 1px solid #303B4F;
-            width: 170px;
-            height: 52px;
-            line-height: 52px;
-            overflow: hidden;
-        }
-        
-        .tab li_x.on {
-            color: #fff;
-            font-weight: 700;
-            background-image: url(../static/images/sprite/icon.less.png);
-            background-position: -304px -76px;
-        }
-        
-        .tab li_x:hover {
-            color: #ccc;
-            background-image: url(../static/images/sprite/icon.less.png);
-            background-position: -312px 0;
-        }
-        `);
-
         InjectionServiceLib.injectCode(`${buff_utility_overrides.toString()}buff_utility_overrides();`, 'body');
     }
 
