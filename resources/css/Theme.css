@@ -1,5 +1,5 @@
 /* remove grayscale from html, body */
-html, body {
+html {
     filter: grayscale(0) !important;
 }
 
