@@ -344,7 +344,9 @@ module Util {
             inNum = parseFloat(inNum);
         }
 
-        if ((await ExtensionSettings.getSetting(ExtensionSettings.Settings.EXPERIMENTAL_FORMAT_CURRENCY))) {
+        const formatCurrency = (await ExtensionSettings.getSetting(ExtensionSettings.Settings.EXPERIMENTAL_FORMAT_CURRENCY));
+
+        if (formatCurrency) {
             return Util.embedDecimalSmall(new Intl.NumberFormat('en-US', {
                 maximumFractionDigits: fractionDigits
             }).format(inNum));
@@ -414,7 +416,9 @@ module Util {
      */
     export function embedDecimalSmall(inStr: string): string {
         if (inStr.indexOf('.') == -1) return inStr;
-        return inStr.replace(/(\d+)\.(\d+)/, `$1<small>.$2</small>`);
+        return inStr
+            .replace(/(\d+)\.(\d+)/, `$1<small>.$2</small>`)
+            .replace('<small>.00</small>', '');
     }
 
     // signal
