@@ -229,7 +229,7 @@ module Adjust_Listings {
             divContainer.appendChild(expandImg);
         }
 
-        let schemaData = null;
+        let schemaData: SchemaTypes.Weapon = null;
         if ((await InjectionService.getGame()) == 'csgo') {
             schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
@@ -284,16 +284,30 @@ module Adjust_Listings {
 
                     aFindSimilar.addEventListener('click', () => {
                         console.debug('[BuffUtility] Find Similar');
-                        let range: [string, string] = ['0.00', '1.00'];
+
+                        let paramData = {};
 
                         for (let _range of ExtensionSettings.FLOAT_RANGES) {
                             if (_range[0] > min) {
-                                range = _range[1];
+                                paramData['min_paintwear'] = _range[1][0];
+                                paramData['max_paintwear'] = _range[1][1];
                                 break;
                             }
                         }
 
-                        console.debug(range);
+                        let stickers = dataRow.asset_info?.info?.stickers ?? [];
+
+                        if (stickers.length > 0) {
+                            paramData['extra_tag_ids'] = (stickers.length == schemaData.sticker_amount) ? 'squad_combos' : 'non_empty';
+
+                            if (stickers.filter(x => x.wear == 0).length == stickers.length) {
+                                paramData['wearless_sticker'] = '1';
+                            }
+                        }
+
+                        console.debug(paramData);
+
+                        Util.signal(['updateHashData'], null, paramData);
                     });
                 }
 
@@ -333,7 +347,7 @@ module Adjust_Listings {
                     wearContainer.appendChild(aMatchFloatDB);
                 }
 
-                if (false && aFindSimilar && enabledOptions[5]) {
+                if (aFindSimilar && enabledOptions[5]) {
                     wearContainer.append(document.createElement('br'), aFindSimilar);
                 }
             }

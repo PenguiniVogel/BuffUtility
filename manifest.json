@@ -1,7 +1,7 @@
 {
     "name": "Buff Utility (Dev)",
     "author": "MePenguini",
-    "version": "2.1.87",
+    "version": "2.1.9",
     "description": "Adds cosmetic functionality to buff.163.com",
     "manifest_version": 3,
     "background": {
