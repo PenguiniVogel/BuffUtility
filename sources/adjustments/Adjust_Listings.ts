@@ -308,19 +308,18 @@ module Adjust_Listings {
                 let enabledOptions: boolean[] = await getSetting(Settings.LISTING_OPTIONS);
 
                 let ctags = wearContainer.querySelectorAll('a.ctag');
-                if (ctags?.length >= 2) {
-                    if (!enabledOptions[0]) {
-                        ctags.item(0).setAttribute('style', 'display: none;');
-                    }
 
-                    if (!enabledOptions[1]) {
-                        ctags.item(1).setAttribute('style', 'display: none;');
-                    }
+                // 3D Inspect
+                if (!enabledOptions[0] && ctags.item(0)) {
+                    ctags.item(0).setAttribute('style', 'display: none;');
                 }
 
-                if ((!enabledOptions[0] && !enabledOptions[1]) || ((ctags?.length ?? 0) < 2)) {
-                    wearContainer.querySelector('br').setAttribute('style', 'display: none;');
+                // Inspect in Server - deprecated, but why
+                if (!enabledOptions[1] && ctags.item(1)) {
+                    ctags.item(1).setAttribute('style', 'display: none;');
                 }
+
+                wearContainer.querySelector('br')?.setAttribute('style', 'display: none;');
 
                 if (aCopyGen && enabledOptions[2]) {
                     wearContainer.appendChild(aCopyGen);

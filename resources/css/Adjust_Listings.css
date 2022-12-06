@@ -7,7 +7,7 @@ td.img_td.can_expand img[data-buff-utility-expand-image] {
 }
 
 td.img_td.can_expand:hover {
-    padding: 20px 0px 20px 0px;
+    padding: 20px 0 20px 0;
 }
 
 td.img_td.can_expand:hover img[data-buff-utility-expand-image] {
@@ -19,11 +19,11 @@ td.img_td.can_expand:hover img[data-buff-utility-expand-image] {
 }
 
 td.img_td.can_expand:hover img[data-buff-utility-expand-image="0"] {
-    transform: scale(10) translate(70px, 0px);
+    transform: scale(5) translate(70px, 0px);
 }
 
 td.img_td.can_expand:hover img[data-buff-utility-expand-image="1"] {
-    transform: scale(8) translate(99px, 10px);
+    transform: scale(5) translate(99px, 10px);
 }
 
 td.img_td.can_expand.expand_backdrop:hover img[data-buff-utility-expand-image="0"] {
