@@ -457,6 +457,22 @@ module Adjust_Listings {
                     aBargain.setAttribute('style', `color: ${GlobalConstants.COLOR_BAD} !important;`);
                 }
             }
+
+            //add date of listing
+            let date = new Date(dataRow.created_at * 1000);
+            let timeEpoch = Date.now() - (dataRow.created_at * 1000);
+            let dateHours = Math.floor(timeEpoch / 3600000);
+            let dateDiv = document.createElement("div");
+            dateDiv.style.cssText = "font-size: 12px; color: #959595; margin: 5px 0 0 10px;";
+            dateDiv.title = date.toUTCString();
+            //dateDiv.innerHTML = `Listed at: ${date.toISOString().split("T")[0]}`;
+            let dateText = (dateHours < 49 ? dateHours + " hour(s)" : Math.floor(timeEpoch / 3600000 / 24) + " day(s)") + " ago";
+            dateDiv.innerHTML = `Listed: ${dateText}`;
+
+
+            <HTMLElement>([ ...<Array<HTMLElement>><unknown>row.querySelectorAll('td.t_Left') ].filter(td => !!td.querySelector('.user-thum')))[0].appendChild(dateDiv);
+
+
         }
 
         if (updated_preview > 0) {
