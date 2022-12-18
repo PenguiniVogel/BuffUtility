@@ -102,7 +102,7 @@ module Adjust_Listings {
      */
     async function adjustHeaderListings(): Promise<void> {
         // default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
-        const days: ExtensionSettings.PriceHistoryRange = await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
+        const days = await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
         const goods_id = document.querySelector('div.detail-cont div.add-bookmark').getAttribute('data-target-id');
 
         // skip to prevent doubles
@@ -154,7 +154,7 @@ module Adjust_Listings {
      * @param days 7 or 30
      * @param callback
      */
-    function fetchPriceHistory(goodsId: any, days: ExtensionSettings.PriceHistoryRange, callback: (response: [any, number][]) => void): void {
+    function fetchPriceHistory(goodsId: any, days: 7 | 30, callback: (response: [any, number][]) => void): void {
         fetch(`https://buff.163.com/api/market/goods/price_history/buff?game=csgo&goods_id=${goodsId}&days=${days}`)
             .then(r => r.json().then(_response => {
                 if (typeof callback == 'function') {
@@ -403,28 +403,7 @@ module Adjust_Listings {
 
                 let fopString = '';
                 if (can_expand_screenshots) {
-                    switch (await getSetting(Settings.CUSTOM_FOP)) {
-                        case ExtensionSettings.FOP_VALUES.Auto:
-                            fopString = '';
-                            break;
-                        case ExtensionSettings.FOP_VALUES.w245xh230:
-                            fopString = '?fop=imageView/2/w/245/h/230';
-                            break;
-                        case ExtensionSettings.FOP_VALUES.w490xh460:
-                            fopString = '?fop=imageView/2/w/490/h/460';
-                            break;
-                        case ExtensionSettings.FOP_VALUES.w980xh920:
-                            fopString = '?fop=imageView/2/w/980/h/920';
-                            break;
-                        case ExtensionSettings.FOP_VALUES.w1960xh1840:
-                            fopString = '?fop=imageView/2/w/1960/h/1840';
-                            break;
-                        case ExtensionSettings.FOP_VALUES.w3920xh3680:
-                            fopString = '?fop=imageView/2/w/3920/h/3680';
-                            break;
-                        default:
-                            break;
-                    }
+                    fopString = await getSetting(Settings.CUSTOM_FOP);
                 }
 
                 switch (await getSetting(Settings.EXPAND_TYPE)) {
