@@ -41,7 +41,8 @@ html {
 
 .dark-theme .des_row,
 .dark-theme .pager li.disabled span,
-.dark-theme .list_tb th {
+.dark-theme .list_tb th,
+.dark-theme .list_tb #rank-title {
     background: var(--bu-color-0, #121212) !important;
     border-color: var(--bu-color-2, #bfbfbf) !important;
 }
@@ -65,12 +66,20 @@ html {
     border-color: var(--bu-color-2, #bfbfbf);
 }
 
+.dark-theme .pinterest .pinterest-item,
+.dark-theme .pinterest .pinterest-item .pinterest-user {
+    color: var(--bu-color-2, #bfbfbf);
+    border-color: var(--bu-color-2, #bfbfbf);
+    background: var(--bu-color-0, #121212) !important;
+}
+
 /* shop pages */
 .dark-theme .l_Layout .market-card,
 .dark-theme .shop .list_card,
 .dark-theme .shop .shop-recommend-cont,
 .dark-theme .shop .shop-recommend-cont .slider-handle,
-.dark-theme .shop .shop-recommend-list li {
+.dark-theme .shop .shop-recommend-list li,
+.dark-theme .shop .card-pager {
     background: var(--bu-color-0, #121212) !important;
 }
 
