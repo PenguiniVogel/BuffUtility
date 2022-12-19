@@ -35,38 +35,38 @@ module ExtensionSettings {
         [1.00, ['0.90', '1.00']],
     ];
 
-    export const enum DifferenceDominator {
-        STEAM,
-        BUFF
-    }
+    export const DifferenceDominator = {
+        STEAM: 0,
+        BUFF: 1
+    } as const;
 
-    export const enum ExpandScreenshotType {
-        PREVIEW,
-        INSPECT
-    }
+    export const ExpandScreenshotType = {
+        PREVIEW: 0,
+        INSPECT: 1
+    } as const;
 
-    export const enum FOP_VALUES {
-        Auto,
-        w245xh230,
-        w490xh460,
-        w980xh920,
-        w1960xh1840,
-        w3920xh3680,
-    }
+    export const FOP_VALUES = {
+        Auto: '',
+        w245xh230: '?fop=imageView/2/w/245/h/230',
+        w490xh460: '?fop=imageView/2/w/490/h/460',
+        w980xh920: '?fop=imageView/2/w/980/h/920',
+        w1960xh1840: '?fop=imageView/2/w/1960/h/1840',
+        w3920xh3680: '?fop=imageView/2/w/3920/h/3680'
+    } as const;
 
-    export const enum LOCATION_RELOAD_NEWEST_VALUES {
-        NONE,
-        BULK,
-        SORT,
-        CENTER,
-        LEFT
-    }
+    export const LOCATION_RELOAD_NEWEST_VALUES = {
+        NONE: 0,
+        BULK: 1,
+        SORT: 2,
+        CENTER: 3,
+        LEFT: 4
+    } as const;
 
-    export const enum PriceHistoryRange {
-        OFF = 0,
-        WEEKLY = 7,
-        MONTHLY = 30
-    }
+    export const PriceHistoryRange  = {
+        OFF: 0,
+        WEEKLY: 7,
+        MONTHLY: 30
+    } as const;
 
     export const FILTER_SORT_BY = {
         'Default': 'default',
@@ -77,7 +77,7 @@ module ExtensionSettings {
         'Float Descending': 'paintwear.desc',
         'Hot Descending': 'heat.desc',
         'Sticker': 'sticker.desc'
-    };
+    } as const;
 
     export const FILTER_STICKER_SEARCH = {
         'All': '',
@@ -87,7 +87,7 @@ module ExtensionSettings {
         'Quad Combos': '&extra_tag_ids=squad_combos',
         'Quad Combos 100%': '&extra_tag_ids=squad_combos&wearless_sticker=1',
         'Save Custom': '&extra_tag_ids=$1'
-    };
+    } as const;
 
     export interface SteamSettings {
         readonly wallet_fee: number,
@@ -161,13 +161,13 @@ module ExtensionSettings {
         [Settings.CUSTOM_CURRENCY_NAME]: string;
         [Settings.CAN_EXPAND_SCREENSHOTS]: boolean;
         [Settings.EXPAND_SCREENSHOTS_BACKDROP]: boolean;
-        [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator;
+        [Settings.DIFFERENCE_DOMINATOR]: ObjectKeys<typeof DifferenceDominator>;
         [Settings.APPLY_STEAM_TAX]: boolean;
         [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: boolean;
-        [Settings.EXPAND_TYPE]: ExpandScreenshotType;
-        [Settings.CUSTOM_FOP]: number;
-        [Settings.DEFAULT_SORT_BY]: string;
-        [Settings.DEFAULT_STICKER_SEARCH]: string;
+        [Settings.EXPAND_TYPE]: ObjectKeys<typeof ExpandScreenshotType>;
+        [Settings.CUSTOM_FOP]: ObjectKeys<typeof FOP_VALUES>;
+        [Settings.DEFAULT_SORT_BY]: ObjectKeys<typeof FILTER_SORT_BY>;
+        [Settings.DEFAULT_STICKER_SEARCH]: ObjectKeys<typeof FILTER_STICKER_SEARCH>;
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: string;
         [Settings.LEECH_CONTRIBUTOR_KEY]: string;
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
@@ -177,13 +177,13 @@ module ExtensionSettings {
         [Settings.DATA_PROTECTION]: boolean;
         [Settings.COLOR_SCHEME]: string[];
         [Settings.USE_SCHEME]: boolean;
-        [Settings.LOCATION_RELOAD_NEWEST]: number;
+        [Settings.LOCATION_RELOAD_NEWEST]: ObjectKeys<typeof LOCATION_RELOAD_NEWEST_VALUES>;
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: boolean;
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: boolean;
-        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange;
+        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: ObjectKeys<typeof PriceHistoryRange>;
         [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: boolean;
@@ -199,18 +199,19 @@ module ExtensionSettings {
         Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
     ];
 
-    const enum InternalStructureTransform {
-        NONE,
-        BOOLEAN,
-        BOOLEAN_ARRAY
-    }
+    const InternalStructureTransform = {
+        NONE: 0,
+        BOOLEAN: 1,
+        BOOLEAN_ARRAY: 2
+    } as const;
 
     type InternalSetting<T extends Settings> = {
         value?: SettingsTypes[T],
         resolved?: boolean,
         readonly default: SettingsTypes[T],
+        readonly associated?: { [key: string]: SettingsTypes[T] },
         readonly export: string,
-        readonly transform: InternalStructureTransform,
+        readonly transform: ObjectKeys<typeof InternalStructureTransform>,
         readonly validator: (key: Settings, value: any) => any
     };
     
@@ -257,9 +258,10 @@ module ExtensionSettings {
         },
         [Settings.DIFFERENCE_DOMINATOR]: {
             default: DifferenceDominator.STEAM,
+            associated: DifferenceDominator,
             export: '0x8',
             transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validatePropertyValue
         },
         [Settings.APPLY_STEAM_TAX]: {
             default: false,
@@ -275,27 +277,31 @@ module ExtensionSettings {
         },
         [Settings.EXPAND_TYPE]: {
             default: ExpandScreenshotType.PREVIEW,
+            associated: ExpandScreenshotType,
             export: '0x11',
             transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validatePropertyValue
         },
         [Settings.CUSTOM_FOP]: {
             default: FOP_VALUES.Auto,
+            associated: FOP_VALUES,
             export: '0x12',
             transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validatePropertyValue
         },
         [Settings.DEFAULT_SORT_BY]: {
-            default: 'default',
+            default: FILTER_SORT_BY.Default,
+            associated: FILTER_SORT_BY,
             export: '0x13',
             transform: InternalStructureTransform.NONE,
-            validator: validateNotNull
+            validator: validatePropertyValue
         },
         [Settings.DEFAULT_STICKER_SEARCH]: {
-            default: 'All',
+            default: FILTER_STICKER_SEARCH.All,
+            associated: FILTER_STICKER_SEARCH,
             export: '0x14',
             transform: InternalStructureTransform.NONE,
-            validator: validateNotNull
+            validator: validatePropertyValue
         },
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: {
             default: '',
@@ -353,9 +359,10 @@ module ExtensionSettings {
         },
         [Settings.LOCATION_RELOAD_NEWEST]: {
             default: LOCATION_RELOAD_NEWEST_VALUES.NONE,
+            associated: LOCATION_RELOAD_NEWEST_VALUES,
             export: '0x24',
             transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validatePropertyValue
         },
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: {
@@ -509,6 +516,21 @@ module ExtensionSettings {
         }
 
         return r;
+    }
+
+    function validatePropertyValue(key: Settings, value: any): any {
+        const associated = INTERNAL_SETTINGS[key].associated;
+
+        if (!associated) {
+            throw new Error(`[BuffUtility] Attempted validating property for ${key} failed, no associated object was set.`);
+        }
+
+        // try migrating, as the value previously may have been the key
+        if (value in associated) {
+            return associated[value];
+        }
+
+        return Object.values(associated).indexOf(value) > -1 ? value : INTERNAL_SETTINGS[key].default;
     }
 
     // general
