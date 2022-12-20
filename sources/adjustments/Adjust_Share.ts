@@ -50,7 +50,7 @@ module Adjust_Share {
         console.debug(information);
 
         if (information.length > 0) {
-            let offset = information.item(0)?.getAttribute('class').indexOf('name_tag') > -1 ? 1 : 0;
+            let offset = information.item(0)?.getAttribute('class')?.indexOf('name_tag') > -1 ? 1 : 0;
 
             if (offset == 1) {
                 baseURL += `&name_tag=1`;
