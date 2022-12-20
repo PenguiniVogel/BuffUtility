@@ -257,6 +257,7 @@ module Options {
         });
 
         // --- Advanced Settings ---
+
         // Settings.DIFFERENCE_DOMINATOR
         advancedSettings += createSelectOption(Settings.DIFFERENCE_DOMINATOR, {
             title: 'Difference Dominator',
@@ -401,23 +402,24 @@ module Options {
         ]);
 
         // --- Experimental Settings ---
+
         // Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, {
             title: 'Favourite Bargain',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show the "Bargain" feature on favourites.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show the "Bargain" feature on favourites.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>'
         });
 
         // Settings.EXPERIMENTAL_ADJUST_POPULAR
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_POPULAR, {
             title: 'Adjust Popular Tab',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed with 2.1.9 and become default.</small>',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed with 2.2.0 and become default.</small>',
             csgoOnly: true
         });
 
         // Settings.EXPERIMENTAL_FETCH_NOTIFICATION
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, {
             title: 'Currency Fetch Notification',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show toast notification when currency rates were updated, happens once a day.<br><small>* Setting will be merged in 2.1.9 into "Show Toast on Action".</small>'
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show toast notification when currency rates were updated, happens once a day.<br><small>* Setting will be merged in 2.2.0 into "Show Toast on Action".</small>'
         });
 
         // Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS - disabled until proxy works
@@ -448,7 +450,7 @@ module Options {
         // Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {
             title: 'Adjust Market Currency',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust shown market currency to selected currency.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust shown market currency to selected currency.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>'
         });
 
         // Settings.EXPERIMENTAL_FORMAT_CURRENCY
@@ -460,14 +462,21 @@ module Options {
         // Settings.EXPERIMENTAL_ADJUST_SHOP
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
             title: 'Adjust Shop Pages',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with 2.1.9 and become default behaviour.</small>',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with 2.2.0 and become default behaviour.</small>',
+            csgoOnly: true
+        });
+
+        // Settings.EXPERIMENTAL_ADJUST_SHARE
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHARE, {
+            title: 'Adjust Share Pages',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Share" pages. This adds the ability to find the listing directly from the share link.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>',
             csgoOnly: true
         });
 
         // Settings.EXPERIMENTAL_ALLOW_BULK_BUY
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_BULK_BUY, {
             title: 'Allow bulk buy',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Allow the bulk buy function to be used on the web version of Buff.<br><small>* Setting will be moved with 2.1.9 to advanced settings.</small>'
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Allow the bulk buy function to be used on the web version of Buff.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>'
         });
 
         // append html
