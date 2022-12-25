@@ -35,38 +35,38 @@ module ExtensionSettings {
         [1.00, ['0.90', '1.00']],
     ];
 
-    export const enum DifferenceDominator {
-        STEAM,
-        BUFF
-    }
+    export const DifferenceDominator = {
+        STEAM: 0,
+        BUFF: 1
+    } as const;
 
-    export const enum ExpandScreenshotType {
-        PREVIEW,
-        INSPECT
-    }
+    export const ExpandScreenshotType = {
+        PREVIEW: 0,
+        INSPECT: 1
+    } as const;
 
-    export const enum FOP_VALUES {
-        Auto,
-        w245xh230,
-        w490xh460,
-        w980xh920,
-        w1960xh1840,
-        w3920xh3680,
-    }
+    export const FOP_VALUES = {
+        Auto: '',
+        w245xh230: '?fop=imageView/2/w/245/h/230',
+        w490xh460: '?fop=imageView/2/w/490/h/460',
+        w980xh920: '?fop=imageView/2/w/980/h/920',
+        w1960xh1840: '?fop=imageView/2/w/1960/h/1840',
+        w3920xh3680: '?fop=imageView/2/w/3920/h/3680'
+    } as const;
 
-    export const enum LOCATION_RELOAD_NEWEST_VALUES {
-        NONE,
-        BULK,
-        SORT,
-        CENTER,
-        LEFT
-    }
+    export const LOCATION_RELOAD_NEWEST_VALUES = {
+        NONE: 0,
+        BULK: 1,
+        SORT: 2,
+        CENTER: 3,
+        LEFT: 4
+    } as const;
 
-    export const enum PriceHistoryRange {
-        OFF = 0,
-        WEEKLY = 7,
-        MONTHLY = 30
-    }
+    export const PriceHistoryRange  = {
+        OFF: 0,
+        WEEKLY: 7,
+        MONTHLY: 30
+    } as const;
 
     export const FILTER_SORT_BY = {
         'Default': 'default',
@@ -77,7 +77,7 @@ module ExtensionSettings {
         'Float Descending': 'paintwear.desc',
         'Hot Descending': 'heat.desc',
         'Sticker': 'sticker.desc'
-    };
+    } as const;
 
     export const FILTER_STICKER_SEARCH = {
         'All': '',
@@ -87,7 +87,13 @@ module ExtensionSettings {
         'Quad Combos': '&extra_tag_ids=squad_combos',
         'Quad Combos 100%': '&extra_tag_ids=squad_combos&wearless_sticker=1',
         'Save Custom': '&extra_tag_ids=$1'
-    };
+    } as const;
+
+    export const BARGAIN_DISCOUNT_TYPES = {
+        NONE: 0,
+        BY_MINIMUM: 1,
+        BY_LISTING: 2
+    } as const;
 
     export interface SteamSettings {
         readonly wallet_fee: number,
@@ -128,26 +134,28 @@ module ExtensionSettings {
         USE_SCHEME = 'use_scheme',
         LOCATION_RELOAD_NEWEST = 'location_reload_newest',
 
-        // 2.1.9 -> setting will be moved to advanced settings
+        // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain',
-        // 2.1.9 -> setting will be removed, default procedure
+        // 2.2.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_POPULAR = 'experimental_adjust_popular',
-        // 2.1.9 -> setting will be merged into show toast on action
+        // 2.2.0 -> setting will be merged into show toast on action
         EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification',
         // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS = 'fetch_favourite_bargain_status',
         // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY = 'fetch_item_price_history',
-        // 2.1.9 -> setting will be moved to advanced settings
+        // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ADJUST_MARKET_CURRENCY = 'adjust_market_currency',
-        // 2.1.9 -> setting will be moved to advanced settings
+        // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_FORMAT_CURRENCY = 'format_currency',
-        // [TBA] -> setting will be removed, default procedure
+        // 2.2.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_SHOP = 'experimental_adjust_shop',
-        // 2.1.9 -> setting will be removed, default procedure
+        // 2.2.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_SHARE = 'experimental_adjust_share',
-        // 2.1.9 -> setting will be moved to advanced settings
+        // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ALLOW_BULK_BUY = 'allow_bulk_buy',
+        // 2.2.0 -> setting will be moved to advanced settings
+        EXPERIMENTAL_AUTOMATIC_BARGAIN = 'automatic_bargain',
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
     }
@@ -159,13 +167,13 @@ module ExtensionSettings {
         [Settings.CUSTOM_CURRENCY_NAME]: string;
         [Settings.CAN_EXPAND_SCREENSHOTS]: boolean;
         [Settings.EXPAND_SCREENSHOTS_BACKDROP]: boolean;
-        [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator;
+        [Settings.DIFFERENCE_DOMINATOR]: ObjectKeys<typeof DifferenceDominator>;
         [Settings.APPLY_STEAM_TAX]: boolean;
         [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: boolean;
-        [Settings.EXPAND_TYPE]: ExpandScreenshotType;
-        [Settings.CUSTOM_FOP]: number;
-        [Settings.DEFAULT_SORT_BY]: string;
-        [Settings.DEFAULT_STICKER_SEARCH]: string;
+        [Settings.EXPAND_TYPE]: ObjectKeys<typeof ExpandScreenshotType>;
+        [Settings.CUSTOM_FOP]: ObjectKeys<typeof FOP_VALUES>;
+        [Settings.DEFAULT_SORT_BY]: ObjectKeys<typeof FILTER_SORT_BY>;
+        [Settings.DEFAULT_STICKER_SEARCH]: ObjectKeys<typeof FILTER_STICKER_SEARCH>;
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: string;
         [Settings.LEECH_CONTRIBUTOR_KEY]: string;
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
@@ -175,18 +183,19 @@ module ExtensionSettings {
         [Settings.DATA_PROTECTION]: boolean;
         [Settings.COLOR_SCHEME]: string[];
         [Settings.USE_SCHEME]: boolean;
-        [Settings.LOCATION_RELOAD_NEWEST]: number;
+        [Settings.LOCATION_RELOAD_NEWEST]: ObjectKeys<typeof LOCATION_RELOAD_NEWEST_VALUES>;
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: boolean;
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: boolean;
-        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange;
+        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: ObjectKeys<typeof PriceHistoryRange>;
         [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHARE]: boolean;
         [Settings.EXPERIMENTAL_ALLOW_BULK_BUY]: boolean;
+        [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: ObjectKeys<typeof BARGAIN_DISCOUNT_TYPES>;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
     }
@@ -196,18 +205,19 @@ module ExtensionSettings {
         Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
     ];
 
-    const enum InternalStructureTransform {
-        NONE,
-        BOOLEAN,
-        BOOLEAN_ARRAY
-    }
+    const InternalStructureTransform = {
+        NONE: 0,
+        BOOLEAN: 1,
+        BOOLEAN_ARRAY: 2
+    } as const;
 
     type InternalSetting<T extends Settings> = {
         value?: SettingsTypes[T],
         resolved?: boolean,
         readonly default: SettingsTypes[T],
+        readonly associated?: { [key: string]: SettingsTypes[T] },
         readonly export: string,
-        readonly transform: InternalStructureTransform,
+        readonly transform?: ObjectKeys<typeof InternalStructureTransform>,
         readonly validator: (key: Settings, value: any) => any
     };
     
@@ -219,25 +229,21 @@ module ExtensionSettings {
         [Settings.VERSION]: {
             default: '2.1.8',
             export: '0x0',
-            transform: InternalStructureTransform.NONE,
             validator: validateNotNull
         },
         [Settings.SELECTED_CURRENCY]: {
             default: 'USD',
             export: '0x1',
-            transform: InternalStructureTransform.NONE,
             validator: validateNotNull
         },
         [Settings.CUSTOM_CURRENCY_RATE]: {
             default: 1,
             export: '0x2',
-            transform: InternalStructureTransform.NONE,
             validator: validateNumber
         },
         [Settings.CUSTOM_CURRENCY_NAME]: {
             default: 'CC',
             export: '0x3',
-            transform: InternalStructureTransform.NONE,
             validator: validateNotNull
         },
         [Settings.CAN_EXPAND_SCREENSHOTS]: {
@@ -254,9 +260,9 @@ module ExtensionSettings {
         },
         [Settings.DIFFERENCE_DOMINATOR]: {
             default: DifferenceDominator.STEAM,
+            associated: DifferenceDominator,
             export: '0x8',
-            transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validatePropertyValue
         },
         [Settings.APPLY_STEAM_TAX]: {
             default: false,
@@ -272,38 +278,36 @@ module ExtensionSettings {
         },
         [Settings.EXPAND_TYPE]: {
             default: ExpandScreenshotType.PREVIEW,
+            associated: ExpandScreenshotType,
             export: '0x11',
-            transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validatePropertyValue
         },
         [Settings.CUSTOM_FOP]: {
             default: FOP_VALUES.Auto,
+            associated: FOP_VALUES,
             export: '0x12',
-            transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validatePropertyValue
         },
         [Settings.DEFAULT_SORT_BY]: {
-            default: 'default',
+            default: FILTER_SORT_BY.Default,
+            associated: FILTER_SORT_BY,
             export: '0x13',
-            transform: InternalStructureTransform.NONE,
-            validator: validateNotNull
+            validator: validatePropertyValue
         },
         [Settings.DEFAULT_STICKER_SEARCH]: {
-            default: 'All',
+            default: FILTER_STICKER_SEARCH.All,
+            associated: FILTER_STICKER_SEARCH,
             export: '0x14',
-            transform: InternalStructureTransform.NONE,
-            validator: validateNotNull
+            validator: validatePropertyValue
         },
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: {
             default: '',
             export: '0x15',
-            transform: InternalStructureTransform.NONE,
             validator: validateNotNull
         },
         [Settings.LEECH_CONTRIBUTOR_KEY]: {
             default: '',
             export: '0x16',
-            transform: InternalStructureTransform.NONE,
             validator: validateNotNull
         },
         [Settings.SHOW_TOAST_ON_ACTION]: {
@@ -339,7 +343,6 @@ module ExtensionSettings {
         [Settings.COLOR_SCHEME]: {
             default: ['#121212', '#1f1f1f', '#bfbfbf', '#696969'],
             export: '0x22',
-            transform: InternalStructureTransform.NONE,
             validator: validateColorArray
         },
         [Settings.USE_SCHEME]: {
@@ -350,40 +353,36 @@ module ExtensionSettings {
         },
         [Settings.LOCATION_RELOAD_NEWEST]: {
             default: LOCATION_RELOAD_NEWEST_VALUES.NONE,
+            associated: LOCATION_RELOAD_NEWEST_VALUES,
             export: '0x24',
-            transform: InternalStructureTransform.NONE,
-            validator: validateNumber
+            validator: validatePropertyValue
         },
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: {
             default: true,
             export: '2x1',
-            transform: InternalStructureTransform.NONE,
-            validator: null
+            validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: {
             default: false,
             export: '2x2',
-            transform: InternalStructureTransform.NONE,
-            validator: null
+            validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: {
             default: false,
             export: '2x3',
-            transform: InternalStructureTransform.NONE,
-            validator: null
+            validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: {
             default: false,
             export: '2x4',
-            transform: InternalStructureTransform.NONE,
-            validator: null
+            validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: {
             default: PriceHistoryRange.OFF,
+            associated: PriceHistoryRange,
             export: '2x5',
-            transform: InternalStructureTransform.NONE,
-            validator: null
+            validator: validatePropertyValue
         },
         [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: {
             default: false,
@@ -394,7 +393,6 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: {
             default: false,
             export: '2x7',
-            transform: InternalStructureTransform.NONE,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: {
@@ -414,6 +412,12 @@ module ExtensionSettings {
             export: '2x10',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
+        },
+        [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: {
+            default: BARGAIN_DISCOUNT_TYPES.NONE,
+            associated: BARGAIN_DISCOUNT_TYPES,
+            export: '2x11',
+            validator: validatePropertyValue
         },
 
         [Settings.STORE_DANGER_AGREEMENTS]: {
@@ -502,6 +506,21 @@ module ExtensionSettings {
         return r;
     }
 
+    function validatePropertyValue(key: Settings, value: any): any {
+        const associated = INTERNAL_SETTINGS[key].associated;
+
+        if (!associated) {
+            throw new Error(`[BuffUtility] Attempted validating property for ${key} failed, no associated object was set.`);
+        }
+
+        // try migrating, as the value previously may have been the key
+        if (value in associated) {
+            return associated[value];
+        }
+
+        return Object.values(associated).indexOf(value) > -1 ? value : INTERNAL_SETTINGS[key].default;
+    }
+
     // general
 
     /**
@@ -530,7 +549,7 @@ module ExtensionSettings {
 
             BrowserInterface.Storage.get<any>(internal.export).then(value => {
                 let newValue = value;
-                switch (internal.transform) {
+                switch (internal.transform ?? InternalStructureTransform.NONE) {
                     case InternalStructureTransform.NONE:
                         break;
                     case InternalStructureTransform.BOOLEAN:
@@ -611,7 +630,7 @@ module ExtensionSettings {
         }
 
         let exportValue: any = null;
-        switch (internal.transform) {
+        switch (internal.transform ?? InternalStructureTransform.NONE) {
             case InternalStructureTransform.NONE:
                 exportValue = internal.value;
                 break;

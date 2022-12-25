@@ -19,11 +19,11 @@ td.img_td.can_expand:hover img[data-buff-utility-expand-image] {
 }
 
 td.img_td.can_expand:hover img[data-buff-utility-expand-image="0"] {
-    transform: scale(5) translate(70px, 0px);
+    transform: scale(10) translate(50%, 0);
 }
 
 td.img_td.can_expand:hover img[data-buff-utility-expand-image="1"] {
-    transform: scale(5) translate(99px, 10px);
+    transform: scale(5) translate(65%, 0);
 }
 
 td.img_td.can_expand.expand_backdrop:hover img[data-buff-utility-expand-image="0"] {
