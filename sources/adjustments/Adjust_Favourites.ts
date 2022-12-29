@@ -28,7 +28,7 @@ module Adjust_Favourites {
 
             // convert price
             let contentTDList = <NodeListOf<HTMLElement>>row.querySelectorAll('td');
-            let priceTD = null;
+            let priceTD: HTMLElement | null = null;
             for (let i = 0, l = contentTDList.length; i < l; i ++) {
                 if (contentTDList.item(i).innerText.indexOf(GlobalConstants.SYMBOL_YUAN) > -1) {
                     priceTD = contentTDList.item(i);
@@ -36,22 +36,15 @@ module Adjust_Favourites {
                 }
             }
 
-            if (priceTD) {
+            if (priceTD && priceTD.children.length >= 2) {
                 let priceCNY = +((/¥ (\d+(\.\d+)?)/.exec(priceTD.innerText) ?? [null, NaN])[1]);
                 if (isFinite(priceCNY)) {
                     let priceStr = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(priceCNY)}`;
 
                     const { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(priceCNY);
 
-                    priceTD.innerHTML = Util.buildHTML('p', {
-                        content: [Util.buildHTML('strong', {
-                            class: 'f_Strong',
-                            content: [ priceStr ]
-                        })]
-                    }) + Util.buildHTML('p', {
-                        class: 'c_Gray f_12px',
-                        content: [ `(${convertedSymbol} ${convertedFormattedValue})` ]
-                    });
+                    priceTD.children[0].children[0].innerHTML = priceStr;
+                    priceTD.children[1].innerHTML = `(${convertedSymbol} ${convertedFormattedValue})`;
                 }
             }
 
