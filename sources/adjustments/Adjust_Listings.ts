@@ -447,7 +447,7 @@ module Adjust_Listings {
                 dateDiv.setAttribute('title', date.toUTCString());
                 dateDiv.setAttribute('style', 'font-size: 12px; color: #959595; transform: translate(3.5%, 20%);');
 
-                let dateText = `${dateHours < 49 ? `${dateHours} hour${dateHours == 1 ? "" : "s"}` : `${Math.floor(timeEpoch / 3_600_000 / 24)} days`} ago`;
+                let dateText = `${dateHours < 49 ? `${dateHours} hour${dateHours == 1 ? '' : 's'}` : `${Math.floor(timeEpoch / 3_600_000 / 24)} days`} ago`;
                 dateDiv.innerHTML = `<i class="icon icon_time"></i><p style="display: inline; vertical-align: middle; margin-left: 5px;">${dateText}</p>`;
 
                 (<NodeListOf<HTMLElement>>row.querySelectorAll('td.t_Left')).forEach(element => {
