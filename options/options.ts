@@ -276,26 +276,78 @@ module Options {
         // Settings.DEFAULT_SORT_BY
         advancedSettings += createSelectOption(Settings.DEFAULT_SORT_BY, {
             title: 'Default sort by',
-            description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Hot Descending: by popularity.<br>Sticker: By Sticker price descending.',
+            description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Popular: by popularity.<br>Sticker: By Sticker price descending.',
             csgoOnly: true
-        }, Object.keys(ExtensionSettings.FILTER_SORT_BY).map(option => {
-            return {
-                displayText: option,
-                value: ExtensionSettings.FILTER_SORT_BY[option]
-            };
-        }), await getSetting(Settings.DEFAULT_SORT_BY));
+        }, [
+            {
+                displayText: 'Default',
+                value: ExtensionSettings.FILTER_SORT_BY.DEFAULT
+            },
+            {
+                displayText: 'Newest',
+                value: ExtensionSettings.FILTER_SORT_BY.NEWEST
+            },
+            {
+                displayText: 'Price Ascending',
+                value: ExtensionSettings.FILTER_SORT_BY.PRICE_ASCENDING
+            },
+            {
+                displayText: 'Price Descending',
+                value: ExtensionSettings.FILTER_SORT_BY.PRICE_DESCENDING
+            },
+            {
+                displayText: 'Float Ascending',
+                value: ExtensionSettings.FILTER_SORT_BY.FLOAT_ASCENDING
+            },
+            {
+                displayText: 'Float Descending',
+                value: ExtensionSettings.FILTER_SORT_BY.FLOAT_DESCENDING
+            },
+            {
+                displayText: 'Popular',
+                value: ExtensionSettings.FILTER_SORT_BY.HOT_DESCENDING
+            },
+            {
+                displayText: 'Sticker',
+                value: ExtensionSettings.FILTER_SORT_BY.STICKER
+            }
+        ], await getSetting(Settings.DEFAULT_SORT_BY));
 
         // Settings.DEFAULT_STICKER_SEARCH
         advancedSettings += createSelectOption(Settings.DEFAULT_STICKER_SEARCH, {
             title: 'Default sticker search',
             description: 'Search listings with sticker settings automatically.',
             csgoOnly: true
-        }, Object.keys(ExtensionSettings.FILTER_STICKER_SEARCH).map(option => {
-            return {
-                displayText: option,
-                value: ExtensionSettings.FILTER_STICKER_SEARCH[option]
-            };
-        }), await getSetting(Settings.DEFAULT_STICKER_SEARCH));
+        }, [
+            {
+                displayText: 'All',
+                value: ExtensionSettings.FILTER_STICKER_SEARCH.ALL
+            },
+            {
+                displayText: 'Stickers',
+                value: ExtensionSettings.FILTER_STICKER_SEARCH.STICKERS
+            },
+            {
+                displayText: 'Stickers 100%',
+                value: ExtensionSettings.FILTER_STICKER_SEARCH.STICKERS_100P
+            },
+            {
+                displayText: 'No Stickers',
+                value: ExtensionSettings.FILTER_STICKER_SEARCH.NO_STICKERS
+            },
+            {
+                displayText: 'Quad Combos',
+                value: ExtensionSettings.FILTER_STICKER_SEARCH.QUAD_COMBOS
+            },
+            {
+                displayText: 'Quad Combos 100%',
+                value: ExtensionSettings.FILTER_STICKER_SEARCH.QUAD_COMBOS_100P
+            },
+            {
+                displayText: 'Save Custom',
+                value: ExtensionSettings.FILTER_STICKER_SEARCH.SAVE_CUSTOM
+            }
+        ], await getSetting(Settings.DEFAULT_STICKER_SEARCH));
 
         // Settings.EXPAND_TYPE
         advancedSettings += createSelectOption(Settings.EXPAND_TYPE, {
@@ -479,7 +531,26 @@ module Options {
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Allow the bulk buy function to be used on the web version of Buff.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>'
         });
 
-        // Settings.EXPERIMENTAL_ALLOW_BULK_BUY
+        // Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN
+        experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN, {
+            title: '"Automatic" Bargain',
+            description: ''
+        }, [
+            {
+                displayText: 'None',
+                value: ExtensionSettings.BARGAIN_DISCOUNT_TYPES.NONE
+            },
+            {
+                displayText: 'Minimum',
+                value: ExtensionSettings.BARGAIN_DISCOUNT_TYPES.BY_MINIMUM
+            },
+            {
+                displayText: 'Listing',
+                value: ExtensionSettings.BARGAIN_DISCOUNT_TYPES.BY_LISTING
+            }
+        ], await getSetting(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN));
+
+        // Settings.EXPERIMENTAL_SHOW_LISTING_DATE
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_SHOW_LISTING_DATE, {
             title: 'Show Listing Date',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show an item\'s listing date in the market page. Time zone differences are already considered and rounded towards full hours.<br>'

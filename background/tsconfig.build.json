@@ -16,7 +16,6 @@
         "node_modules"
     ],
     "files": [
-        "../sources/@typings/TypeScriptExtensions.d.ts",
         "../sources/@typings/SchemaTypes.d.ts",
         "../sources/.GlobalConstants.ts",
         "../sources/config.ts",

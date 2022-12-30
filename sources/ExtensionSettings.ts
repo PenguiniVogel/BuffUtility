@@ -35,65 +35,65 @@ module ExtensionSettings {
         [1.00, ['0.90', '1.00']],
     ];
 
-    export const DifferenceDominator = {
-        STEAM: 0,
-        BUFF: 1
-    } as const;
+    export const enum DifferenceDominator {
+        STEAM = 0,
+        BUFF = 1
+    }
 
-    export const ExpandScreenshotType = {
-        PREVIEW: 0,
-        INSPECT: 1
-    } as const;
+    export const enum ExpandScreenshotType {
+        PREVIEW = 0,
+        INSPECT = 1
+    }
 
-    export const FOP_VALUES = {
-        Auto: '',
-        w245xh230: '?fop=imageView/2/w/245/h/230',
-        w490xh460: '?fop=imageView/2/w/490/h/460',
-        w980xh920: '?fop=imageView/2/w/980/h/920',
-        w1960xh1840: '?fop=imageView/2/w/1960/h/1840',
-        w3920xh3680: '?fop=imageView/2/w/3920/h/3680'
-    } as const;
+    export const enum FOP_VALUES {
+        Auto = '',
+        w245xh230 = '?fop=imageView/2/w/245/h/230',
+        w490xh460 = '?fop=imageView/2/w/490/h/460',
+        w980xh920 = '?fop=imageView/2/w/980/h/920',
+        w1960xh1840 = '?fop=imageView/2/w/1960/h/1840',
+        w3920xh3680 = '?fop=imageView/2/w/3920/h/3680'
+    }
 
-    export const LOCATION_RELOAD_NEWEST_VALUES = {
-        NONE: 0,
-        BULK: 1,
-        SORT: 2,
-        CENTER: 3,
-        LEFT: 4
-    } as const;
+    export const enum LOCATION_RELOAD_NEWEST_VALUES {
+        NONE = 0,
+        BULK = 1,
+        SORT = 2,
+        CENTER = 3,
+        LEFT = 4
+    }
 
-    export const PriceHistoryRange  = {
-        OFF: 0,
-        WEEKLY: 7,
-        MONTHLY: 30
-    } as const;
+    export const enum PriceHistoryRange {
+        OFF = 0,
+        WEEKLY = 7,
+        MONTHLY = 30
+    }
 
-    export const FILTER_SORT_BY = {
-        'Default': 'default',
-        'Newest': 'created.desc',
-        'Price Ascending': 'price.asc',
-        'Price Descending': 'price.desc',
-        'Float Ascending': 'paintwear.asc',
-        'Float Descending': 'paintwear.desc',
-        'Hot Descending': 'heat.desc',
-        'Sticker': 'sticker.desc'
-    } as const;
+    export const enum FILTER_SORT_BY {
+        DEFAULT = 'default',
+        NEWEST = 'created.desc',
+        PRICE_ASCENDING = 'price.asc',
+        PRICE_DESCENDING = 'price.desc',
+        FLOAT_ASCENDING = 'paintwear.asc',
+        FLOAT_DESCENDING = 'paintwear.desc',
+        HOT_DESCENDING = 'heat.desc',
+        STICKER = 'sticker.desc'
+    }
 
-    export const FILTER_STICKER_SEARCH = {
-        'All': '',
-        'Stickers': '&extra_tag_ids=non_empty',
-        'Stickers 100%': '&extra_tag_ids=non_empty&wearless_sticker=1',
-        'No Stickers': '&extra_tag_ids=empty',
-        'Quad Combos': '&extra_tag_ids=squad_combos',
-        'Quad Combos 100%': '&extra_tag_ids=squad_combos&wearless_sticker=1',
-        'Save Custom': '&extra_tag_ids=$1'
-    } as const;
+    export const enum FILTER_STICKER_SEARCH {
+        ALL = '',
+        STICKERS = '&extra_tag_ids=non_empty',
+        STICKERS_100P = '&extra_tag_ids=non_empty&wearless_sticker=1',
+        NO_STICKERS = '&extra_tag_ids=empty',
+        QUAD_COMBOS = '&extra_tag_ids=squad_combos',
+        QUAD_COMBOS_100P = '&extra_tag_ids=squad_combos&wearless_sticker=1',
+        SAVE_CUSTOM = '&extra_tag_ids=$1'
+    }
 
-    export const BARGAIN_DISCOUNT_TYPES = {
-        NONE: 0,
-        BY_MINIMUM: 1,
-        BY_LISTING: 2
-    } as const;
+    export const enum BARGAIN_DISCOUNT_TYPES {
+        NONE = 0,
+        BY_MINIMUM = 1,
+        BY_LISTING = 2
+    }
 
     export interface SteamSettings {
         readonly wallet_fee: number,
@@ -157,7 +157,7 @@ module ExtensionSettings {
         // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_AUTOMATIC_BARGAIN = 'automatic_bargain',
         // [TBA] -> setting will be moved to advanced settings
-        EXPERIMENTAL_SHOW_LISTING_DATE= 'show_listing_date',
+        EXPERIMENTAL_SHOW_LISTING_DATE = 'show_listing_date',
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
     }
@@ -169,13 +169,13 @@ module ExtensionSettings {
         [Settings.CUSTOM_CURRENCY_NAME]: string;
         [Settings.CAN_EXPAND_SCREENSHOTS]: boolean;
         [Settings.EXPAND_SCREENSHOTS_BACKDROP]: boolean;
-        [Settings.DIFFERENCE_DOMINATOR]: ObjectKeys<typeof DifferenceDominator>;
+        [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator;
         [Settings.APPLY_STEAM_TAX]: boolean;
         [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: boolean;
-        [Settings.EXPAND_TYPE]: ObjectKeys<typeof ExpandScreenshotType>;
-        [Settings.CUSTOM_FOP]: ObjectKeys<typeof FOP_VALUES>;
-        [Settings.DEFAULT_SORT_BY]: ObjectKeys<typeof FILTER_SORT_BY>;
-        [Settings.DEFAULT_STICKER_SEARCH]: ObjectKeys<typeof FILTER_STICKER_SEARCH>;
+        [Settings.EXPAND_TYPE]: ExpandScreenshotType;
+        [Settings.CUSTOM_FOP]: FOP_VALUES;
+        [Settings.DEFAULT_SORT_BY]: FILTER_SORT_BY;
+        [Settings.DEFAULT_STICKER_SEARCH]: FILTER_STICKER_SEARCH;
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: string;
         [Settings.LEECH_CONTRIBUTOR_KEY]: string;
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
@@ -185,19 +185,19 @@ module ExtensionSettings {
         [Settings.DATA_PROTECTION]: boolean;
         [Settings.COLOR_SCHEME]: string[];
         [Settings.USE_SCHEME]: boolean;
-        [Settings.LOCATION_RELOAD_NEWEST]: ObjectKeys<typeof LOCATION_RELOAD_NEWEST_VALUES>;
+        [Settings.LOCATION_RELOAD_NEWEST]: LOCATION_RELOAD_NEWEST_VALUES;
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: boolean;
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: boolean;
-        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: ObjectKeys<typeof PriceHistoryRange>;
+        [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: PriceHistoryRange;
         [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHARE]: boolean;
         [Settings.EXPERIMENTAL_ALLOW_BULK_BUY]: boolean;
-        [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: ObjectKeys<typeof BARGAIN_DISCOUNT_TYPES>;
+        [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: BARGAIN_DISCOUNT_TYPES;
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: boolean;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
@@ -208,19 +208,19 @@ module ExtensionSettings {
         Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
     ];
 
-    const InternalStructureTransform = {
-        NONE: 0,
-        BOOLEAN: 1,
-        BOOLEAN_ARRAY: 2
-    } as const;
+    const enum InternalStructureTransform {
+        NONE = 0,
+        BOOLEAN = 1,
+        BOOLEAN_ARRAY = 2
+    }
 
     type InternalSetting<T extends Settings> = {
         value?: SettingsTypes[T],
         resolved?: boolean,
         readonly default: SettingsTypes[T],
-        readonly associated?: { [key: string]: SettingsTypes[T] },
+        readonly allowedValues?: SettingsTypes[T][],
         readonly export: string,
-        readonly transform?: ObjectKeys<typeof InternalStructureTransform>,
+        readonly transform?: InternalStructureTransform,
         readonly validator: (key: Settings, value: any) => any
     };
     
@@ -263,7 +263,10 @@ module ExtensionSettings {
         },
         [Settings.DIFFERENCE_DOMINATOR]: {
             default: DifferenceDominator.STEAM,
-            associated: DifferenceDominator,
+            allowedValues: [
+                DifferenceDominator.STEAM,
+                DifferenceDominator.BUFF
+            ],
             export: '0x8',
             validator: validatePropertyValue
         },
@@ -281,25 +284,52 @@ module ExtensionSettings {
         },
         [Settings.EXPAND_TYPE]: {
             default: ExpandScreenshotType.PREVIEW,
-            associated: ExpandScreenshotType,
+            allowedValues: [
+                ExpandScreenshotType.PREVIEW,
+                ExpandScreenshotType.INSPECT
+            ],
             export: '0x11',
             validator: validatePropertyValue
         },
         [Settings.CUSTOM_FOP]: {
             default: FOP_VALUES.Auto,
-            associated: FOP_VALUES,
+            allowedValues: [
+                FOP_VALUES.Auto,
+                FOP_VALUES.w245xh230,
+                FOP_VALUES.w490xh460,
+                FOP_VALUES.w980xh920,
+                FOP_VALUES.w1960xh1840,
+                FOP_VALUES.w3920xh3680
+            ],
             export: '0x12',
             validator: validatePropertyValue
         },
         [Settings.DEFAULT_SORT_BY]: {
-            default: FILTER_SORT_BY.Default,
-            associated: FILTER_SORT_BY,
+            default: FILTER_SORT_BY.DEFAULT,
+            allowedValues: [
+                FILTER_SORT_BY.DEFAULT,
+                FILTER_SORT_BY.NEWEST,
+                FILTER_SORT_BY.PRICE_ASCENDING,
+                FILTER_SORT_BY.PRICE_DESCENDING,
+                FILTER_SORT_BY.FLOAT_ASCENDING,
+                FILTER_SORT_BY.FLOAT_DESCENDING,
+                FILTER_SORT_BY.HOT_DESCENDING,
+                FILTER_SORT_BY.STICKER
+            ],
             export: '0x13',
             validator: validatePropertyValue
         },
         [Settings.DEFAULT_STICKER_SEARCH]: {
-            default: FILTER_STICKER_SEARCH.All,
-            associated: FILTER_STICKER_SEARCH,
+            default: FILTER_STICKER_SEARCH.ALL,
+            allowedValues: [
+                FILTER_STICKER_SEARCH.ALL,
+                FILTER_STICKER_SEARCH.STICKERS,
+                FILTER_STICKER_SEARCH.STICKERS_100P,
+                FILTER_STICKER_SEARCH.NO_STICKERS,
+                FILTER_STICKER_SEARCH.QUAD_COMBOS,
+                FILTER_STICKER_SEARCH.QUAD_COMBOS_100P,
+                FILTER_STICKER_SEARCH.SAVE_CUSTOM
+            ],
             export: '0x14',
             validator: validatePropertyValue
         },
@@ -356,7 +386,13 @@ module ExtensionSettings {
         },
         [Settings.LOCATION_RELOAD_NEWEST]: {
             default: LOCATION_RELOAD_NEWEST_VALUES.NONE,
-            associated: LOCATION_RELOAD_NEWEST_VALUES,
+            allowedValues: [
+                LOCATION_RELOAD_NEWEST_VALUES.NONE,
+                LOCATION_RELOAD_NEWEST_VALUES.BULK,
+                LOCATION_RELOAD_NEWEST_VALUES.SORT,
+                LOCATION_RELOAD_NEWEST_VALUES.CENTER,
+                LOCATION_RELOAD_NEWEST_VALUES.LEFT
+            ],
             export: '0x24',
             validator: validatePropertyValue
         },
@@ -383,7 +419,11 @@ module ExtensionSettings {
         },
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: {
             default: PriceHistoryRange.OFF,
-            associated: PriceHistoryRange,
+            allowedValues: [
+                PriceHistoryRange.OFF,
+                PriceHistoryRange.WEEKLY,
+                PriceHistoryRange.MONTHLY
+            ],
             export: '2x5',
             validator: validatePropertyValue
         },
@@ -418,7 +458,11 @@ module ExtensionSettings {
         },
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: {
             default: BARGAIN_DISCOUNT_TYPES.NONE,
-            associated: BARGAIN_DISCOUNT_TYPES,
+            allowedValues: [
+                BARGAIN_DISCOUNT_TYPES.NONE,
+                BARGAIN_DISCOUNT_TYPES.BY_MINIMUM,
+                BARGAIN_DISCOUNT_TYPES.BY_LISTING
+            ],
             export: '2x11',
             validator: validatePropertyValue
         },
@@ -516,18 +560,14 @@ module ExtensionSettings {
     }
 
     function validatePropertyValue(key: Settings, value: any): any {
-        const associated = INTERNAL_SETTINGS[key].associated;
+        const internal = INTERNAL_SETTINGS[key];
+        const allowedValues = internal.allowedValues;
 
-        if (!associated) {
-            throw new Error(`[BuffUtility] Attempted validating property for ${key} failed, no associated object was set.`);
+        if (!Array.isArray(allowedValues) || allowedValues?.length == 0) {
+            throw new Error(`[BuffUtility] Attempted validating value for ${key} failed, no allowed values were set.`);
         }
 
-        // try migrating, as the value previously may have been the key
-        if (value in associated) {
-            return associated[value];
-        }
-
-        return Object.values(associated).indexOf(value) > -1 ? value : INTERNAL_SETTINGS[key].default;
+        return value in allowedValues ? value : internal.export;
     }
 
     // general

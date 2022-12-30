@@ -75,6 +75,8 @@ module Adjust_Listings {
             }
 
             addReloadNewest();
+
+            PopupHelper.expandBargainPopup();
         });
     }
 
@@ -333,7 +335,7 @@ module Adjust_Listings {
                     ctags.item(1).setAttribute('style', 'display: none;');
                 }
 
-                wearContainer.querySelector('br')?.setAttribute('style', 'display: none;');
+                // wearContainer.querySelector('br')?.setAttribute('style', 'display: none;');
 
                 if (aCopyGen && enabledOptions[2]) {
                     wearContainer.appendChild(aCopyGen);
@@ -442,7 +444,7 @@ module Adjust_Listings {
                 let date = new Date(dataRow.created_at * 1_000);
                 let timeEpoch = Date.now() - (dataRow.created_at * 1_000);
                 let dateHours = Math.floor(timeEpoch / 3_600_000);
-                let dateDiv = document.createElement("div");
+                let dateDiv = document.createElement('div');
 
                 dateDiv.setAttribute('title', date.toUTCString());
                 dateDiv.setAttribute('style', 'font-size: 12px; color: #959595; transform: translate(3.5%, 20%);');

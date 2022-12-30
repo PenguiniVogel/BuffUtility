@@ -56,7 +56,7 @@ module Adjust_Market {
                     if (schemaData && schemaData.sticker_amount > 0) {
                         stickerSearch = await getSetting(Settings.DEFAULT_STICKER_SEARCH);
 
-                        if (stickerSearch == ExtensionSettings.FILTER_STICKER_SEARCH['Save Custom']) {
+                        if (stickerSearch == ExtensionSettings.FILTER_STICKER_SEARCH.SAVE_CUSTOM) {
                             if ((await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH)).length > 0) {
                                 stickerSearch = await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH);
                             }

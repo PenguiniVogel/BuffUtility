@@ -310,6 +310,16 @@ module InjectionService {
         return await _p;
     }
 
+    export function shadowFunction(fnStr: string, thisArg: string, shadow: Function) {
+        InjectionServiceLib.injectCode(`(function() {
+            var copy = ${fnStr}.prototype.constructor;
+            ${fnStr} = function() {
+                (${shadow.toString()}).apply(${thisArg}, arguments);
+                copy.apply(${thisArg}, arguments);
+            };
+        })();`, 'body');
+    }
+
     function interceptNetworkRequests() {
         const open = window.XMLHttpRequest.prototype.open;
         const isNative = open.toString().indexOf('native code') != -1;

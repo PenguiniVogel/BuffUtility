@@ -1539,7 +1539,12 @@ declare function updateHashData(params: {
 }): void;
 
 declare module Buff {
-
     export function toast(a?: any, b?: any): unknown;
+
+}
+
+declare module Popup {
+
+    export function show(t: string): unknown;
 
 }

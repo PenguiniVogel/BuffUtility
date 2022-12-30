@@ -18,6 +18,7 @@
                 "sources/Util.js",
                 "sources/ExtensionSettings.js",
                 "sources/CurrencyHelper.js",
+                "sources/PopupHelper.js",
                 "sources/preload.js"
             ],
             "css": [
