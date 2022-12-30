@@ -156,6 +156,8 @@ module ExtensionSettings {
         EXPERIMENTAL_ALLOW_BULK_BUY = 'allow_bulk_buy',
         // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_AUTOMATIC_BARGAIN = 'automatic_bargain',
+        // [TBA] -> setting will be moved to advanced settings
+        EXPERIMENTAL_SHOW_LISTING_DATE= 'show_listing_date',
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
     }
@@ -196,6 +198,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ADJUST_SHARE]: boolean;
         [Settings.EXPERIMENTAL_ALLOW_BULK_BUY]: boolean;
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: ObjectKeys<typeof BARGAIN_DISCOUNT_TYPES>;
+        [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: boolean;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
     }
@@ -418,6 +421,12 @@ module ExtensionSettings {
             associated: BARGAIN_DISCOUNT_TYPES,
             export: '2x11',
             validator: validatePropertyValue
+        },
+        [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: {
+            default: false,
+            export: '2x11',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
         },
 
         [Settings.STORE_DANGER_AGREEMENTS]: {

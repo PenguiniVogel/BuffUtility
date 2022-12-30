@@ -479,6 +479,12 @@ module Options {
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Allow the bulk buy function to be used on the web version of Buff.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>'
         });
 
+        // Settings.EXPERIMENTAL_ALLOW_BULK_BUY
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_SHOW_LISTING_DATE, {
+            title: 'Show Listing Date',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show an item\'s listing date in the market page. Time zone differences are already considered and rounded towards full hours.<br>'
+        });
+
         // append html
         document.querySelector('#settings-normal tbody').innerHTML = normalSettings;
         document.querySelector('#settings-advanced tbody').innerHTML = advancedSettings;
