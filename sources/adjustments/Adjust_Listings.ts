@@ -439,16 +439,22 @@ module Adjust_Listings {
 
             //add date of listing
             if (await getSetting(Settings.EXPERIMENTAL_SHOW_LISTING_DATE)) {
-                let date = new Date(dataRow.created_at * 1000);
-                let timeEpoch = Date.now() - (dataRow.created_at * 1000);
-                let dateHours = Math.floor(timeEpoch / 3600000);
+                let date = new Date(dataRow.created_at * 1_000);
+                let timeEpoch = Date.now() - (dataRow.created_at * 1_000);
+                let dateHours = Math.floor(timeEpoch / 3_600_000);
                 let dateDiv = document.createElement("div");
-                dateDiv.style.cssText = "font-size: 12px; color: #959595; transform: translate(3.5%, 20%);";
-                dateDiv.title = date.toUTCString();
-                let dateText = (dateHours < 49 ? dateHours + ` hour${dateHours==1?"":"s"}` : Math.floor(timeEpoch / 3600000 / 24) + " days") + " ago";
+
+                dateDiv.setAttribute('title', date.toUTCString());
+                dateDiv.setAttribute('style', 'font-size: 12px; color: #959595; transform: translate(3.5%, 20%);');
+
+                let dateText = `${dateHours < 49 ? `${dateHours} hour${dateHours == 1 ? "" : "s"}` : `${Math.floor(timeEpoch / 3_600_000 / 24)} days`} ago`;
                 dateDiv.innerHTML = `<i class="icon icon_time"></i><p style="display: inline; vertical-align: middle; margin-left: 5px;">${dateText}</p>`;
 
-                <HTMLElement>([ ...<Array<HTMLElement>><unknown>row.querySelectorAll('td.t_Left') ].filter(td => !!td.querySelector('.user-thum')))[0].appendChild(dateDiv);
+                (<NodeListOf<HTMLElement>>row.querySelectorAll('td.t_Left')).forEach(element => {
+                    if (element.querySelector('.user-thum')) {
+                        element.appendChild(dateDiv);
+                    }
+                });
             }
         }
 

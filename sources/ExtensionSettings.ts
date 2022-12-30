@@ -424,7 +424,7 @@ module ExtensionSettings {
         },
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: {
             default: false,
-            export: '2x11',
+            export: '2x12',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
