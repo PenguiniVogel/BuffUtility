@@ -560,14 +560,14 @@ module ExtensionSettings {
     }
 
     function validatePropertyValue(key: Settings, value: any): any {
-        const internal = INTERNAL_SETTINGS[key];
-        const allowedValues = internal.allowedValues;
+        const internal: InternalSetting<any> = INTERNAL_SETTINGS[key];
+        const allowedValues: any[] = internal.allowedValues;
 
         if (!Array.isArray(allowedValues) || allowedValues?.length == 0) {
             throw new Error(`[BuffUtility] Attempted validating value for ${key} failed, no allowed values were set.`);
         }
 
-        return value in allowedValues ? value : internal.export;
+        return allowedValues.indexOf(value) > -1 ? value : internal.default;
     }
 
     // general

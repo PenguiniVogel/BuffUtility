@@ -330,12 +330,14 @@ module Adjust_Listings {
                     ctags.item(0).setAttribute('style', 'display: none;');
                 }
 
-                // Inspect in Server - deprecated, but why
+                // Inspect in Server
                 if (!enabledOptions[1] && ctags.item(1)) {
                     ctags.item(1).setAttribute('style', 'display: none;');
                 }
 
-                // wearContainer.querySelector('br')?.setAttribute('style', 'display: none;');
+                if (!enabledOptions[0] && !enabledOptions[1]) {
+                    wearContainer.querySelector('br')?.setAttribute('style', 'display: none;');
+                }
 
                 if (aCopyGen && enabledOptions[2]) {
                     wearContainer.appendChild(aCopyGen);
@@ -407,6 +409,8 @@ module Adjust_Listings {
                 if (can_expand_screenshots) {
                     fopString = await getSetting(Settings.CUSTOM_FOP);
                 }
+
+                console.debug(fopString);
 
                 switch (await getSetting(Settings.EXPAND_TYPE)) {
                     case ExtensionSettings.ExpandScreenshotType.PREVIEW:
