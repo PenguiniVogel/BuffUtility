@@ -89,12 +89,6 @@ module ExtensionSettings {
         SAVE_CUSTOM = '&extra_tag_ids=$1'
     }
 
-    export const enum BARGAIN_DISCOUNT_TYPES {
-        NONE = 0,
-        BY_MINIMUM = 1,
-        BY_LISTING = 2
-    }
-
     export interface SteamSettings {
         readonly wallet_fee: number,
         readonly wallet_fee_base: number,
@@ -156,10 +150,23 @@ module ExtensionSettings {
         EXPERIMENTAL_ALLOW_BULK_BUY = 'allow_bulk_buy',
         // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_AUTOMATIC_BARGAIN = 'automatic_bargain',
-        // [TBA] -> setting will be moved to advanced settings
+        // 2.2.0 -> setting will be moved to advanced settings
+        EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT = 'automatic_bargain_default',
+        // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_SHOW_LISTING_DATE = 'show_listing_date',
 
-        STORE_DANGER_AGREEMENTS = 'store_danger_agreements'
+        STORE_DANGER_AGREEMENTS = 'store_danger_agreements',
+
+        // PSE MIGRATION
+        PSE_ADVANCED_PAGE_NAVIGATION = 'pse_advanced_page_navigation',
+        PSE_CALCULATE_BUYORDER_SUMMARY = 'pse_calculate_buyorder_summary',
+        PSE_BUYORDER_CANCEL_CONFIRMATION = 'pse_buyorder_cancel_confirmation',
+        PSE_BUYORDER_SCROLLING = 'pse_buyorder_scrolling',
+        PSE_NEW_GRAPH = 'pse_new_graph',
+        PSE_FORCE_ITEM_ACTIVITY = 'pse_force_item_activity',
+        PSE_ADD_VIEW_ON_BUFF = 'pse_add_view_on_buff',
+        PSE_HIDE_ACCOUNT_DETAILS = 'pse_hide_account_details',
+        PSE_MERGE_ACTIVE_LISTINGS = 'pse_merge_active_listings'
     }
 
     type SettingsTypes = {
@@ -197,10 +204,21 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_SHARE]: boolean;
         [Settings.EXPERIMENTAL_ALLOW_BULK_BUY]: boolean;
-        [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: BARGAIN_DISCOUNT_TYPES;
+        [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: boolean;
+        [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT]: number;
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: boolean;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
+
+        [Settings.PSE_ADVANCED_PAGE_NAVIGATION]: boolean;
+        [Settings.PSE_CALCULATE_BUYORDER_SUMMARY]: boolean;
+        [Settings.PSE_BUYORDER_CANCEL_CONFIRMATION]: boolean;
+        [Settings.PSE_BUYORDER_SCROLLING]: boolean;
+        [Settings.PSE_NEW_GRAPH]: boolean;
+        [Settings.PSE_FORCE_ITEM_ACTIVITY]: boolean;
+        [Settings.PSE_ADD_VIEW_ON_BUFF]: boolean;
+        [Settings.PSE_HIDE_ACCOUNT_DETAILS]: boolean;
+        [Settings.PSE_MERGE_ACTIVE_LISTINGS]: boolean;
     }
 
     const DANGER_SETTINGS: Settings[] = [
@@ -400,21 +418,25 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: {
             default: true,
             export: '2x1',
+            transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: {
             default: false,
             export: '2x2',
+            transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: {
             default: false,
             export: '2x3',
+            transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: {
             default: false,
             export: '2x4',
+            transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: {
@@ -436,6 +458,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: {
             default: false,
             export: '2x7',
+            transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: {
@@ -457,14 +480,15 @@ module ExtensionSettings {
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: {
-            default: BARGAIN_DISCOUNT_TYPES.NONE,
-            allowedValues: [
-                BARGAIN_DISCOUNT_TYPES.NONE,
-                BARGAIN_DISCOUNT_TYPES.BY_MINIMUM,
-                BARGAIN_DISCOUNT_TYPES.BY_LISTING
-            ],
+            default: false,
             export: '2x11',
-            validator: validatePropertyValue
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT]: {
+            default: 10,
+            export: '2x13',
+            validator: validateNumber
         },
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: {
             default: false,
@@ -478,7 +502,62 @@ module ExtensionSettings {
             export: '3x1',
             transform: InternalStructureTransform.BOOLEAN_ARRAY,
             validator: validateBooleanArray
-        }
+        },
+
+        [Settings.PSE_ADVANCED_PAGE_NAVIGATION]: {
+            default: false,
+            export: '9x1',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_CALCULATE_BUYORDER_SUMMARY]: {
+            default: false,
+            export: '9x2',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_BUYORDER_CANCEL_CONFIRMATION]: {
+            default: true,
+            export: '9x3',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_BUYORDER_SCROLLING]: {
+            default: false,
+            export: '9x4',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_NEW_GRAPH]: {
+            default: false,
+            export: '9x5',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_FORCE_ITEM_ACTIVITY]: {
+            default: false,
+            export: '9x6',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_ADD_VIEW_ON_BUFF]: {
+            default: false,
+            export: '9x7',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_HIDE_ACCOUNT_DETAILS]: {
+            default: false,
+            export: '9x8',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_MERGE_ACTIVE_LISTINGS]: {
+            default: false,
+            export: '9x9',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
     };
 
     // func validators

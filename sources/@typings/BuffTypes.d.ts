@@ -1523,6 +1523,14 @@ interface JQuery<TElement = HTMLElement> extends Iterable<TElement> {
 
 declare function buff_utility_readNarrowOptions(selector: string): void;
 
+declare function buff_utility_quickconvertcny(cny: number | string): Util.ReturnConvertCNYRaw;
+
+declare let buff_utility_bargain_mathFunc: (listing: number, minimum: number, p: number) => number;
+
+declare function buff_utility_bargain_offer(): void;
+
+declare function buff_utility_bargain_change(factor: number): void;
+
 declare function sendRequest(url: string, config: {
     method: string,
     dataType: string,
@@ -1544,7 +1552,6 @@ declare module Buff {
 }
 
 declare module Popup {
-
     export function show(t: string): unknown;
 
 }

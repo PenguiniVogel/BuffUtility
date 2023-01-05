@@ -7,18 +7,23 @@ fi
 
 echo ""
 
-echo "Building main project..."
+echo "Running bundled tsc -p tsconfig.json"
 node_modules/.bin/tsc -p tsconfig.json
 echo "Done."
 echo ""
 
-echo "Building background project..."
+echo "Running bundled tsc -p background/tsconfig.json"
 node_modules/.bin/tsc -p background/tsconfig.json
 echo "Done."
 echo ""
 
-echo "Building option project..."
+echo "Running bundled tsc -p options/tsconfig.json"
 node_modules/.bin/tsc -p options/tsconfig.json
+echo "Done."
+echo ""
+
+echo "Running bundled tsc -p steam/tsconfig.json"
+node_modules/.bin/tsc -p steam/tsconfig.json
 echo "Done."
 echo ""
 

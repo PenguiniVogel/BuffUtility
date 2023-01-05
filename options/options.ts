@@ -93,7 +93,7 @@ module Options {
             attributes: {
                 'data-target': 'select'
             },
-            content: (options ?? []).map(option => `<option value="${option.value}" ${(selectedOption == option.value) ? 'selected' : ''}>${option.displayText}</option>`)
+            content: (options ?? []).map(option => `<option value="${option.value}" data-type="${(typeof option.value)}" ${(selectedOption == option.value) ? 'selected' : ''}>${option.displayText}</option>`)
         }));
     }
 
@@ -167,6 +167,7 @@ module Options {
         let normalSettings: string = '';
         let advancedSettings: string = '';
         let experimentalSettings: string = '';
+        let pseSettings: string = '';
 
         // --- Normal Settings ---
 
@@ -261,7 +262,7 @@ module Options {
         // Settings.DIFFERENCE_DOMINATOR
         advancedSettings += createSelectOption(Settings.DIFFERENCE_DOMINATOR, {
             title: 'Difference Dominator',
-            description: 'Specify the dominator meaning:<br>Steam: <code>(steam_price - buff_price) / steam_price</code><br>Buff: <code>(steam_price - buff_price) / buff_price</code><br>Unless you know the difference might not want to change this setting.'
+            description: 'Specify the dominator meaning:<br>Steam: <code>(steam_price - buff_price) / steam_price</code><br>Buff: <code>(steam_price - buff_price) / buff_price</code><br>Unless you know the difference might not want to change this setting.<br>A short explanation being, if you buy from Buff and sell on Steam, you should choose "Buff".<br>If you buy from Steam, and sell on Buff, you should choose "Steam".'
         }, [
             {
                 displayText: 'Steam',
@@ -532,34 +533,84 @@ module Options {
         });
 
         // Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN
-        experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN, {
-            title: '"Automatic" Bargain',
-            description: ''
-        }, [
-            {
-                displayText: 'None',
-                value: ExtensionSettings.BARGAIN_DISCOUNT_TYPES.NONE
-            },
-            {
-                displayText: 'Minimum',
-                value: ExtensionSettings.BARGAIN_DISCOUNT_TYPES.BY_MINIMUM
-            },
-            {
-                displayText: 'Listing',
-                value: ExtensionSettings.BARGAIN_DISCOUNT_TYPES.BY_LISTING
-            }
-        ], await getSetting(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN));
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN, {
+            title: 'Bargain Calculator',
+            description: 'Gives you the ability to quickly bargain by doing the math for you.<br><code>&gt; minimum + ( ( listing - minimum ) * percentage )</code> is used to calculate the bargain price.'
+        });
+
+        experimentalSettings += createInputOption(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT, {
+            title: 'Bargain Calculator Default',
+            description: 'Sets the default percentage value.<br>Allowed range is 1 to 99.<br>While you can set it outside the range, the value will be clamped between 1 and 99.'
+        }, 'number', await getSetting(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT));
 
         // Settings.EXPERIMENTAL_SHOW_LISTING_DATE
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_SHOW_LISTING_DATE, {
             title: 'Show Listing Date',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show an item\'s listing date in the market page. Time zone differences are already considered and rounded towards full hours.<br>'
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show an item\'s listing date in the market page.<br>Time zone differences are already considered and rounded towards full hours.'
+        });
+
+        // --- PSE Settings ---
+
+        // Settings.PSE_ADVANCED_PAGE_NAVIGATION TODO
+        pseSettings += await createCheckboxOption(Settings.PSE_ADVANCED_PAGE_NAVIGATION, {
+            title: 'Advanced Page Navigation',
+            description: ''
+        });
+
+        // Settings.PSE_CALCULATE_BUYORDER_SUMMARY
+        pseSettings += await createCheckboxOption(Settings.PSE_CALCULATE_BUYORDER_SUMMARY, {
+            title: 'Calculate BuyOrder Summary',
+            description: 'Shows the buy order summary, total per buy order, max buy order you can place, and how much has been placed.'
+        });
+
+        // Settings.PSE_BUYORDER_CANCEL_CONFIRMATION
+        pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_CANCEL_CONFIRMATION, {
+            title: 'BuyOrder Cancel Confirmation',
+            description: 'Hate accidentally cancelling a buy order? Well no more! Now you get asked... once.'
+        });
+
+        // Settings.PSE_BUYORDER_SCROLLING TODO
+        pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_SCROLLING, {
+            title: 'BuyOrder Scrolling',
+            description: ''
+        });
+
+        // Settings.PSE_NEW_GRAPH TODO
+        pseSettings += await createCheckboxOption(Settings.PSE_NEW_GRAPH, {
+            title: 'New Graph',
+            description: ''
+        });
+
+        // Settings.PSE_FORCE_ITEM_ACTIVITY TODO
+        pseSettings += await createCheckboxOption(Settings.PSE_FORCE_ITEM_ACTIVITY, {
+            title: 'Force Item Activity',
+            description: ''
+        });
+
+        // Settings.PSE_ADD_VIEW_ON_BUFF TODO
+        pseSettings += await createCheckboxOption(Settings.PSE_ADD_VIEW_ON_BUFF, {
+            title: 'Add "View on Buff"',
+            description: '',
+            csgoOnly: true
+        });
+
+        // Settings.PSE_HIDE_ACCOUNT_DETAILS TODO
+        pseSettings += await createCheckboxOption(Settings.PSE_HIDE_ACCOUNT_DETAILS, {
+            title: 'Hide Account Details',
+            description: ''
+        });
+
+        // Settings.PSE_MERGE_ACTIVE_LISTINGS TODO
+        pseSettings += await createCheckboxOption(Settings.PSE_MERGE_ACTIVE_LISTINGS, {
+            title: 'Merge Active Listings',
+            description: ''
         });
 
         // append html
         document.querySelector('#settings-normal tbody').innerHTML = normalSettings;
         document.querySelector('#settings-advanced tbody').innerHTML = advancedSettings;
         document.querySelector('#settings-experimental tbody').innerHTML = experimentalSettings;
+        document.querySelector('#settings-pse tbody').innerHTML = pseSettings;
 
         // add events [data-target]
         (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-target]')).forEach(element => {
@@ -593,9 +644,25 @@ module Options {
                     break;
                 case 'select':
                     element.onchange = () => {
-                        console.debug('select', element, (<HTMLSelectElement>element).selectedOptions[0]);
+                        const id = <Settings>element.getAttribute('id');
+                        const selectedOptions = <HTMLCollectionOf<HTMLOptionElement>>((<HTMLSelectElement>element).selectedOptions ?? []);
+                        const selectedOption = selectedOptions[0];
+                        
+                        console.debug('select', element, selectedOption);
 
-                        setSetting(<Settings>element.getAttribute('id'), (<HTMLSelectElement>element).selectedOptions[0].getAttribute('value') ?? 'USD');
+                        if (selectedOption) {
+                            const value = selectedOption.getAttribute('value');
+                            const type = selectedOption.getAttribute('data-type');
+
+                            switch (type) {
+                                case 'number':
+                                    setSetting(id, parseFloat(value));
+                                    break;
+                                default:
+                                    setSetting(id, value);
+                                    break;
+                            }
+                        }
                     };
                     break;
                 case 'multi-input':
@@ -622,26 +689,26 @@ module Options {
         });
 
         // add events .setting-description.action
-        (<NodeListOf<HTMLElement>>document.querySelectorAll('.setting-description.action')).forEach(element => {
-            element.onclick = () => {
-                let collapsedText = <HTMLElement>element.parentElement.querySelector('.setting-description.text-collapsed');
-                let symCollapsed = <HTMLElement>element.querySelector('.setting-description.sym-collapsed');
-                let expandedText = <HTMLElement>element.parentElement.querySelector('.setting-description.text-expanded');
-                let symExpanded = <HTMLElement>element.querySelector('.setting-description.sym-expanded');
-
-                if (collapsedText) {
-                    collapsedText.setAttribute('class', 'setting-description text-expanded');
-                    symCollapsed.innerText = '-';
-                    symCollapsed.setAttribute('class', 'setting-description sym-expanded');
-                }
-
-                if (expandedText) {
-                    expandedText.setAttribute('class', 'setting-description text-collapsed');
-                    symExpanded.innerText = '+';
-                    symExpanded.setAttribute('class', 'setting-description sym-collapsed');
-                }
-            };
-        });
+        // (<NodeListOf<HTMLElement>>document.querySelectorAll('.setting-description.action')).forEach(element => {
+        //     element.onclick = () => {
+        //         let collapsedText = <HTMLElement>element.parentElement.querySelector('.setting-description.text-collapsed');
+        //         let symCollapsed = <HTMLElement>element.querySelector('.setting-description.sym-collapsed');
+        //         let expandedText = <HTMLElement>element.parentElement.querySelector('.setting-description.text-expanded');
+        //         let symExpanded = <HTMLElement>element.querySelector('.setting-description.sym-expanded');
+        //
+        //         if (collapsedText) {
+        //             collapsedText.setAttribute('class', 'setting-description text-expanded');
+        //             symCollapsed.innerText = '-';
+        //             symCollapsed.setAttribute('class', 'setting-description sym-expanded');
+        //         }
+        //
+        //         if (expandedText) {
+        //             expandedText.setAttribute('class', 'setting-description text-collapsed');
+        //             symExpanded.innerText = '+';
+        //             symExpanded.setAttribute('class', 'setting-description sym-collapsed');
+        //         }
+        //     };
+        // });
 
         // add events [data-page]
         (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-page]')).forEach(element => {

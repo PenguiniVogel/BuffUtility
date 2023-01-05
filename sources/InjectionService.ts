@@ -310,14 +310,53 @@ module InjectionService {
         return await _p;
     }
 
-    export function shadowFunction(fnStr: string, thisArg: string, shadow: Function) {
-        InjectionServiceLib.injectCode(`(function() {
-            var copy = ${fnStr}.prototype.constructor;
-            ${fnStr} = function() {
-                (${shadow.toString()}).apply(${thisArg}, arguments);
-                copy.apply(${thisArg}, arguments);
-            };
-        })();`, 'body');
+    /**
+     * Allows us to shadow a function on a site
+     *
+     * @param fnStr The function to shadow
+     * @param thisArg The argument that is passed
+     * @param shadow The shadow function we wish to execute
+     * @param order The order the shadow function is called in, <code>before</code> means the original function is executed before ours, <code>after</code> means the original function is executed after ours and <code>custom</code> means the original function is only executed if ours returns true
+     * @param variablePass The variables to pass
+     */
+    export function shadowFunction(fnStr: string, thisArg: string, shadow: Function, order: 'before' | 'after' | 'custom' = 'before', variablePass: {
+        [key: string]: any
+    } = {}) {
+        let shadowBlock = '(function() {\n';
+
+        // inject passed variables
+        for (let key of Object.keys(variablePass)) {
+            if (typeof variablePass[key] == 'string') {
+                shadowBlock += `    var ${key} = '${variablePass[key]}';\n`;
+            } else {
+                shadowBlock += `    var ${key} = ${variablePass[key]};\n`;
+            }
+        }
+
+        shadowBlock += `    var copy = ${fnStr}.prototype.constructor;\n`;
+        shadowBlock += `    ${fnStr} = function () {\n`;
+
+        switch (order) {
+            case 'after':
+                shadowBlock += `        (${shadow.toString()}).apply(${thisArg}, arguments);\n`;
+                shadowBlock += `        copy.apply(${thisArg}, arguments);\n`;
+                break;
+            case 'custom':
+                shadowBlock += `        if ((${shadow.toString()}).apply(${thisArg}, arguments)) {\n`;
+                shadowBlock += `            copy.apply(${thisArg}, arguments);\n`;
+                shadowBlock += '        }\n';
+                break;
+            case 'before':
+            default:
+                shadowBlock += `        copy.apply(${thisArg}, arguments);\n`;
+                shadowBlock += `        (${shadow.toString()}).apply(${thisArg}, arguments);\n`;
+                break;
+        }
+
+        shadowBlock += '    };\n';
+        shadowBlock += '})();';
+
+        InjectionServiceLib.injectCode(shadowBlock, 'body');
     }
 
     function interceptNetworkRequests() {

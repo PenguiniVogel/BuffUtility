@@ -25,7 +25,7 @@ read -p "Press [ENTER] to resume ..."
 echo "Checking directory structure..."
 mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/sources/{adjustments,csgostash}
 mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/resources/{css,icon}
-mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/{background,options}
+mkdir -p .export/{BuffUtility,BuffUtility_Firefox}/{background,options,steam}
 echo " "
 
 # f_copy
@@ -45,6 +45,9 @@ f_build() {
 
   # copy sources/**/*.js
   f_copy ".out/sources/**/*.js" "$DEST" 5
+
+  # copy steam/*.js
+  f_copy ".out/steam/*.js" "$DEST" 5
 
   # copy background/merge_background.js
   f_copy ".out/background/merge_background.js" "$DEST" 5

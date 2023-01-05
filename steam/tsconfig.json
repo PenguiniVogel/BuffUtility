@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "module": "none",
+        "target": "es5",
+        "inlineSourceMap": true,
+        "inlineSources": true,
+        "lib": [
+            "ES2017.Object",
+            "ES2015",
+            "dom"
+        ]
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "include": [
+        "../sources/.GlobalConstants.ts",
+        "../sources/@typings/BuffTypes.d.ts",
+        "../sources/@typings/SchemaTypes.d.ts",
+        "../sources/config.ts",
+        "../sources/InjectionService.ts",
+        "../sources/Cookie.ts",
+        "../sources/CurrencyHelper.ts",
+        "../sources/BrowserInterface.ts",
+        "../sources/ExtensionSettings.ts",
+        "../sources/Util.ts",
+        "PSE_Currencies.ts",
+        "PSE_Market.ts"
+    ]
+}

@@ -17,6 +17,8 @@ echo Running bundled tsc -p .\options\tsconfig.json
 call .\node_modules\.bin\tsc -p .\options\tsconfig.json
 echo Running bundled tsc -p .\tsconfig.json
 call .\node_modules\.bin\tsc -p .\tsconfig.json
+echo Running bundled tsc -p .\steam\tsconfig.json
+call .\node_modules\.bin\tsc -p .\steam\tsconfig.json
 
 echo.
 echo Done

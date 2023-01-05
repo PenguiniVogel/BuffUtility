@@ -125,6 +125,36 @@
                 "https://csgostash.com/skin/*"
             ],
             "all_frames": true
+        },
+        {
+            "js": [
+                "sources/config.js",
+                "sources/InjectionService.js",
+                "sources/BrowserInterface.js",
+                "sources/ISchemaHelper.js",
+                "sources/Cookie.js",
+                "sources/Util.js",
+                "sources/ExtensionSettings.js",
+                "sources/CurrencyHelper.js",
+                "sources/preload.js"
+            ],
+            "matches": [
+                "https://steamcommunity.com/market*"
+            ],
+            "run_at": "document_start",
+            "all_frames": true
+        },
+        {
+            "js": [
+                "steam/PSE_Currencies.js",
+                "steam/PSE_Market.js"
+            ],
+            "matches": [
+                "https://steamcommunity.com/market",
+                "https://steamcommunity.com/market/",
+                "https://steamcommunity.com/market?*"
+            ],
+            "all_frames": true
         }
     ],
     "permissions": [

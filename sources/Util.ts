@@ -91,7 +91,7 @@ module Util {
     /**
      * Return type for {@link convertCNYRaw}
      */
-    interface ReturnConvertCNYRaw {
+    export interface ReturnConvertCNYRaw {
         /**
          * The currency symbol
          */

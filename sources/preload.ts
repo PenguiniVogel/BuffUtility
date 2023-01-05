@@ -77,7 +77,8 @@ module Preload {
         CurrencyHelper.getData().rates[currencyName] = parsedCurrencyCache.rates[currencyName];
 
         // delete cookie
-        Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, '0', 0);
+        Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, '0', -1);
+        Cookie.write('pse_settings', '0', -1);
     }
 
     init();
