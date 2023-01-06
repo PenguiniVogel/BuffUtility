@@ -241,18 +241,17 @@ module InjectionService {
                 transferData.url.indexOf('/api/market/inspect_show_switch') > -1 ||
                 transferData.url.indexOf('/api/message/notification') > -1 ||
                 transferData.url.indexOf('/api/message/announcement') > -1 ||
-                transferData.url.indexOf('/market/item_detail') > -1;
+                transferData.url.indexOf('/market/item_detail') > -1 ||
+                transferData.url.indexOf('steamcommunity.com/actions/');
 
             // we ignore these as they have no purpose for us (for now)
             if (skipCheck) return;
 
             console.debug('[BuffUtility] captured', transferData.status, '->', transferData.url, transferData.data ? '\n' : '', transferData.data ?? '');
 
-            if (transferData.data) {
-                responseCache.push(transferData);
+            responseCache.push(transferData);
 
-                if (responseCache.length > 10) responseCache.shift();
-            }
+            if (responseCache.length > 10) responseCache.shift();
 
             // add a slight delay before dispatching the response somewhere
             setTimeout(() => {
@@ -316,27 +315,42 @@ module InjectionService {
      * @param fnStr The function to shadow
      * @param thisArg The argument that is passed
      * @param shadow The shadow function we wish to execute
-     * @param order The order the shadow function is called in, <code>before</code> means the original function is executed before ours, <code>after</code> means the original function is executed after ours and <code>custom</code> means the original function is only executed if ours returns true
-     * @param variablePass The variables to pass
+     * @param options order: The order the shadow function is called in,
+     * <code>before</code> means the original function is executed before ours,
+     * <code>after</code> means the original function is executed after ours and
+     * <code>custom</code> means the original function is only executed if ours returns true
+     * variablePass: The variables to pass
+     * appendOn: the ISL appendOn option, 'body' by default
      */
-    export function shadowFunction(fnStr: string, thisArg: string, shadow: Function, order: 'before' | 'after' | 'custom' = 'before', variablePass: {
-        [key: string]: any
-    } = {}) {
+    export function shadowFunction(fnStr: string, thisArg: string, shadow: Function, options?: {
+        order?: 'before' | 'after' | 'custom',
+        variablePass?: {
+            [key: string]: any
+        },
+        appendOn?: 'html' | 'head' | 'body'
+    }) {
+        options = {
+            order: 'before',
+            variablePass: {},
+            appendOn: 'body',
+            ...options
+        };
+
         let shadowBlock = '(function() {\n';
 
         // inject passed variables
-        for (let key of Object.keys(variablePass)) {
-            if (typeof variablePass[key] == 'string') {
-                shadowBlock += `    var ${key} = '${variablePass[key]}';\n`;
+        for (let key of Object.keys(options.variablePass)) {
+            if (typeof options.variablePass[key] == 'string') {
+                shadowBlock += `    var ${key} = '${options.variablePass[key]}';\n`;
             } else {
-                shadowBlock += `    var ${key} = ${variablePass[key]};\n`;
+                shadowBlock += `    var ${key} = ${options.variablePass[key]};\n`;
             }
         }
 
         shadowBlock += `    var copy = ${fnStr}.prototype.constructor;\n`;
         shadowBlock += `    ${fnStr} = function () {\n`;
 
-        switch (order) {
+        switch (options.order) {
             case 'after':
                 shadowBlock += `        (${shadow.toString()}).apply(${thisArg}, arguments);\n`;
                 shadowBlock += `        copy.apply(${thisArg}, arguments);\n`;
@@ -356,7 +370,7 @@ module InjectionService {
         shadowBlock += '    };\n';
         shadowBlock += '})();';
 
-        InjectionServiceLib.injectCode(shadowBlock, 'body');
+        InjectionServiceLib.injectCode(shadowBlock, options.appendOn);
     }
 
     function interceptNetworkRequests() {

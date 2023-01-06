@@ -1,5 +1,7 @@
 module PSE_Market {
 
+    DEBUG && console.debug('[PSE] Module.PSE_Market');
+
     // imports
     import Settings = ExtensionSettings.Settings;
     import getSetting = ExtensionSettings.getSetting;

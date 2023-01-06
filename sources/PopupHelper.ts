@@ -216,8 +216,11 @@ module PopupHelper {
             });
 
             customPrice.parentElement.append(pConvertedLivePrice);
-        }, 'after', {
-            default_percentage: default_percentage
+        }, {
+            order: 'after',
+            variablePass: {
+                default_percentage: default_percentage
+            }
         });
     }
 

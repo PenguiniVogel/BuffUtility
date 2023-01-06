@@ -1,16 +1,21 @@
 # tsc
-echo "Building main: -p tsconfig.build.json"
+echo "Running bundled tsc -p tsconfig.build.json"
 node_modules/.bin/tsc -p tsconfig.build.json
 echo " "
 
 # tsc
-echo "Building background: -p background/tsconfig.build.json"
+echo "Running bundled tsc -p background/tsconfig.build.json"
 node_modules/.bin/tsc -p background/tsconfig.build.json
 echo " "
 
 # tsc
-echo "Building options: -p options/tsconfig.build.json"
+echo "Running bundled tsc -p options/tsconfig.build.json"
 node_modules/.bin/tsc -p options/tsconfig.build.json
+echo " "
+
+# tsc
+echo "Running bundled tsc -p steam/tsconfig.build.json"
+node_modules/.bin/tsc -p steam/tsconfig.build.json
 echo " "
 
 # delete previous export

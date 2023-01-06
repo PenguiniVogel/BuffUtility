@@ -1,5 +1,7 @@
 module PSE_Listings {
 
+    DEBUG && console.debug('[PSE] Module.PSE_Listings');
+
     // imports
     import Settings = ExtensionSettings.Settings;
     import getSetting = ExtensionSettings.getSetting;
@@ -39,7 +41,7 @@ module PSE_Listings {
         aViewOnBuff.setAttribute('class', 'btn_small btn_grey_white_innerfade');
         aViewOnBuff.setAttribute('target', '_blank');
 
-        if (false && buffId) {
+        if (buffId) {
             DEBUG && console.debug('[PSE] 730 ->', itemName, buffId);
 
             aViewOnBuff.setAttribute('href', `https://buff.163.com/goods/${buffId}?from=market#tab=selling&sort_by=default`);
@@ -79,7 +81,7 @@ module PSE_Listings {
 
             let wear_test = /Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred/gi.test(itemName);
 
-            console.debug('[PSE] 730 ->', itemName, special_quality[1], itemName, wear_test, transformedItemName, transformedSpecialQuality);
+            DEBUG && console.debug('[PSE] 730 ->', itemName, special_quality[1], itemName, wear_test, transformedItemName, transformedSpecialQuality);
 
             aViewOnBuff.setAttribute('href', `https://buff.163.com/market/csgo#tab=selling&page_num=1&search=${encodeURIComponent(transformedItemName)}${wear_test ? `&quality=${transformedSpecialQuality}` : ''}`);
         }

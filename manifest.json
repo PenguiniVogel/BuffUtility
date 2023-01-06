@@ -136,7 +136,9 @@
                 "sources/Util.js",
                 "sources/ExtensionSettings.js",
                 "sources/CurrencyHelper.js",
-                "sources/preload.js"
+                "sources/preload.js",
+                "steam/PSE_Util.js",
+                "steam/PSE_Currencies.js"
             ],
             "matches": [
                 "https://steamcommunity.com/market*"
@@ -146,8 +148,6 @@
         },
         {
             "js": [
-                "steam/PSE_Util.js",
-                "steam/PSE_Currencies.js",
                 "steam/PSE_Market.js"
             ],
             "matches": [
@@ -159,8 +159,16 @@
         },
         {
             "js": [
-                "steam/PSE_Util.js",
-                "steam/PSE_Currencies.js",
+                "steam/PSE_TransformGraph.js"
+            ],
+            "matches": [
+                "https://steamcommunity.com/market/listings/*"
+            ],
+            "run_at": "document_end",
+            "all_frames": true
+        },
+        {
+            "js": [
                 "steam/PSE_Listings.js"
             ],
             "matches": [

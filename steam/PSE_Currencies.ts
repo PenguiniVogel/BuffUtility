@@ -1,5 +1,7 @@
 module PSE_Currencies {
 
+    DEBUG && console.debug('[PSE] Module.PSE_Currencies');
+
     export interface SteamCurrency {
         code: string,
         currencyId: number,

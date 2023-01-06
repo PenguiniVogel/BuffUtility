@@ -552,10 +552,10 @@ module Options {
         // --- PSE Settings ---
 
         // Settings.PSE_ADVANCED_PAGE_NAVIGATION TODO
-        pseSettings += await createCheckboxOption(Settings.PSE_ADVANCED_PAGE_NAVIGATION, {
-            title: 'Advanced Page Navigation',
-            description: ''
-        });
+        // pseSettings += await createCheckboxOption(Settings.PSE_ADVANCED_PAGE_NAVIGATION, {
+        //     title: 'Advanced Page Navigation',
+        //     description: ''
+        // });
 
         // Settings.PSE_CALCULATE_BUYORDER_SUMMARY
         pseSettings += await createCheckboxOption(Settings.PSE_CALCULATE_BUYORDER_SUMMARY, {
@@ -570,41 +570,47 @@ module Options {
         });
 
         // Settings.PSE_BUYORDER_SCROLLING TODO
-        pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_SCROLLING, {
-            title: 'BuyOrder Scrolling',
-            description: ''
+        // pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_SCROLLING, {
+        //     title: 'BuyOrder Scrolling',
+        //     description: ''
+        // });
+
+        // Settings.PSE_GRAPH_SHOW_YEARS
+        pseSettings += await createCheckboxOption(Settings.PSE_GRAPH_SHOW_YEARS, {
+            title: 'Steam Graph - Show Years',
+            description: 'Display the year in the Steam Median Sales graph.'
         });
 
-        // Settings.PSE_NEW_GRAPH TODO
-        pseSettings += await createCheckboxOption(Settings.PSE_NEW_GRAPH, {
-            title: 'New Graph',
-            description: ''
+        // Settings.PSE_GRAPH_SHOW_VOLUME
+        pseSettings += await createCheckboxOption(Settings.PSE_GRAPH_SHOW_VOLUME, {
+            title: 'Steam Graph - Show Volume',
+            description: 'Display the volume as additional series in the Steam Median Sales graph.'
         });
 
         // Settings.PSE_FORCE_ITEM_ACTIVITY TODO
-        pseSettings += await createCheckboxOption(Settings.PSE_FORCE_ITEM_ACTIVITY, {
-            title: 'Force Item Activity',
-            description: ''
-        });
+        // pseSettings += await createCheckboxOption(Settings.PSE_FORCE_ITEM_ACTIVITY, {
+        //     title: 'Force Item Activity',
+        //     description: ''
+        // });
 
-        // Settings.PSE_ADD_VIEW_ON_BUFF TODO
+        // Settings.PSE_ADD_VIEW_ON_BUFF
         pseSettings += await createCheckboxOption(Settings.PSE_ADD_VIEW_ON_BUFF, {
             title: 'Add "View on Buff"',
-            description: '',
+            description: 'Add a quick button to open the buff.163 sale page for the specified item.',
             csgoOnly: true
         });
 
         // Settings.PSE_HIDE_ACCOUNT_DETAILS TODO
-        pseSettings += await createCheckboxOption(Settings.PSE_HIDE_ACCOUNT_DETAILS, {
-            title: 'Hide Account Details',
-            description: ''
-        });
+        // pseSettings += await createCheckboxOption(Settings.PSE_HIDE_ACCOUNT_DETAILS, {
+        //     title: 'Hide Account Details',
+        //     description: ''
+        // });
 
         // Settings.PSE_MERGE_ACTIVE_LISTINGS TODO
-        pseSettings += await createCheckboxOption(Settings.PSE_MERGE_ACTIVE_LISTINGS, {
-            title: 'Merge Active Listings',
-            description: ''
-        });
+        // pseSettings += await createCheckboxOption(Settings.PSE_MERGE_ACTIVE_LISTINGS, {
+        //     title: 'Merge Active Listings',
+        //     description: ''
+        // });
 
         // append html
         document.querySelector('#settings-normal tbody').innerHTML = normalSettings;

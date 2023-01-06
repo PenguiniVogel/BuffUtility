@@ -162,7 +162,8 @@ module ExtensionSettings {
         PSE_CALCULATE_BUYORDER_SUMMARY = 'pse_calculate_buyorder_summary',
         PSE_BUYORDER_CANCEL_CONFIRMATION = 'pse_buyorder_cancel_confirmation',
         PSE_BUYORDER_SCROLLING = 'pse_buyorder_scrolling',
-        PSE_NEW_GRAPH = 'pse_new_graph',
+        PSE_GRAPH_SHOW_YEARS = 'pse_graph_show_years',
+        PSE_GRAPH_SHOW_VOLUME = 'pse_graph_show_volume',
         PSE_FORCE_ITEM_ACTIVITY = 'pse_force_item_activity',
         PSE_ADD_VIEW_ON_BUFF = 'pse_add_view_on_buff',
         PSE_HIDE_ACCOUNT_DETAILS = 'pse_hide_account_details',
@@ -214,7 +215,8 @@ module ExtensionSettings {
         [Settings.PSE_CALCULATE_BUYORDER_SUMMARY]: boolean;
         [Settings.PSE_BUYORDER_CANCEL_CONFIRMATION]: boolean;
         [Settings.PSE_BUYORDER_SCROLLING]: boolean;
-        [Settings.PSE_NEW_GRAPH]: boolean;
+        [Settings.PSE_GRAPH_SHOW_YEARS]: boolean;
+        [Settings.PSE_GRAPH_SHOW_VOLUME]: boolean;
         [Settings.PSE_FORCE_ITEM_ACTIVITY]: boolean;
         [Settings.PSE_ADD_VIEW_ON_BUFF]: boolean;
         [Settings.PSE_HIDE_ACCOUNT_DETAILS]: boolean;
@@ -528,36 +530,42 @@ module ExtensionSettings {
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
-        [Settings.PSE_NEW_GRAPH]: {
-            default: false,
+        [Settings.PSE_GRAPH_SHOW_YEARS]: {
+            default: true,
             export: '9x5',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
-        [Settings.PSE_FORCE_ITEM_ACTIVITY]: {
+        [Settings.PSE_GRAPH_SHOW_VOLUME]: {
             default: false,
             export: '9x6',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
-        [Settings.PSE_ADD_VIEW_ON_BUFF]: {
+        [Settings.PSE_FORCE_ITEM_ACTIVITY]: {
             default: false,
             export: '9x7',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
-        [Settings.PSE_HIDE_ACCOUNT_DETAILS]: {
+        [Settings.PSE_ADD_VIEW_ON_BUFF]: {
             default: false,
             export: '9x8',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
-        [Settings.PSE_MERGE_ACTIVE_LISTINGS]: {
+        [Settings.PSE_HIDE_ACCOUNT_DETAILS]: {
             default: false,
             export: '9x9',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
+        [Settings.PSE_MERGE_ACTIVE_LISTINGS]: {
+            default: false,
+            export: '9x10',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        }
     };
 
     // func validators
@@ -670,7 +678,7 @@ module ExtensionSettings {
 
             // if setting has been resolved (loaded) already, return value
             if (internal.resolved) {
-                // console.debug(`[BuffUtility] Loading resolved setting ${setting}:`, internal.value);
+                DEBUG && console.debug(`[BuffUtility] Loading already resolved setting ${setting} ->`, internal.value);
                 resolve(internal.value);
                 return;
             }
@@ -699,7 +707,7 @@ module ExtensionSettings {
 
                 internal.resolved = true;
 
-                DEBUG && console.debug(`[BuffUtility] Resolved setting ${setting}:`, internal.value);
+                DEBUG && console.debug(`[BuffUtility] Resolved setting ${setting} (${internal.export}) ->`, internal.value);
 
                 resolve(internal.value);
             });
