@@ -24,7 +24,9 @@
         "../sources/BrowserInterface.ts",
         "../sources/ExtensionSettings.ts",
         "../sources/Util.ts",
+        "PSE_Util.ts",
         "PSE_Currencies.ts",
-        "PSE_Market.ts"
+        "PSE_Market.ts",
+        "PSE_Listings.ts"
     ]
 }

@@ -126,12 +126,17 @@ module PopupHelper {
             document.querySelector('#bu_bargain_converted_price_preview').innerHTML = `(${valueConverted.convertedSymbol} ${valueConverted.convertedValue})`;
         }
 
-        InjectionServiceLib.injectCode(`${buff_utility_bargain_mathFunc.toString()}\n${buff_utility_bargain_offer.toString()}\n${buff_utility_bargain_change.toString()}`, 'body');
+        InjectionServiceLib.injectCode(`${await Util.getQuickConvertCNY()}\n${buff_utility_bargain_mathFunc.toString()}\n${buff_utility_bargain_offer.toString()}\n${buff_utility_bargain_change.toString()}`, 'body');
 
         // clamp to 1 - 99
         const default_percentage = Math.max(1, Math.min(await ExtensionSettings.getSetting(ExtensionSettings.Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT), 99));
 
         InjectionService.shadowFunction('Popup.show', 'Popup', function (t: string) {
+            // ignore all popups except the bargain one
+            if (t != 'j_popup_bargain') {
+                return;
+            }
+
             const valuesElements = <NodeListOf<HTMLElement>>document.querySelectorAll('#j_popup_bargain td.t_Left li.t_Ellipsis span.f_Strong.f_Bold');
             const priceElement = valuesElements.item(0);
             const priceMinimumElement = valuesElements.item(1);

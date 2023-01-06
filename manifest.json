@@ -146,6 +146,7 @@
         },
         {
             "js": [
+                "steam/PSE_Util.js",
                 "steam/PSE_Currencies.js",
                 "steam/PSE_Market.js"
             ],
@@ -153,6 +154,17 @@
                 "https://steamcommunity.com/market",
                 "https://steamcommunity.com/market/",
                 "https://steamcommunity.com/market?*"
+            ],
+            "all_frames": true
+        },
+        {
+            "js": [
+                "steam/PSE_Util.js",
+                "steam/PSE_Currencies.js",
+                "steam/PSE_Listings.js"
+            ],
+            "matches": [
+                "https://steamcommunity.com/market/listings/*"
             ],
             "all_frames": true
         }

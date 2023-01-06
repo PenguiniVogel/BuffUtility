@@ -76,33 +76,6 @@ module Adjust_Listings {
 
             addReloadNewest();
 
-
-            async function injectQuickConvertCNY(): Promise<void> {
-                const data = await Util.convertCNYRaw(1);
-
-                InjectionServiceLib.injectCode(`
-                    function buff_utility_quickconvertcny(cny) {
-                        if (typeof cny == 'string') {
-                            cny = parseFloat(cny);
-                        }
-                        
-                        const calculated = cny * ${data.convertedRate};
-            
-                        return {
-                            convertedSymbol: '${data.convertedSymbol}',
-                            convertedValue: calculated.toFixed(${data.convertedLeadingZeros}),
-                            convertedFormattedValue: '',
-                            convertedValueRaw: calculated,
-                            convertedName: '${data.convertedName}',
-                            convertedRate: ${data.convertedRate},
-                            convertedLeadingZeros: ${data.convertedLeadingZeros}
-                        };
-                    }
-                `, 'head');
-            }
-
-            injectQuickConvertCNY();
-
             PopupHelper.expandBargainPopup();
         });
     }

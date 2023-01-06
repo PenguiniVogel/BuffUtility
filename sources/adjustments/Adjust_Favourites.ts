@@ -157,6 +157,8 @@ module Adjust_Favourites {
                 }
             }
         }
+
+        PopupHelper.expandBargainPopup();
     }
 
     init();

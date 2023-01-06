@@ -177,6 +177,33 @@ module Util {
     }
 
     /**
+     * Get the quick cny convert function for injection
+     */
+    export async function getQuickConvertCNY(): Promise<string> {
+        const data = await Util.convertCNYRaw(1);
+
+        return `
+            function buff_utility_quickconvertcny(cny) {
+                if (typeof cny == 'string') {
+                    cny = parseFloat(cny);
+                }
+                
+                const calculated = cny * ${data.convertedRate};
+    
+                return {
+                    convertedSymbol: '${data.convertedSymbol}',
+                    convertedValue: calculated.toFixed(${data.convertedLeadingZeros}),
+                    convertedFormattedValue: '',
+                    convertedValueRaw: calculated,
+                    convertedName: '${data.convertedName}',
+                    convertedRate: ${data.convertedRate},
+                    convertedLeadingZeros: ${data.convertedLeadingZeros}
+                };
+            }
+        `;
+    }
+
+    /**
      * This will try to parse the given data string into JSON or return object of choice
      *
      * @param data
