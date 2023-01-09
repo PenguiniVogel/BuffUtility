@@ -92,6 +92,7 @@ module Util {
      * Return type for {@link convertCNYRaw}
      */
     export interface ReturnConvertCNYRaw {
+
         /**
          * The currency symbol
          */
@@ -127,7 +128,12 @@ module Util {
         /**
          * How many fraction zeros should be preserved, 2+
          */
-        convertedLeadingZeros: number
+        convertedLeadingZeros: number,
+
+        /**
+         * Original cny value that was passed
+         */
+        originalCNY: number
     }
 
     /**
@@ -156,7 +162,8 @@ module Util {
                 convertedValueRaw: calculated,
                 convertedName: custom_currency_name,
                 convertedRate: custom_currency_calculated_rate,
-                convertedLeadingZeros: custom_currency_leading_zeros
+                convertedLeadingZeros: custom_currency_leading_zeros,
+                originalCNY: cny
             };
         } else {
             const { rates, symbols } = CurrencyHelper.getData();
@@ -171,7 +178,8 @@ module Util {
                 convertedValueRaw: calculated,
                 convertedName: selected_currency,
                 convertedRate: rate,
-                convertedLeadingZeros: fixPoint
+                convertedLeadingZeros: fixPoint,
+                originalCNY: cny
             };
         }
     }

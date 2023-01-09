@@ -89,6 +89,10 @@ module Adjust_Listings {
             console.debug('[BuffUtility] Adjust_Listings (buy_order)');
 
             adjustBuyOrderListings(<InjectionService.TransferData<BuffTypes.BuyOrder.Data>>transferData);
+        } else if (transferData.url.indexOf('/bill_order') > -1) {
+            console.debug('[BuffUtility] Adjust_Listings (bill_order)');
+
+            adjustBillOrderTransactions(<InjectionService.TransferData<BuffTypes.BillOrder.Data>>transferData);
         }
 
         // don't run until proxy is fixed
@@ -500,6 +504,76 @@ module Adjust_Listings {
             let priceContainer = <HTMLElement>row.querySelectorAll('td.t_Left').item(3);
             let paymentMethods = (<HTMLElement>priceContainer.querySelectorAll('div').item(1))?.outerHTML ?? '';
             priceContainer.innerHTML = (newHTML + paymentMethods);
+        }
+    }
+
+    async function adjustBillOrderTransactions(transferData: InjectionService.TransferData<BuffTypes.BillOrder.Data>): Promise<void> {
+        // if feature is disabled, skip
+        if (!(await getSetting(Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS))) {
+            return;
+        }
+
+        // if no items, skip
+        if (transferData?.data?.items?.length == 0) {
+            return;
+        }
+
+        const rows = <NodeListOf<HTMLElement>>document.querySelectorAll('table.list_tb tbody > tr');
+
+        // if no rows, skip
+        if (rows?.length == 0) {
+            return;
+        }
+
+        const sum = <HTMLElement>document.querySelector('.detail-cont .detail-summ strong.f_Strong');
+        let referencePrice = -1;
+        if (sum) {
+            const match = /¥ (\d+(?:\.\d{2}))\(/.exec(sum.innerText) ?? [];
+            const parsedReference = parseFloat(match[1]);
+
+            if (isFinite(parsedReference)) {
+                referencePrice = parsedReference;
+            }
+        }
+
+        // start at one to skip the header row
+        for (let i = 1, l = rows.length; i < l; i ++) {
+            // subtract one for the real data
+            const item = transferData.data.items[i - 1];
+            const row = rows.item(i);
+
+            const priceTD = <HTMLElement>row.querySelector('strong.f_Strong')?.parentElement;
+
+            // if we have no price container, skip
+            if (!priceTD) {
+                continue;
+            }
+
+            const convertedPrice = await Util.convertCNYRaw(item.price);
+            const diff = convertedPrice.originalCNY - referencePrice;
+            const convertedDiff = await Util.convertCNYRaw(diff);
+
+            const diffP = (referencePrice > -1 ? Util.buildHTML('p', {
+                class: 'c_Gray f_12px',
+                style: {
+                    color: `${diff > 0 ? GlobalConstants.COLOR_BAD : GlobalConstants.COLOR_GOOD} !important`
+                },
+                content: (await getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) ?
+                    [ `${diff > 0 ? GlobalConstants.SYMBOL_ARROW_UP : GlobalConstants.SYMBOL_ARROW_DOWN}${convertedDiff.convertedSymbol} ${convertedDiff.convertedFormattedValue}` ] :
+                    [ `${diff > 0 ? GlobalConstants.SYMBOL_ARROW_UP : GlobalConstants.SYMBOL_ARROW_DOWN}${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(diff)}` ]
+            }) : '');
+
+            priceTD.innerHTML = Util.buildHTML('strong', {
+                class: 'f_Strong',
+                content: [ `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(item.price)}` ]
+            }) + Util.buildHTML('p', {
+                content: [
+                    Util.buildHTML('span', {
+                        class: 'c_Gray f_12px',
+                        content: [ `${convertedPrice.convertedSymbol} ${convertedPrice.convertedFormattedValue}` ]
+                    })
+                ]
+            }) + diffP;
         }
     }
 

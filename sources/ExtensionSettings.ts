@@ -154,6 +154,8 @@ module ExtensionSettings {
         EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT = 'automatic_bargain_default',
         // 2.2.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_SHOW_LISTING_DATE = 'show_listing_date',
+        // 2.2.0 -> setting will become default
+        EXPERIMENTAL_ADJUST_TRADE_RECORDS = 'adjust_trade_records',
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements',
 
@@ -208,6 +210,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: boolean;
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT]: number;
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: boolean;
+        [Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS]: boolean;
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
 
@@ -495,6 +498,12 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: {
             default: false,
             export: '2x12',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS]: {
+            default: true,
+            export: '2x14',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },

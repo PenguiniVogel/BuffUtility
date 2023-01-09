@@ -242,16 +242,21 @@ module InjectionService {
                 transferData.url.indexOf('/api/message/notification') > -1 ||
                 transferData.url.indexOf('/api/message/announcement') > -1 ||
                 transferData.url.indexOf('/market/item_detail') > -1 ||
-                transferData.url.indexOf('steamcommunity.com/actions/');
+                transferData.url.indexOf('steamcommunity.com/actions/') > -1;
 
             // we ignore these as they have no purpose for us (for now)
-            if (skipCheck) return;
+            if (skipCheck) {
+                DEBUG && console.debug('[BuffUtility] Skipping Request:', transferData.status, '->', transferData.url);
+                return;
+            } else
 
-            console.debug('[BuffUtility] captured', transferData.status, '->', transferData.url, transferData.data ? '\n' : '', transferData.data ?? '');
+            console.debug('[BuffUtility] Captured Request:', transferData.status, '->', transferData.url, transferData.data ? '\n' : '', transferData.data ?? '');
 
             responseCache.push(transferData);
 
-            if (responseCache.length > 10) responseCache.shift();
+            if (responseCache.length > 10) {
+                responseCache.shift();
+            }
 
             // add a slight delay before dispatching the response somewhere
             setTimeout(() => {

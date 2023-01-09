@@ -549,6 +549,12 @@ module Options {
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show an item\'s listing date in the market page.<br>Time zone differences are already considered and rounded towards full hours.'
         });
 
+        // Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS, {
+            title: 'Adjust Trade Records',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Trade Records" tab for an items page, showing things such as currency conversion, and difference to reference price.'
+        });
+
         // --- PSE Settings ---
 
         // Settings.PSE_ADVANCED_PAGE_NAVIGATION TODO
