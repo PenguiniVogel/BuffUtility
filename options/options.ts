@@ -734,6 +734,14 @@ module Options {
                 });
             };
         });
+
+        // add event reset-all
+        document.querySelector('#reset-all').addEventListener('click', async () => {
+            if (confirm('This will reset ALL settings to their default value and cannot be undone.')) {
+                await BrowserInterface.Storage.clear();
+                alert('Please refresh the options to see the changes.');
+            }
+        });
     }
 
     init();

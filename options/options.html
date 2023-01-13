@@ -158,14 +158,14 @@
             border: 0;
         }
 
-        .setting-table button[data-reset] {
+        .reset-all, .setting-table button[data-reset] {
             margin-top: 5px;
             cursor: pointer;
             font-size: 12px;
             border: 2px solid var(--color-light2);
         }
 
-        .setting-table button[data-reset]:hover {
+        .reset-all:hover, .setting-table button[data-reset]:hover {
             border: 2px solid var(--color-light);
         }
 
@@ -224,6 +224,9 @@
             <div data-page="advanced">Advanced Settings</div>
             <div data-page="experimental">Experimental Settings</div>
             <div data-page="pse">PSE</div>
+            <e>
+                <button id="reset-all" class="reset-all">Reset All</button>
+            </e>
         </div>
     </nav>
     <div class="scroll-container">

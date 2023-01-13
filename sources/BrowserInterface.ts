@@ -61,7 +61,12 @@ module BrowserInterface {
                  * @param keys
                  * @param callback
                  */
-                get<T>(keys: string[], callback: (result: { [key: string]: T }) => void): void
+                get<T>(keys: string[], callback: (result: { [key: string]: T }) => void): void,
+
+                /**
+                 * Removes all items from storage
+                 */
+                clear(callback?: () => void)
             }
         }
     }
@@ -82,6 +87,11 @@ module BrowserInterface {
                  * @param keys
                  */
                 get<T>(keys: string[]): Promise<{ [key: string]: T }>
+
+                /**
+                 * Removes all items from storage
+                 */
+                clear(): Promise<void>
             }
         }
     }
@@ -291,6 +301,24 @@ module BrowserInterface {
                         break;
                     case 'browser':
                         browser.storage.sync.get<T>(keys)
+                            .then(result => resolve(result))
+                            .catch(_ => resolve(null));
+                        break;
+                }
+            });
+        }
+
+        /**
+         * Removes all items from storage
+         */
+        export async function clear(): Promise<void> {
+            return await new Promise<void>((resolve, _) => {
+                switch (environment) {
+                    case 'chrome':
+                        chrome.storage.sync.clear(() => resolve());
+                        break;
+                    case 'browser':
+                        browser.storage.sync.clear()
                             .then(result => resolve(result))
                             .catch(_ => resolve(null));
                         break;

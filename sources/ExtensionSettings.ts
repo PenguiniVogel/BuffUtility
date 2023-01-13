@@ -698,7 +698,9 @@ module ExtensionSettings {
                     case InternalStructureTransform.NONE:
                         break;
                     case InternalStructureTransform.BOOLEAN:
-                        newValue = value == 1;
+                        // changed, only import 0 -> false and 1 -> true, anything else set to null
+                        // to ensure validator takes default and doesn't set it to false outright
+                        newValue = value === 0 || value === 1 ? value == 1 : null;
 
                         // forcefully disable for now until proxy works properly
                         if (setting == Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS || setting == Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) {
@@ -716,7 +718,7 @@ module ExtensionSettings {
 
                 internal.resolved = true;
 
-                DEBUG && console.debug(`[BuffUtility] Resolved setting ${setting} (${internal.export}) ->`, internal.value);
+                DEBUG && console.debug(`[BuffUtility] Resolved setting ${setting} (${internal.export}):`, value, '->', internal.value);
 
                 resolve(internal.value);
             });
