@@ -366,13 +366,17 @@ module Adjust_Listings {
 
             let price = +dataRow.price;
             let priceDiff = price - steamPriceCNY;
+            let priceDiffEx: string = `Steam price: ${GlobalConstants.SYMBOL_YUAN} ${steamPriceCNY} | Buff price: ${GlobalConstants.SYMBOL_YUAN} ${price}&#10;${price} - ${steamPriceCNY} = ${priceDiff.toFixed(2)}`;
 
             let priceDiffStr;
             if (await getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
-                let { convertedSymbol, convertedFormattedValue } = await Util.convertCNYRaw(priceDiff);
+                let { convertedSymbol, convertedFormattedValue, convertedValue, convertedValueRaw, convertedLeadingZeros } = await Util.convertCNYRaw(priceDiff);
                 priceDiffStr = `${convertedSymbol} ${convertedFormattedValue}`;
+                priceDiffEx += ` => ${convertedSymbol} ${convertedValue}&#10;`;
+                priceDiffEx += `This item is ${convertedSymbol} ${Math.abs(convertedValueRaw).toFixed(convertedLeadingZeros)} ${priceDiff < 0 ? 'cheaper' : 'more expensive'} than on Steam.`;
             } else {
                 priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(priceDiff)}`;
+                priceDiffEx += `&#10;This item is ${GlobalConstants.SYMBOL_YUAN} ${Math.abs(priceDiff).toFixed(2)} ${priceDiff < 0 ? 'cheaper' : 'more expensive'} than on Steam.`;
             }
 
             let price_str = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.price, 2)}`;
@@ -398,6 +402,9 @@ module Adjust_Listings {
                                 class: 'f_12px',
                                 style: {
                                     'color': priceDiff < 0 ? GlobalConstants.COLOR_GOOD : GlobalConstants.COLOR_BAD
+                                },
+                                attributes: {
+                                    'title': priceDiffEx
                                 },
                                 content: [ `${priceDiff < 0 ? GlobalConstants.SYMBOL_ARROW_DOWN : GlobalConstants.SYMBOL_ARROW_UP}${priceDiffStr}` ]
                             })

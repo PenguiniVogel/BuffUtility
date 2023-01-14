@@ -150,6 +150,9 @@
             "js": [
                 "steam/PSE_Market.js"
             ],
+            "css": [
+                "resources/css/PSE_Market.css"
+            ],
             "matches": [
                 "https://steamcommunity.com/market",
                 "https://steamcommunity.com/market/",

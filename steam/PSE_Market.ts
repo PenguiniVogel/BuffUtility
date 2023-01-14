@@ -39,6 +39,49 @@ module PSE_Market {
         const buyOrderTable = <HTMLElement>document.querySelector('#tabContentsMyListings > div:nth-child(2)');
         const buyOrderListings = <NodeListOf<HTMLElement>>buyOrderTable.querySelectorAll('div[id^="mybuyorder_"]');
 
+        // buy-order scrolling and filtering
+        if (await getSetting(Settings.PSE_BUYORDER_SCROLLING)) {
+            buyOrderTable.setAttribute('style', 'overflow: hidden auto; max-height: 50vh;');
+
+            const nameHeader = <HTMLElement>buyOrderTable.querySelector('div.market_listing_table_header span.market_listing_header_namespacer').parentElement;
+            const filterInput = document.createElement('input');
+
+            filterInput.setAttribute('type', 'text');
+            filterInput.setAttribute('placeholder', 'Search...');
+            filterInput.setAttribute('style', 'margin-left: 10px;');
+
+            let lastValue = '';
+            filterInput.addEventListener('keyup', () => {
+                let value = (filterInput.value ?? '').replace(/\s/g, '').toLocaleLowerCase();
+
+                // avoid running multiple times for the same search term
+                if (value == lastValue) {
+                    return;
+                }
+
+                lastValue = value;
+
+                for (let i = 0, l = buyOrderListings.length; i < l; i ++) {
+                    const buyOrderListing = buyOrderListings.item(i);
+                    let name = (<HTMLElement>buyOrderListing.querySelector('[id^="mbuyorder_"].market_listing_item_name a')).innerText.toLocaleLowerCase();
+
+                    // replace special characters
+                    name = name.replace(/★|™|\s|\||\(|\)/g, '');
+
+                    DEBUG && console.debug('[PSE] Filter buy-orders', name, 'term:', value, 'check:', name.indexOf(value) == -1, '|', value.indexOf(name) == -1, '|', PSE_Util.stringSimilarity(value, name));
+
+                    if (name.indexOf(value) == -1 && value.indexOf(name) == -1 && PSE_Util.stringSimilarity(value, name) < 0.5) {
+                        buyOrderListing.setAttribute('style', 'display: none;');
+                    } else {
+                        buyOrderListing.setAttribute('style', '');
+                    }
+                }
+            });
+
+            nameHeader.append(filterInput);
+        }
+
+        // summary
         let totalSum = 0;
 
         for (let i = 0, l = buyOrderListings.length; i < l; i ++) {
@@ -54,7 +97,7 @@ module PSE_Market {
             const price = extractNumber(priceColumn.innerText);
             const quantity = parseInt(quantityColumn.innerText);
 
-            totalSum += price;
+            totalSum += price * quantity;
 
             priceColumn.innerHTML = `
                     <div>${(price * quantity).toFixed(2)}${currencySymbol}</div>
@@ -70,7 +113,7 @@ module PSE_Market {
 
         summary.setAttribute('class', 'my_market_header_count');
 
-        summary.innerHTML = `${totalSum.toFixed(2)} ${currencySymbol} / Max: ${maxBuyOrderBalance} ${currencySymbol}`;
+        summary.innerHTML = `${totalSum.toFixed(2)} ${currencySymbol} / Max: ${maxBuyOrderBalance.toFixed(2)} ${currencySymbol}`;
 
         buyOrderHeader.append(summary);
     }

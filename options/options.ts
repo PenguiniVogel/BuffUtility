@@ -575,11 +575,11 @@ module Options {
             description: 'Hate accidentally cancelling a buy order? Well no more! Now you get asked... once.'
         });
 
-        // Settings.PSE_BUYORDER_SCROLLING TODO
-        // pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_SCROLLING, {
-        //     title: 'BuyOrder Scrolling',
-        //     description: ''
-        // });
+        // Settings.PSE_BUYORDER_SCROLLING
+        pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_SCROLLING, {
+            title: 'BuyOrder Scrolling',
+            description: 'Hate how it takes up the whole page? Now the content height gets reduced to 50vh, and a scrollbar shows instead. This also adds a search field next to the Name header to quickly look for buy-orders.'
+        });
 
         // Settings.PSE_GRAPH_SHOW_YEARS
         pseSettings += await createCheckboxOption(Settings.PSE_GRAPH_SHOW_YEARS, {

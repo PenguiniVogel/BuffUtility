@@ -79,13 +79,20 @@ module Adjust_Market {
                 steamPriceCNY = f_steamPriceCNY;
             }
 
-            let priceDiff;
+            let priceDiff: number = steamPriceCNY - buffPrice;
+            let priceDiffEx: string = `Steam price: ${GlobalConstants.SYMBOL_YUAN} ${steamPriceCNY} | Buff price: ${GlobalConstants.SYMBOL_YUAN} ${buffPrice}&#10;Difference: ~${GlobalConstants.SYMBOL_YUAN} ${priceDiff.toFixed(2)}&#10;`;
             switch (await getSetting(Settings.DIFFERENCE_DOMINATOR)) {
                 case ExtensionSettings.DifferenceDominator.STEAM:
-                    priceDiff = ((steamPriceCNY - buffPrice) / steamPriceCNY) * -1 * 100;
+                    priceDiffEx += `(~${priceDiff.toFixed(2)} / ${steamPriceCNY})`;
+                    priceDiff = (priceDiff / steamPriceCNY) * -1 * 100;
+                    priceDiffEx += ` * -100 = ${priceDiff.toFixed(1)}%&#10;`;
+                    priceDiffEx += `This item is ${Math.abs(priceDiff).toFixed(1)}% ${priceDiff < 0 ? 'cheaper' : 'more expensive'} on Buff based on Steam price.`;
                     break;
                 case ExtensionSettings.DifferenceDominator.BUFF:
-                    priceDiff = ((steamPriceCNY - buffPrice) / buffPrice) * -1 * 100;
+                    priceDiffEx += `(~${priceDiff.toFixed(2)} / ${buffPrice})`;
+                    priceDiff = (priceDiff / buffPrice) * -1 * 100;
+                    priceDiffEx += ` * -100 = ${priceDiff.toFixed(1)}%&#10;`;
+                    priceDiffEx += `This item is ${Math.abs(priceDiff).toFixed(1)}% ${priceDiff < 0 ? 'cheaper' : 'more expensive'} on Buff based on Buff price.`;
                     break;
             }
 
@@ -189,6 +196,9 @@ module Adjust_Market {
                         'font-weight': '700',
                         'text-align': 'center',
                         'color': priceDiff < 0 ? GlobalConstants.COLOR_GOOD : GlobalConstants.COLOR_BAD
+                    },
+                    attributes: {
+                        'title': priceDiffEx
                     },
                     content: [ priceDiffStr ]
                 }));
