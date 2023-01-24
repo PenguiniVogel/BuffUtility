@@ -6,7 +6,14 @@ declare module BuffTypes {
     /** */
     export interface g {
         appid: number,
-        currency: any,
+        currency: {
+            code: string,
+            default: string,
+            desc: string,
+            rate_base_cny: number,
+            rate_base_usd: number,
+            symbol: string
+        },
         game: string,
         locale: string,
         user: {

@@ -161,6 +161,7 @@ module ExtensionSettings {
 
         // PSE MIGRATION
         PSE_ADVANCED_PAGE_NAVIGATION = 'pse_advanced_page_navigation',
+        PSE_ADVANCED_PAGE_NAVIGATION_SIZE = 'pse_advanced_page_navigation_size',
         PSE_CALCULATE_BUYORDER_SUMMARY = 'pse_calculate_buyorder_summary',
         PSE_BUYORDER_CANCEL_CONFIRMATION = 'pse_buyorder_cancel_confirmation',
         PSE_BUYORDER_SCROLLING = 'pse_buyorder_scrolling',
@@ -215,6 +216,7 @@ module ExtensionSettings {
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
 
         [Settings.PSE_ADVANCED_PAGE_NAVIGATION]: boolean;
+        [Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE]: number;
         [Settings.PSE_CALCULATE_BUYORDER_SUMMARY]: boolean;
         [Settings.PSE_BUYORDER_CANCEL_CONFIRMATION]: boolean;
         [Settings.PSE_BUYORDER_SCROLLING]: boolean;
@@ -521,6 +523,12 @@ module ExtensionSettings {
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
+        [Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE]: {
+            default: 10,
+            export: '9x11',
+            transform: InternalStructureTransform.NONE,
+            validator: validateNumber
+        },
         [Settings.PSE_CALCULATE_BUYORDER_SUMMARY]: {
             default: false,
             export: '9x2',
@@ -760,7 +768,19 @@ module ExtensionSettings {
             setSetting(Settings.STORE_DANGER_AGREEMENTS, [false, false]);
         }
 
-        setSetting(setting, <SettingsTypes[T]>INTERNAL_SETTINGS[setting].default);
+        setSetting(setting, INTERNAL_SETTINGS[setting].default);
+    }
+
+    /**
+     * Resets all settings and clears browser storage
+     */
+    export async function resetAllSettings(): Promise<void> {
+        await BrowserInterface.Storage.clear();
+        const keys = <Settings[]>Object.keys(INTERNAL_SETTINGS);
+
+        for (let key of keys) {
+            resetSetting(key);
+        }
     }
 
     /**

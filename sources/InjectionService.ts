@@ -248,7 +248,7 @@ module InjectionService {
             if (skipCheck) {
                 DEBUG && console.debug('[BuffUtility] Skipping Request:', transferData.status, '->', transferData.url);
                 return;
-            } else
+            }
 
             console.debug('[BuffUtility] Captured Request:', transferData.status, '->', transferData.url, transferData.data ? '\n' : '', transferData.data ?? '');
 

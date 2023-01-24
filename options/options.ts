@@ -13,7 +13,8 @@ module Options {
     interface DisplayInfo {
         title: string,
         description: string,
-        csgoOnly?: boolean
+        csgoOnly?: boolean,
+        steamOnly?: boolean
     }
 
     interface SelectOption {
@@ -28,11 +29,11 @@ module Options {
                     content: [
                         Util.buildHTML('div', {
                             class: 'setting-title',
-                            content: [ info.title, info.csgoOnly ? ' <u style="color: var(--color-light);">(CS:GO Only)</u>' : '' ]
+                            content: [ info.title, info.csgoOnly ? ' <u style="color: var(--color-light);">(CS:GO Only)</u>' : '', info.steamOnly ? ' <u style="color: var(--color-steam);">(Steam Only)</u>' : '' ]
                         }),
                         Util.buildHTML('div', {
                             class: 'setting-description action',
-                            content: [ `<span class="setting-description sym-expanded">-</span> Description</div>` ]
+                            content: [ `<span class="setting-description sym-expanded">►</span> Description</div>` ]
                         }),
                         Util.buildHTML('div', {
                             class: 'setting-description text-expanded',
@@ -557,40 +558,66 @@ module Options {
 
         // --- PSE Settings ---
 
-        // Settings.PSE_ADVANCED_PAGE_NAVIGATION TODO
-        // pseSettings += await createCheckboxOption(Settings.PSE_ADVANCED_PAGE_NAVIGATION, {
-        //     title: 'Advanced Page Navigation',
-        //     description: ''
-        // });
+        // Settings.PSE_ADVANCED_PAGE_NAVIGATION
+        pseSettings += await createCheckboxOption(Settings.PSE_ADVANCED_PAGE_NAVIGATION, {
+            title: 'History Page Navigation',
+            description: 'Have many thousands of pages in your Market History? Ever wish you could jump to page 100? With this setting you can.',
+            steamOnly: true
+        });
+
+        // Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE
+        pseSettings += createSelectOption(Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE, {
+            title: 'History Page Navigation Size',
+            description: 'Wan\'t more than 10 items per page? Like on the sell order, this setting makes 10, 30 and 100 items per page available.',
+            steamOnly: true
+        }, [
+            {
+                displayText: '10',
+                value: 10
+            },
+            {
+                displayText: '30',
+                value: 30
+            },
+            {
+                displayText: '100',
+                value: 100
+            }
+        ], await getSetting(Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE));
 
         // Settings.PSE_CALCULATE_BUYORDER_SUMMARY
         pseSettings += await createCheckboxOption(Settings.PSE_CALCULATE_BUYORDER_SUMMARY, {
             title: 'Calculate BuyOrder Summary',
-            description: 'Shows the buy order summary, total per buy order, max buy order you can place, and how much has been placed.'
+            description: 'Shows the buy order summary, total per buy order, max buy order you can place, and how much has been placed.',
+            steamOnly: true
         });
 
         // Settings.PSE_BUYORDER_CANCEL_CONFIRMATION
         pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_CANCEL_CONFIRMATION, {
             title: 'BuyOrder Cancel Confirmation',
-            description: 'Hate accidentally cancelling a buy order? Well no more! Now you get asked... once.'
+            description: 'Hate accidentally cancelling a buy order? Well no more! Now you get asked... once.',
+            steamOnly: true
         });
 
         // Settings.PSE_BUYORDER_SCROLLING
         pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_SCROLLING, {
             title: 'BuyOrder Scrolling',
-            description: 'Hate how it takes up the whole page? Now the content height gets reduced to 50vh, and a scrollbar shows instead. This also adds a search field next to the Name header to quickly look for buy-orders.'
+            description: 'Hate how it takes up the whole page? Now the content height gets reduced to 50vh, and a scrollbar shows instead. This also adds a search field next to the Name header to quickly look for buy-orders.',
+            steamOnly: true
         });
 
         // Settings.PSE_GRAPH_SHOW_YEARS
         pseSettings += await createCheckboxOption(Settings.PSE_GRAPH_SHOW_YEARS, {
             title: 'Steam Graph - Show Years',
-            description: 'Display the year in the Steam Median Sales graph.'
+            description: 'Display the year in the Steam Median Sales graph.',
+            steamOnly: true
         });
 
         // Settings.PSE_GRAPH_SHOW_VOLUME
         pseSettings += await createCheckboxOption(Settings.PSE_GRAPH_SHOW_VOLUME, {
             title: 'Steam Graph - Show Volume',
-            description: 'Display the volume as additional series in the Steam Median Sales graph.'
+            description: 'Display the volume as additional series in the Steam Median Sales graph.',
+            steamOnly: true
         });
 
         // Settings.PSE_FORCE_ITEM_ACTIVITY TODO
@@ -603,7 +630,8 @@ module Options {
         pseSettings += await createCheckboxOption(Settings.PSE_ADD_VIEW_ON_BUFF, {
             title: 'Add "View on Buff"',
             description: 'Add a quick button to open the buff.163 sale page for the specified item.',
-            csgoOnly: true
+            csgoOnly: true,
+            steamOnly: true
         });
 
         // Settings.PSE_HIDE_ACCOUNT_DETAILS TODO
@@ -612,11 +640,12 @@ module Options {
         //     description: ''
         // });
 
-        // Settings.PSE_MERGE_ACTIVE_LISTINGS TODO
-        // pseSettings += await createCheckboxOption(Settings.PSE_MERGE_ACTIVE_LISTINGS, {
-        //     title: 'Merge Active Listings',
-        //     description: ''
-        // });
+        // Settings.PSE_MERGE_ACTIVE_LISTINGS
+        pseSettings += await createCheckboxOption(Settings.PSE_MERGE_ACTIVE_LISTINGS, {
+            title: 'Merge Active Listings',
+            description: '',
+            steamOnly: true
+        });
 
         // append html
         document.querySelector('#settings-normal tbody').innerHTML = normalSettings;
@@ -700,28 +729,6 @@ module Options {
             };
         });
 
-        // add events .setting-description.action
-        // (<NodeListOf<HTMLElement>>document.querySelectorAll('.setting-description.action')).forEach(element => {
-        //     element.onclick = () => {
-        //         let collapsedText = <HTMLElement>element.parentElement.querySelector('.setting-description.text-collapsed');
-        //         let symCollapsed = <HTMLElement>element.querySelector('.setting-description.sym-collapsed');
-        //         let expandedText = <HTMLElement>element.parentElement.querySelector('.setting-description.text-expanded');
-        //         let symExpanded = <HTMLElement>element.querySelector('.setting-description.sym-expanded');
-        //
-        //         if (collapsedText) {
-        //             collapsedText.setAttribute('class', 'setting-description text-expanded');
-        //             symCollapsed.innerText = '-';
-        //             symCollapsed.setAttribute('class', 'setting-description sym-expanded');
-        //         }
-        //
-        //         if (expandedText) {
-        //             expandedText.setAttribute('class', 'setting-description text-collapsed');
-        //             symExpanded.innerText = '+';
-        //             symExpanded.setAttribute('class', 'setting-description sym-collapsed');
-        //         }
-        //     };
-        // });
-
         // add events [data-page]
         (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-page]')).forEach(element => {
             element.onclick = () => {
@@ -738,7 +745,7 @@ module Options {
         // add event reset-all
         document.querySelector('#reset-all').addEventListener('click', async () => {
             if (confirm('This will reset ALL settings to their default value and cannot be undone.')) {
-                await BrowserInterface.Storage.clear();
+                await ExtensionSettings.resetAllSettings();
                 alert('Please refresh the options to see the changes.');
             }
         });

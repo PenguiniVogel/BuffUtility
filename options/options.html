@@ -19,6 +19,8 @@
 
             --color-green: #009800;
             --color-red: #c90000;
+
+            --color-steam: #6b8fc3;
         }
 
         * {
@@ -71,6 +73,10 @@
             border-bottom: 1px solid var(--color-light);
             font-weight: 800;
             background: var(--color-dark-shadow);
+        }
+
+        input[type="checkbox"] {
+            cursor: pointer;
         }
 
         .scroll-container {
@@ -184,7 +190,6 @@
         .setting-description.action {
             user-select: none;
             padding-top: 5px;
-            cursor: pointer;
         }
 
         .setting-description.sym-collapsed {
@@ -193,7 +198,7 @@
         }
 
         .setting-description.sym-expanded {
-            color: var(--color-red);
+            color: var(--color-light-accent);
             font-weight: bolder;
         }
 

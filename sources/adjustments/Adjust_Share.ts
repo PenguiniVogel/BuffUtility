@@ -43,7 +43,16 @@ module Adjust_Share {
             return;
         }
 
-        let baseURL = `https://buff.163.com/goods/${parsedParam.goods_id}?from=market#tab=selling&sort_by=default&min_price=${parsedParam.price}&max_price=${(+parsedParam.price + 0.01)}`;
+        let baseURL = `https://buff.163.com/goods/${parsedParam.goods_id}?from=market#tab=selling&sort_by=default`;
+
+        const g = await InjectionService.requestObject<BuffTypes.g>('g');
+        let parsedPrice = parseFloat(parsedParam.price);
+
+        if (isFinite(parsedPrice) && isFinite(g?.currency?.rate_base_cny)) {
+            // convert to whatever user currency, because min_price and max_price are currency dependent, thanks buff
+            parsedPrice = parsedPrice * g.currency.rate_base_cny;
+            baseURL += `&min_price=${Math.max(0.01, parsedPrice - 0.01).toFixed(2)}&max_price=${(parsedPrice + 0.01).toFixed(1)}`;
+        }
 
         const information = <NodeListOf<HTMLElement>>document.querySelectorAll('div.title-info-wrapper p');
 
