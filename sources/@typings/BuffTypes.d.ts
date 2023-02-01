@@ -1499,7 +1499,7 @@ declare module BuffTypes {
 
 declare const $: JQuery;
 
-interface JQuery<TElement = HTMLElement> extends Iterable<TElement> {
+interface JQuery<TElement = HTMLElement | Document> extends Iterable<TElement> {
 
     (...params: any[]): JQuery<TElement>;
 
@@ -1515,7 +1515,7 @@ interface JQuery<TElement = HTMLElement> extends Iterable<TElement> {
             [key: string]: {
                 data?: any,
                 guid: number,
-                handler: () => void,
+                handler: (a?: any, b?: any, c?: any) => void,
                 namespace?: string,
                 needsContext: boolean,
                 origType: string,
@@ -1562,3 +1562,9 @@ declare module Popup {
     export function show(t: string): unknown;
 
 }
+
+declare interface RItemDetailPopupDecorator {
+    show(index: any): void;
+}
+
+declare function ItemDetailPopupDecorator(name: string): RItemDetailPopupDecorator;

@@ -226,7 +226,7 @@ module Options {
         // Settings.LISTING_OPTIONS
         normalSettings += await createMultiCheckboxOption(Settings.LISTING_OPTIONS, {
             title: 'Listing options',
-            description: 'Define what options show up on each listing.',
+            description: 'Define what options show up on each listing.<br/>3D Inspect: Buffs 3D Inspect.<br/>Inspect in server: Buffs inspect server.<br/>Copy !gen/!gengl: Quickly copy !gen codes.<br/>Share: Opens the share page.<br/>Match floatdb: Tries to find the skin on floatdb.<br/>Find Similar: Tries finding similar listings.<br/>Detail: A replacement button for the new detail UI.',
             csgoOnly: true
         }, [
             '3D Inspect',
@@ -234,7 +234,8 @@ module Options {
             'Copy !gen/!gengl',
             'Share',
             'Match floatdb',
-            'Find Similar'
+            'Find Similar',
+            'Detail'
         ]);
 
         // Settings.SHOW_FLOAT_BAR
@@ -554,6 +555,13 @@ module Options {
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS, {
             title: 'Adjust Trade Records',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Trade Records" tab for an items page, showing things such as currency conversion, and difference to reference price.'
+        });
+
+        // Settings.EXPERIMENTAL_REMOVE_SALE_POPUP
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_REMOVE_SALE_POPUP, {
+            title: 'Remove Sale Popup',
+            description: 'The new Buff sale ui annoying you when you are trying to copy the price or other data? This removes the click events and prevents it from opening normally.',
+            csgoOnly: true
         });
 
         // --- PSE Settings ---

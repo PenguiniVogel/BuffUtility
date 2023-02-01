@@ -41,10 +41,29 @@ module Adjust_Listings {
                 }
             }
 
+            function buff_utility_remove_sale_popup(): void {
+                let event = $._data(document)?.events['click']?.filter(x => x.selector == 'tr.selling')[0];
+                if (event) {
+                    event.handler = (e) => {
+                        console.debug('[BuffUtility] Popup click has been removed');
+                    };
+                }
+            }
+
+            function buff_utility_render_sale_popup(index): void {
+                ItemDetailPopupDecorator('selling-list').show(index);
+            }
+
             InjectionServiceLib.injectCode(`${buff_utility_forceNewestReload.toString()}`);
 
             (async () => {
-                InjectionServiceLib.injectCode(`${await getSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY) ? `${buff_utility_override_bulk_buy.toString()}\nbuff_utility_override_bulk_buy();` : ''}`);
+                if (await getSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY)) {
+                    InjectionServiceLib.injectCode(`${buff_utility_override_bulk_buy.toString()}\nbuff_utility_override_bulk_buy();`);
+                }
+
+                if (await getSetting(Settings.EXPERIMENTAL_REMOVE_SALE_POPUP)) {
+                    InjectionServiceLib.injectCode(`${buff_utility_remove_sale_popup.toString()}\nbuff_utility_remove_sale_popup();\n${buff_utility_render_sale_popup.toString()}`);
+                }
             })();
 
             let a = document.createElement('a');
@@ -323,6 +342,14 @@ module Adjust_Listings {
                 aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
                 aShare.setAttribute('target', '_blank');
 
+                const aDetail = document.createElement('a');
+                aDetail.innerHTML = '<b><i style="filter: invert(1);" class="icon icon_search"></i></b>Detail<br>';
+                aDetail.setAttribute('class', 'ctag btn');
+
+                aDetail.addEventListener('click', () => {
+                    Util.signal(['buff_utility_render_sale_popup'], null, i);
+                });
+
                 wearContainer.appendChild(document.createElement('br'));
 
                 let enabledOptions: boolean[] = await getSetting(Settings.LISTING_OPTIONS);
@@ -355,8 +382,16 @@ module Adjust_Listings {
                     wearContainer.appendChild(aMatchFloatDB);
                 }
 
+                if ((aFindSimilar && enabledOptions[5]) || (aDetail && enabledOptions[6])) {
+                    wearContainer.append(document.createElement('br'));
+                }
+
                 if (aFindSimilar && enabledOptions[5]) {
-                    wearContainer.append(document.createElement('br'), aFindSimilar);
+                    wearContainer.append(aFindSimilar);
+                }
+
+                if (aDetail && enabledOptions[6]) {
+                    wearContainer.append(aDetail);
                 }
             }
 

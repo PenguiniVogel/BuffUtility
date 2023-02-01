@@ -156,6 +156,8 @@ module ExtensionSettings {
         EXPERIMENTAL_SHOW_LISTING_DATE = 'show_listing_date',
         // 2.2.0 -> setting will become default
         EXPERIMENTAL_ADJUST_TRADE_RECORDS = 'adjust_trade_records',
+        // TBA -> setting will be moved to advanced settings
+        EXPERIMENTAL_REMOVE_SALE_POPUP = 'remove_sale_popup',
 
         STORE_DANGER_AGREEMENTS = 'store_danger_agreements',
 
@@ -198,6 +200,8 @@ module ExtensionSettings {
         [Settings.USE_SCHEME]: boolean;
         [Settings.LOCATION_RELOAD_NEWEST]: LOCATION_RELOAD_NEWEST_VALUES;
 
+        // Experimental
+
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: boolean;
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: boolean;
@@ -212,8 +216,13 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT]: number;
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS]: boolean;
+        [Settings.EXPERIMENTAL_REMOVE_SALE_POPUP]: boolean;
+
+        // Misc
 
         [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
+
+        // PSE
 
         [Settings.PSE_ADVANCED_PAGE_NAVIGATION]: boolean;
         [Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE]: number;
@@ -375,7 +384,7 @@ module ExtensionSettings {
             validator: validateBoolean
         },
         [Settings.LISTING_OPTIONS]: {
-            default: [true, true, true, true, false, false],
+            default: [true, true, true, true, false, false, false],
             export: '0x18',
             transform: InternalStructureTransform.BOOLEAN_ARRAY,
             validator: validateBooleanArray
@@ -421,6 +430,8 @@ module ExtensionSettings {
             export: '0x24',
             validator: validatePropertyValue
         },
+
+        // Experimental
 
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: {
             default: true,
@@ -509,6 +520,14 @@ module ExtensionSettings {
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
+        [Settings.EXPERIMENTAL_REMOVE_SALE_POPUP]: {
+            default: true,
+            export: '2x15',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+
+        // Misc
 
         [Settings.STORE_DANGER_AGREEMENTS]: {
             default: [false, false],
@@ -516,6 +535,8 @@ module ExtensionSettings {
             transform: InternalStructureTransform.BOOLEAN_ARRAY,
             validator: validateBooleanArray
         },
+
+        // PSE
 
         [Settings.PSE_ADVANCED_PAGE_NAVIGATION]: {
             default: false,
