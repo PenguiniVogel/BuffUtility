@@ -28,6 +28,8 @@ module PSE_Market {
     const reformatCurrencyRegex = /,(?:--)?/;
     const floatNumberRegex = /(\d+(?:\.\d+)?)/;
 
+    let loadedSteamCurrency = null;
+
     function extractNumber(text: string): number {
         return parseFloat((floatNumberRegex.exec(text.replace(reformatCurrencyRegex, '.')) ?? [])[1]);
     }
@@ -36,39 +38,221 @@ module PSE_Market {
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, async (e: CustomEvent<InjectionService.TransferData<unknown>>) => {
             if (e.detail.url.indexOf('mylistings/render/?query=') > -1) {
                 if (await getSetting(Settings.PSE_MERGE_ACTIVE_LISTINGS)) {
-                    mergeActiveListings();
+                    mergeActiveListings(loadedSteamCurrency);
                 }
             }
+        });
 
-            if (e.detail.url.endsWith('/market/myhistory') || e.detail.url.endsWith('/market/myhistory/')) {
-                if (await getSetting(Settings.PSE_ADVANCED_PAGE_NAVIGATION)) {
-                    // TODO
+        const allowAdvancedPageNav = await getSetting(Settings.PSE_ADVANCED_PAGE_NAVIGATION);
+
+        function pse_advancedPageGoTo(input: HTMLInputElement, e: KeyboardEvent): void {
+            if (e.code == 'Enter' || e.key == 'Enter') {
+                let min = parseInt(input.getAttribute('min'));
+                let max = parseInt(input.getAttribute('max'));
+                let value = parseInt(input.value);
+
+                if (!isFinite(min)) {
+                    min = 1;
                 }
+
+                if (!isFinite(max)) {
+                    max = 1;
+                }
+
+                if (!isFinite(value)) {
+                    value = 1;
+                }
+
+                value = Math.min(max, Math.max(min, value));
+
+                g_oMyHistory.GoToPage(value - 1, false);
+            }
+        }
+
+        if (allowAdvancedPageNav) {
+            InjectionServiceLib.injectCode(pse_advancedPageGoTo.toString(), 'body');
+        }
+
+        const pageSize = await getSetting(Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE);
+
+        InjectionService.shadowFunction('LoadMarketHistory', null, function() {
+            if (g_bBusyLoadingMarketHistory || g_bIsLoadedMarketHistory) {
+                DEBUG && console.debug('[PSE] Skipping LoadMarketHistory', g_bBusyLoadingMarketHistory, g_bIsLoadedMarketHistory);
+                return false;
+            }
+
+            DEBUG && console.debug('[PSE] Executing shadowed LoadMarketHistory');
+
+            g_bBusyLoadingMarketHistory = true;
+
+            let elMyHistoryContents = <SteamJQuery<HTMLElement>>$('tabContentsMyMarketHistory');
+
+            new Ajax.Request(`https://steamcommunity.com/market/myhistory/render/?query=&start=0&count=${pageSize}`, {
+                method: 'get',
+                parameters: {},
+                onSuccess: (transport) => {
+                    if (transport.responseJSON) {
+                        let response = transport.responseJSON;
+
+                        elMyHistoryContents.innerHTML = `
+<div id="tabContentsMyMarketHistoryTable" class="market_home_listing_table market_home_main_listing_table" style="max-height: 69vh; overflow: auto;">
+    <div id="tabContentsMyMarketHistoryRows">
+        ${response.results_html}
+    </div>
+</div>
+<div id="tabContentsMyMarketHistory_ctn" class="market_paging" style>
+    <div class="market_paging_controls" id="tabContentsMyMarketHistory_controls">
+        <input style="${allowAdvancedPageNav}" onkeyup="pse_advancedPageGoTo(this, event);" type="number" min="1" max="${~~Math.ceil(response.total_count / response.pagesize)}" value="1" />
+        <span id="tabContentsMyMarketHistory_btn_prev" class="pagebtn disabled">&lt;</span>
+        <span id="tabContentsMyMarketHistory_links"></span>
+        <span id="tabContentsMyMarketHistory_btn_next" class="pagebtn">&gt;</span>
+    </div>
+    <div class="market_paging_summary ellipsis">
+    Showing <span id="tabContentsMyMarketHistory_start">1</span> - <span id="tabContentsMyMarketHistory_end">${pageSize}</span> of <span id="tabContentsMyMarketHistory_total">???</span> results
+    </div>
+    <div style="clear: both;"></div> 
+</div>`;
+
+                        MergeWithAssetArray(response.assets);
+                        eval(response.hovers);
+
+                        g_oMyHistory = new CAjaxPagingControls({
+                            query: '',
+                            total_count: response.total_count,
+                            pagesize: response.pagesize,
+                            prefix: 'tabContentsMyMarketHistory',
+                            class_prefix: 'market'
+                        }, 'https://steamcommunity.com/market/myhistory/');
+
+                        g_oMyHistory.SetResponseHandler((response) => {
+                            MergeWithAssetArray(response.assets);
+                            eval(response.hovers);
+                        });
+                    }
+                },
+                onComplete: () => {
+                    g_bIsLoadedMarketHistory = true;
+                    g_bBusyLoadingMarketHistory = false;
+                }
+            });
+
+            return false;
+        }, {
+            appendOn: 'body',
+            order: 'custom',
+            variablePass: {
+                'DEBUG': DEBUG,
+                'pageSize': pageSize,
+                'g_bIsLoadedMarketHistory': false,
+                'allowAdvancedPageNav': allowAdvancedPageNav ? '' : 'display: none;'
             }
         });
 
         const walletInfo: {
             wallet_currency: number
         } = await InjectionService.requestObject('g_rgWalletInfo');
-        const steamCurrency = PSE_Currencies.getById(walletInfo.wallet_currency);
+        loadedSteamCurrency = PSE_Currencies.getById(walletInfo.wallet_currency);
 
-        console.debug('[PSE]', walletInfo, steamCurrency);
+        InjectionServiceLib.injectCode(`var pse_steamCurrencySymbol = '${(loadedSteamCurrency.symbol ?? '')}'`);
+
+        console.debug('[PSE]', walletInfo, loadedSteamCurrency);
 
         if (await getSetting(Settings.PSE_MERGE_ACTIVE_LISTINGS)) {
-            mergeActiveListings();
+            mergeActiveListings(loadedSteamCurrency);
         }
 
-        addBuyOrderSummaryAndScrolling(steamCurrency.symbol);
+        addBuyOrderSummaryAndScrolling(loadedSteamCurrency.symbol);
 
         if (await getSetting(Settings.PSE_BUYORDER_CANCEL_CONFIRMATION)) {
             PSE_Util.addBuyOrderCancelConfirmation();
         }
     }
 
-    async function mergeActiveListings(): Promise<void> {
-        function pse_remove_mergedListing(element: SellOrderMergeData[], all: boolean): void {
-            console.debug(element, all);
+    async function mergeActiveListings(steamCurrency: PSE_Currencies.SteamCurrency): Promise<void> {
+        function pse_remove_mergedListing(selector: string, all: boolean): void {
+            let rowElement = <HTMLElement>document.querySelector(`[data-selector="row_${selector}"]`);
+            let dataElement = <HTMLElement>document.querySelector(`[data-selector="data_${selector}"]`);
+            let loaderElement = <HTMLElement>document.querySelector(`[data-selector="img_${selector}"]`);
+            let countElement = <HTMLElement>document.querySelector(`[data-selector="count_${selector}"]`);
 
+            let parsedData: SellOrderMergeData[];
+            try {
+                parsedData = JSON.parse(dataElement.innerHTML.replace(/^\n|\n$/g, '').trim());
+            } catch (_) {
+                parsedData = [];
+            }
+
+            if (parsedData.length < 1) {
+                return;
+            }
+
+            console.debug('[PSE] pse_remove_mergedListing', parsedData, selector, all);
+
+            function sendRemoveListing(data: SellOrderMergeData, callback: (failure: boolean) => void): void {
+                new Ajax.Request(`https://steamcommunity.com/market/removelisting/${data.listingid}`, {
+                    method: 'post',
+                    parameters: {
+                        sessionid: g_sessionID
+                    },
+                    onSuccess: () => callback(false),
+                    onFailure: () => callback(true)
+                });
+            }
+
+            if (all && confirm(`Do you wish to remove ALL listings for ${parsedData[0].name} on ${parsedData[0].listedOn} for ${parsedData[0].priceBuyer} ${pse_steamCurrencySymbol}`) && confirm(`Do you REALLY wish to remove ALL listings for ${parsedData[0].name} on ${parsedData[0].listedOn} for ${parsedData[0].priceBuyer} ${pse_steamCurrencySymbol}`)) {
+                let maxRetry = 5;
+                loaderElement.style['display'] = '';
+
+                function process(at: number): void {
+                    if (at >= parsedData.length) {
+                        loaderElement.style['display'] = 'none';
+                        countElement.innerHTML = '0';
+                        rowElement.style['display'] = 'none';
+                        return;
+                    }
+
+                    sendRemoveListing(parsedData[at], (failure) => {
+                        if (failure) {
+                            maxRetry --;
+
+                            if (maxRetry <= 0) {
+                                alert(`Failed to remove all listings for ${parsedData[0].name}`);
+                            } else {
+                                process(at);
+                            }
+                        } else {
+                            maxRetry = 5;
+
+                            countElement.innerHTML = `${parsedData.length - at}`;
+
+                            process(at + 1);
+                        }
+                    });
+                }
+
+                process(0);
+            } else if (confirm(`Do you wish to remove a listings for ${parsedData[0].name} on ${parsedData[0].listedOn} for ${parsedData[0].priceBuyer} ${pse_steamCurrencySymbol}`)) {
+                loaderElement.style['display'] = '';
+
+                sendRemoveListing(parsedData[0], (failure) => {
+                    if (failure) {
+                        loaderElement.style['display'] = 'none';
+
+                        alert(`Failed to remove listing for ${parsedData[0].name}`);
+                    } else {
+                        parsedData = parsedData.slice(1);
+
+                        dataElement.innerHTML = JSON.stringify(parsedData);
+                        countElement.innerHTML = `${parsedData.length}`;
+
+                        loaderElement.style['display'] = 'none';
+
+                        if (parsedData.length <= 0) {
+                            rowElement.style['display'] = 'none';
+                        }
+                    }
+                });
+            }
         }
 
         InjectionServiceLib.injectCode(pse_remove_mergedListing.toString(), 'body');
@@ -150,7 +334,10 @@ module PSE_Market {
             const pick = merged[url][0];
             const block = merged[url].filter(x => x.listedOn == pick.listedOn && x.priceYou == pick.priceYou);
 
+            const selectorId = `${pick.appid}_${pick.name}_${pick.listedOn}_${pick.priceYou}`;
+
             const newRow = document.createElement('div');
+            newRow.setAttribute('data-selector', `row_${selectorId}`);
             newRow.setAttribute('class', 'market_listing_row market_recent_listing_row');
 
             newRow.innerHTML = `
@@ -158,16 +345,16 @@ module PSE_Market {
     <div class="market_listing_right_cell market_listing_edit_buttons placeholder"></div>
     <div class="market_listing_right_cell market_listing_my_price">
         <span class="market_table_value">
-            <span class="market_listing_price">${block.length}</span>
+            <span data-selector="count_${selectorId}" class="market_listing_price">${block.length}</span>
         </span>
     </div>
     <div class="market_listing_right_cell market_listing_my_price">
         <span class="market_table_value">
             <span class="market_listing_price">
                 <span style="display: inline-block;">
-                    <span title="This is the price the buyer pays.">${pick.priceBuyer}</span>
+                    <span title="This is the price the buyer pays.">${pick.priceBuyer} ${steamCurrency.symbol}</span>
                     <br>
-                    <span title="This is how much you will receive." style="color: #AFAFAF;"> (${pick.priceYou}) </span>
+                    <span title="This is how much you will receive." style="color: #AFAFAF;"> (${pick.priceYou} ${steamCurrency.symbol}) </span>
                 </span>
             </span>
         </span>
@@ -185,10 +372,19 @@ module PSE_Market {
     
     <div class="market_listing_edit_buttons actual_content">
         <div class="market_listing_cancel_button">
-            <!-- href="javascript:RemoveMarketListing('mylisting', '3556153482729383973', 232090, '2', '3515621086022428816')" -->
-            <a href="javascript:pse_remove_mergedListing(${JSON.stringify(block).replace(/"/g, '\'')}, false);" class="item_market_action_button item_market_action_button_edit nodisable">
+            <data data-selector="data_${selectorId}" style="display: none;">
+                ${JSON.stringify(block)}
+            </data>
+            <img data-selector="img_${selectorId}" style="display: none;" alt="loading" src="https://community.akamai.steamstatic.com/public/images/login/throbber.gif" width="32" height="32" />
+            <a href="javascript:pse_remove_mergedListing('${selectorId}', false);" class="item_market_action_button item_market_action_button_edit nodisable">
                 <span class="item_market_action_button_edge item_market_action_button_left"></span>
                 <span class="item_market_action_button_contents">Remove</span>
+                <span class="item_market_action_button_edge item_market_action_button_right"></span>
+                <span class="item_market_action_button_preload"></span>
+            </a>
+            <a href="javascript:pse_remove_mergedListing('${selectorId}', true);" class="item_market_action_button item_market_action_button_edit nodisable">
+                <span class="item_market_action_button_edge item_market_action_button_left"></span>
+                <span class="item_market_action_button_contents">Remove All</span>
                 <span class="item_market_action_button_edge item_market_action_button_right"></span>
                 <span class="item_market_action_button_preload"></span>
             </a>

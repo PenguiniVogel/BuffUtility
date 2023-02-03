@@ -642,11 +642,12 @@ module Options {
             steamOnly: true
         });
 
-        // Settings.PSE_HIDE_ACCOUNT_DETAILS TODO
-        // pseSettings += await createCheckboxOption(Settings.PSE_HIDE_ACCOUNT_DETAILS, {
-        //     title: 'Hide Account Details',
-        //     description: ''
-        // });
+        // Settings.PSE_HIDE_ACCOUNT_DETAILS
+        pseSettings += await createCheckboxOption(Settings.PSE_HIDE_ACCOUNT_DETAILS, {
+            title: 'Hide Account Details',
+            description: 'Blurs the billing information panel.',
+            steamOnly: true
+        });
 
         // Settings.PSE_MERGE_ACTIVE_LISTINGS
         pseSettings += await createCheckboxOption(Settings.PSE_MERGE_ACTIVE_LISTINGS, {

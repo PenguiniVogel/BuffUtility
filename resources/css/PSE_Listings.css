@@ -1,0 +1,21 @@
+#market_buyorder_dialog_paymentinfo_frame_container #market_buyorder_dialog_myaccountname,
+#market_buyorder_dialog_paymentinfo_frame_container #first_name,
+#market_buyorder_dialog_paymentinfo_frame_container #last_name,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_address,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_address_two,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_city,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_postal_code,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_country {
+    filter: var(--pse-blur);
+}
+
+#market_buyorder_dialog_paymentinfo_frame_container #market_buyorder_dialog_myaccountname:hover,
+#market_buyorder_dialog_paymentinfo_frame_container #first_name:hover,
+#market_buyorder_dialog_paymentinfo_frame_container #last_name:hover,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_address:hover,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_address_two:hover,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_city:hover,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_postal_code:hover,
+#market_buyorder_dialog_paymentinfo_frame_container #billing_country:hover {
+    filter: blur(0);
+}

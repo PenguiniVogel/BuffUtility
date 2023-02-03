@@ -28,6 +28,7 @@
         "../sources/Util.ts",
         "PSE_Util.ts",
         "PSE_Currencies.ts",
+        "PSE_Start.ts",
         "PSE_TransformGraph.ts",
         "PSE_Market.ts",
         "PSE_Listings.ts"

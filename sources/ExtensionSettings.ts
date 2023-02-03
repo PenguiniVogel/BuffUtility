@@ -384,7 +384,7 @@ module ExtensionSettings {
             validator: validateBoolean
         },
         [Settings.LISTING_OPTIONS]: {
-            default: [true, true, true, true, false, false, false],
+            default: [true, true, true, true, false, false, true],
             export: '0x18',
             transform: InternalStructureTransform.BOOLEAN_ARRAY,
             validator: validateBooleanArray

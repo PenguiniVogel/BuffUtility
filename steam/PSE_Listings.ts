@@ -16,6 +16,10 @@ module PSE_Listings {
         if (await getSetting(Settings.PSE_ADD_VIEW_ON_BUFF)) {
             addViewOnBuff();
         }
+
+        // if (await getSetting(Settings.PSE_FORCE_ITEM_ACTIVITY)) {
+        //     addForceItemActivity();
+        // }
     }
 
     async function addViewOnBuff(): Promise<void> {
@@ -89,6 +93,17 @@ module PSE_Listings {
         aViewOnBuff.innerHTML = `<span style="background: #2e2a35; color: #ddb362;">View on BUFF</span>`;
 
         document.querySelector('#largeiteminfo_item_actions').append(aViewOnBuff);
+    }
+
+    function addForceItemActivity(): void {
+        /*
+        <div id="market_activity_section">
+            <h3 class="market_activity_header">Recent activity</h3>
+            <div id="market_activity_block">
+                <div id="market_activity_waiting_text">Waiting for new activity...</div>
+            </div>
+        </div>
+         */
     }
 
     init();

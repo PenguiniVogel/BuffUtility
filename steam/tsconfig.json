@@ -17,6 +17,7 @@
         "../sources/.GlobalConstants.ts",
         "../sources/@typings/BuffTypes.d.ts",
         "../sources/@typings/SchemaTypes.d.ts",
+        "../sources/@typings/SteamTypes.d.ts",
         "../sources/config.ts",
         "../sources/InjectionService.ts",
         "../sources/Cookie.ts",
@@ -26,6 +27,7 @@
         "../sources/Util.ts",
         "PSE_Util.ts",
         "PSE_Currencies.ts",
+        "PSE_Start.ts",
         "PSE_TransformGraph.ts",
         "PSE_Market.ts",
         "PSE_Listings.ts"

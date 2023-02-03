@@ -1,21 +1,21 @@
 /* width */
-.my_listing_section.market_content_block.market_home_listing_table::-webkit-scrollbar {
+#tabContentsMyMarketHistoryTable::-webkit-scrollbar, .my_listing_section.market_content_block.market_home_listing_table::-webkit-scrollbar {
     width: 10px;
 }
 
 /* track */
-.my_listing_section.market_content_block.market_home_listing_table::-webkit-scrollbar-track {
+#tabContentsMyMarketHistoryTable::-webkit-scrollbar-track, .my_listing_section.market_content_block.market_home_listing_table::-webkit-scrollbar-track {
     /* background: #1b2838; */
     background: rgba(0, 0, 0, 0.2);
 }
 
 /* handle */
-.my_listing_section.market_content_block.market_home_listing_table::-webkit-scrollbar-thumb {
+#tabContentsMyMarketHistoryTable::-webkit-scrollbar-thumb, .my_listing_section.market_content_block.market_home_listing_table::-webkit-scrollbar-thumb {
     border-radius: 5px;
     background: #000f18;
 }
 
 /* handle on hover */
-.my_listing_section.market_content_block.market_home_listing_table::-webkit-scrollbar-thumb:hover {
+#tabContentsMyMarketHistoryTable::-webkit-scrollbar-thumb:hover, .my_listing_section.market_content_block.market_home_listing_table::-webkit-scrollbar-thumb:hover {
     background: #001f33;
 }
