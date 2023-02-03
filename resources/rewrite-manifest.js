@@ -37,6 +37,7 @@ switch (argv2) {
             'storage',
             '*://penguinivogel.github.io/currency-repository/rates.json',
             '*://buff.163.com/*',
+            '*://https://steamcommunity.com/market*',
             '*://csgostash.com/*'
         ];
 

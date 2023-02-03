@@ -19,6 +19,7 @@
         "../sources/.GlobalConstants.ts",
         "../sources/@typings/BuffTypes.d.ts",
         "../sources/@typings/SchemaTypes.d.ts",
+        "../sources/@typings/SteamTypes.d.ts",
         "../sources/config.ts",
         "../sources/InjectionService.ts",
         "../sources/Cookie.ts",

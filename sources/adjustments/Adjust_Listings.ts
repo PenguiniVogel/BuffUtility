@@ -41,15 +41,6 @@ module Adjust_Listings {
                 }
             }
 
-            function buff_utility_remove_sale_popup(): void {
-                let event = $._data(document)?.events['click']?.filter(x => x.selector == 'tr.selling')[0];
-                if (event) {
-                    event.handler = (e) => {
-                        console.debug('[BuffUtility] Popup click has been removed');
-                    };
-                }
-            }
-
             function buff_utility_render_sale_popup(index): void {
                 ItemDetailPopupDecorator('selling-list').show(index);
             }
@@ -59,10 +50,6 @@ module Adjust_Listings {
             (async () => {
                 if (await getSetting(Settings.EXPERIMENTAL_ALLOW_BULK_BUY)) {
                     InjectionServiceLib.injectCode(`${buff_utility_override_bulk_buy.toString()}\nbuff_utility_override_bulk_buy();`);
-                }
-
-                if (await getSetting(Settings.EXPERIMENTAL_REMOVE_SALE_POPUP)) {
-                    InjectionServiceLib.injectCode(`${buff_utility_remove_sale_popup.toString()}\nbuff_utility_remove_sale_popup();\n${buff_utility_render_sale_popup.toString()}`);
                 }
             })();
 

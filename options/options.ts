@@ -557,13 +557,6 @@ module Options {
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Trade Records" tab for an items page, showing things such as currency conversion, and difference to reference price.'
         });
 
-        // Settings.EXPERIMENTAL_REMOVE_SALE_POPUP
-        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_REMOVE_SALE_POPUP, {
-            title: 'Remove Sale Popup',
-            description: 'The new Buff sale ui annoying you when you are trying to copy the price or other data? This removes the click events and prevents it from opening normally.',
-            csgoOnly: true
-        });
-
         // --- PSE Settings ---
 
         // Settings.PSE_ADVANCED_PAGE_NAVIGATION
