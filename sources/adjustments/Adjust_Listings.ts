@@ -122,7 +122,7 @@ module Adjust_Listings {
         }
 
         // disable until proxy works
-        fetchPriceHistory(goods_id, days, (response) => {
+        fetchPriceHistory(goods_id, days, async (response) => {
             // skip if empty, 503/507 or 425 http maybe
             if (response.length == 0) {
                 return;
@@ -131,8 +131,10 @@ module Adjust_Listings {
             // discard dates from prices as they are not used
             let history = response.map(arr => arr[1]);
 
-            let priceMin = Math.min(...history);
-            let priceMax = Math.max(...history);
+            let priceMin = await Util.convertCNYRaw(Math.min(...history));
+            let priceMax = await Util.convertCNYRaw(Math.max(...history));
+            let priceMinRaw = priceMin.convertedValueRaw.toFixed(2).split('.');
+            let priceMaxRaw = priceMax.convertedValueRaw.toFixed(2).split('.');
 
             let header = <HTMLElement>document.querySelector('body > div.market-list > div > div.detail-header.black');
             let priceParent = <HTMLElement>header.querySelector('div.detail-summ');
@@ -145,7 +147,7 @@ module Adjust_Listings {
             priceSpan.setAttribute('class', 'buff-utility-price-range');
             priceLabel.innerText = `Buff Price Trend (${days}D) |`;
 
-            priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> - <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
+            priceStrong.innerHTML= `<strong class='f_Strong'>${priceMin.convertedSymbol} <big>${priceMinRaw[0]}</big>.${priceMinRaw[1]}<small class="hide-usd">(MIN)</small></strong> - <strong class='f_Strong'>${priceMax.convertedSymbol} <big>${priceMaxRaw[0]}</big>.${priceMaxRaw[1]}<small class="hide-usd">(MAX)</small></strong>`;
 
             priceSpan.appendChild(priceLabel);
             priceSpan.appendChild(priceStrong);
