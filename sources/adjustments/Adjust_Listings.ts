@@ -101,8 +101,7 @@ module Adjust_Listings {
             adjustBillOrderTransactions(<InjectionService.TransferData<BuffTypes.BillOrder.Data>>transferData);
         }
 
-        // don't run until proxy is fixed
-        if (false && !document.querySelector('span.buffutility-pricerange') && await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
+        if (await getSetting(Settings.ALLOW_EXTENSION_REQUESTS) && !document.querySelector('span.buffutility-pricerange') && await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
 
             adjustHeaderListings();
@@ -123,40 +122,40 @@ module Adjust_Listings {
         }
 
         // disable until proxy works
-        // fetchPriceHistory(goods_id, days, (response) => {
-        //     // skip if empty, 503/507 or 425 http maybe
-        //     if (response.length == 0) {
-        //         return;
-        //     }
-        //
-        //     // discard dates from prices as not used
-        //     let history = response.map(arr => arr[1]);
-        //
-        //     let priceMin = Math.min(...history);
-        //     let priceMax = Math.max(...history);
-        //
-        //     let header = <HTMLElement>document.querySelector('body > div.market-list > div > div.detail-header.black');
-        //     let priceParent = <HTMLElement>header.querySelector('div.detail-summ');
-        //
-        //     let priceSpan = document.createElement('span');
-        //     let priceLabel = document.createElement('label');
-        //     let priceStrong = document.createElement('strong');
-        //
-        //     priceParent.setAttribute('style', 'line-height: 200%;');
-        //     priceSpan.setAttribute('class', 'buff-utility-price-range');
-        //     priceLabel.innerText = `Buff Price Trend (${days}D) |`;
-        //
-        //     priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> - <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
-        //
-        //     priceSpan.appendChild(priceLabel);
-        //     priceSpan.appendChild(priceStrong);
-        //
-        //     // prevent the double adding of the element caused by the async nature of the function
-        //     if (document.querySelector('span.buff-utility-price-range') == null) {
-        //         priceParent.appendChild(document.createElement('br'));
-        //         priceParent.appendChild(priceSpan);
-        //     }
-        // });
+        fetchPriceHistory(goods_id, days, (response) => {
+            // skip if empty, 503/507 or 425 http maybe
+            if (response.length == 0) {
+                return;
+            }
+
+            // discard dates from prices as they are not used
+            let history = response.map(arr => arr[1]);
+
+            let priceMin = Math.min(...history);
+            let priceMax = Math.max(...history);
+
+            let header = <HTMLElement>document.querySelector('body > div.market-list > div > div.detail-header.black');
+            let priceParent = <HTMLElement>header.querySelector('div.detail-summ');
+
+            let priceSpan = document.createElement('span');
+            let priceLabel = document.createElement('label');
+            let priceStrong = document.createElement('strong');
+
+            priceParent.setAttribute('style', 'line-height: 200%;');
+            priceSpan.setAttribute('class', 'buff-utility-price-range');
+            priceLabel.innerText = `Buff Price Trend (${days}D) |`;
+
+            priceStrong.innerHTML= `<strong class='f_Strong'>${Util.convertCNY(priceMin)}<small class="hide-usd">(MIN)</small></strong> - <strong class='f_Strong'>${Util.convertCNY(priceMax)}<small class="hide-usd">(MAX)</small></strong>`;
+
+            priceSpan.appendChild(priceLabel);
+            priceSpan.appendChild(priceStrong);
+
+            // prevent the double adding of the element caused by the async nature of the function
+            if (document.querySelector('span.buff-utility-price-range') == null) {
+                priceParent.appendChild(document.createElement('br'));
+                priceParent.appendChild(priceSpan);
+            }
+        });
     }
 
     /**
@@ -166,7 +165,7 @@ module Adjust_Listings {
      * @param days 7 or 30
      * @param callback
      */
-    function fetchPriceHistory(goodsId: any, days: 7 | 30, callback: (response: [any, number][]) => void): void {
+    function fetchPriceHistory(goodsId: any, days: ExtensionSettings.PriceHistoryRange, callback: (response: [any, number][]) => void): void {
         fetch(`https://buff.163.com/api/market/goods/price_history/buff?game=csgo&goods_id=${goodsId}&days=${days}`)
             .then(r => r.json().then(_response => {
                 if (typeof callback == 'function') {
@@ -326,7 +325,7 @@ module Adjust_Listings {
                 const aShare = document.createElement('a');
                 aShare.innerHTML = '<b><i style="margin: -4px 0 0 0; filter: brightness(0);" class="icon icon_link"></i></b>Share';
                 aShare.setAttribute('class', 'ctag btn');
-                aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&game=csgo&assetid=${dataRow.asset_info.assetid}&sell_order_id=${dataRow.id}`);
+                aShare.setAttribute('href', `https://buff.163.com/goods/${dataRow.goods_id}?appid=730&classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&assetid=${dataRow.asset_info.assetid}&contextid=2&sell_order_id=${dataRow.id}`);
                 aShare.setAttribute('target', '_blank');
 
                 const aDetail = document.createElement('a');

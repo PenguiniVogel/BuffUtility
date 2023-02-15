@@ -109,7 +109,7 @@ module Adjust_Favourites {
             let aShare = document.createElement('a');
             aShare.innerHTML = '<b><i style="margin: -3px 3px 0 0;" class="icon icon_link"></i></b>Share';
             aShare.setAttribute('class', 'ctag btn');
-            aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${assetInfo.classid}&instanceid=${assetInfo.instanceid}&game=csgo&assetid=${assetInfo.assetid}&sell_order_id=${targetId.getAttribute('data-target-id')}`);
+            aShare.setAttribute('href', `https://buff.163.com/goods/${assetInfo.goods_id}?appid=730&classid=${assetInfo.classid}&instanceid=${assetInfo.instanceid}&assetid=${assetInfo.assetid}&contextid=2&sell_order_id=${targetId.getAttribute('data-target-id')}`);
             aShare.setAttribute('target', '_blank');
 
             nameContainer.parentElement.appendChild(aShare);

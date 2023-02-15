@@ -14,7 +14,8 @@ module Options {
         title: string,
         description: string,
         csgoOnly?: boolean,
-        steamOnly?: boolean
+        steamOnly?: boolean,
+        requiresRequest?: boolean
     }
 
     interface SelectOption {
@@ -29,7 +30,7 @@ module Options {
                     content: [
                         Util.buildHTML('div', {
                             class: 'setting-title',
-                            content: [ info.title, info.csgoOnly ? ' <u style="color: var(--color-light);">(CS:GO Only)</u>' : '', info.steamOnly ? ' <u style="color: var(--color-steam);">(Steam Only)</u>' : '' ]
+                            content: [ info.title, info.csgoOnly ? ' <u style="color: var(--color-light);">(CS:GO Only)</u>' : '', info.steamOnly ? ' <u style="color: var(--color-steam);">(Steam Only)</u>' : '', info.requiresRequest ? ' <u style="color: #b91010;" title="This feature is a REQUIRE REQUEST feature, use with caution.">(RR ⚠)</u>' : '' ]
                         }),
                         Util.buildHTML('div', {
                             class: 'setting-description action',
@@ -161,6 +162,17 @@ module Options {
                     }
                 })
             )
+        }));
+    }
+
+    function createButtonOption(setting: Settings, info: DisplayInfo, handler: string): string {
+        return createSettingHTML(setting, info, Util.buildHTML('button', {
+            attributes: {
+                'data-target': 'button',
+                'data-setting': setting,
+                'data-handler': handler
+            },
+            content: [ 'Activate' ]
         }));
     }
 
@@ -456,6 +468,14 @@ module Options {
             'Text Color Disabled'
         ]);
 
+        // Settings.ALLOW_EXTENSION_REQUESTS
+        if (!await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
+            advancedSettings += createButtonOption(Settings.ALLOW_EXTENSION_REQUESTS, {
+                title: 'Allow Extension Requests',
+                description: 'Allow BuffUtility to make Buff requests within its context.<br>This is potentially very dangerous, so unless there is a reason, and you are aware of the consequences: <b>DO NOT ENABLE THIS</b>'
+            }, 'sendAllowExtensionRequests');
+        }
+
         // --- Experimental Settings ---
 
         // Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN
@@ -477,30 +497,36 @@ module Options {
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show toast notification when currency rates were updated, happens once a day.<br><small>* Setting will be merged in 2.2.0 into "Show Toast on Action".</small>'
         });
 
-        // Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS - disabled until proxy works
-        // experimentalSettings += createCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
-        //     title: 'Fetch Favourite Bargain Status',
-        //     description: '!!!BuffUtility!!!\\n!!!Experimental!!!\\n!!!Danger!!!\\n!!!READ!!!\\nThis will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
-        // });
+        // Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS
+        if (await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
+            experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
+                title: 'Fetch Favourite Bargain Status',
+                description: '<u><b>BuffUtility<br>Experimental<br></b></u>This will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+                requiresRequest: true
+            });
+        }
 
-        // Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY - disabled until proxy works
-        // experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, {
-        //     title: 'Fetch item price history',
-        //     description: '!!!BuffUtility!!!\\n!!!Experimental!!!\\n!!!Danger!!!\\n!!!READ!!!\\nThis will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.'
-        // }, [
-        //     {
-        //         displayText: 'Off',
-        //         value: ExtensionSettings.PriceHistoryRange.OFF
-        //     },
-        //     {
-        //         displayText: '7 Days',
-        //         value: ExtensionSettings.PriceHistoryRange.WEEKLY
-        //     },
-        //     {
-        //         displayText: '30 Days',
-        //         value: ExtensionSettings.PriceHistoryRange.MONTHLY
-        //     }
-        // ], getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+        // Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
+        if (await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
+            experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, {
+                title: 'Fetch item price history',
+                description: '<u><b>BuffUtility<br>Experimental<br></b></u>This will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+                requiresRequest: true
+            }, [
+                {
+                    displayText: 'Off',
+                    value: ExtensionSettings.PriceHistoryRange.OFF
+                },
+                {
+                    displayText: '7 Days',
+                    value: ExtensionSettings.PriceHistoryRange.WEEKLY
+                },
+                {
+                    displayText: '30 Days',
+                    value: ExtensionSettings.PriceHistoryRange.MONTHLY
+                }
+            ], getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+        }
 
         // Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {
@@ -721,6 +747,17 @@ module Options {
                         setSetting(setting, values);
                     };
                     break;
+                case 'button':
+                    element.onclick = () => {
+                        console.debug('button', element);
+
+                        const handler = element.getAttribute('data-handler');
+
+                        if (typeof Options[handler] == 'function') {
+                            Options[handler]();
+                        }
+                    };
+                    break;
             }
         });
 
@@ -751,6 +788,17 @@ module Options {
                 alert('Please refresh the options to see the changes.');
             }
         });
+    }
+
+    export function sendAllowExtensionRequests(): void {
+        if (confirm('You are about to enable Extension Requests, this is potentially dangerous and we offer no support or help for any issues that may arise from this. This cannot be undone.')) {
+            if (confirm('Are you really sure you wish to enable this Setting? THIS CANNOT BE UNDONE. You can still go back and use all other features of BuffUtility without any issues.')) {
+                const message = 'I understand what I am about todo and the potential consequences that may happen. I have been warned.';
+                if (prompt(`To enable the feature please enter: "${message}"`) === message) {
+                    setSetting(Settings.ALLOW_EXTENSION_REQUESTS, true);
+                }
+            }
+        }
     }
 
     init();

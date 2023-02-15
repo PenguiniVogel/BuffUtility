@@ -157,7 +157,7 @@ module ExtensionSettings {
         // 2.2.0 -> setting will become default
         EXPERIMENTAL_ADJUST_TRADE_RECORDS = 'adjust_trade_records',
 
-        STORE_DANGER_AGREEMENTS = 'store_danger_agreements',
+        ALLOW_EXTENSION_REQUESTS = 'allow_extension_requests',
 
         // PSE MIGRATION
         PSE_ADVANCED_PAGE_NAVIGATION = 'pse_advanced_page_navigation',
@@ -217,7 +217,7 @@ module ExtensionSettings {
 
         // Misc
 
-        [Settings.STORE_DANGER_AGREEMENTS]: boolean[];
+        [Settings.ALLOW_EXTENSION_REQUESTS]: boolean;
 
         // PSE
 
@@ -234,7 +234,7 @@ module ExtensionSettings {
         [Settings.PSE_MERGE_ACTIVE_LISTINGS]: boolean;
     }
 
-    const DANGER_SETTINGS: Settings[] = [
+    const REQUIRE_REQUESTS: Settings[] = [
         Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS,
         Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
     ];
@@ -520,11 +520,11 @@ module ExtensionSettings {
 
         // Misc
 
-        [Settings.STORE_DANGER_AGREEMENTS]: {
-            default: [false, false],
+        [Settings.ALLOW_EXTENSION_REQUESTS]: {
+            default: false,
             export: '3x1',
             transform: InternalStructureTransform.BOOLEAN_ARRAY,
-            validator: validateBooleanArray
+            validator: validateBoolean
         },
 
         // PSE
@@ -721,12 +721,6 @@ module ExtensionSettings {
                         // changed, only import 0 -> false and 1 -> true, anything else set to null
                         // to ensure validator takes default and doesn't set it to false outright
                         newValue = value === 0 || value === 1 ? value == 1 : null;
-
-                        // forcefully disable for now until proxy works properly
-                        if (setting == Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS || setting == Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) {
-                            newValue = false;
-                        }
-
                         break;
                     case InternalStructureTransform.BOOLEAN_ARRAY:
                         newValue = Util.importBooleansFromBytes(value);
@@ -775,10 +769,6 @@ module ExtensionSettings {
      */
     export function resetSetting<T extends Settings>(setting: T): void {
         console.debug(`[BuffUtility] Resetting '${setting}' to the default value.`);
-
-        if (DANGER_SETTINGS.indexOf(setting) > -1) {
-            setSetting(Settings.STORE_DANGER_AGREEMENTS, [false, false]);
-        }
 
         setSetting(setting, INTERNAL_SETTINGS[setting].default);
     }
@@ -834,9 +824,9 @@ module ExtensionSettings {
     export function hasBeenAgreed(setting: Settings): boolean {
         switch (setting) {
             case Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS:
-                return getSetting(Settings.STORE_DANGER_AGREEMENTS)[0];
+                return getSetting(Settings.ALLOW_EXTENSION_REQUESTS)[0];
             case Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY:
-                return getSetting(Settings.STORE_DANGER_AGREEMENTS)[1];
+                return getSetting(Settings.ALLOW_EXTENSION_REQUESTS)[1];
             default:
                 return false;
         }

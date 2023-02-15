@@ -7,8 +7,6 @@ module SchemaHelper {
     import Weapon = SchemaTypes.Weapon;
     import Paint = SchemaTypes.Paint;
 
-    // manage https://csgofloat.com/api/v1/schema
-
     interface IWeapon extends Weapon {
         paints: {
             [id: number]: Paint

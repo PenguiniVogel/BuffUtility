@@ -20,7 +20,7 @@ module Adjust_Sales {
 
             let link = document.createElement('span');
 
-            link.innerHTML = `<a href="https://buff.163.com/market/m/item_detail?classid=${a.getAttribute('data-classid')}&instanceid=${a.getAttribute('data-instanceid')}&game=csgo&assetid=${li.getAttribute('data-assetid')}&sell_order_id=${li.getAttribute('data-orderid')}" onclick="this.parentElement.parentElement.click();" target="_blank"><i class="icon icon_link bu_icon_link j_tips_handler" data-title="Share" data-direction="bottom"></i></a>`;
+            link.innerHTML = `<a href="https://buff.163.com/goods/${li.getAttribute('data-goodsid')}?appid=${a.getAttribute('data-appid')}&classid=${a.getAttribute('data-classid')}&instanceid=${a.getAttribute('data-instanceid')}&assetid=${li.getAttribute('data-assetid')}&contextid=${a.getAttribute('data-contextid')}&sell_order_id=${li.getAttribute('data-orderid')}" onclick="this.parentElement.parentElement.click();" target="_blank"><i class="icon icon_link bu_icon_link j_tips_handler" data-title="Share" data-direction="bottom"></i></a>`;
 
             tagBox.appendChild(link);
         }
