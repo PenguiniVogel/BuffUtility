@@ -525,7 +525,7 @@ module Options {
                     displayText: '30 Days',
                     value: ExtensionSettings.PriceHistoryRange.MONTHLY
                 }
-            ], getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+            ], await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
         }
 
         // Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY

@@ -234,10 +234,8 @@ module ExtensionSettings {
         [Settings.PSE_MERGE_ACTIVE_LISTINGS]: boolean;
     }
 
-    const REQUIRE_REQUESTS: Settings[] = [
-        Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS,
-        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
-    ];
+    type REQUIRE_REQUESTS = Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS |
+        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY;
 
     const enum InternalStructureTransform {
         NONE = 0,
@@ -523,7 +521,7 @@ module ExtensionSettings {
         [Settings.ALLOW_EXTENSION_REQUESTS]: {
             default: false,
             export: '3x1',
-            transform: InternalStructureTransform.BOOLEAN_ARRAY,
+            transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
 
@@ -817,19 +815,17 @@ module ExtensionSettings {
     }
 
     /**
-     * @deprecated
+     * Get a setting that falls within require request
      *
      * @param setting
      */
-    export function hasBeenAgreed(setting: Settings): boolean {
-        switch (setting) {
-            case Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS:
-                return getSetting(Settings.ALLOW_EXTENSION_REQUESTS)[0];
-            case Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY:
-                return getSetting(Settings.ALLOW_EXTENSION_REQUESTS)[1];
-            default:
-                return false;
+    export async function getRequestSetting<T extends REQUIRE_REQUESTS, R extends SettingsTypes[T]>(setting: T): Promise<R> {
+        const canRequest = await getSetting(Settings.ALLOW_EXTENSION_REQUESTS);
+        if (canRequest) {
+            return await getSetting(<Settings><unknown>setting);
         }
+
+        return <R><unknown>INTERNAL_SETTINGS[<Settings><unknown>setting].default;
     }
 
     // --- upgrade ~2.1.7 -> 2.1.8+

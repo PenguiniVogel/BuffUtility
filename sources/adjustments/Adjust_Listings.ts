@@ -101,7 +101,7 @@ module Adjust_Listings {
             adjustBillOrderTransactions(<InjectionService.TransferData<BuffTypes.BillOrder.Data>>transferData);
         }
 
-        if (await getSetting(Settings.ALLOW_EXTENSION_REQUESTS) && !document.querySelector('span.buffutility-pricerange') && await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
+        if (!document.querySelector('span.buffutility-pricerange') && await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
 
             adjustHeaderListings();
@@ -113,7 +113,7 @@ module Adjust_Listings {
      */
     async function adjustHeaderListings(): Promise<void> {
         // default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
-        const days = await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
+        const days = await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
         const goods_id = document.querySelector('div.detail-cont div.add-bookmark').getAttribute('data-target-id');
 
         // skip to prevent doubles
