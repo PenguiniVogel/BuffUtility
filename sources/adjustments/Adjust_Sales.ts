@@ -2,7 +2,20 @@ module Adjust_Sales {
 
     DEBUG && console.debug('[BuffUtility] Module.Adjust_Sales');
 
-    function init(): void {
+    // imports
+    import Settings = ExtensionSettings.Settings;
+    import getSetting = ExtensionSettings.getSetting;
+
+    // module
+
+    async function init(): Promise<void> {
+        if (!await getSetting(Settings.MODULE_ADJUST_SALES)) {
+            console.debug('%c■', 'color: #ff0000', '[BuffUtility] Adjust_Sales - disabled');
+            return;
+        } else {
+            console.debug('%c■', 'color: #00ff00', '[BuffUtility] Adjust_Sales');
+        }
+
         // skip if not csgo
         if (window.location.href.indexOf('game=csgo') == -1) return;
 

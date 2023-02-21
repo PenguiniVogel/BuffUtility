@@ -1,6 +1,6 @@
 module Adjust_Share {
 
-    DEBUG && console.debug('[BuffUtility] Module.Adjust_Share');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[BuffUtility] Module.Adjust_Share');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -21,6 +21,13 @@ module Adjust_Share {
     }
 
     async function init(): Promise<void> {
+        if (!await getSetting(Settings.MODULE_ADJUST_SHARE)) {
+            console.debug('%c■', 'color: #ff0000', '[BuffUtility] Adjust_Share - disabled');
+            return;
+        } else {
+            console.debug('%c■', 'color: #00ff00', '[BuffUtility] Adjust_Share');
+        }
+
         if (await getSetting(Settings.EXPERIMENTAL_ADJUST_SHARE)) {
             process();
         }

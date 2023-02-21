@@ -64,7 +64,7 @@ module PopupHelper {
             return;
         }
 
-        function buff_utility_bargain_mathFunc(listing, minimum, p) {
+        function buff_utility_bargain_mathFunc(listing: number, minimum: number, p: number) {
             return minimum + (listing - minimum) * p;
         }
 

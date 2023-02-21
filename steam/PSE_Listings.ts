@@ -1,6 +1,6 @@
 module PSE_Listings {
 
-    DEBUG && console.debug('[PSE] Module.PSE_Listings');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[PSE] Module.PSE_Listings');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -9,6 +9,13 @@ module PSE_Listings {
     // module
 
     async function init(): Promise<void> {
+        if (!await getSetting(Settings.MODULE_PSE_LISTINGS)) {
+            console.debug('%c■', 'color: #ff0000', '[BuffUtility] PSE_Listings - disabled');
+            return;
+        } else {
+            console.debug('%c■', 'color: #00ff00', '[BuffUtility] PSE_Listings');
+        }
+
         if (await getSetting(Settings.PSE_BUYORDER_CANCEL_CONFIRMATION)) {
             PSE_Util.addBuyOrderCancelConfirmation();
         }

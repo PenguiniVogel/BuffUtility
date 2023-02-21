@@ -1,6 +1,6 @@
 module PSE_TransformGraph {
 
-    DEBUG && console.debug('[PSE] Module.PSE_TransformGraph');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[PSE] Module.PSE_TransformGraph');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -48,6 +48,13 @@ module PSE_TransformGraph {
     declare function pricehistory_zoomMonthOrLifetime(plot: jqPlot, earliest: any, latest: any): void;
 
     async function init(): Promise<void> {
+        if (!await getSetting(Settings.MODULE_PSE_TRANSFORMGRAPH)) {
+            console.debug('%c■', 'color: #ff0000', '[BuffUtility] PSE_TransformGraph - disabled');
+            return;
+        } else {
+            console.debug('%c■', 'color: #00ff00', '[BuffUtility] PSE_TransformGraph');
+        }
+
         const showYears = await getSetting(Settings.PSE_GRAPH_SHOW_YEARS);
         const showVolume = await getSetting(Settings.PSE_GRAPH_SHOW_VOLUME);
 

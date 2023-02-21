@@ -788,6 +788,11 @@ module Options {
                 alert('Please refresh the options to see the changes.');
             }
         });
+
+        // add event show-modules
+        document.querySelector('#show-modules').addEventListener('click', () => {
+            (<HTMLElement>document.querySelector('[data-page="modules"]')).click();
+        });
     }
 
     export function sendAllowExtensionRequests(): void {
