@@ -148,7 +148,7 @@ declare module BuffTypes {
             paintindex: number;
             paintseed: number;
             stickers: Sticker[];
-            tournament_tags: any[];
+            tournament_tags: CommonType.TournamentTag[];
         }
 
         export interface AssetInfo {
