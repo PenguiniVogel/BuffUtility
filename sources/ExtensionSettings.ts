@@ -170,7 +170,21 @@ module ExtensionSettings {
         PSE_FORCE_ITEM_ACTIVITY = 'pse_force_item_activity',
         PSE_ADD_VIEW_ON_BUFF = 'pse_add_view_on_buff',
         PSE_HIDE_ACCOUNT_DETAILS = 'pse_hide_account_details',
-        PSE_MERGE_ACTIVE_LISTINGS = 'pse_merge_active_listings'
+        PSE_MERGE_ACTIVE_LISTINGS = 'pse_merge_active_listings',
+
+        // Modules
+
+        MODULE_ADJUST_FAVOURITES = 'module_adjust_favourites',
+        MODULE_ADJUST_LISTINGS = 'module_adjust_listings',
+        MODULE_ADJUST_MARKET = 'module_adjust_market',
+        MODULE_ADJUST_SALES = 'module_adjust_sales',
+        MODULE_ADJUST_SETTINGS = 'module_adjust_settings',
+        MODULE_ADJUST_SHARE = 'module_adjust_share',
+        MODULE_ADJUST_SHOP = 'module_adjust_shop',
+        MODULE_PSE_LISTINGS = 'module_pse_listings',
+        MODULE_PSE_MARKET = 'module_pse_market',
+        MODULE_PSE_START = 'module_pse_start',
+        MODULE_PSE_TRANSFORMGRAPH = 'module_pse_transformgraph',
     }
 
     type SettingsTypes = {
@@ -232,6 +246,20 @@ module ExtensionSettings {
         [Settings.PSE_ADD_VIEW_ON_BUFF]: boolean;
         [Settings.PSE_HIDE_ACCOUNT_DETAILS]: boolean;
         [Settings.PSE_MERGE_ACTIVE_LISTINGS]: boolean;
+
+        // Modules
+
+        [Settings.MODULE_ADJUST_FAVOURITES]: boolean;
+        [Settings.MODULE_ADJUST_LISTINGS]: boolean;
+        [Settings.MODULE_ADJUST_MARKET]: boolean;
+        [Settings.MODULE_ADJUST_SALES]: boolean;
+        [Settings.MODULE_ADJUST_SETTINGS]: boolean;
+        [Settings.MODULE_ADJUST_SHARE]: boolean;
+        [Settings.MODULE_ADJUST_SHOP]: boolean;
+        [Settings.MODULE_PSE_LISTINGS]: boolean;
+        [Settings.MODULE_PSE_MARKET]: boolean;
+        [Settings.MODULE_PSE_START]: boolean;
+        [Settings.MODULE_PSE_TRANSFORMGRAPH]: boolean;
     }
 
     type REQUIRE_REQUESTS = Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS |
@@ -243,15 +271,24 @@ module ExtensionSettings {
         BOOLEAN_ARRAY = 2
     }
 
+    interface InternalStructureTransformMapping {
+        boolean: InternalStructureTransform.BOOLEAN,
+    }
+
     type InternalSetting<T extends Settings> = {
         value?: SettingsTypes[T],
         resolved?: boolean,
         readonly default: SettingsTypes[T],
         readonly allowedValues?: SettingsTypes[T][],
         readonly export: string,
-        readonly transform?: InternalStructureTransform,
         readonly validator: (key: Settings, value: any) => any
-    };
+    } & (SettingsTypes[T] extends boolean ? {
+        readonly transform: InternalStructureTransform.BOOLEAN
+    } : SettingsTypes[T] extends boolean[] ? {
+        readonly transform: InternalStructureTransform.BOOLEAN_ARRAY
+    } : {
+        readonly transform?: InternalStructureTransform.NONE
+    });
     
     type InternalSettingStructure = {
         [key in Settings]: InternalSetting<key>
@@ -536,7 +573,6 @@ module ExtensionSettings {
         [Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE]: {
             default: 10,
             export: '9x11',
-            transform: InternalStructureTransform.NONE,
             validator: validateNumber
         },
         [Settings.PSE_CALCULATE_BUYORDER_SUMMARY]: {
@@ -590,6 +626,75 @@ module ExtensionSettings {
         [Settings.PSE_MERGE_ACTIVE_LISTINGS]: {
             default: false,
             export: '9x10',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+
+        // Modules
+
+        [Settings.MODULE_ADJUST_FAVOURITES]: {
+            default: true,
+            export: 'Mx0',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_ADJUST_LISTINGS]: {
+            default: true,
+            export: 'Mx1',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_ADJUST_MARKET]: {
+            default: true,
+            export: 'Mx2',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_ADJUST_SALES]: {
+            default: true,
+            export: 'Mx3',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_ADJUST_SETTINGS]: {
+            default: true,
+            export: 'Mx4',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_ADJUST_SHARE]: {
+            default: true,
+            export: 'Mx5',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_ADJUST_SHOP]: {
+            default: true,
+            export: 'Mx6',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_PSE_LISTINGS]: {
+            default: true,
+            export: 'Mx7',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_PSE_MARKET]: {
+            default: true,
+            export: 'Mx8',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_PSE_START]: {
+            default: true,
+            export: 'Mx9',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.MODULE_PSE_TRANSFORMGRAPH]: {
+            default: true,
+            export: 'Mx10',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         }

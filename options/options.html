@@ -240,8 +240,10 @@
             <div data-page="advanced">Advanced Settings</div>
             <div data-page="experimental">Experimental Settings</div>
             <div data-page="pse">PSE</div>
-            <e>
+            <div data-page="modules" style="display: none;"></div>
+            <e style="background: var(--color-dark-shadow);">
                 <button id="reset-all" class="reset-all">Reset All</button>
+                <button id="show-modules" class="reset-all">Modules</button>
             </e>
         </div>
     </nav>
@@ -287,6 +289,9 @@
                     </colgroup>
                     <tbody></tbody>
                 </table>
+            </div>
+            <div id="page-modules" style="display: none;" class="setting-table">
+                <h3>Here you can disable entire modules from the Extension</h3>
             </div>
         </div>
     </div>

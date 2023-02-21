@@ -1,11 +1,20 @@
 module Adjust_Settings {
 
-    DEBUG && console.debug('[BuffUtility] Module.Adjust_Settings');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[BuffUtility] Module.Adjust_Settings');
 
-    // add settings
+    // imports
+    import Settings = ExtensionSettings.Settings;
+    import getSetting = ExtensionSettings.getSetting;
 
-    function init(): void {
-        console.debug('[BuffUtility] Adjust_Settings');
+    // module
+
+    async function init(): Promise<void> {
+        if (!await getSetting(Settings.MODULE_ADJUST_SETTINGS)) {
+            console.debug('%c■', 'color: #ff0000', '[BuffUtility] Adjust_Settings - disabled');
+            return;
+        } else {
+            console.debug('%c■', 'color: #00ff00', '[BuffUtility] Adjust_Settings');
+        }
 
         // Get stuff
         const userSettings = document.querySelector('div.user-setting');

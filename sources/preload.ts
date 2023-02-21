@@ -22,6 +22,9 @@ module Preload {
 
         // fetch currency and make sure selected rate is up-to-date
         await getCurrencyCache();
+
+        // preload modules
+        await loadModuleSettings();
     }
 
     async function getCurrencyCache(): Promise<void> {
@@ -79,6 +82,20 @@ module Preload {
         // delete cookie
         Cookie.write(GlobalConstants.BUFF_UTILITY_CURRENCY_CACHE, '0', -1);
         Cookie.write('pse_settings', '0', -1);
+    }
+
+    async function loadModuleSettings(): Promise<void> {
+        await getSetting(Settings.MODULE_ADJUST_FAVOURITES);
+        await getSetting(Settings.MODULE_ADJUST_LISTINGS);
+        await getSetting(Settings.MODULE_ADJUST_MARKET);
+        await getSetting(Settings.MODULE_ADJUST_SALES);
+        await getSetting(Settings.MODULE_ADJUST_SETTINGS);
+        await getSetting(Settings.MODULE_ADJUST_SHARE);
+        await getSetting(Settings.MODULE_ADJUST_SHOP);
+        await getSetting(Settings.MODULE_PSE_LISTINGS);
+        await getSetting(Settings.MODULE_PSE_MARKET);
+        await getSetting(Settings.MODULE_PSE_START);
+        await getSetting(Settings.MODULE_PSE_TRANSFORMGRAPH);
     }
 
     init();

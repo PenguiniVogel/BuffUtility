@@ -1,6 +1,6 @@
 module Adjust_Shop {
 
-    DEBUG && console.debug('[BuffUtility] Module.Adjust_Shop');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[BuffUtility] Module.Adjust_Shop');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -8,7 +8,14 @@ module Adjust_Shop {
 
     // module
 
-    function init(): void {
+    async function init(): Promise<void> {
+        if (!await getSetting(Settings.MODULE_ADJUST_SHOP)) {
+            console.debug('%c■', 'color: #ff0000', '[BuffUtility] Adjust_Shop - disabled');
+            return;
+        } else {
+            console.debug('%c■', 'color: #00ff00', '[BuffUtility] Adjust_Shop');
+        }
+
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, (e: CustomEvent<InjectionService.TransferData<unknown>>) => process(e.detail));
 
         InjectionServiceLib.injectCSS(`

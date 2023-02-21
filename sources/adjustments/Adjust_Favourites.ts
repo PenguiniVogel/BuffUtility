@@ -1,6 +1,6 @@
 module Adjust_Favourites {
 
-    DEBUG && console.debug('[BuffUtility] Module.Adjust_Favourites');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[BuffUtility] Module.Adjust_Favourites');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -9,7 +9,12 @@ module Adjust_Favourites {
     // module
 
     async function init(): Promise<void> {
-        console.debug('[BuffUtility] Adjust_Favourites');
+        if (!await getSetting(Settings.MODULE_ADJUST_FAVOURITES)) {
+            console.debug('%c■', 'color: #ff0000', '[BuffUtility] Adjust_Favourites');
+            return;
+        } else {
+            console.debug('%c■', 'color: #00ff00', '[BuffUtility] Adjust_Favourites');
+        }
 
         let rows = <NodeListOf<HTMLElement>>(document.querySelector('table.list_tb.list_tb_csgo')?.querySelectorAll('tr'));
 
