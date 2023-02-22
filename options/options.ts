@@ -583,6 +583,12 @@ module Options {
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Trade Records" tab for an items page, showing things such as currency conversion, and difference to reference price.'
         });
 
+        // Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS
+        experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS, {
+            title: 'Show Souvenir Teams',
+            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Utilize the attributes field in market listings and favorites to display the teams of a souvenir package.'
+        });
+
         // --- PSE Settings ---
 
         // Settings.PSE_ADVANCED_PAGE_NAVIGATION
