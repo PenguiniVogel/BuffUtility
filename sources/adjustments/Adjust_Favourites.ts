@@ -61,6 +61,7 @@ module Adjust_Favourites {
             }
 
             let assetInfo: BuffTypes.SellOrder.AssetInfo = JSON.parse(aAssetInfo.getAttribute('data-asset-info'));
+            let goodsName = aAssetInfo.getAttribute('data-goods-name');
 
             async function _csgoSpecific(): Promise<void> {
                 let itemType = nameContainer.innerText.split(' | ')[0].replace('（★）', '');
@@ -104,6 +105,15 @@ module Adjust_Favourites {
                     Util.addAnchorClipboardAction(aCopyGen, gen);
 
                     wearContainer.appendChild(aCopyGen);
+                } else if (goodsName.endsWith('Souvenir Package')) {
+                    let teams = assetInfo.info.tournament_tags.map(x => String(x.localized_name)).slice(0, 2);
+                    // sticker div is empty when item has no stickers
+                    let stickerContainer = <HTMLElement>row.querySelector('.csgo_sticker');
+                    let teamsDiv = document.createElement('div');
+                    teamsDiv.setAttribute('style', 'display: flex; flex-direction: column; align-items: center; color: #ffd700; opacity: 0.8;');
+                    teamsDiv.setAttribute('class', 'f_12px');
+                    teamsDiv.innerHTML = `<span>${teams[0]}</span><div class="clear"></div><span>vs</span><div class="clear"></div><span>${teams[1]}</span>`;
+                    stickerContainer.appendChild(teamsDiv);
                 }
             }
 
@@ -125,6 +135,8 @@ module Adjust_Favourites {
 
             let price = +aBuy.getAttribute('data-price');
             let lowest_bargain_price = price * 0.8;
+
+
 
             if (await getSetting(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN)) {
                 // Note: this feature is yet unable to check if the seller has disabled bargaining
