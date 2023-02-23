@@ -156,6 +156,7 @@ module ExtensionSettings {
         EXPERIMENTAL_SHOW_LISTING_DATE = 'show_listing_date',
         // 2.2.0 -> setting will become default
         EXPERIMENTAL_ADJUST_TRADE_RECORDS = 'adjust_trade_records',
+        EXPERIMENTAL_SHOW_SOUVENIR_TEAMS = 'show_souvenir_teams',
 
         ALLOW_EXTENSION_REQUESTS = 'allow_extension_requests',
 
@@ -228,6 +229,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT]: number;
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS]: boolean;
+        [Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS]: boolean;
 
         // Misc
 
@@ -549,6 +551,12 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS]: {
             default: true,
             export: '2x14',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS]: {
+            default: false,
+            export: '2x15',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },

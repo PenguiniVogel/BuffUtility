@@ -329,6 +329,16 @@ module Adjust_Listings {
 
                         Util.signal(['updateHashData'], null, paramData);
                     });
+                } else if (goodsInfo.market_hash_name.endsWith('Souvenir Package') && await getSetting(Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS)) {
+                    let teams = dataRow.asset_info.info.tournament_tags.map(x => String(x.localized_name)).slice(0, 2);
+                    // sticker div is empty when item has no stickers
+                    let stickerContainer = <HTMLElement>row.querySelector('.csgo_sticker');
+                    let teamsDiv = document.createElement('div');
+                    teamsDiv.setAttribute('class', 'f_12px');
+                    teamsDiv.setAttribute('style', 'display: flex; flex-direction: column; align-items: center; color: #ffd700; opacity: 0.8;');
+                    teamsDiv.innerHTML = `<span>${teams[0]}</span><div class="clear"></div><span>vs</span><div class="clear"></div><span>${teams[1]}</span>`;
+                    stickerContainer.setAttribute('style', 'float: none;');
+                    stickerContainer.appendChild(teamsDiv);
                 }
 
                 const aShare = document.createElement('a');
