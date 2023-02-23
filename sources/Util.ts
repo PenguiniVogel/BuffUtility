@@ -330,32 +330,6 @@ module Util {
             }
         }
 
-        // if (content && typeof content == 'string' && content.length > 0) {
-        //     if (!isPreContentSet) {
-        //         // isPreContentSet = true;
-        //         selfClosing = false;
-        //
-        //         result += '>';
-        //     }
-        //
-        //     result += content;
-        // } else {
-        //     if (Array.isArray(content) && content.length > 0) {
-        //         for (let l_Content of <string[]>content) {
-        //             if (!l_Content || l_Content.length == 0) continue;
-        //
-        //             if (!isPreContentSet) {
-        //                 isPreContentSet = true;
-        //                 selfClosing = false;
-        //
-        //                 result += '>';
-        //             }
-        //
-        //             result += l_Content;
-        //         }
-        //     }
-        // }
-
         return `${result}${selfClosing ? '/>' : `</${tag}>`}`;
     }
 

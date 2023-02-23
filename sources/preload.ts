@@ -84,18 +84,17 @@ module Preload {
         Cookie.write('pse_settings', '0', -1);
     }
 
-    async function loadModuleSettings(): Promise<void> {
-        await getSetting(Settings.MODULE_ADJUST_FAVOURITES);
-        await getSetting(Settings.MODULE_ADJUST_LISTINGS);
-        await getSetting(Settings.MODULE_ADJUST_MARKET);
-        await getSetting(Settings.MODULE_ADJUST_SALES);
-        await getSetting(Settings.MODULE_ADJUST_SETTINGS);
-        await getSetting(Settings.MODULE_ADJUST_SHARE);
-        await getSetting(Settings.MODULE_ADJUST_SHOP);
-        await getSetting(Settings.MODULE_PSE_LISTINGS);
-        await getSetting(Settings.MODULE_PSE_MARKET);
-        await getSetting(Settings.MODULE_PSE_START);
-        await getSetting(Settings.MODULE_PSE_TRANSFORMGRAPH);
+    function loadModuleSettings(): void {
+        getSetting(Settings.MODULE_ADJUST_FAVOURITES);
+        getSetting(Settings.MODULE_ADJUST_LISTINGS);
+        getSetting(Settings.MODULE_ADJUST_MARKET);
+        getSetting(Settings.MODULE_ADJUST_SALES);
+        getSetting(Settings.MODULE_ADJUST_SETTINGS);
+        getSetting(Settings.MODULE_ADJUST_SHARE);
+        getSetting(Settings.MODULE_ADJUST_SHOP);
+        getSetting(Settings.MODULE_PSE_LISTINGS);
+        getSetting(Settings.MODULE_PSE_MARKET);
+        getSetting(Settings.MODULE_PSE_TRANSFORMGRAPH);
     }
 
     init();
