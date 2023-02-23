@@ -13,9 +13,12 @@ module Options {
     interface DisplayInfo {
         title: string,
         description: string,
-        csgoOnly?: boolean,
-        steamOnly?: boolean,
-        requiresRequest?: boolean
+        tags?: {
+            csgoOnly?: boolean,
+            steamOnly?: boolean,
+            requiresRequest?: boolean,
+            isModule?: boolean
+        }
     }
 
     interface SelectOption {
@@ -24,13 +27,35 @@ module Options {
     }
 
     function createSettingHTML(setting: Settings, info: DisplayInfo, settingHTML: string): string {
+        function translateTags(tags: DisplayInfo['tags'] = {}): string {
+            let tagString = '';
+
+            if (tags.csgoOnly) {
+                tagString += ' <u style="color: var(--color-light);">(CS:GO Only)</u>';
+            }
+
+            if (tags.steamOnly) {
+                tagString += ' <u style="color: var(--color-steam);">(Steam Only)</u>';
+            }
+
+            if (tags.requiresRequest) {
+                tagString += ' <u style="color: #b91010;" title="This feature is a REQUIRE REQUEST feature, use with caution.">(RR ⚠)</u>';
+            }
+
+            if (tags.isModule) {
+                tagString += ' <u style="color: #fffdfd; background: #006447; padding: 1px; border: 1px solid #eee;">Module</u>';
+            }
+
+            return tagString;
+        }
+        
         return Util.buildHTML('tr', {
             content: [
                 Util.buildHTML('td', {
                     content: [
                         Util.buildHTML('div', {
                             class: 'setting-title',
-                            content: [ info.title, info.csgoOnly ? ' <u style="color: var(--color-light);">(CS:GO Only)</u>' : '', info.steamOnly ? ' <u style="color: var(--color-steam);">(Steam Only)</u>' : '', info.requiresRequest ? ' <u style="color: #b91010;" title="This feature is a REQUIRE REQUEST feature, use with caution.">(RR ⚠)</u>' : '' ]
+                            content: [ info.title, translateTags(info.tags) ]
                         }),
                         Util.buildHTML('div', {
                             class: 'setting-description action',
@@ -181,6 +206,7 @@ module Options {
         let advancedSettings: string = '';
         let experimentalSettings: string = '';
         let pseSettings: string = '';
+        let modulesSettings: string = '';
 
         // --- Normal Settings ---
 
@@ -213,14 +239,18 @@ module Options {
         normalSettings += await createCheckboxOption(Settings.CAN_EXPAND_SCREENSHOTS, {
             title: 'Can expand preview',
             description: 'Can previews be expanded on sell listings. This only works if "Preview screenshots" is turned on and if the item has been inspected.',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         });
 
         // Settings.EXPAND_SCREENSHOTS_BACKDROP
         normalSettings += await createCheckboxOption(Settings.EXPAND_SCREENSHOTS_BACKDROP, {
             title: 'Expanded preview backdrop',
             description: 'Adds a transparent black backdrop to preview images to add some contrast.',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         });
 
         // Settings.APPLY_STEAM_TAX
@@ -239,7 +269,9 @@ module Options {
         normalSettings += await createMultiCheckboxOption(Settings.LISTING_OPTIONS, {
             title: 'Listing options',
             description: 'Define what options show up on each listing.<br/>3D Inspect: Buffs 3D Inspect.<br/>Inspect in server: Buffs inspect server.<br/>Copy !gen/!gengl: Quickly copy !gen codes.<br/>Share: Opens the share page.<br/>Match floatdb: Tries to find the skin on floatdb.<br/>Find Similar: Tries finding similar listings.<br/>Detail: A replacement button for the new detail UI.',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         }, [
             '3D Inspect',
             'Inspect in server',
@@ -292,15 +324,17 @@ module Options {
         advancedSettings += createSelectOption(Settings.DEFAULT_SORT_BY, {
             title: 'Default sort by',
             description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Popular: by popularity.<br>Sticker: By Sticker price descending.',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         }, [
             {
                 displayText: 'Default',
                 value: ExtensionSettings.FILTER_SORT_BY.DEFAULT
             },
             {
-                displayText: 'Newest',
-                value: ExtensionSettings.FILTER_SORT_BY.NEWEST
+                displayText: 'Latest',
+                value: ExtensionSettings.FILTER_SORT_BY.LATEST
             },
             {
                 displayText: 'Price Ascending',
@@ -325,6 +359,10 @@ module Options {
             {
                 displayText: 'Sticker',
                 value: ExtensionSettings.FILTER_SORT_BY.STICKER
+            },
+            {
+                displayText: 'Time Cost Ascending',
+                value: ExtensionSettings.FILTER_SORT_BY.TIME_COST
             }
         ], await getSetting(Settings.DEFAULT_SORT_BY));
 
@@ -332,7 +370,9 @@ module Options {
         advancedSettings += createSelectOption(Settings.DEFAULT_STICKER_SEARCH, {
             title: 'Default sticker search',
             description: 'Search listings with sticker settings automatically.',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         }, [
             {
                 displayText: 'All',
@@ -368,7 +408,9 @@ module Options {
         advancedSettings += createSelectOption(Settings.EXPAND_TYPE, {
             title: 'Expand preview type',
             description: 'Either expand into a zoomed preview image or expand into the inspect image.',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         }, [
             {
                 displayText: 'Preview',
@@ -384,7 +426,9 @@ module Options {
         advancedSettings += createSelectOption(Settings.CUSTOM_FOP, {
             title: 'Custom Preview resolution',
             description: 'Set the resolution of preview images. You should <b>not</b> change this from <b>Auto</b> unless you have slow internet, then you should choose one of the lower values (e.g. 245, 490 or 980).',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         }, [
             {
                 displayText: 'Auto',
@@ -488,7 +532,9 @@ module Options {
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_POPULAR, {
             title: 'Adjust Popular Tab',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed with 2.2.0 and become default.</small>',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         });
 
         // Settings.EXPERIMENTAL_FETCH_NOTIFICATION
@@ -502,7 +548,9 @@ module Options {
             experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
                 title: 'Fetch Favourite Bargain Status',
                 description: '<u><b>BuffUtility<br>Experimental<br></b></u>This will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
-                requiresRequest: true
+                tags: {
+                    requiresRequest: true
+                }
             });
         }
 
@@ -511,7 +559,9 @@ module Options {
             experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, {
                 title: 'Fetch item price history',
                 description: '<u><b>BuffUtility<br>Experimental<br></b></u>This will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
-                requiresRequest: true
+                tags: {
+                    requiresRequest: true
+                }
             }, [
                 {
                     displayText: 'Off',
@@ -544,14 +594,18 @@ module Options {
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
             title: 'Adjust Shop Pages',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with 2.2.0 and become default behaviour.</small>',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         });
 
         // Settings.EXPERIMENTAL_ADJUST_SHARE
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHARE, {
             title: 'Adjust Share Pages',
             description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Share" pages. This adds the ability to find the listing directly from the share link.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>',
-            csgoOnly: true
+            tags: {
+                csgoOnly: true
+            }
         });
 
         // Settings.EXPERIMENTAL_ALLOW_BULK_BUY
@@ -595,14 +649,18 @@ module Options {
         pseSettings += await createCheckboxOption(Settings.PSE_ADVANCED_PAGE_NAVIGATION, {
             title: 'History Page Navigation',
             description: 'Have many thousands of pages in your Market History? Ever wish you could jump to page 100? With this setting you can.',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         });
 
         // Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE
         pseSettings += createSelectOption(Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE, {
             title: 'History Page Navigation Size',
             description: 'Wan\'t more than 10 items per page? Like on the sell order, this setting makes 10, 30 and 100 items per page available.',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         }, [
             {
                 displayText: '10',
@@ -622,35 +680,45 @@ module Options {
         pseSettings += await createCheckboxOption(Settings.PSE_CALCULATE_BUYORDER_SUMMARY, {
             title: 'Calculate BuyOrder Summary',
             description: 'Shows the buy order summary, total per buy order, max buy order you can place, and how much has been placed.',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         });
 
         // Settings.PSE_BUYORDER_CANCEL_CONFIRMATION
         pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_CANCEL_CONFIRMATION, {
             title: 'BuyOrder Cancel Confirmation',
             description: 'Hate accidentally cancelling a buy order? Well no more! Now you get asked... once.',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         });
 
         // Settings.PSE_BUYORDER_SCROLLING
         pseSettings += await createCheckboxOption(Settings.PSE_BUYORDER_SCROLLING, {
             title: 'BuyOrder Scrolling',
             description: 'Hate how it takes up the whole page? Now the content height gets reduced to 50vh, and a scrollbar shows instead. This also adds a search field next to the Name header to quickly look for buy-orders.',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         });
 
         // Settings.PSE_GRAPH_SHOW_YEARS
         pseSettings += await createCheckboxOption(Settings.PSE_GRAPH_SHOW_YEARS, {
             title: 'Steam Graph - Show Years',
             description: 'Display the year in the Steam Median Sales graph.',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         });
 
         // Settings.PSE_GRAPH_SHOW_VOLUME
         pseSettings += await createCheckboxOption(Settings.PSE_GRAPH_SHOW_VOLUME, {
             title: 'Steam Graph - Show Volume',
             description: 'Display the volume as additional series in the Steam Median Sales graph.',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         });
 
         // Settings.PSE_FORCE_ITEM_ACTIVITY TODO
@@ -663,29 +731,129 @@ module Options {
         pseSettings += await createCheckboxOption(Settings.PSE_ADD_VIEW_ON_BUFF, {
             title: 'Add "View on Buff"',
             description: 'Add a quick button to open the buff.163 sale page for the specified item.',
-            csgoOnly: true,
-            steamOnly: true
+            tags: {
+                csgoOnly: true,
+                steamOnly: true
+            }
         });
 
         // Settings.PSE_HIDE_ACCOUNT_DETAILS
         pseSettings += await createCheckboxOption(Settings.PSE_HIDE_ACCOUNT_DETAILS, {
             title: 'Hide Account Details',
             description: 'Blurs the billing information panel.',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         });
 
         // Settings.PSE_MERGE_ACTIVE_LISTINGS
         pseSettings += await createCheckboxOption(Settings.PSE_MERGE_ACTIVE_LISTINGS, {
             title: 'Merge Active Listings',
             description: '',
-            steamOnly: true
+            tags: {
+                steamOnly: true
+            }
         });
+
+        // --- Modules ---
+
+        // Settings.MODULE_ADJUST_FAVOURITES
+        modulesSettings += await createCheckboxOption(Settings.MODULE_ADJUST_FAVOURITES, {
+            title: 'MODULE_ADJUST_FAVOURITES',
+            description: 'Adjustments in the Buff favourites<br>Active on:<br><code>[.*]buff.163.com/user-center/bookmark/sell_order*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_ADJUST_LISTINGS
+        modulesSettings += await createCheckboxOption(Settings.MODULE_ADJUST_LISTINGS, {
+            title: 'MODULE_ADJUST_LISTINGS',
+            description: 'Adjustments in the Buff listing view<br>Active on:<br><code>[.*]buff.163.com/goods/*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_ADJUST_MARKET
+        modulesSettings += await createCheckboxOption(Settings.MODULE_ADJUST_MARKET, {
+            title: 'MODULE_ADJUST_MARKET',
+            description: 'Adjustments in the Buff market view<br>Active on:<br><code>[.*]buff.163.com/market/*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_ADJUST_SALES
+        modulesSettings += await createCheckboxOption(Settings.MODULE_ADJUST_SALES, {
+            title: 'MODULE_ADJUST_SALES',
+            description: 'Adjustments in the Buff sales view<br>Active on:<br><code>[.*]buff.163.com/market/sell_order/on_sale*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_ADJUST_SETTINGS
+        modulesSettings += await createCheckboxOption(Settings.MODULE_ADJUST_SETTINGS, {
+            title: 'MODULE_ADJUST_SETTINGS',
+            description: '<u>Deprecated</u> Adjustments in the Buff settings view<br>Active on:<br><code>[.*]buff.163.com/user-center/profile</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_ADJUST_SHARE
+        modulesSettings += await createCheckboxOption(Settings.MODULE_ADJUST_SHARE, {
+            title: 'MODULE_ADJUST_SHARE',
+            description: '<u>Deprecated</u> Adjustments in the Buff share view<br>Active on:<br><code>[.*]buff.163.com/market/m/item_detail?*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_ADJUST_SHOP
+        modulesSettings += await createCheckboxOption(Settings.MODULE_ADJUST_SHOP, {
+            title: 'MODULE_ADJUST_SHOP',
+            description: 'Adjustments in the Buff shop view<br>Active on:<br><code>[.*]buff.163.com/shop*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_PSE_LISTINGS
+        modulesSettings += await createCheckboxOption(Settings.MODULE_PSE_LISTINGS, {
+            title: 'MODULE_PSE_LISTINGS',
+            description: 'Adjustments in the Steam listing view<br>Active on:<br><code>[.*]steamcommunity.com/market/listings/*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_PSE_MARKET
+        modulesSettings += await createCheckboxOption(Settings.MODULE_PSE_MARKET, {
+            title: 'MODULE_PSE_MARKET',
+            description: 'Adjustments in the Steam market view<br>Active on:<br><code>[.*]steamcommunity.com/market</code><br><code>[.*]steamcommunity.com/market/</code><br><code>[.*]steamcommunity.com/market?*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
+        // Settings.MODULE_PSE_TRANSFORMGRAPH
+        modulesSettings += await createCheckboxOption(Settings.MODULE_PSE_TRANSFORMGRAPH, {
+            title: 'MODULE_PSE_TRANSFORMGRAPH',
+            description: 'Adjustments to the Steam sales graph<br>Active on:<br><code>[.*]steamcommunity.com/market/listings/*</code>',
+            tags: {
+                isModule: true
+            }
+        });
+
 
         // append html
         document.querySelector('#settings-normal tbody').innerHTML = normalSettings;
         document.querySelector('#settings-advanced tbody').innerHTML = advancedSettings;
         document.querySelector('#settings-experimental tbody').innerHTML = experimentalSettings;
         document.querySelector('#settings-pse tbody').innerHTML = pseSettings;
+        document.querySelector('#settings-modules tbody').innerHTML = modulesSettings;
 
         // add events [data-target]
         (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-target]')).forEach(element => {

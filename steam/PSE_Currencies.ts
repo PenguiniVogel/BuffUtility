@@ -1,6 +1,6 @@
 module PSE_Currencies {
 
-    DEBUG && console.debug('[PSE] Module.PSE_Currencies');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[BuffUtility:PSE] Module.PSE_Currencies');
 
     export interface SteamCurrency {
         code: string,

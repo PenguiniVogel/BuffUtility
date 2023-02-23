@@ -1,6 +1,6 @@
 module PSE_Util {
 
-    DEBUG && console.debug('[PSE] Module.PSE_Util');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[BuffUtility:PSE] Module.PSE_Util');
 
     export function addBuyOrderCancelConfirmation(): void {
         InjectionService.shadowFunction('CancelMarketBuyOrder', 'null', function (buy_orderid: string) {

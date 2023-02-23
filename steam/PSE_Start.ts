@@ -1,6 +1,6 @@
 module PSE_Start {
 
-    DEBUG && console.debug('%c■', 'color: #0000ff', 'Module.PSE_Start');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[BuffUtility:PSE] Module.PSE_Start');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -8,14 +8,8 @@ module PSE_Start {
 
     // module
 
-    async function init(): Promise<void> {
-        if (!await getSetting(Settings.MODULE_PSE_START)) {
-            console.debug('%c■', 'color: #ff0000', '[BuffUtility] PSE_Start - disabled');
-            return;
-        } else {
-            console.debug('%c■', 'color: #00ff00', '[BuffUtility] PSE_Start');
-        }
-
+    function init(): void {
+        console.debug('%c■', 'color: #00ff00', '[BuffUtility:PSE] PSE_Start');
         addSteamCSS();
     }
 

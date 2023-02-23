@@ -70,13 +70,14 @@ module ExtensionSettings {
 
     export const enum FILTER_SORT_BY {
         DEFAULT = 'default',
-        NEWEST = 'created.desc',
+        LATEST = 'created.desc',
         PRICE_ASCENDING = 'price.asc',
         PRICE_DESCENDING = 'price.desc',
         FLOAT_ASCENDING = 'paintwear.asc',
         FLOAT_DESCENDING = 'paintwear.desc',
         HOT_DESCENDING = 'heat.desc',
-        STICKER = 'sticker.desc'
+        STICKER = 'sticker.desc',
+        TIME_COST = 'seller.asc'
     }
 
     export const enum FILTER_STICKER_SEARCH {
@@ -128,34 +129,35 @@ module ExtensionSettings {
         USE_SCHEME = 'use_scheme',
         LOCATION_RELOAD_NEWEST = 'location_reload_newest',
 
-        // 2.2.0 -> setting will be moved to advanced settings
+        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain',
-        // 2.2.0 -> setting will be removed, default procedure
+        // 2.3.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_POPULAR = 'experimental_adjust_popular',
-        // 2.2.0 -> setting will be merged into show toast on action
+        // 2.3.0 -> setting will be merged into show toast on action
         EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification',
         // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS = 'fetch_favourite_bargain_status',
         // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY = 'fetch_item_price_history',
-        // 2.2.0 -> setting will be moved to advanced settings
+        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ADJUST_MARKET_CURRENCY = 'adjust_market_currency',
-        // 2.2.0 -> setting will be moved to advanced settings
+        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_FORMAT_CURRENCY = 'format_currency',
-        // 2.2.0 -> setting will be removed, default procedure
+        // 2.3.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_SHOP = 'experimental_adjust_shop',
-        // 2.2.0 -> setting will be removed, default procedure
+        // 2.3.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_SHARE = 'experimental_adjust_share',
-        // 2.2.0 -> setting will be moved to advanced settings
+        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ALLOW_BULK_BUY = 'allow_bulk_buy',
-        // 2.2.0 -> setting will be moved to advanced settings
+        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_AUTOMATIC_BARGAIN = 'automatic_bargain',
-        // 2.2.0 -> setting will be moved to advanced settings
+        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT = 'automatic_bargain_default',
-        // 2.2.0 -> setting will be moved to advanced settings
+        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_SHOW_LISTING_DATE = 'show_listing_date',
-        // 2.2.0 -> setting will become default
+        // 2.3.0 -> setting will become default
         EXPERIMENTAL_ADJUST_TRADE_RECORDS = 'adjust_trade_records',
+        // 2.3.0 -> setting will move to advanced settings
         EXPERIMENTAL_SHOW_SOUVENIR_TEAMS = 'show_souvenir_teams',
 
         ALLOW_EXTENSION_REQUESTS = 'allow_extension_requests',
@@ -174,7 +176,6 @@ module ExtensionSettings {
         PSE_MERGE_ACTIVE_LISTINGS = 'pse_merge_active_listings',
 
         // Modules
-
         MODULE_ADJUST_FAVOURITES = 'module_adjust_favourites',
         MODULE_ADJUST_LISTINGS = 'module_adjust_listings',
         MODULE_ADJUST_MARKET = 'module_adjust_market',
@@ -184,7 +185,6 @@ module ExtensionSettings {
         MODULE_ADJUST_SHOP = 'module_adjust_shop',
         MODULE_PSE_LISTINGS = 'module_pse_listings',
         MODULE_PSE_MARKET = 'module_pse_market',
-        MODULE_PSE_START = 'module_pse_start',
         MODULE_PSE_TRANSFORMGRAPH = 'module_pse_transformgraph',
     }
 
@@ -260,7 +260,6 @@ module ExtensionSettings {
         [Settings.MODULE_ADJUST_SHOP]: boolean;
         [Settings.MODULE_PSE_LISTINGS]: boolean;
         [Settings.MODULE_PSE_MARKET]: boolean;
-        [Settings.MODULE_PSE_START]: boolean;
         [Settings.MODULE_PSE_TRANSFORMGRAPH]: boolean;
     }
 
@@ -271,10 +270,6 @@ module ExtensionSettings {
         NONE = 0,
         BOOLEAN = 1,
         BOOLEAN_ARRAY = 2
-    }
-
-    interface InternalStructureTransformMapping {
-        boolean: InternalStructureTransform.BOOLEAN,
     }
 
     type InternalSetting<T extends Settings> = {
@@ -376,13 +371,14 @@ module ExtensionSettings {
             default: FILTER_SORT_BY.DEFAULT,
             allowedValues: [
                 FILTER_SORT_BY.DEFAULT,
-                FILTER_SORT_BY.NEWEST,
+                FILTER_SORT_BY.LATEST,
                 FILTER_SORT_BY.PRICE_ASCENDING,
                 FILTER_SORT_BY.PRICE_DESCENDING,
                 FILTER_SORT_BY.FLOAT_ASCENDING,
                 FILTER_SORT_BY.FLOAT_DESCENDING,
                 FILTER_SORT_BY.HOT_DESCENDING,
-                FILTER_SORT_BY.STICKER
+                FILTER_SORT_BY.STICKER,
+                FILTER_SORT_BY.TIME_COST
             ],
             export: '0x13',
             validator: validatePropertyValue
@@ -691,12 +687,6 @@ module ExtensionSettings {
         [Settings.MODULE_PSE_MARKET]: {
             default: true,
             export: 'Mx8',
-            transform: InternalStructureTransform.BOOLEAN,
-            validator: validateBoolean
-        },
-        [Settings.MODULE_PSE_START]: {
-            default: true,
-            export: 'Mx9',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },

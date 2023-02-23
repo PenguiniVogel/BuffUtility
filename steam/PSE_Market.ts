@@ -1,6 +1,6 @@
 module PSE_Market {
 
-    DEBUG && console.debug('%c■', 'color: #0000ff', '[PSE] Module.PSE_Market');
+    DEBUG && console.debug('%c■', 'color: #0000ff', '[BuffUtility:PSE] Module.PSE_Market');
 
     // imports
     import Settings = ExtensionSettings.Settings;
@@ -36,10 +36,10 @@ module PSE_Market {
 
     async function init(): Promise<void> {
         if (!await getSetting(Settings.MODULE_PSE_MARKET)) {
-            console.debug('%c■', 'color: #ff0000', '[BuffUtility] PSE_Market - disabled');
+            console.debug('%c■', 'color: #ff0000', '[BuffUtility:PSE] PSE_Market - disabled');
             return;
         } else {
-            console.debug('%c■', 'color: #00ff00', '[BuffUtility] PSE_Market');
+            console.debug('%c■', 'color: #00ff00', '[BuffUtility:PSE] PSE_Market');
         }
 
         window.addEventListener(GlobalConstants.BUFF_UTILITY_INJECTION_SERVICE, async (e: CustomEvent<InjectionService.TransferData<unknown>>) => {
