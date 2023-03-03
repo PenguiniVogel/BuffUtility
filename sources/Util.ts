@@ -391,10 +391,10 @@ module Util {
 
     // <a> action injection
 
-    export function addAnchorShareAction(classid: string, instanceid: string, assetid: string, sellOrderId: string): HTMLElement {
+    export function addAnchorShareAction(goods_id: number, classid: string, instanceid: string, assetid: string, sellOrderId: string): HTMLElement {
         const aShare = document.createElement('a');
         aShare.setAttribute('style', 'cursor: pointer;');
-        aShare.setAttribute('href', `https://buff.163.com/market/m/item_detail?classid=${classid}&instanceid=${instanceid}&game=csgo&assetid=${assetid}&sell_order_id=${sellOrderId}`);
+        aShare.setAttribute('href', `https://buff.163.com/goods/${goods_id}?appid=730&classid=${classid}&instanceid=${instanceid}&game=csgo&assetid=${assetid}&sell_order_id=${sellOrderId}`);
         aShare.setAttribute('target', '_blank');
         aShare.innerHTML = '<i class="icon icon_link j_tips_handler" data-direction="bottom" data-title="Share"></i>';
 

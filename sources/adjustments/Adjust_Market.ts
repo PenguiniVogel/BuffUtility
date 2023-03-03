@@ -261,7 +261,7 @@ module Adjust_Market {
                 priceBox.append(span);
             }
 
-            tagBox.insertBefore(Util.addAnchorShareAction(dataRow.asset_info.classid, dataRow.asset_info.instanceid, dataRow.asset_info.assetid, dataRow.id), tagBox.firstChild);
+            tagBox.insertBefore(Util.addAnchorShareAction(dataRow.goods_id, dataRow.asset_info.classid, dataRow.asset_info.instanceid, dataRow.asset_info.assetid, dataRow.id), tagBox.firstChild);
 
             const schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 

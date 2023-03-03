@@ -63,7 +63,7 @@ module Adjust_Shop {
                 const schemaData = (await ISchemaHelper.find(goodsInfo.market_hash_name, true, goodsInfo?.tags?.exterior?.internal_name == 'wearcategoryna')).data[0];
 
                 if (tagBox.children.length == 2) {
-                    tagBox.insertBefore(Util.addAnchorShareAction(dataRow.asset_info.classid, dataRow.asset_info.instanceid, dataRow.asset_info.assetid, dataRow.id), tagBox.firstChild);
+                    tagBox.insertBefore(Util.addAnchorShareAction(dataRow.goods_id, dataRow.asset_info.classid, dataRow.asset_info.instanceid, dataRow.asset_info.assetid, dataRow.id), tagBox.firstChild);
                     // only append if we have schema data, which we always should have, but some items have weird CH mappings
                     if (schemaData) {
                         let aCopyGen = document.createElement('a');
