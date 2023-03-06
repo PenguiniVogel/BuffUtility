@@ -418,6 +418,16 @@ module Util {
         });
     }
 
+    export function addSouvenirTeams(row: HTMLElement, teams: string[] | [string, string]): void {
+        let stickerContainer = <HTMLElement>row.querySelector('.csgo_sticker');
+        let teamsDiv = document.createElement('div');
+        teamsDiv.setAttribute('class', 'f_12px');
+        teamsDiv.setAttribute('style', 'display: flex; flex-direction: column; align-items: center; color: #ffd700; opacity: 0.8;');
+        teamsDiv.innerHTML = `<span>${teams[0]}</span><div class="clear"></div><span>vs</span><div class="clear"></div><span>${teams[1]}</span>`;
+        stickerContainer.setAttribute('style', 'float: none;');
+        stickerContainer.appendChild(teamsDiv);
+    }
+
     /**
      * Embed decimals in a <small></small> element
      *

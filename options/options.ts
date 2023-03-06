@@ -721,6 +721,15 @@ module Options {
             }
         });
 
+        // Settings.PSE_GRAPH_CUMULATE_RECENT
+        pseSettings += await createCheckboxOption(Settings.PSE_GRAPH_CUMULATE_RECENT, {
+            title: 'Steam Graph - Cumulate Recent Volume',
+            description: 'Instead of displaying the recent days volume hourly, it cumulates it together like other days.',
+            tags: {
+                steamOnly: true
+            }
+        });
+
         // Settings.PSE_FORCE_ITEM_ACTIVITY TODO
         // pseSettings += await createCheckboxOption(Settings.PSE_FORCE_ITEM_ACTIVITY, {
         //     title: 'Force Item Activity',

@@ -57,6 +57,7 @@ module PSE_TransformGraph {
 
         const showYears = await getSetting(Settings.PSE_GRAPH_SHOW_YEARS);
         const showVolume = await getSetting(Settings.PSE_GRAPH_SHOW_VOLUME);
+        const cumulateRecent = await getSetting(Settings.PSE_GRAPH_CUMULATE_RECENT);
 
         if (showYears || showVolume) {
             const walletInfo: {
@@ -73,23 +74,73 @@ module PSE_TransformGraph {
             InjectionService.shadowFunction('pricehistory_zoomLifetime', 'null', cleanY2Axis);
             InjectionService.shadowFunction('pricehistory_zoomMonthOrLifetime', 'null', cleanY2Axis);
 
-            InjectionServiceLib.injectCode(`${PSE_transform_graph.toString()}\nPSE_transform_graph(${showYears}, ${showVolume}, '${steamCurrency?.symbol ?? ''}');`, 'body');
+            InjectionServiceLib.injectCode(`${PSE_transform_graph.toString()}\nPSE_transform_graph(${showYears}, ${showVolume}, ${cumulateRecent}, '${steamCurrency?.symbol ?? ''}');`, 'body');
         }
     }
 
-    function PSE_transform_graph(showYears: boolean, showVolume: boolean, currency: string): void {
+    function PSE_transform_graph(showYears: boolean, showVolume: boolean, cumulateRecent: boolean, currency: string): void {
         let maxSales = 0;
         let swappedData: [string, number, string][] = [];
 
         // don't swap data around if we don't even want it visible
         if (showVolume) {
-            swappedData = g_plotPriceHistory.data.slice()[0].map(x => {
+            let clonedData: [string, number, number][] = g_plotPriceHistory.data.slice()[0].map(x => {
                 const parsedVolume = parseInt(x[2]);
                 maxSales = Math.max(parsedVolume, maxSales, 0);
 
-                return [x[0], parsedVolume, `${x[1].toFixed(2)}${currency}`];
+                return [x[0], parsedVolume, x[1]];
             });
+
+            if (cumulateRecent) {
+                let groups: {
+                    [key: string]: [string, number, number][]
+                } = {};
+
+                // collect groups
+                for (const entry of clonedData) {
+                    const keyRegex = /^([A-Z][a-z]{2} \d{2} \d{4})/;
+                    const key = keyRegex.exec(entry[0])[1];
+
+                    let arr = (groups[key] ?? []);
+
+                    arr.push(entry);
+
+                    groups[key] = arr;
+                }
+
+                console.debug(clonedData);
+
+                clonedData = [];
+
+                // merge groups
+                const keys = Object.keys(groups);
+                for (const group of keys) {
+                    const collection = groups[group];
+
+                    if (collection.length > 1) {
+                        let totalVolume = 0;
+                        let averagePrice = 0;
+
+                        for (const entry of collection) {
+                            totalVolume += entry[1];
+                            averagePrice += entry[2];
+                        }
+
+                        averagePrice /= collection.length;
+
+                        clonedData.push([`${group} 01: +0`, totalVolume, averagePrice]);
+                    } else {
+                        clonedData.push(collection[0]);
+                    }
+                }
+            }
+
+            console.debug(clonedData);
+
+            swappedData = clonedData.map(x => [x[0], x[1], `${x[2].toFixed(2)}${currency}`]);
         }
+
+        console.debug(swappedData);
 
         g_plotPriceHistory.reInitialize([g_plotPriceHistory.data[0], swappedData], {
             title: {

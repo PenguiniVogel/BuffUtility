@@ -106,15 +106,16 @@ module Adjust_Favourites {
 
                     wearContainer.appendChild(aCopyGen);
                 } else if (goodsName.endsWith('Souvenir Package') && await getSetting(Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS)) {
-                    let teams = assetInfo.info.tournament_tags.map(x => String(x.localized_name)).slice(0, 2);
+                    let teams = assetInfo.info.tournament_tags.map(x => `${x.localized_name}`);
                     // sticker div is empty when item has no stickers
-                    let stickerContainer = <HTMLElement>row.querySelector('.csgo_sticker');
-                    let teamsDiv = document.createElement('div');
-                    teamsDiv.setAttribute('class', 'f_12px');
-                    teamsDiv.setAttribute('style', 'display: flex; flex-direction: column; align-items: center; color: #ffd700; opacity: 0.8;');
-                    teamsDiv.innerHTML = `<span>${teams[0]}</span><div class="clear"></div><span>vs</span><div class="clear"></div><span>${teams[1]}</span>`;
-                    stickerContainer.setAttribute('style', 'float: none;');
-                    stickerContainer.appendChild(teamsDiv);
+                    Util.addSouvenirTeams(row, teams);
+                    // let stickerContainer = <HTMLElement>row.querySelector('.csgo_sticker');
+                    // let teamsDiv = document.createElement('div');
+                    // teamsDiv.setAttribute('class', 'f_12px');
+                    // teamsDiv.setAttribute('style', 'display: flex; flex-direction: column; align-items: center; color: #ffd700; opacity: 0.8;');
+                    // teamsDiv.innerHTML = `<span>${teams[0]}</span><div class="clear"></div><span>vs</span><div class="clear"></div><span>${teams[1]}</span>`;
+                    // stickerContainer.setAttribute('style', 'float: none;');
+                    // stickerContainer.appendChild(teamsDiv);
                 }
             }
 

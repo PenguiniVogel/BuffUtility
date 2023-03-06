@@ -174,6 +174,7 @@ module ExtensionSettings {
         PSE_ADD_VIEW_ON_BUFF = 'pse_add_view_on_buff',
         PSE_HIDE_ACCOUNT_DETAILS = 'pse_hide_account_details',
         PSE_MERGE_ACTIVE_LISTINGS = 'pse_merge_active_listings',
+        PSE_GRAPH_CUMULATE_RECENT = 'pse_graph_cumulate_recent',
 
         // Modules
         MODULE_ADJUST_FAVOURITES = 'module_adjust_favourites',
@@ -248,6 +249,7 @@ module ExtensionSettings {
         [Settings.PSE_ADD_VIEW_ON_BUFF]: boolean;
         [Settings.PSE_HIDE_ACCOUNT_DETAILS]: boolean;
         [Settings.PSE_MERGE_ACTIVE_LISTINGS]: boolean;
+        [Settings.PSE_GRAPH_CUMULATE_RECENT]: boolean;
 
         // Modules
 
@@ -630,6 +632,12 @@ module ExtensionSettings {
         [Settings.PSE_MERGE_ACTIVE_LISTINGS]: {
             default: false,
             export: '9x10',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.PSE_GRAPH_CUMULATE_RECENT]: {
+            default: false,
+            export: '9x11',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
