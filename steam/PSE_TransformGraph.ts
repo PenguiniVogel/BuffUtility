@@ -108,8 +108,6 @@ module PSE_TransformGraph {
                     groups[key] = arr;
                 }
 
-                console.debug(clonedData);
-
                 clonedData = [];
 
                 // merge groups
@@ -135,12 +133,8 @@ module PSE_TransformGraph {
                 }
             }
 
-            console.debug(clonedData);
-
             swappedData = clonedData.map(x => [x[0], x[1], `${x[2].toFixed(2)}${currency}`]);
         }
-
-        console.debug(swappedData);
 
         g_plotPriceHistory.reInitialize([g_plotPriceHistory.data[0], swappedData], {
             title: {
