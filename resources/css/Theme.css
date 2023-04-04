@@ -166,6 +166,29 @@ html {
     background: var(--bu-color-1, #1f1f1f) !important;
 }
 
+/* weapon case popup */
+.dark-theme .popup_weaponbox,
+.dark-theme .popup_weaponbox .weapon-col1,
+.dark-theme .popup_weaponbox .weapon-col2 {
+    background: var(--bu-color-0, #121212);
+}
+
+
+.dark-theme .popup_weaponbox .weapon-col2 li {
+    background: var(--bu-color-0, #121212) !important;
+}
+
+.dark-theme .popup_weaponbox .weapon-col1 li.on,
+.dark-theme .popup_weaponbox li:hover {
+    background: var(--bu-color-1, #1f1f1f) !important;
+}
+
+.dark-theme .popup_weaponbox h2,
+.dark-theme .popup_weaponbox a,
+.dark-theme .popup_weaponbox .weapon-cate {
+    color: var(--bu-color-2, #bfbfbf) !important;
+}
+
 /* payment methods popup */
 .dark-theme .popup .popup-header,
 .dark-theme .popup .popup-tip,
