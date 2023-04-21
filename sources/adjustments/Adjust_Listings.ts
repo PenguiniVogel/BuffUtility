@@ -748,10 +748,13 @@ module Adjust_Listings {
 
         let spContainer = <HTMLElement>document.createElement('div');
 
-        stickerContainer.before(spContainer);
+        stickerContainer.prepend(spContainer);
 
         spContainer.outerHTML = Util.buildHTML('div', {
             class: 'f_12px c_Gray',
+            style: {
+                'text-align': 'center'
+            },
             attributes: {
                 'title': `BuffUtility SP% may not be 100% accurate, please always double check! &#10;Market Price: ${extractionMinPrice.toFixed(2)} | Listing Price: ${listingPrice.toFixed(2)} | Sticker Sum: ${stickerSum.toFixed(2)}&#10;( ${listingPrice.toFixed(2)} - ${extractionMinPrice.toFixed(2)} ) / ${stickerSum.toFixed(2)} => ${((listingPrice - extractionMinPrice) / stickerSum).toFixed(3)}`
             },
