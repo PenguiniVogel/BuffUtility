@@ -136,36 +136,22 @@ module ExtensionSettings {
         USE_SCHEME = 'use_scheme',
         LOCATION_RELOAD_NEWEST = 'location_reload_newest',
 
-        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN = 'allow_favourite_bargain',
-        // 2.3.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_POPULAR = 'experimental_adjust_popular',
-        // 2.3.0 -> setting will be merged into show toast on action
         EXPERIMENTAL_FETCH_NOTIFICATION = 'experimental_fetch_notification',
-        // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS = 'fetch_favourite_bargain_status',
-        // [TBA] -> setting will be moved to advanced settings
         EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY = 'fetch_item_price_history',
-        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ADJUST_MARKET_CURRENCY = 'adjust_market_currency',
-        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_FORMAT_CURRENCY = 'format_currency',
-        // 2.3.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_SHOP = 'experimental_adjust_shop',
-        // 2.3.0 -> setting will be removed, default procedure
         EXPERIMENTAL_ADJUST_SHARE = 'experimental_adjust_share',
-        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_ALLOW_BULK_BUY = 'allow_bulk_buy',
-        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_AUTOMATIC_BARGAIN = 'automatic_bargain',
-        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT = 'automatic_bargain_default',
-        // 2.3.0 -> setting will be moved to advanced settings
         EXPERIMENTAL_SHOW_LISTING_DATE = 'show_listing_date',
-        // 2.3.0 -> setting will become default
         EXPERIMENTAL_ADJUST_TRADE_RECORDS = 'adjust_trade_records',
-        // 2.3.0 -> setting will move to advanced settings
         EXPERIMENTAL_SHOW_SOUVENIR_TEAMS = 'show_souvenir_teams',
+        EXPERIMENTAL_FETCH_LISTING_SPP = 'fetch_listing_spp',
 
         ALLOW_EXTENSION_REQUESTS = 'allow_extension_requests',
 
@@ -238,6 +224,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: boolean;
         [Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS]: boolean;
         [Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS]: boolean;
+        [Settings.EXPERIMENTAL_FETCH_LISTING_SPP]: boolean;
 
         // Misc
 
@@ -273,7 +260,7 @@ module ExtensionSettings {
     }
 
     type REQUIRE_REQUESTS = Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS |
-        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY;
+        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY | Settings.EXPERIMENTAL_FETCH_LISTING_SPP;
 
     const enum InternalStructureTransform {
         NONE = 0,
@@ -567,6 +554,12 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS]: {
             default: false,
             export: '2x15',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
+        [Settings.EXPERIMENTAL_FETCH_LISTING_SPP]: {
+            default: false,
+            export: '2x16',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },

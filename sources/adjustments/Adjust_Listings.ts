@@ -5,6 +5,7 @@ module Adjust_Listings {
     // imports
     import Settings = ExtensionSettings.Settings;
     import getSetting = ExtensionSettings.getSetting;
+    import getRequestSetting = ExtensionSettings.getRequestSetting;
 
     // module
 
@@ -107,7 +108,7 @@ module Adjust_Listings {
 
             adjustBillOrderTransactions(<InjectionService.TransferData<BuffTypes.BillOrder.Data>>transferData);
         } else if (transferData.url.indexOf('/market/item_detail') > -1) {
-            console.debug('/market/item_detail', transferData.data, new DOMParser().parseFromString(transferData.data['raw_content'], 'text/html').documentElement);
+            addSingleListingSP(transferData.data);
         }
 
         if (!document.querySelector('span.buffutility-pricerange') && await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
@@ -400,6 +401,12 @@ module Adjust_Listings {
                 if (aDetail && enabledOptions[6]) {
                     wearContainer.append(aDetail);
                 }
+
+                if (await getRequestSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP) && dataRow.asset_info.info.stickers.length > 0) {
+                    fetch(`https://buff.163.com/market/item_detail?appid=730&game=csgo&classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&sell_order_id=${dataRow.id}&origin=selling-list&assetid=${dataRow.asset_info.assetid}&contextid=2`).then(async res => {
+                        addSingleListingSP({ raw_content: await res.text() }, Settings.EXPERIMENTAL_FETCH_LISTING_SPP);
+                    });
+                }
             }
 
             let priceContainer = <HTMLElement>([ ...<Array<HTMLElement>><unknown>row.querySelectorAll('td.t_Left') ].filter(td => !!td.querySelector('p.hide-cny')))[0];
@@ -654,6 +661,102 @@ module Adjust_Listings {
                 ]
             }) + diffP;
         }
+    }
+
+    async function addSingleListingSP(data: unknown, settingContext?: Settings): Promise<void> {
+        // they were pre-fetched, don't bother executing on hover
+        if (settingContext != Settings.EXPERIMENTAL_FETCH_LISTING_SPP && await getRequestSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP)) {
+            return;
+        }
+
+        let detailDoc: HTMLElement;
+
+        try {
+            detailDoc = new DOMParser().parseFromString(data['raw_content'], 'text/html').documentElement;
+        } catch (_ /* discard */) { }
+
+        // the detail doc actually needs to be valid
+        if (detailDoc == null) {
+            return;
+        }
+
+        let extractionMinPrice = +(/data-price="(\d+\.?\d+)"/.exec(document.getElementById('market_min_price_pat').innerText) ?? [])[1];
+
+        // the item min price needs to be valid
+        if (!isFinite(extractionMinPrice) || isNaN(extractionMinPrice)) {
+            return;
+        }
+
+        let assetInfos = detailDoc.querySelectorAll('[data-asset-info]');
+
+        let parsedAssetInfos: {
+            assetid: string,
+            classid: string,
+            instanceid: string,
+            info: {
+                stickers: {
+                    sell_reference_price: string
+                }[]
+            }
+        }[] = [];
+
+        assetInfos.forEach(x => {
+            parsedAssetInfos.push(Util.tryParseJson(x.getAttribute('data-asset-info')));
+        });
+
+        // the data needs to contain more than 0 stickers (obviously)
+        let stickerInfos = parsedAssetInfos.find(x => x.info.stickers.length > 0);
+        if (stickerInfos == null) {
+            return;
+        }
+
+        let assetId = parsedAssetInfos.find(x => x?.assetid != null)?.assetid;
+        let classId = parsedAssetInfos.find(x => x?.classid != null)?.classid;
+        let instanceId = parsedAssetInfos.find(x => x?.instanceid != null)?.instanceid;
+
+        // all of these need to be valid to pass
+        if (assetId == null || classId == null || instanceId == null) {
+            return;
+        }
+
+        let listingOrderId = document.querySelector(`[data-classid="${classId}"][data-instanceid="${instanceId}"][data-assetid="${assetId}"]`)?.getAttribute('data-orderid');
+
+        // if we have no listing order we have no listing price anyway
+        if (listingOrderId == null) {
+            return;
+        }
+
+        let listingRow = <HTMLElement>document.querySelector(`#sell_order_${listingOrderId}`);
+        let stickerContainer = <HTMLElement>listingRow.querySelector(`td.t_Left div.csgo_sticker`);
+
+        // no sicker container means no sp% spot
+        if (stickerContainer == null) {
+            return;
+        }
+
+        let listingPrice = +(listingRow.querySelector('a[data-price]')?.getAttribute('data-price'));
+
+        // the item price needs to be valid
+        if (!isFinite(listingPrice) || isNaN(listingPrice)) {
+            return;
+        }
+
+        let stickerSum = 0;
+        for (let sticker of stickerInfos.info.stickers) {
+            stickerSum += +sticker.sell_reference_price;
+        }
+
+        let spContainer = <HTMLElement>document.createElement('div');
+
+        stickerContainer.before(spContainer);
+
+        spContainer.outerHTML = Util.buildHTML('div', {
+            class: 'f_12px c_Gray',
+            attributes: {
+                'title': `BuffUtility SP% may not be 100% accurate, please always double check! &#10;Market Price: ${extractionMinPrice.toFixed(2)} | Listing Price: ${listingPrice.toFixed(2)} | Sticker Sum: ${stickerSum.toFixed(2)}&#10;( ${listingPrice.toFixed(2)} - ${extractionMinPrice.toFixed(2)} ) / ${stickerSum.toFixed(2)} => ${((listingPrice - extractionMinPrice) / stickerSum).toFixed(3)}`
+            },
+            content: [ `SP: ${GlobalConstants.SYMBOL_YUAN}${stickerSum.toFixed(2)} (${(((listingPrice - extractionMinPrice) / stickerSum) * 100).toFixed(1)} %)` ]
+        });
     }
 
     init();

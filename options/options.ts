@@ -581,8 +581,8 @@ module Options {
             }
         });
 
-        // Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS
         if (await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
+            // Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS
             experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
                 title: 'Fetch Favourite Bargain Status',
                 description: 'This will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
@@ -591,10 +591,8 @@ module Options {
                     requiresRequest: true
                 }
             });
-        }
 
-        // Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
-        if (await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
+            // Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY
             experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, {
                 title: 'Fetch item price history',
                 description: 'This will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
@@ -616,6 +614,16 @@ module Options {
                     value: ExtensionSettings.PriceHistoryRange.MONTHLY
                 }
             ], await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+
+            // Settings.EXPERIMENTAL_FETCH_LISTING_SPP
+            experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_LISTING_SPP, {
+                title: 'Fetch Sticker Price %',
+                description: 'This will pre fetch the SP% on listings so you wont have to manually hover over it, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+                tags: {
+                    isExperimental: true,
+                    requiresRequest: true
+                }
+            });
         }
 
         // Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY
