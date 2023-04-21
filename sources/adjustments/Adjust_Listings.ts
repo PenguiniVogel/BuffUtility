@@ -68,18 +68,18 @@ module Adjust_Listings {
 
             async function addReloadNewest(): Promise<void> {
                 switch (await getSetting(Settings.LOCATION_RELOAD_NEWEST)) {
-                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE:
+                    case ExtensionSettings.ReloadNewestLocation.NONE:
                         break;
-                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK:
+                    case ExtensionSettings.ReloadNewestLocation.BULK:
                         (document.querySelector('#batch-buy-btn') ?? document.querySelector('#batch-buy-btn-override'))?.parentElement?.appendChild(a);
                         break;
-                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.SORT:
+                    case ExtensionSettings.ReloadNewestLocation.SORT:
                         document.querySelector('#asset_tag-filter div.l_Right div.w-Select-Multi[name="sort"]')?.parentElement?.appendChild(a);
                         break;
-                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.CENTER:
+                    case ExtensionSettings.ReloadNewestLocation.CENTER:
                         document.querySelector('#asset_tag-filter div.l_Left')?.parentElement?.appendChild(a);
                         break;
-                    case ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.LEFT:
+                    case ExtensionSettings.ReloadNewestLocation.LEFT:
                         document.querySelector('#asset_tag-filter div.l_Left')?.prepend(a);
                         break;
                     default:
@@ -106,6 +106,8 @@ module Adjust_Listings {
             console.debug('[BuffUtility] Adjust_Listings (bill_order)');
 
             adjustBillOrderTransactions(<InjectionService.TransferData<BuffTypes.BillOrder.Data>>transferData);
+        } else if (transferData.url.indexOf('/market/item_detail') > -1) {
+            console.debug('/market/item_detail', transferData.data, new DOMParser().parseFromString(transferData.data['raw_content'], 'text/html').documentElement);
         }
 
         if (!document.querySelector('span.buffutility-pricerange') && await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
@@ -213,8 +215,7 @@ module Adjust_Listings {
                 break;
         }
 
-        const preview_screenshots = document.getElementById('preview_screenshots');
-        const can_expand_screenshots = await getSetting(Settings.CAN_EXPAND_SCREENSHOTS) && !!preview_screenshots?.querySelector('span[value="inspect_trn_url"].on');
+        const can_expand_screenshots = await getSetting(Settings.CAN_EXPAND_SCREENSHOTS);
         const expand_classes = can_expand_screenshots ? `img_td can_expand ${await getSetting(Settings.EXPAND_SCREENSHOTS_BACKDROP) ? 'expand_backdrop' : ''}` : 'img_td';
 
         // adjust reference price
@@ -410,14 +411,27 @@ module Adjust_Listings {
             let priceDiffEx: string = `Steam price: ${GlobalConstants.SYMBOL_YUAN} ${steamPriceCNY} | Buff price: ${GlobalConstants.SYMBOL_YUAN} ${price}&#10;${price} - ${steamPriceCNY} = ${priceDiff.toFixed(2)}`;
 
             let priceDiffStr;
-            if (await getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) {
-                let { convertedSymbol, convertedFormattedValue, convertedValue, convertedValueRaw, convertedLeadingZeros } = await Util.convertCNYRaw(priceDiff);
-                priceDiffStr = `${convertedSymbol} ${convertedFormattedValue}`;
-                priceDiffEx += ` => ${convertedSymbol} ${convertedValue}&#10;`;
-                priceDiffEx += `This item is ${convertedSymbol} ${Math.abs(convertedValueRaw).toFixed(convertedLeadingZeros)} ${priceDiff < 0 ? 'cheaper' : 'more expensive'} than on Steam.`;
-            } else {
-                priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(priceDiff)}`;
-                priceDiffEx += `&#10;This item is ${GlobalConstants.SYMBOL_YUAN} ${Math.abs(priceDiff).toFixed(2)} ${priceDiff < 0 ? 'cheaper' : 'more expensive'} than on Steam.`;
+            const listingStyle = await getSetting(Settings.LISTING_DIFFERENCE_STYLE);
+            switch (listingStyle) {
+                case ExtensionSettings.ListingDifferenceStyle.CURRENCY_DIFFERENCE:
+                    priceDiffStr = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(priceDiff)}`;
+                    priceDiffEx += `&#10;This item is ${GlobalConstants.SYMBOL_YUAN} ${Math.abs(priceDiff).toFixed(2)} ${priceDiff < 0 ? 'cheaper' : 'more expensive'} than on Steam.`;
+                    break;
+                case ExtensionSettings.ListingDifferenceStyle.CONVERTED_CURRENCY_DIFFERENCE:
+                    let { convertedSymbol, convertedFormattedValue, convertedValue, convertedValueRaw, convertedLeadingZeros } = await Util.convertCNYRaw(priceDiff);
+                    priceDiffStr = `${convertedSymbol} ${convertedFormattedValue}`;
+                    priceDiffEx += ` => ${convertedSymbol} ${convertedValue}&#10;`;
+                    priceDiffEx += `This item is ${convertedSymbol} ${Math.abs(convertedValueRaw).toFixed(convertedLeadingZeros)} ${priceDiff < 0 ? 'cheaper' : 'more expensive'} than on Steam.`;
+                    break;
+                case ExtensionSettings.ListingDifferenceStyle.PERCENTAGE_DIFFERENCE:
+                    priceDiffStr = `${Util.embedDecimalSmall(((priceDiff / steamPriceCNY) * 100).toFixed(2))}%`;
+                    priceDiffEx += `=> ${priceDiff.toFixed(2)} / ${steamPriceCNY} * 100&#10;`;
+                    priceDiffEx += `=> This item is ${Math.abs(((priceDiff / steamPriceCNY) * 100)).toFixed(2)}% ${priceDiff < 0 ? 'cheaper' : 'more expensive'} than on Steam.`;
+                    break;
+                case ExtensionSettings.ListingDifferenceStyle.NONE:
+                default:
+                    priceDiffStr = '';
+                    break;
             }
 
             let price_str = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.price, 2)}`;
@@ -454,17 +468,18 @@ module Adjust_Listings {
                 ]
             });
 
-            if (can_expand_screenshots && dataRow.can_use_inspect_trn_url) {
+            if (can_expand_screenshots && (dataRow.asset_info?.info?.inspect_trn_url ?? '').length > 0) {
                 let img_src = dataRow.img_src + data.fop_str;
 
-                let fopString = '';
-                if (can_expand_screenshots) {
-                    fopString = await getSetting(Settings.CUSTOM_FOP);
-                }
+                let fopString = await getSetting(Settings.CUSTOM_FOP);
 
                 switch (await getSetting(Settings.EXPAND_TYPE)) {
                     case ExtensionSettings.ExpandScreenshotType.PREVIEW:
-                        img_src = `${dataRow.img_src}${fopString}`;
+                        if (dataRow.can_use_inspect_trn_url) {
+                            img_src = `${dataRow.img_src}${fopString}`;
+                        } else {
+                            img_src = `${dataRow.asset_info.info.inspect_trn_url}${fopString}`;
+                        }
 
                         break;
                     case ExtensionSettings.ExpandScreenshotType.INSPECT:
@@ -601,15 +616,31 @@ module Adjust_Listings {
             const diff = convertedPrice.originalCNY - referencePrice;
             const convertedDiff = await Util.convertCNYRaw(diff);
 
-            const diffP = (referencePrice > -1 ? Util.buildHTML('p', {
+            let diffPContent: string;
+            const listingStyle = await getSetting(Settings.LISTING_DIFFERENCE_STYLE);
+            switch (listingStyle) {
+                case ExtensionSettings.ListingDifferenceStyle.CURRENCY_DIFFERENCE:
+                    diffPContent = `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(diff)}`;
+                    break;
+                case ExtensionSettings.ListingDifferenceStyle.CONVERTED_CURRENCY_DIFFERENCE:
+                    diffPContent = `${convertedDiff.convertedSymbol} ${convertedDiff.convertedFormattedValue}`;
+                    break;
+                case ExtensionSettings.ListingDifferenceStyle.PERCENTAGE_DIFFERENCE:
+                    diffPContent = referencePrice == -1 ? '?%' : `${Util.embedDecimalSmall(((diff / referencePrice) * 100).toFixed(2))}%`;
+                    break;
+                case ExtensionSettings.ListingDifferenceStyle.NONE:
+                default:
+                    diffPContent = '';
+                    break;
+            }
+
+            const diffP = listingStyle != ExtensionSettings.ListingDifferenceStyle.NONE ? (referencePrice > -1 ? Util.buildHTML('p', {
                 class: 'c_Gray f_12px',
                 style: {
                     color: `${diff > 0 ? GlobalConstants.COLOR_BAD : GlobalConstants.COLOR_GOOD} !important`
                 },
-                content: (await getSetting(Settings.APPLY_CURRENCY_TO_DIFFERENCE)) ?
-                    [ `${diff > 0 ? GlobalConstants.SYMBOL_ARROW_UP : GlobalConstants.SYMBOL_ARROW_DOWN}${convertedDiff.convertedSymbol} ${convertedDiff.convertedFormattedValue}` ] :
-                    [ `${diff > 0 ? GlobalConstants.SYMBOL_ARROW_UP : GlobalConstants.SYMBOL_ARROW_DOWN}${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(diff)}` ]
-            }) : '');
+                content: [ `${diff > 0 ? GlobalConstants.SYMBOL_ARROW_UP : GlobalConstants.SYMBOL_ARROW_DOWN}${diffPContent}` ]
+            }) : '') : '<p class="c_Gray f_12px" data-buinfo="content is hidden as listing style is none"></p>';
 
             priceTD.innerHTML = Util.buildHTML('strong', {
                 class: 'f_Strong',

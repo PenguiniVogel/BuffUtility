@@ -10,10 +10,20 @@ module Options {
 
     // module
 
+    const VERSION: number = 223;
+
+    const enum SettingsCategory {
+        NORMAL,
+        ADVANCED,
+        PSE,
+        MODULE
+    }
+
     interface DisplayInfo {
         title: string,
         description: string,
         tags?: {
+            isExperimental?: boolean,
             csgoOnly?: boolean,
             steamOnly?: boolean,
             requiresRequest?: boolean,
@@ -27,6 +37,14 @@ module Options {
     }
 
     function createSettingHTML(setting: Settings, info: DisplayInfo, settingHTML: string): string {
+        function translateExperimental(tags: DisplayInfo['tags'] = {}): string {
+            if (tags.isExperimental) {
+                return `<div style="padding: 2px; border: 1px solid #fffdfd; color: #fffdfd; background: #306eb6; display: inline-block; width: 17px; text-align: center; margin-right: 3px;" title="BuffUtility Experimental Setting! May have bugs or other issues!">E</div>`;
+            }
+
+            return '';
+        }
+
         function translateTags(tags: DisplayInfo['tags'] = {}): string {
             let tagString = '';
 
@@ -55,7 +73,7 @@ module Options {
                     content: [
                         Util.buildHTML('div', {
                             class: 'setting-title',
-                            content: [ info.title, translateTags(info.tags) ]
+                            content: [ translateExperimental(info.tags), info.title, translateTags(info.tags) ]
                         }),
                         Util.buildHTML('div', {
                             class: 'setting-description action',
@@ -203,7 +221,6 @@ module Options {
 
     async function init(): Promise<void> {
         let normalSettings: string = '';
-        let advancedSettings: string = '';
         let experimentalSettings: string = '';
         let pseSettings: string = '';
         let modulesSettings: string = '';
@@ -229,11 +246,27 @@ module Options {
             }
         ], await getSetting(Settings.SELECTED_CURRENCY));
 
-        // Settings.APPLY_CURRENCY_TO_DIFFERENCE
-        normalSettings += await createCheckboxOption(Settings.APPLY_CURRENCY_TO_DIFFERENCE, {
-            title: 'Apply Currency to difference',
-            description: 'Whether to show the difference on the listing page in your selected currency or RMB.'
-        });
+        normalSettings += createSelectOption(Settings.LISTING_DIFFERENCE_STYLE, {
+            title: 'Listing Difference Style',
+            description: 'Change the difference style'
+        }, [
+            {
+                displayText: 'None',
+                value: ExtensionSettings.ListingDifferenceStyle.NONE
+            },
+            {
+                displayText: `${GlobalConstants.SYMBOL_YUAN} Difference`,
+                value: ExtensionSettings.ListingDifferenceStyle.CURRENCY_DIFFERENCE
+            },
+            {
+                displayText: 'Converted Difference',
+                value: ExtensionSettings.ListingDifferenceStyle.CONVERTED_CURRENCY_DIFFERENCE
+            },
+            {
+                displayText: '% Difference',
+                value: ExtensionSettings.ListingDifferenceStyle.PERCENTAGE_DIFFERENCE
+            },
+        ], await getSetting(Settings.LISTING_DIFFERENCE_STYLE));
 
         // Settings.CAN_EXPAND_SCREENSHOTS
         normalSettings += await createCheckboxOption(Settings.CAN_EXPAND_SCREENSHOTS, {
@@ -303,10 +336,8 @@ module Options {
             description: 'Use the defined color scheme (dark mode by default).'
         });
 
-        // --- Advanced Settings ---
-
         // Settings.DIFFERENCE_DOMINATOR
-        advancedSettings += createSelectOption(Settings.DIFFERENCE_DOMINATOR, {
+        normalSettings += createSelectOption(Settings.DIFFERENCE_DOMINATOR, {
             title: 'Difference Dominator',
             description: 'Specify the dominator meaning:<br>Steam: <code>(steam_price - buff_price) / steam_price</code><br>Buff: <code>(steam_price - buff_price) / buff_price</code><br>Unless you know the difference might not want to change this setting.<br>A short explanation being, if you buy from Buff and sell on Steam, you should choose "Buff".<br>If you buy from Steam, and sell on Buff, you should choose "Steam".'
         }, [
@@ -321,7 +352,7 @@ module Options {
         ], await getSetting(Settings.DIFFERENCE_DOMINATOR));
 
         // Settings.DEFAULT_SORT_BY
-        advancedSettings += createSelectOption(Settings.DEFAULT_SORT_BY, {
+        normalSettings += createSelectOption(Settings.DEFAULT_SORT_BY, {
             title: 'Default sort by',
             description: 'Default sort by for item listings<br>Default: Default<br>Newest: Newest<br>Price Ascending: low to high<br>Price Descending: high to low<br>Float Ascending: low to high<br>Float Descending: high to low<br>Popular: by popularity.<br>Sticker: By Sticker price descending.',
             tags: {
@@ -330,44 +361,44 @@ module Options {
         }, [
             {
                 displayText: 'Default',
-                value: ExtensionSettings.FILTER_SORT_BY.DEFAULT
+                value: ExtensionSettings.FilterSortBy.DEFAULT
             },
             {
                 displayText: 'Latest',
-                value: ExtensionSettings.FILTER_SORT_BY.LATEST
+                value: ExtensionSettings.FilterSortBy.LATEST
             },
             {
                 displayText: 'Price Ascending',
-                value: ExtensionSettings.FILTER_SORT_BY.PRICE_ASCENDING
+                value: ExtensionSettings.FilterSortBy.PRICE_ASCENDING
             },
             {
                 displayText: 'Price Descending',
-                value: ExtensionSettings.FILTER_SORT_BY.PRICE_DESCENDING
+                value: ExtensionSettings.FilterSortBy.PRICE_DESCENDING
             },
             {
                 displayText: 'Float Ascending',
-                value: ExtensionSettings.FILTER_SORT_BY.FLOAT_ASCENDING
+                value: ExtensionSettings.FilterSortBy.FLOAT_ASCENDING
             },
             {
                 displayText: 'Float Descending',
-                value: ExtensionSettings.FILTER_SORT_BY.FLOAT_DESCENDING
+                value: ExtensionSettings.FilterSortBy.FLOAT_DESCENDING
             },
             {
                 displayText: 'Popular',
-                value: ExtensionSettings.FILTER_SORT_BY.HOT_DESCENDING
+                value: ExtensionSettings.FilterSortBy.HOT_DESCENDING
             },
             {
                 displayText: 'Sticker',
-                value: ExtensionSettings.FILTER_SORT_BY.STICKER
+                value: ExtensionSettings.FilterSortBy.STICKER
             },
             {
                 displayText: 'Time Cost Ascending',
-                value: ExtensionSettings.FILTER_SORT_BY.TIME_COST
+                value: ExtensionSettings.FilterSortBy.TIME_COST
             }
         ], await getSetting(Settings.DEFAULT_SORT_BY));
 
         // Settings.DEFAULT_STICKER_SEARCH
-        advancedSettings += createSelectOption(Settings.DEFAULT_STICKER_SEARCH, {
+        normalSettings += createSelectOption(Settings.DEFAULT_STICKER_SEARCH, {
             title: 'Default sticker search',
             description: 'Search listings with sticker settings automatically.',
             tags: {
@@ -376,36 +407,36 @@ module Options {
         }, [
             {
                 displayText: 'All',
-                value: ExtensionSettings.FILTER_STICKER_SEARCH.ALL
+                value: ExtensionSettings.FilterStickerSearch.ALL
             },
             {
                 displayText: 'Stickers',
-                value: ExtensionSettings.FILTER_STICKER_SEARCH.STICKERS
+                value: ExtensionSettings.FilterStickerSearch.STICKERS
             },
             {
                 displayText: 'Stickers 100%',
-                value: ExtensionSettings.FILTER_STICKER_SEARCH.STICKERS_100P
+                value: ExtensionSettings.FilterStickerSearch.STICKERS_100P
             },
             {
                 displayText: 'No Stickers',
-                value: ExtensionSettings.FILTER_STICKER_SEARCH.NO_STICKERS
+                value: ExtensionSettings.FilterStickerSearch.NO_STICKERS
             },
             {
                 displayText: 'Quad Combos',
-                value: ExtensionSettings.FILTER_STICKER_SEARCH.QUAD_COMBOS
+                value: ExtensionSettings.FilterStickerSearch.QUAD_COMBOS
             },
             {
                 displayText: 'Quad Combos 100%',
-                value: ExtensionSettings.FILTER_STICKER_SEARCH.QUAD_COMBOS_100P
+                value: ExtensionSettings.FilterStickerSearch.QUAD_COMBOS_100P
             },
             {
                 displayText: 'Save Custom',
-                value: ExtensionSettings.FILTER_STICKER_SEARCH.SAVE_CUSTOM
+                value: ExtensionSettings.FilterStickerSearch.SAVE_CUSTOM
             }
         ], await getSetting(Settings.DEFAULT_STICKER_SEARCH));
 
         // Settings.EXPAND_TYPE
-        advancedSettings += createSelectOption(Settings.EXPAND_TYPE, {
+        normalSettings += createSelectOption(Settings.EXPAND_TYPE, {
             title: 'Expand preview type',
             description: 'Either expand into a zoomed preview image or expand into the inspect image.',
             tags: {
@@ -423,7 +454,7 @@ module Options {
         ], await getSetting(Settings.EXPAND_TYPE));
 
         // Settings.CUSTOM_FOP
-        advancedSettings += createSelectOption(Settings.CUSTOM_FOP, {
+        normalSettings += createSelectOption(Settings.CUSTOM_FOP, {
             title: 'Custom Preview resolution',
             description: 'Set the resolution of preview images. You should <b>not</b> change this from <b>Auto</b> unless you have slow internet, then you should choose one of the lower values (e.g. 245, 490 or 980).',
             tags: {
@@ -432,77 +463,77 @@ module Options {
         }, [
             {
                 displayText: 'Auto',
-                value: ExtensionSettings.FOP_VALUES.Auto
+                value: ExtensionSettings.FopValues.Auto
             },
             {
                 displayText: 'w245/h230',
-                value: ExtensionSettings.FOP_VALUES.w245xh230
+                value: ExtensionSettings.FopValues.w245xh230
             },
             {
                 displayText: 'w490/h460',
-                value: ExtensionSettings.FOP_VALUES.w490xh460
+                value: ExtensionSettings.FopValues.w490xh460
             },
             {
                 displayText: 'w980/h920',
-                value: ExtensionSettings.FOP_VALUES.w980xh920
+                value: ExtensionSettings.FopValues.w980xh920
             },
             {
                 displayText: 'w1960/h1840',
-                value: ExtensionSettings.FOP_VALUES.w1960xh1840
+                value: ExtensionSettings.FopValues.w1960xh1840
             },
             {
                 displayText: 'w3920/h3680',
-                value: ExtensionSettings.FOP_VALUES.w3920xh3680
+                value: ExtensionSettings.FopValues.w3920xh3680
             }
         ], await getSetting(Settings.CUSTOM_FOP));
 
         // Settings.LOCATION_RELOAD_NEWEST
-        advancedSettings += createSelectOption(Settings.LOCATION_RELOAD_NEWEST, {
+        normalSettings += createSelectOption(Settings.LOCATION_RELOAD_NEWEST, {
             title: 'Location Reload Newest',
             description: 'Sets the location of the forced newest reload.<br>None: Don\'t show<br>Bulk: Next to "Bulk Buy"<br>Sort: Next to sorting<br>Center: In the center<br>Left: Left most position.'
         }, [
             {
                 displayText: 'None',
-                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.NONE
+                value: ExtensionSettings.ReloadNewestLocation.NONE
             },
             {
                 displayText: 'Bulk',
-                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.BULK
+                value: ExtensionSettings.ReloadNewestLocation.BULK
             },
             {
                 displayText: 'Sort',
-                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.SORT
+                value: ExtensionSettings.ReloadNewestLocation.SORT
             },
             {
                 displayText: 'Center',
-                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.CENTER
+                value: ExtensionSettings.ReloadNewestLocation.CENTER
             },
             {
                 displayText: 'Left',
-                value: ExtensionSettings.LOCATION_RELOAD_NEWEST_VALUES.LEFT
+                value: ExtensionSettings.ReloadNewestLocation.LEFT
             }
         ], await getSetting(Settings.LOCATION_RELOAD_NEWEST));
 
         // Settings.CUSTOM_CURRENCY_RATE
-        advancedSettings += createInputOption(Settings.CUSTOM_CURRENCY_RATE, {
+        normalSettings += createInputOption(Settings.CUSTOM_CURRENCY_RATE, {
             title: 'Custom currency rate',
             description: 'Set the rate of the custom currency e.g.<br>10 RMB -> 1 CC<br>Only active if "Custom" was selected in the "Display Currency" option.'
         }, 'number', await getSetting(Settings.CUSTOM_CURRENCY_RATE));
 
         // Settings.CUSTOM_CURRENCY_NAME
-        advancedSettings += createInputOption(Settings.CUSTOM_CURRENCY_NAME, {
+        normalSettings += createInputOption(Settings.CUSTOM_CURRENCY_NAME, {
             title: 'Custom currency name',
             description: 'Set the name of the custom currency.<br>Only active if "Custom" was selected in the "Display Currency" option.'
         }, 'text', await getSetting(Settings.CUSTOM_CURRENCY_NAME));
 
         // Settings.DATA_PROTECTION
-        advancedSettings += await createCheckboxOption(Settings.DATA_PROTECTION, {
+        normalSettings += await createCheckboxOption(Settings.DATA_PROTECTION, {
             title: 'Data protection',
             description: 'Blur some settings on the account page to protect yourself.'
         });
 
         // Settings.COLOR_SCHEME
-        advancedSettings += await createMultiInputOption(Settings.COLOR_SCHEME, {
+        normalSettings += await createMultiInputOption(Settings.COLOR_SCHEME, {
             title: 'Color Scheme',
             description: 'Color Scheme for whatever theme you want (Dark-Theme by default)'
         }, 'color', [
@@ -514,7 +545,7 @@ module Options {
 
         // Settings.ALLOW_EXTENSION_REQUESTS
         if (!await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
-            advancedSettings += createButtonOption(Settings.ALLOW_EXTENSION_REQUESTS, {
+            normalSettings += createButtonOption(Settings.ALLOW_EXTENSION_REQUESTS, {
                 title: 'Allow Extension Requests',
                 description: 'Allow BuffUtility to make Buff requests within its context.<br>This is potentially very dangerous, so unless there is a reason, and you are aware of the consequences: <b>DO NOT ENABLE THIS</b>'
             }, 'sendAllowExtensionRequests');
@@ -525,14 +556,18 @@ module Options {
         // Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN, {
             title: 'Favourite Bargain',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show the "Bargain" feature on favourites.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>'
+            description: 'Show the "Bargain" feature on favourites.',
+            tags: {
+                isExperimental: true
+            }
         });
 
         // Settings.EXPERIMENTAL_ADJUST_POPULAR
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_POPULAR, {
             title: 'Adjust Popular Tab',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed with 2.2.0 and become default.</small>',
+            description: 'Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed and become default eventually.</small>',
             tags: {
+                isExperimental: true,
                 csgoOnly: true
             }
         });
@@ -540,15 +575,19 @@ module Options {
         // Settings.EXPERIMENTAL_FETCH_NOTIFICATION
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_NOTIFICATION, {
             title: 'Currency Fetch Notification',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show toast notification when currency rates were updated, happens once a day.<br><small>* Setting will be merged in 2.2.0 into "Show Toast on Action".</small>'
+            description: 'Show toast notification when currency rates were updated, happens once a day.<br><small>* Setting will be merged into "Show Toast on Action" eventually.</small>',
+            tags: {
+                isExperimental: true
+            }
         });
 
         // Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS
         if (await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
             experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS, {
                 title: 'Fetch Favourite Bargain Status',
-                description: '<u><b>BuffUtility<br>Experimental<br></b></u>This will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+                description: 'This will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
                 tags: {
+                    isExperimental: true,
                     requiresRequest: true
                 }
             });
@@ -558,8 +597,9 @@ module Options {
         if (await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
             experimentalSettings += createSelectOption(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY, {
                 title: 'Fetch item price history',
-                description: '<u><b>BuffUtility<br>Experimental<br></b></u>This will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
+                description: 'This will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
                 tags: {
+                    isExperimental: true,
                     requiresRequest: true
                 }
             }, [
@@ -581,20 +621,27 @@ module Options {
         // Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY, {
             title: 'Adjust Market Currency',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust shown market currency to selected currency.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>'
+            description: 'Adjust shown market currency to selected currency.',
+            tags: {
+                isExperimental: true
+            }
         });
 
         // Settings.EXPERIMENTAL_FORMAT_CURRENCY
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FORMAT_CURRENCY, {
             title: 'Format Currency',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>If set, will format numbers.<br>e.g. given 1234.56 will turn into 1,234.56'
+            description: 'If set, will format numbers.<br>e.g. given 1234.56 will turn into 1,234.56',
+            tags: {
+                isExperimental: true
+            }
         });
 
         // Settings.EXPERIMENTAL_ADJUST_SHOP
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHOP, {
             title: 'Adjust Shop Pages',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with 2.2.0 and become default behaviour.</small>',
+            description: 'Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with and become default eventually.</small>',
             tags: {
+                isExperimental: true,
                 csgoOnly: true
             }
         });
@@ -602,8 +649,9 @@ module Options {
         // Settings.EXPERIMENTAL_ADJUST_SHARE
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_SHARE, {
             title: 'Adjust Share Pages',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Share" pages. This adds the ability to find the listing directly from the share link.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>',
+            description: 'Adjust the "Share" pages. This adds the ability to find the listing directly from the share link.',
             tags: {
+                isExperimental: true,
                 csgoOnly: true
             }
         });
@@ -611,36 +659,54 @@ module Options {
         // Settings.EXPERIMENTAL_ALLOW_BULK_BUY
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ALLOW_BULK_BUY, {
             title: 'Allow bulk buy',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Allow the bulk buy function to be used on the web version of Buff.<br><small>* Setting will be moved with 2.2.0 to advanced settings.</small>'
+            description: 'Allow the bulk buy function to be used on the web version of Buff',
+            tags: {
+                isExperimental: true
+            }
         });
 
         // Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN, {
             title: 'Bargain Calculator',
-            description: 'Gives you the ability to quickly bargain by doing the math for you.<br><code>&gt; minimum + ( ( listing - minimum ) * percentage )</code> is used to calculate the bargain price.'
+            description: 'Gives you the ability to quickly bargain by doing the math for you.<br><code>&gt; minimum + ( ( listing - minimum ) * percentage )</code> is used to calculate the bargain price.',
+            tags: {
+                isExperimental: true
+            }
         });
 
         experimentalSettings += createInputOption(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT, {
             title: 'Bargain Calculator Default',
-            description: 'Sets the default percentage value.<br>Allowed range is 1 to 99.<br>While you can set it outside the range, the value will be clamped between 1 and 99.'
+            description: 'Sets the default percentage value.<br>Allowed range is 1 to 99.<br>While you can set it outside the range, the value will be clamped between 1 and 99.',
+            tags: {
+                isExperimental: true
+            }
         }, 'number', await getSetting(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT));
 
         // Settings.EXPERIMENTAL_SHOW_LISTING_DATE
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_SHOW_LISTING_DATE, {
             title: 'Show Listing Date',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Show an item\'s listing date in the market page.<br>Time zone differences are already considered and rounded towards full hours.'
+            description: 'Show an item\'s listing date in the market page.<br>Time zone differences are already considered and rounded towards full hours.',
+            tags: {
+                isExperimental: true
+            }
         });
 
         // Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS, {
             title: 'Adjust Trade Records',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Adjust the "Trade Records" tab for an items page, showing things such as currency conversion, and difference to reference price.'
+            description: 'Adjust the "Trade Records" tab for an items page, showing things such as currency conversion, and difference to reference price.',
+            tags: {
+                isExperimental: true
+            }
         });
 
         // Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS
         experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS, {
             title: 'Show Souvenir Teams',
-            description: '<u><b>BuffUtility<br>Experimental<br></b></u>Utilize the attributes field in market listings and favorites to display the teams of a souvenir package.'
+            description: 'Utilize the attributes field in market listings and favorites to display the teams of a souvenir package.',
+            tags: {
+                isExperimental: true
+            }
         });
 
         // --- PSE Settings ---
@@ -859,7 +925,7 @@ module Options {
 
         // append html
         document.querySelector('#settings-normal tbody').innerHTML = normalSettings;
-        document.querySelector('#settings-advanced tbody').innerHTML = advancedSettings;
+        // document.querySelector('#settings-advanced tbody').innerHTML = advancedSettings;
         document.querySelector('#settings-experimental tbody').innerHTML = experimentalSettings;
         document.querySelector('#settings-pse tbody').innerHTML = pseSettings;
         document.querySelector('#settings-modules tbody').innerHTML = modulesSettings;

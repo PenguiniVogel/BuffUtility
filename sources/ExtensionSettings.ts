@@ -45,7 +45,7 @@ module ExtensionSettings {
         INSPECT = 1
     }
 
-    export const enum FOP_VALUES {
+    export const enum FopValues {
         Auto = '',
         w245xh230 = '?fop=imageView/2/w/245/h/230',
         w490xh460 = '?fop=imageView/2/w/490/h/460',
@@ -54,7 +54,7 @@ module ExtensionSettings {
         w3920xh3680 = '?fop=imageView/2/w/3920/h/3680'
     }
 
-    export const enum LOCATION_RELOAD_NEWEST_VALUES {
+    export const enum ReloadNewestLocation {
         NONE = 0,
         BULK = 1,
         SORT = 2,
@@ -68,7 +68,7 @@ module ExtensionSettings {
         MONTHLY = 30
     }
 
-    export const enum FILTER_SORT_BY {
+    export const enum FilterSortBy {
         DEFAULT = 'default',
         LATEST = 'created.desc',
         PRICE_ASCENDING = 'price.asc',
@@ -80,7 +80,7 @@ module ExtensionSettings {
         TIME_COST = 'seller.asc'
     }
 
-    export const enum FILTER_STICKER_SEARCH {
+    export const enum FilterStickerSearch {
         ALL = '',
         STICKERS = '&extra_tag_ids=non_empty',
         STICKERS_100P = '&extra_tag_ids=non_empty&wearless_sticker=1',
@@ -88,6 +88,13 @@ module ExtensionSettings {
         QUAD_COMBOS = '&extra_tag_ids=squad_combos',
         QUAD_COMBOS_100P = '&extra_tag_ids=squad_combos&wearless_sticker=1',
         SAVE_CUSTOM = '&extra_tag_ids=$1'
+    }
+
+    export const enum ListingDifferenceStyle {
+        NONE = 0,
+        CURRENCY_DIFFERENCE = 1,
+        CONVERTED_CURRENCY_DIFFERENCE = 2,
+        PERCENTAGE_DIFFERENCE = 3
     }
 
     export interface SteamSettings {
@@ -113,7 +120,7 @@ module ExtensionSettings {
         EXPAND_SCREENSHOTS_BACKDROP = 'expand_screenshots_backdrop',
         DIFFERENCE_DOMINATOR = 'difference_dominator',
         APPLY_STEAM_TAX = 'apply_steam_tax',
-        APPLY_CURRENCY_TO_DIFFERENCE = 'apply_currency_to_difference',
+        LISTING_DIFFERENCE_STYLE = 'listing_difference_style',
         EXPAND_TYPE = 'expand_type',
         CUSTOM_FOP = 'custom_fop',
         DEFAULT_SORT_BY = 'default_sort_by',
@@ -198,11 +205,11 @@ module ExtensionSettings {
         [Settings.EXPAND_SCREENSHOTS_BACKDROP]: boolean;
         [Settings.DIFFERENCE_DOMINATOR]: DifferenceDominator;
         [Settings.APPLY_STEAM_TAX]: boolean;
-        [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: boolean;
+        [Settings.LISTING_DIFFERENCE_STYLE]: ListingDifferenceStyle;
         [Settings.EXPAND_TYPE]: ExpandScreenshotType;
-        [Settings.CUSTOM_FOP]: FOP_VALUES;
-        [Settings.DEFAULT_SORT_BY]: FILTER_SORT_BY;
-        [Settings.DEFAULT_STICKER_SEARCH]: FILTER_STICKER_SEARCH;
+        [Settings.CUSTOM_FOP]: FopValues;
+        [Settings.DEFAULT_SORT_BY]: FilterSortBy;
+        [Settings.DEFAULT_STICKER_SEARCH]: FilterStickerSearch;
         [Settings.STORED_CUSTOM_STICKER_SEARCH]: string;
         [Settings.LEECH_CONTRIBUTOR_KEY]: string;
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
@@ -212,7 +219,7 @@ module ExtensionSettings {
         [Settings.DATA_PROTECTION]: boolean;
         [Settings.COLOR_SCHEME]: string[];
         [Settings.USE_SCHEME]: boolean;
-        [Settings.LOCATION_RELOAD_NEWEST]: LOCATION_RELOAD_NEWEST_VALUES;
+        [Settings.LOCATION_RELOAD_NEWEST]: ReloadNewestLocation;
 
         // Experimental
 
@@ -341,11 +348,16 @@ module ExtensionSettings {
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
-        [Settings.APPLY_CURRENCY_TO_DIFFERENCE]: {
-            default: false,
-            export: '0x10',
-            transform: InternalStructureTransform.BOOLEAN,
-            validator: validateBoolean
+        [Settings.LISTING_DIFFERENCE_STYLE]: {
+            default: ListingDifferenceStyle.CURRENCY_DIFFERENCE,
+            allowedValues: [
+                ListingDifferenceStyle.NONE,
+                ListingDifferenceStyle.CURRENCY_DIFFERENCE,
+                ListingDifferenceStyle.CONVERTED_CURRENCY_DIFFERENCE,
+                ListingDifferenceStyle.PERCENTAGE_DIFFERENCE
+            ],
+            export: '0x25',
+            validator: validatePropertyValue
         },
         [Settings.EXPAND_TYPE]: {
             default: ExpandScreenshotType.PREVIEW,
@@ -357,44 +369,44 @@ module ExtensionSettings {
             validator: validatePropertyValue
         },
         [Settings.CUSTOM_FOP]: {
-            default: FOP_VALUES.Auto,
+            default: FopValues.Auto,
             allowedValues: [
-                FOP_VALUES.Auto,
-                FOP_VALUES.w245xh230,
-                FOP_VALUES.w490xh460,
-                FOP_VALUES.w980xh920,
-                FOP_VALUES.w1960xh1840,
-                FOP_VALUES.w3920xh3680
+                FopValues.Auto,
+                FopValues.w245xh230,
+                FopValues.w490xh460,
+                FopValues.w980xh920,
+                FopValues.w1960xh1840,
+                FopValues.w3920xh3680
             ],
             export: '0x12',
             validator: validatePropertyValue
         },
         [Settings.DEFAULT_SORT_BY]: {
-            default: FILTER_SORT_BY.DEFAULT,
+            default: FilterSortBy.DEFAULT,
             allowedValues: [
-                FILTER_SORT_BY.DEFAULT,
-                FILTER_SORT_BY.LATEST,
-                FILTER_SORT_BY.PRICE_ASCENDING,
-                FILTER_SORT_BY.PRICE_DESCENDING,
-                FILTER_SORT_BY.FLOAT_ASCENDING,
-                FILTER_SORT_BY.FLOAT_DESCENDING,
-                FILTER_SORT_BY.HOT_DESCENDING,
-                FILTER_SORT_BY.STICKER,
-                FILTER_SORT_BY.TIME_COST
+                FilterSortBy.DEFAULT,
+                FilterSortBy.LATEST,
+                FilterSortBy.PRICE_ASCENDING,
+                FilterSortBy.PRICE_DESCENDING,
+                FilterSortBy.FLOAT_ASCENDING,
+                FilterSortBy.FLOAT_DESCENDING,
+                FilterSortBy.HOT_DESCENDING,
+                FilterSortBy.STICKER,
+                FilterSortBy.TIME_COST
             ],
             export: '0x13',
             validator: validatePropertyValue
         },
         [Settings.DEFAULT_STICKER_SEARCH]: {
-            default: FILTER_STICKER_SEARCH.ALL,
+            default: FilterStickerSearch.ALL,
             allowedValues: [
-                FILTER_STICKER_SEARCH.ALL,
-                FILTER_STICKER_SEARCH.STICKERS,
-                FILTER_STICKER_SEARCH.STICKERS_100P,
-                FILTER_STICKER_SEARCH.NO_STICKERS,
-                FILTER_STICKER_SEARCH.QUAD_COMBOS,
-                FILTER_STICKER_SEARCH.QUAD_COMBOS_100P,
-                FILTER_STICKER_SEARCH.SAVE_CUSTOM
+                FilterStickerSearch.ALL,
+                FilterStickerSearch.STICKERS,
+                FilterStickerSearch.STICKERS_100P,
+                FilterStickerSearch.NO_STICKERS,
+                FilterStickerSearch.QUAD_COMBOS,
+                FilterStickerSearch.QUAD_COMBOS_100P,
+                FilterStickerSearch.SAVE_CUSTOM
             ],
             export: '0x14',
             validator: validatePropertyValue
@@ -451,13 +463,13 @@ module ExtensionSettings {
             validator: validateBoolean
         },
         [Settings.LOCATION_RELOAD_NEWEST]: {
-            default: LOCATION_RELOAD_NEWEST_VALUES.NONE,
+            default: ReloadNewestLocation.NONE,
             allowedValues: [
-                LOCATION_RELOAD_NEWEST_VALUES.NONE,
-                LOCATION_RELOAD_NEWEST_VALUES.BULK,
-                LOCATION_RELOAD_NEWEST_VALUES.SORT,
-                LOCATION_RELOAD_NEWEST_VALUES.CENTER,
-                LOCATION_RELOAD_NEWEST_VALUES.LEFT
+                ReloadNewestLocation.NONE,
+                ReloadNewestLocation.BULK,
+                ReloadNewestLocation.SORT,
+                ReloadNewestLocation.CENTER,
+                ReloadNewestLocation.LEFT
             ],
             export: '0x24',
             validator: validatePropertyValue
@@ -637,7 +649,7 @@ module ExtensionSettings {
         },
         [Settings.PSE_GRAPH_CUMULATE_RECENT]: {
             default: false,
-            export: '9x11',
+            export: '9x12',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
@@ -705,6 +717,23 @@ module ExtensionSettings {
             validator: validateBoolean
         }
     };
+
+    // validate the export keys to make sure one doesn't get used twice
+    function checkInternalSettings(): void {
+        const keys = Object.keys(INTERNAL_SETTINGS);
+        let usedExports: string[] = [];
+        for (let key of keys) {
+            let internal: InternalSetting<any> = INTERNAL_SETTINGS[key];
+
+            if (usedExports.indexOf(internal.export) > -1) {
+                console.error(`[BuffUtility] Export key ${internal.export} for ${key} has already been defined, please check.`);
+            }
+
+            usedExports.push(internal.export);
+        }
+    }
+
+    checkInternalSettings();
 
     // func validators
 

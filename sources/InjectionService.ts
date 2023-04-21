@@ -241,7 +241,7 @@ module InjectionService {
                 transferData.url.indexOf('/api/market/inspect_show_switch') > -1 ||
                 transferData.url.indexOf('/api/message/notification') > -1 ||
                 transferData.url.indexOf('/api/message/announcement') > -1 ||
-                transferData.url.indexOf('/market/item_detail') > -1 ||
+                // transferData.url.indexOf('/market/item_detail') > -1 || -> now has a use
                 transferData.url.indexOf('steamcommunity.com/actions/') > -1;
 
             // we ignore these as they have no purpose for us (for now)
@@ -390,11 +390,13 @@ module InjectionService {
                     let current = <XMLHttpRequest>e.currentTarget;
 
                     // simple try-parse
-                    function tryParseJSON(r: string): any {
+                    function tryParseJSON(r: string): undefined | { data: any } {
                         try {
                             return JSON.parse(r);
                         } catch (_) {
-                            return undefined;
+                            return {
+                                data: { raw_content: r }
+                            };
                         }
                     }
 

@@ -63,7 +63,7 @@ module Adjust_Market {
                     if (schemaData && schemaData.sticker_amount > 0) {
                         stickerSearch = await getSetting(Settings.DEFAULT_STICKER_SEARCH);
 
-                        if (stickerSearch == ExtensionSettings.FILTER_STICKER_SEARCH.SAVE_CUSTOM) {
+                        if (stickerSearch == ExtensionSettings.FilterStickerSearch.SAVE_CUSTOM) {
                             if ((await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH)).length > 0) {
                                 stickerSearch = await getSetting(Settings.STORED_CUSTOM_STICKER_SEARCH);
                             }
@@ -127,7 +127,7 @@ module Adjust_Market {
                         'overflow': 'hidden'
                     },
                     attributes: {
-                        'title': `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.sell_min_price)} selling (${dataRow.sell_num})`
+                        'title': `${GlobalConstants.SYMBOL_YUAN} ${dataRow.sell_min_price} selling (${dataRow.sell_num})`
                     },
                     content: [
                         Util.buildHTML('span', {
@@ -168,7 +168,7 @@ module Adjust_Market {
                         'grid-column': '1'
                     },
                     attributes: {
-                        'title': `${GlobalConstants.SYMBOL_YUAN} ${await Util.formatNumber(dataRow.buy_max_price)} buying (${dataRow.buy_num})`
+                        'title': `${GlobalConstants.SYMBOL_YUAN} ${dataRow.buy_max_price} buying (${dataRow.buy_num})`
                     },
                     content: [
                         Util.buildHTML('span', {
