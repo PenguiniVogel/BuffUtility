@@ -717,6 +717,20 @@ module Options {
             }
         });
 
+        experimentalSettings += await createMultiCheckboxOption(Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS, {
+            title: 'Preferred Payment Methods',
+            description: 'This will gray out the Buy/Bargain button if the listing does not support any of your selected preferred payment methods.',
+            tags: {
+                isExperimental: true
+            }
+        }, [
+            'BUFF balance-Alipay',
+            'Alipay - Credit card',
+            'BUFF Balance-Bank Card',
+            'WeChat Pay',
+            'WeChat Split Payment'
+        ]);
+
         // --- PSE Settings ---
 
         // Settings.PSE_ADVANCED_PAGE_NAVIGATION

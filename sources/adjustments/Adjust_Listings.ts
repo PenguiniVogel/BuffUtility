@@ -501,11 +501,19 @@ module Adjust_Listings {
             let paymentMethods = (<HTMLElement>priceContainer.querySelectorAll('div').item(1))?.outerHTML ?? '';
             priceContainer.innerHTML = (newHTML + paymentMethods);
 
-            if (isBalanceYuan) {
-                let aBuy = row.querySelector('td a.btn-buy-order[data-asset-info]');
-                let aBargain = dataRow.can_bargain ? row.querySelector('td a.bargain[data-asset-info]') : null;
-                // console.debug(aBuy, aBargain);
+            const preferredPaymentMethods = await ExtensionSettings.getTransformSetting(Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS);
+            let aBuy = row.querySelector('td a.btn-buy-order[data-asset-info]');
+            let aBargain = dataRow.can_bargain ? row.querySelector('td a.bargain[data-asset-info]') : null;
 
+            if (!dataRow.supported_pay_methods.some(x => preferredPaymentMethods.indexOf(x) > -1)) {
+                if (aBuy) {
+                    aBuy.setAttribute('style', `background: #959595;`);
+                }
+
+                if (aBargain) {
+                    aBargain.setAttribute('style', `color: #959595 !important;`);
+                }
+            } else if (isBalanceYuan) {
                 if (aBuy && price > nrBalance && (await getSetting(Settings.COLOR_LISTINGS))[0]) {
                     aBuy.setAttribute('style', `background: ${GlobalConstants.COLOR_BAD};`);
                 }

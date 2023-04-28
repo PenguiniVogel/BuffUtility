@@ -152,6 +152,7 @@ module ExtensionSettings {
         EXPERIMENTAL_ADJUST_TRADE_RECORDS = 'adjust_trade_records',
         EXPERIMENTAL_SHOW_SOUVENIR_TEAMS = 'show_souvenir_teams',
         EXPERIMENTAL_FETCH_LISTING_SPP = 'fetch_listing_spp',
+        EXPERIMENTAL_PREFERRED_PAYMENT_METHODS = 'preferred_payment_methods',
 
         ALLOW_EXTENSION_REQUESTS = 'allow_extension_requests',
 
@@ -225,6 +226,7 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS]: boolean;
         [Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS]: boolean;
         [Settings.EXPERIMENTAL_FETCH_LISTING_SPP]: boolean;
+        [Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS]: boolean[];
 
         // Misc
 
@@ -259,8 +261,13 @@ module ExtensionSettings {
         [Settings.MODULE_PSE_TRANSFORMGRAPH]: boolean;
     }
 
-    type REQUIRE_REQUESTS = Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS |
-        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY | Settings.EXPERIMENTAL_FETCH_LISTING_SPP;
+    type SettingsTypesTransformed = {
+        [Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS]: number[]
+    };
+
+    type SETTINGS_REQUIRE_REQUESTS = Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS | Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY | Settings.EXPERIMENTAL_FETCH_LISTING_SPP;
+
+    type SETTINGS_TRANSFORMING = Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS;
 
     const enum InternalStructureTransform {
         NONE = 0,
@@ -271,6 +278,7 @@ module ExtensionSettings {
     type InternalSetting<T extends Settings> = {
         value?: SettingsTypes[T],
         resolved?: boolean,
+        transformedValue?: any,
         readonly default: SettingsTypes[T],
         readonly allowedValues?: SettingsTypes[T][],
         readonly export: string,
@@ -563,6 +571,12 @@ module ExtensionSettings {
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
+        [Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS]: {
+            default: [true, true, true, true, true],
+            export: '2x17',
+            transform: InternalStructureTransform.BOOLEAN_ARRAY,
+            validator: validateBooleanArray
+        },
 
         // Misc
 
@@ -708,6 +722,41 @@ module ExtensionSettings {
             export: 'Mx10',
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
+        }
+    };
+
+    const INTERNAL_TRANSFORMERS: {
+        [key in SETTINGS_TRANSFORMING]: (input: SettingsTypes[key]) => SettingsTypesTransformed[key]
+    } = {
+        [Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS]: (input) => {
+            let r = [];
+
+            // BUFF balance-Alipay
+            if (input[0]) {
+                r.push(3);
+            }
+
+            // Alipay - Credit card
+            if (input[1]) {
+                r.push(10);
+            }
+
+            // BUFF Balance-Bank Card
+            if (input[2]) {
+                r.push(1);
+            }
+
+            // WeChat Pay
+            if (input[3]) {
+                r.push(6);
+            }
+
+            // WeChat Split Payment
+            if (input[4]) {
+                r.push(18);
+            }
+
+            return r;
         }
     };
 
@@ -952,13 +1001,27 @@ module ExtensionSettings {
      *
      * @param setting
      */
-    export async function getRequestSetting<T extends REQUIRE_REQUESTS, R extends SettingsTypes[T]>(setting: T): Promise<R> {
+    export async function getRequestSetting<T extends SETTINGS_REQUIRE_REQUESTS, R extends SettingsTypes[T]>(setting: T): Promise<R> {
         const canRequest = await getSetting(Settings.ALLOW_EXTENSION_REQUESTS);
         if (canRequest) {
             return await getSetting(<Settings><unknown>setting);
         }
 
         return <R><unknown>INTERNAL_SETTINGS[<Settings><unknown>setting].default;
+    }
+
+    /**
+     * Get a transforming setting value
+     *
+     * @param setting
+     */
+    export async function getTransformSetting<T extends SETTINGS_TRANSFORMING, R extends SettingsTypesTransformed[T]>(setting: T): Promise<R> {
+        if (INTERNAL_SETTINGS[setting].transformedValue == null) {
+            let transformFunction = INTERNAL_TRANSFORMERS[setting];
+            INTERNAL_SETTINGS[setting].transformedValue = transformFunction != null ? <R><unknown>transformFunction(await getSetting(setting)) : null;
+        }
+
+        return <R>INTERNAL_SETTINGS[setting].transformedValue;
     }
 
     // --- upgrade ~2.1.7 -> 2.1.8+
