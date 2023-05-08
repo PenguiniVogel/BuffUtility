@@ -9,7 +9,7 @@ module Background {
         const async = 'async' in safe ? (safe.async ?? false) : false;
 
         if ('method' in safe && 'parameters' in safe) {
-            if (safe.method == BrowserInterface.DelegationMethod.SchemaHelper_find) {
+            if (safe.method == BrowserInterface.DelegationMethod.SCHEMA_HELPER_FIND) {
                 sendResponse({
                     received: true,
                     type: safe.method,
@@ -19,7 +19,7 @@ module Background {
                 return async;
             }
 
-            if (safe.method == BrowserInterface.DelegationMethod.BuffSchema_get) {
+            if (safe.method == BrowserInterface.DelegationMethod.BUFF_SCHEMA_GET) {
                 sendResponse({
                     received: true,
                     type: safe.method,
@@ -29,7 +29,7 @@ module Background {
                 return async;
             }
 
-            if (safe.method == BrowserInterface.DelegationMethod.BuffBargain_fetch) {
+            if (safe.method == BrowserInterface.DelegationMethod.BUFF_BARGAIN_FETCH) {
                 fetch(`https://proxy-a.penguini-software.workers.dev/fetch_bargain_status`, {
                     method: 'POST',
                     body: JSON.stringify(safe.parameters)
@@ -44,7 +44,7 @@ module Background {
                 return async;
             }
 
-            if (safe.method == BrowserInterface.DelegationMethod.CurrencyCache_get) {
+            if (safe.method == BrowserInterface.DelegationMethod.CURRENCY_CACHE_GET) {
                 CurrencyHelper.initialize(true, (data) => {
                     sendResponse({
                         received: true,

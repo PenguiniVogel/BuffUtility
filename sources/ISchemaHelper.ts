@@ -77,7 +77,7 @@ module ISchemaHelper {
 
     export async function find(name: string, weaponOnly: boolean = false, isVanilla: boolean = false, reduceInformation: boolean = false) {
         return await BrowserInterface.delegate<BrowserInterface.SchemaHelperFindDelegation, SchemaTypes.Weapon[]>({
-            method: BrowserInterface.DelegationMethod.SchemaHelper_find,
+            method: BrowserInterface.DelegationMethod.SCHEMA_HELPER_FIND,
             parameters: {
                 name: name,
                 weaponOnly: weaponOnly,

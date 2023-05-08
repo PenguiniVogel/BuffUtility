@@ -3,7 +3,7 @@
  * necessary because in chrome you can find it with <code>self</code>
  * but in firefox you require this reference
  */
-let _globalScope = this;
+const _globalScope = this;
 
 /**
  * Module to manage communication between content and background scripts
@@ -13,10 +13,75 @@ module BrowserInterface {
 
     DEBUG && console.debug('[BuffUtility] Module.BrowserInterface');
 
+    interface StorageSpace {
+        set: Function,
+        get: Function,
+        clear: Function,
+        getBytesInUse: Function
+    }
+
+    interface CallbackStorageSpace extends StorageSpace {
+        /**
+         * Set an item in sync storage
+         *
+         * @param data
+         * @param callback
+         */
+        set(data: { [key: string]: any }, callback: () => void): void,
+
+        /**
+         * Get an item from sync storage
+         *
+         * @param keys
+         * @param callback
+         */
+        get<T>(keys: string[], callback: (result: { [key: string]: T }) => void): void,
+
+        /**
+         * Removes all items from storage
+         *
+         * @param callback
+         */
+        clear(callback?: () => void),
+
+        /**
+         * Get all bytes in use
+         *
+         * @param callback
+         */
+        getBytesInUse(callback: (bytesInUse: number) => void)
+    }
+
+    interface PromiseStorageSpace extends StorageSpace {
+        /**
+         * Set an item in sync storage
+         *
+         * @param data
+         */
+        set(data: { [key: string]: any }): Promise<void>,
+
+        /**
+         * Get an item from sync storage
+         *
+         * @param keys
+         */
+        get<T>(keys: string[]): Promise<{ [key: string]: T }>
+
+        /**
+         * Removes all items from storage
+         */
+        clear(): Promise<void>,
+
+        /**
+         * Get all bytes in use
+         */
+        getBytesInUse(): Promise<number>
+    }
+
     /**
      * Represents a browser environment with matched functions
      */
-    interface BrowserEnvironment {
+    interface BrowserEnvironment<T extends StorageSpace> {
         runtime: {
             /**
              * The extension id
@@ -41,71 +106,19 @@ module BrowserInterface {
              * @param response
              */
             sendMessage(data: any, response: (data: any) => void): void,
-        }
-    }
-
-    interface ChromeEnvironment extends BrowserEnvironment {
+        },
         storage: {
-            sync: {
-                /**
-                 * Set an item in sync storage
-                 *
-                 * @param data
-                 * @param callback
-                 */
-                set(data: { [key: string]: any }, callback: () => void): void,
-
-                /**
-                 * Get an item from sync storage
-                 *
-                 * @param keys
-                 * @param callback
-                 */
-                get<T>(keys: string[], callback: (result: { [key: string]: T }) => void): void,
-
-                /**
-                 * Removes all items from storage
-                 */
-                clear(callback?: () => void)
-            }
+            local: T
+            sync: T,
+            session: T
         }
     }
-
-    interface FirefoxEnvironment extends BrowserEnvironment {
-        storage: {
-            sync: {
-                /**
-                 * Set an item in sync storage
-                 *
-                 * @param data
-                 */
-                set(data: { [key: string]: any }): Promise<void>,
-
-                /**
-                 * Get an item from sync storage
-                 *
-                 * @param keys
-                 */
-                get<T>(keys: string[]): Promise<{ [key: string]: T }>
-
-                /**
-                 * Removes all items from storage
-                 */
-                clear(): Promise<void>
-            }
-        }
-    }
-
-    declare var chrome: ChromeEnvironment;
-    declare var browser: FirefoxEnvironment;
-
-    let environment: 'chrome' | 'browser' = null;
 
     export const enum DelegationMethod {
-        SchemaHelper_find = 'SchemaHelper_find',
-        BuffSchema_get = 'BuffSchema_get',
-        BuffBargain_fetch = 'BuffBargain_fetch',
-        CurrencyCache_get = 'CurrencyCache_get'
+        SCHEMA_HELPER_FIND = 'SchemaHelper_find',
+        BUFF_SCHEMA_GET = 'BuffSchema_get',
+        BUFF_BARGAIN_FETCH = 'BuffBargain_fetch',
+        CURRENCY_CACHE_GET = 'CurrencyCache_get'
     }
 
     export interface BaseDelegation {
@@ -117,7 +130,7 @@ module BrowserInterface {
     }
 
     export interface SchemaHelperFindDelegation extends BaseDelegation {
-        method: DelegationMethod.SchemaHelper_find,
+        method: DelegationMethod.SCHEMA_HELPER_FIND,
         parameters: {
             name: string,
             weaponOnly: boolean,
@@ -127,14 +140,14 @@ module BrowserInterface {
     }
 
     export interface BuffSchemaGetIdOrNameDelegation extends BaseDelegation {
-        method: DelegationMethod.BuffSchema_get,
+        method: DelegationMethod.BUFF_SCHEMA_GET,
         parameters: {
             name: string
         }
     }
 
     export interface BuffBargainFetchDelegation extends BaseDelegation {
-        method: DelegationMethod.BuffBargain_fetch,
+        method: DelegationMethod.BUFF_BARGAIN_FETCH,
         parameters: {
             classId: string,
             instanceId: string,
@@ -144,7 +157,7 @@ module BrowserInterface {
     }
 
     export interface CurrencyCacheGet extends BaseDelegation {
-        method: DelegationMethod.CurrencyCache_get,
+        method: DelegationMethod.CURRENCY_CACHE_GET,
         parameters: { }
     }
 
@@ -154,14 +167,19 @@ module BrowserInterface {
         data: T
     }
 
-    let browserEnvironment: BrowserEnvironment;
+    declare var chrome: BrowserEnvironment<CallbackStorageSpace>;
+    declare var browser: BrowserEnvironment<PromiseStorageSpace>;
+
+    let environment: 'chrome' | 'browser' = null;
+
+    let browserEnvironment: BrowserEnvironment<any>;
 
     /**
      * Initialize the environment, mapping the current respective browser
      *
      * @private
      */
-    function initializeBrowserEnvironment(): BrowserEnvironment {
+    function initializeBrowserEnvironment(): BrowserEnvironment<any> {
         if (browserEnvironment) {
             return browserEnvironment;
         }
@@ -183,13 +201,6 @@ module BrowserInterface {
         }
 
         throw new Error('[BrowserInterface] Neither chrome or browser was found in global, this browser is not supported.');
-    }
-
-    /**
-     * Get the current associated environment
-     */
-    export function getEnvironment(): BrowserEnvironment {
-        return browserEnvironment;
     }
 
     /**
@@ -260,19 +271,26 @@ module BrowserInterface {
     /** */
     export module Storage {
 
+        export const enum Area {
+            LOCAL = 'local',
+            SYNC = 'sync',
+            SESSION = 'session'
+        }
+
         /**
          * Set data
          *
          * @param data
+         * @param fromSpace
          */
-        export async function set(data: { [key: string]: any }): Promise<void> {
+        export async function set(data: { [key: string]: any }, fromSpace: Area = Area.SYNC): Promise<void> {
             return await new Promise<void>((resolve, _) => {
                 switch (environment) {
                     case 'chrome':
-                        chrome.storage.sync.set(data, () => resolve());
+                        chrome.storage[fromSpace].set(data, () => resolve());
                         break;
                     case 'browser':
-                        browser.storage.sync.set(data).then(_ => resolve());
+                        browser.storage[fromSpace].set(data).then(_ => resolve());
                         break;
                 }
             });
@@ -282,9 +300,10 @@ module BrowserInterface {
          * Get data
          *
          * @param key
+         * @param storageArea
          */
-        export async function get<T>(key: string): Promise<T> {
-            let result = await getAll<T>([key]);
+        export async function get<T>(key: string, storageArea: Area = Area.SYNC): Promise<T> {
+            let result = await getAll<T>([key], storageArea);
             return (result ?? {})[key];
         }
 
@@ -292,15 +311,16 @@ module BrowserInterface {
          * Get data
          *
          * @param keys
+         * @param storageArea
          */
-        export async function getAll<T>(keys: string[]): Promise<{ [key: string]: T }> {
+        export async function getAll<T>(keys: string[], storageArea: Area = Area.SYNC): Promise<{ [key: string]: T }> {
             return await new Promise<{ [key: string]: T }>((resolve, _) => {
                 switch (environment) {
                     case 'chrome':
-                        chrome.storage.sync.get<T>(keys, (result) => resolve(result));
+                        chrome.storage[storageArea].get<T>(keys, (result) => resolve(result));
                         break;
                     case 'browser':
-                        browser.storage.sync.get<T>(keys)
+                        browser.storage[storageArea].get<T>(keys)
                             .then(result => resolve(result))
                             .catch(_ => resolve(null));
                         break;
@@ -310,15 +330,37 @@ module BrowserInterface {
 
         /**
          * Removes all items from storage
+         *
+         * @param storageArea
          */
-        export async function clear(): Promise<void> {
+        export async function clear(storageArea: Area = Area.SYNC): Promise<void> {
             return await new Promise<void>((resolve, _) => {
                 switch (environment) {
                     case 'chrome':
-                        chrome.storage.sync.clear(() => resolve());
+                        chrome.storage[storageArea].clear(() => resolve());
                         break;
                     case 'browser':
-                        browser.storage.sync.clear()
+                        browser.storage[storageArea].clear()
+                            .then(result => resolve(result))
+                            .catch(_ => resolve(null));
+                        break;
+                }
+            });
+        }
+
+        /**
+         * Get bytes in use from the specified area
+         *
+         * @param storageArea
+         */
+        export async function getBytesInUse(storageArea: Area = Area.SYNC): Promise<number> {
+            return await new Promise<number>((resolve, _) => {
+                switch (environment) {
+                    case 'chrome':
+                        chrome.storage[storageArea].getBytesInUse((bytesInUse) => resolve(bytesInUse));
+                        break;
+                    case 'browser':
+                        browser.storage[storageArea].getBytesInUse()
                             .then(result => resolve(result))
                             .catch(_ => resolve(null));
                         break;

@@ -843,10 +843,19 @@ module Options {
             }
         });
 
+        // Settings.PSE_COLLAPSE_ACCOUNT_DETAILS
+        pseSettings += await createCheckboxOption(Settings.PSE_COLLAPSE_ACCOUNT_DETAILS, {
+            title: 'Collapse Account Details',
+            description: 'Hiding them not enough? You would like the modal to collapse them to?',
+            tags: {
+                steamOnly: true
+            }
+        });
+
         // Settings.PSE_MERGE_ACTIVE_LISTINGS
         pseSettings += await createCheckboxOption(Settings.PSE_MERGE_ACTIVE_LISTINGS, {
             title: 'Merge Active Listings',
-            description: '',
+            description: 'Merges active listings by price and date',
             tags: {
                 steamOnly: true
             }

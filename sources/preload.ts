@@ -66,7 +66,7 @@ module Preload {
 
         if (cachedDate != dateToday || !(currencyName in cachedRates)) {
             let response = await BrowserInterface.delegate<BrowserInterface.CurrencyCacheGet, CurrencyHelper.Data>({
-                method: BrowserInterface.DelegationMethod.CurrencyCache_get,
+                method: BrowserInterface.DelegationMethod.CURRENCY_CACHE_GET,
                 parameters: {},
                 async: true
             });

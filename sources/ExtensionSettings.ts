@@ -169,6 +169,7 @@ module ExtensionSettings {
         PSE_HIDE_ACCOUNT_DETAILS = 'pse_hide_account_details',
         PSE_MERGE_ACTIVE_LISTINGS = 'pse_merge_active_listings',
         PSE_GRAPH_CUMULATE_RECENT = 'pse_graph_cumulate_recent',
+        PSE_COLLAPSE_ACCOUNT_DETAILS = 'pse_collapse_account_details',
 
         // Modules
         MODULE_ADJUST_FAVOURITES = 'module_adjust_favourites',
@@ -246,6 +247,7 @@ module ExtensionSettings {
         [Settings.PSE_HIDE_ACCOUNT_DETAILS]: boolean;
         [Settings.PSE_MERGE_ACTIVE_LISTINGS]: boolean;
         [Settings.PSE_GRAPH_CUMULATE_RECENT]: boolean;
+        [Settings.PSE_COLLAPSE_ACCOUNT_DETAILS]: boolean;
 
         // Modules
 
@@ -660,6 +662,12 @@ module ExtensionSettings {
             transform: InternalStructureTransform.BOOLEAN,
             validator: validateBoolean
         },
+        [Settings.PSE_COLLAPSE_ACCOUNT_DETAILS]: {
+            default: false,
+            export: '9x13',
+            transform: InternalStructureTransform.BOOLEAN,
+            validator: validateBoolean
+        },
 
         // Modules
 
@@ -887,7 +895,7 @@ module ExtensionSettings {
 
             // if setting has been resolved (loaded) already, return value
             if (internal.resolved) {
-                DEBUG && console.debug(`[BuffUtility] Loading already resolved setting ${setting} ->`, internal.value);
+                // DEBUG && console.debug(`[BuffUtility] Loading already resolved setting ${setting} ->`, internal.value);
                 resolve(internal.value);
                 return;
             }

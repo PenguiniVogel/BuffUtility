@@ -9,6 +9,18 @@ module Adjust_Listings {
 
     // module
 
+    interface ParsedAssetInfo {
+        assetid: string,
+        classid: string,
+        instanceid: string,
+        info: {
+            stickers: {
+                sell_reference_price: string
+            }[]
+        },
+        cacheDate: number
+    }
+
     async function init(): Promise<void> {
         if (!await getSetting(Settings.MODULE_ADJUST_LISTINGS)) {
             console.debug('%c■', 'color: #ff0000', '[BuffUtility] Adjust_Listings');
@@ -108,7 +120,10 @@ module Adjust_Listings {
 
             adjustBillOrderTransactions(<InjectionService.TransferData<BuffTypes.BillOrder.Data>>transferData);
         } else if (transferData.url.indexOf('/market/item_detail') > -1) {
-            addSingleListingSP(transferData.data);
+            let stickerAssetInfo = await extractAssetInfos(transferData.data, null);
+            if (stickerAssetInfo != null) {
+                addSingleListingSP(stickerAssetInfo);
+            }
         }
 
         if (!document.querySelector('span.buffutility-pricerange') && await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
@@ -333,15 +348,9 @@ module Adjust_Listings {
                     });
                 } else if (goodsInfo.market_hash_name.endsWith('Souvenir Package') && await getSetting(Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS)) {
                     let teams = dataRow.asset_info.info.tournament_tags.map(x => String(x.localized_name)).slice(0, 2);
+
                     // sticker div is empty when item has no stickers
                     Util.addSouvenirTeams(row, teams);
-                    // let stickerContainer = <HTMLElement>row.querySelector('.csgo_sticker');
-                    // let teamsDiv = document.createElement('div');
-                    // teamsDiv.setAttribute('class', 'f_12px');
-                    // teamsDiv.setAttribute('style', 'display: flex; flex-direction: column; align-items: center; color: #ffd700; opacity: 0.8;');
-                    // teamsDiv.innerHTML = `<span>${teams[0]}</span><div class="clear"></div><span>vs</span><div class="clear"></div><span>${teams[1]}</span>`;
-                    // stickerContainer.setAttribute('style', 'float: none;');
-                    // stickerContainer.appendChild(teamsDiv);
                 }
 
                 const aShare = document.createElement('a');
@@ -403,9 +412,18 @@ module Adjust_Listings {
                 }
 
                 if (await getRequestSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP) && dataRow.asset_info.info.stickers.length > 0) {
-                    fetch(`https://buff.163.com/market/item_detail?appid=730&game=csgo&classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&sell_order_id=${dataRow.id}&origin=selling-list&assetid=${dataRow.asset_info.assetid}&contextid=2`).then(async res => {
-                        addSingleListingSP({ raw_content: await res.text() }, Settings.EXPERIMENTAL_FETCH_LISTING_SPP);
-                    });
+                    let stickerAssetInfos = await extractAssetInfos(null, `c_${dataRow.id}`);
+                    if (stickerAssetInfos == null) {
+                        let response = await fetch(`https://buff.163.com/market/item_detail?appid=730&game=csgo&classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&sell_order_id=${dataRow.id}&origin=selling-list&assetid=${dataRow.asset_info.assetid}&contextid=2`);
+                        stickerAssetInfos = await extractAssetInfos({ raw_content: await response.text() }, `c_${dataRow.id}`);
+                        console.debug(`Listing ${dataRow.id} fetching sticker prices`);
+                    } else {
+                        console.debug(`Listing ${dataRow.id} using cached sticker prices`);
+                    }
+
+                    if (stickerAssetInfos != null) {
+                        addSingleListingSP(stickerAssetInfos, Settings.EXPERIMENTAL_FETCH_LISTING_SPP);
+                    }
                 }
             }
 
@@ -671,10 +689,17 @@ module Adjust_Listings {
         }
     }
 
-    async function addSingleListingSP(data: unknown, settingContext?: Settings): Promise<void> {
-        // they were pre-fetched, don't bother executing on hover
-        if (settingContext != Settings.EXPERIMENTAL_FETCH_LISTING_SPP && await getRequestSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP)) {
-            return;
+    async function extractAssetInfos(data: unknown, cacheId: string): Promise<ParsedAssetInfo> {
+        if (cacheId != null) {
+            let cachedEntry = await BrowserInterface.Storage.get<ParsedAssetInfo>(cacheId, BrowserInterface.Storage.Area.LOCAL);
+            if (cachedEntry != null) {
+                // 4 hour validity
+                if ((Date.now() - cachedEntry.cacheDate) > 1.44e+7) {
+                    return null;
+                }
+
+                return cachedEntry;
+            }
         }
 
         let detailDoc: HTMLElement;
@@ -685,6 +710,60 @@ module Adjust_Listings {
 
         // the detail doc actually needs to be valid
         if (detailDoc == null) {
+            return null;
+        }
+
+        let assetInfos = detailDoc.querySelectorAll('[data-asset-info]');
+
+        let parsedAssetInfosList: ParsedAssetInfo[] = [];
+
+        assetInfos.forEach(x => {
+            parsedAssetInfosList.push(Util.tryParseJson(x.getAttribute('data-asset-info')));
+        });
+
+        // the data needs to contain more than 0 stickers (obviously)
+        let stickerInfos = parsedAssetInfosList.find(x => x.info.stickers.length > 0);
+        if (stickerInfos == null) {
+            return null;
+        }
+
+        let assetId = parsedAssetInfosList.find(x => x?.assetid != null)?.assetid;
+        let classId = parsedAssetInfosList.find(x => x?.classid != null)?.classid;
+        let instanceId = parsedAssetInfosList.find(x => x?.instanceid != null)?.instanceid;
+
+        // all of these need to be valid to pass
+        if (assetId == null || classId == null || instanceId == null) {
+            return null;
+        }
+
+        let parsedAssetInfo: ParsedAssetInfo = {
+            assetid: assetId,
+            classid: classId,
+            instanceid: instanceId,
+            info: {
+                stickers: stickerInfos.info.stickers.map(x => {
+                    return {
+                        sell_reference_price: x.sell_reference_price
+                    };
+                })
+            },
+            cacheDate: Date.now()
+        };
+
+        if (cacheId != null) {
+            await BrowserInterface.Storage.set({
+                [cacheId]: parsedAssetInfo
+            }, BrowserInterface.Storage.Area.LOCAL);
+        }
+
+        console.debug(parsedAssetInfo);
+
+        return parsedAssetInfo;
+    }
+
+    async function addSingleListingSP(data: ParsedAssetInfo, settingContext?: Settings): Promise<void> {
+        // they were pre-fetched, don't bother executing on hover
+        if (settingContext != Settings.EXPERIMENTAL_FETCH_LISTING_SPP && await getRequestSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP)) {
             return;
         }
 
@@ -695,39 +774,7 @@ module Adjust_Listings {
             return;
         }
 
-        let assetInfos = detailDoc.querySelectorAll('[data-asset-info]');
-
-        let parsedAssetInfos: {
-            assetid: string,
-            classid: string,
-            instanceid: string,
-            info: {
-                stickers: {
-                    sell_reference_price: string
-                }[]
-            }
-        }[] = [];
-
-        assetInfos.forEach(x => {
-            parsedAssetInfos.push(Util.tryParseJson(x.getAttribute('data-asset-info')));
-        });
-
-        // the data needs to contain more than 0 stickers (obviously)
-        let stickerInfos = parsedAssetInfos.find(x => x.info.stickers.length > 0);
-        if (stickerInfos == null) {
-            return;
-        }
-
-        let assetId = parsedAssetInfos.find(x => x?.assetid != null)?.assetid;
-        let classId = parsedAssetInfos.find(x => x?.classid != null)?.classid;
-        let instanceId = parsedAssetInfos.find(x => x?.instanceid != null)?.instanceid;
-
-        // all of these need to be valid to pass
-        if (assetId == null || classId == null || instanceId == null) {
-            return;
-        }
-
-        let listingOrderId = document.querySelector(`[data-classid="${classId}"][data-instanceid="${instanceId}"][data-assetid="${assetId}"]`)?.getAttribute('data-orderid');
+        let listingOrderId = document.querySelector(`[data-classid="${data.classid}"][data-instanceid="${data.instanceid}"][data-assetid="${data.assetid}"]`)?.getAttribute('data-orderid');
 
         // if we have no listing order we have no listing price anyway
         if (listingOrderId == null) {
@@ -750,7 +797,7 @@ module Adjust_Listings {
         }
 
         let stickerSum = 0;
-        for (let sticker of stickerInfos.info.stickers) {
+        for (let sticker of data.info.stickers) {
             stickerSum += +sticker.sell_reference_price;
         }
 

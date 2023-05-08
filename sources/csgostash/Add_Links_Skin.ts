@@ -71,7 +71,7 @@ module Add_Links_Skin {
 
             const hash_name = `${isUnusual ? '★ ' : (specialQuality && hasSpecialQuality ? (hasStatTrack ? 'StatTrak™ ' : 'Souvenir ') : '')}${itemName} (${wear})`;
             const goods_id: string = (await BrowserInterface.delegate<BrowserInterface.BuffSchemaGetIdOrNameDelegation, string>({
-                method: BrowserInterface.DelegationMethod.BuffSchema_get,
+                method: BrowserInterface.DelegationMethod.BUFF_SCHEMA_GET,
                 parameters: {
                     name: hash_name
                 }
