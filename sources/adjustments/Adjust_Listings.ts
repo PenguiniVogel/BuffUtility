@@ -691,6 +691,11 @@ module Adjust_Listings {
 
     async function extractAssetInfos(data: unknown, cacheId: string): Promise<ParsedAssetInfo> {
         if (cacheId != null) {
+            // if the storage almost reached max capacity clear
+            if (await BrowserInterface.Storage.getBytesInUse(BrowserInterface.Storage.Area.LOCAL) > (10_485_760 - 1_000)) {
+                await BrowserInterface.Storage.clear(BrowserInterface.Storage.Area.LOCAL);
+            }
+
             let cachedEntry = await BrowserInterface.Storage.get<ParsedAssetInfo>(cacheId, BrowserInterface.Storage.Area.LOCAL);
             if (cachedEntry != null) {
                 // 4 hour validity
