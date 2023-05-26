@@ -13,75 +13,14 @@ module BrowserInterface {
 
     DEBUG && console.debug('[BuffUtility] Module.BrowserInterface');
 
-    interface StorageSpace {
-        set: Function,
-        get: Function,
-        clear: Function,
-        getBytesInUse: Function
-    }
-
-    interface CallbackStorageSpace extends StorageSpace {
-        /**
-         * Set an item in sync storage
-         *
-         * @param data
-         * @param callback
-         */
-        set(data: { [key: string]: any }, callback: () => void): void,
-
-        /**
-         * Get an item from sync storage
-         *
-         * @param keys
-         * @param callback
-         */
-        get<T>(keys: string[], callback: (result: { [key: string]: T }) => void): void,
-
-        /**
-         * Removes all items from storage
-         *
-         * @param callback
-         */
-        clear(callback?: () => void),
-
-        /**
-         * Get all bytes in use
-         *
-         * @param callback
-         */
-        getBytesInUse(callback: (bytesInUse: number) => void)
-    }
-
-    interface PromiseStorageSpace extends StorageSpace {
-        /**
-         * Set an item in sync storage
-         *
-         * @param data
-         */
-        set(data: { [key: string]: any }): Promise<void>,
-
-        /**
-         * Get an item from sync storage
-         *
-         * @param keys
-         */
-        get<T>(keys: string[]): Promise<{ [key: string]: T }>
-
-        /**
-         * Removes all items from storage
-         */
-        clear(): Promise<void>,
-
-        /**
-         * Get all bytes in use
-         */
-        getBytesInUse(): Promise<number>
+    export interface Manifest {
+        version: string
     }
 
     /**
      * Represents a browser environment with matched functions
      */
-    interface BrowserEnvironment<T extends StorageSpace> {
+    interface BrowserEnvironment<TStorage extends Storage.Space> {
         runtime: {
             /**
              * The extension id
@@ -106,11 +45,16 @@ module BrowserInterface {
              * @param response
              */
             sendMessage(data: any, response: (data: any) => void): void,
+
+            /**
+             * Get the manifest
+             */
+            getManifest(): Manifest
         },
         storage: {
-            local: T
-            sync: T,
-            session: T
+            local: TStorage
+            sync: TStorage,
+            session: TStorage
         }
     }
 
@@ -167,8 +111,8 @@ module BrowserInterface {
         data: T
     }
 
-    declare var chrome: BrowserEnvironment<CallbackStorageSpace>;
-    declare var browser: BrowserEnvironment<PromiseStorageSpace>;
+    declare var chrome: BrowserEnvironment<Storage.CallbackSpace>;
+    declare var browser: BrowserEnvironment<Storage.PromiseSpace>;
 
     let environment: 'chrome' | 'browser' = null;
 
@@ -266,10 +210,82 @@ module BrowserInterface {
     }
 
     /**
+     * Get the extension manifest
+     */
+    export function getManifest(): Manifest {
+        return browserEnvironment.runtime.getManifest();
+    }
+
+    /**
      * Module to manage storage options
      */
     /** */
     export module Storage {
+
+        export interface Space {
+            set: Function,
+            get: Function,
+            clear: Function,
+            getBytesInUse: Function
+        }
+
+        export interface CallbackSpace extends Space {
+            /**
+             * Set an item in sync storage
+             *
+             * @param data
+             * @param callback
+             */
+            set(data: { [key: string]: any }, callback: () => void): void,
+
+            /**
+             * Get an item from sync storage
+             *
+             * @param keys
+             * @param callback
+             */
+            get<T>(keys: string[], callback: (result: { [key: string]: T }) => void): void,
+
+            /**
+             * Removes all items from storage
+             *
+             * @param callback
+             */
+            clear(callback?: () => void),
+
+            /**
+             * Get all bytes in use
+             *
+             * @param callback
+             */
+            getBytesInUse(callback: (bytesInUse: number) => void)
+        }
+
+        export interface PromiseSpace extends Space {
+            /**
+             * Set an item in sync storage
+             *
+             * @param data
+             */
+            set(data: { [key: string]: any }): Promise<void>,
+
+            /**
+             * Get an item from sync storage
+             *
+             * @param keys
+             */
+            get<T>(keys: string[]): Promise<{ [key: string]: T }>
+
+            /**
+             * Removes all items from storage
+             */
+            clear(): Promise<void>,
+
+            /**
+             * Get all bytes in use
+             */
+            getBytesInUse(): Promise<number>
+        }
 
         export const enum Area {
             LOCAL = 'local',

@@ -8,7 +8,8 @@
             "ES2017.Object",
             "ES2015",
             "dom"
-        ]
+        ],
+        "resolveJsonModule": true
     },
     "exclude": [
         "node_modules"

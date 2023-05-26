@@ -10,15 +10,6 @@ module Options {
 
     // module
 
-    const VERSION: number = 223;
-
-    const enum SettingsCategory {
-        NORMAL,
-        ADVANCED,
-        PSE,
-        MODULE
-    }
-
     interface DisplayInfo {
         title: string,
         description: string,
@@ -27,7 +18,8 @@ module Options {
             csgoOnly?: boolean,
             steamOnly?: boolean,
             requiresRequest?: boolean,
-            isModule?: boolean
+            isModule?: boolean,
+            addedIn?: string
         }
     }
 
@@ -37,6 +29,44 @@ module Options {
     }
 
     function createSettingHTML(setting: Settings, info: DisplayInfo, settingHTML: string): string {
+        function compareVersion(versionIn: string): number {
+            if (versionIn == null || versionIn?.length == 0) {
+                return -1;
+            }
+
+            function parseVersion(inStr: string): number {
+                const multiplier = [1000, 100, 10, 1];
+                let split = (inStr ?? '').split('.');
+                let result: number = 0;
+
+                if (split.length >= 3) {
+                    function parseNumber(arg: string): number {
+                        let r: number = 0;
+                        try {
+                            r = parseInt(arg);
+                        } catch (_ /* discard */) { }
+
+                        if (!isFinite(r) || isNaN(r)) {
+                            r = 0;
+                        }
+
+                        return r;
+                    }
+
+                    for(let i = 0; i < 4; i ++) {
+                        result += parseNumber(split[i]) * multiplier[i];
+                    }
+                }
+
+                return result;
+            }
+
+            let manifestVersion = parseVersion(BrowserInterface.getManifest().version);
+            let compareVersion = parseVersion(versionIn);
+
+            return compareVersion >= manifestVersion ? 0 : -1;
+        }
+
         function translateExperimental(tags: DisplayInfo['tags'] = {}): string {
             if (tags.isExperimental) {
                 return `<div style="padding: 2px; border: 1px solid #fffdfd; color: #fffdfd; background: #306eb6; display: inline-block; width: 17px; text-align: center; margin-right: 3px;" title="BuffUtility Experimental Setting! May have bugs or other issues!">E</div>`;
@@ -46,25 +76,25 @@ module Options {
         }
 
         function translateTags(tags: DisplayInfo['tags'] = {}): string {
-            let tagString = '';
+            let tagString = '<ul>';
 
             if (tags.csgoOnly) {
-                tagString += ' <u style="color: var(--color-light);">(CS:GO Only)</u>';
+                tagString += '<li>- <u style="color: var(--color-light);" title="This setting only applies to CS:GO related pages / items.">CS:GO Only</u></li>';
             }
 
             if (tags.steamOnly) {
-                tagString += ' <u style="color: var(--color-steam);">(Steam Only)</u>';
+                tagString += '<li>- <u style="color: var(--color-steam);" title="This setting only applies to Steam related pages.">Steam Only</u></li>';
             }
 
             if (tags.requiresRequest) {
-                tagString += ' <u style="color: #b91010;" title="This feature is a REQUIRE REQUEST feature, use with caution.">(RR ⚠)</u>';
+                tagString += '<li>- <u style="color: #b91010;" title="This feature is a REQUIRE REQUEST feature, use with caution.">Requires Request ⚠</u></li>';
             }
 
             if (tags.isModule) {
-                tagString += ' <u style="color: #fffdfd; background: #006447; padding: 1px; border: 1px solid #eee;">Module</u>';
+                tagString += '<li>- <u style="color: #fffdfd; background: #006447; padding: 1px; border: 1px solid #eee;">Module</u></li>';
             }
 
-            return tagString;
+            return `${tagString}</ul>`;
         }
         
         return Util.buildHTML('tr', {
@@ -73,11 +103,11 @@ module Options {
                     content: [
                         Util.buildHTML('div', {
                             class: 'setting-title',
-                            content: [ translateExperimental(info.tags), info.title, translateTags(info.tags) ]
+                            content: [ translateExperimental(info.tags), info.title, (compareVersion(info.tags?.addedIn) == 0 ? '<sup><small style="color: var(--color-light);"> New!</small></sup>' : '') ]
                         }),
                         Util.buildHTML('div', {
                             class: 'setting-description action',
-                            content: [ `<span class="setting-description sym-expanded">►</span> Description</div>` ]
+                            content: [ `<span class="setting-description sym-expanded">►</span> Description${(info.tags?.addedIn != null ? ` <small>(since <e style="color: var(--color-light);">${info.tags.addedIn}</e>)</small>` : '')}`, translateTags(info.tags) ]
                         }),
                         Util.buildHTML('div', {
                             class: 'setting-description text-expanded',
@@ -220,6 +250,10 @@ module Options {
     }
 
     async function init(): Promise<void> {
+        // version
+        document.querySelector('#version-container').innerHTML = `v${BrowserInterface.getManifest().version}`;
+
+        // settings
         let normalSettings: string = '';
         let experimentalSettings: string = '';
         let pseSettings: string = '';
@@ -303,7 +337,8 @@ module Options {
             title: 'Listing options',
             description: 'Define what options show up on each listing.<br/>3D Inspect: Buffs 3D Inspect.<br/>Inspect in server: Buffs inspect server.<br/>Copy !gen/!gengl: Quickly copy !gen codes.<br/>Share: Opens the share page.<br/>Match floatdb: Tries to find the skin on floatdb.<br/>Find Similar: Tries finding similar listings.<br/>Detail: A replacement button for the new detail UI.',
             tags: {
-                csgoOnly: true
+                csgoOnly: true,
+                addedIn: '2.1.2'
             }
         }, [
             '3D Inspect',
@@ -311,20 +346,26 @@ module Options {
             'Copy !gen/!gengl',
             'Share',
             'Match floatdb',
-            'Find Similar',
-            'Detail'
+            'Find Similar<sup><small style="color: var(--color-light);"> 2.1.9</small></sup>',
+            'Detail<sup><small style="color: var(--color-light);"> 2.2.1</small></sup>'
         ]);
 
         // Settings.SHOW_FLOAT_BAR
         normalSettings += await createCheckboxOption(Settings.SHOW_FLOAT_BAR, {
             title: 'Show float-bar',
-            description: 'Show the float-bar buff has on the side, can be expanded back if hidden!'
+            description: 'Show the float-bar buff has on the side, can be expanded back if hidden!',
+            tags: {
+                addedIn: '2.1.2'
+            }
         });
 
         // Settings.COLOR_LISTINGS
         normalSettings += await createMultiCheckboxOption(Settings.COLOR_LISTINGS, {
             title: 'Color purchase options',
-            description: 'Color purchase options, this will paint purchase options red if not affordable with the current held balance.'
+            description: 'Color purchase options, this will paint purchase options red if not affordable with the current held balance.',
+            tags: {
+                addedIn: '2.1.2'
+            }
         }, [
             'Color Buy',
             'Color Bargain'
@@ -490,7 +531,10 @@ module Options {
         // Settings.LOCATION_RELOAD_NEWEST
         normalSettings += createSelectOption(Settings.LOCATION_RELOAD_NEWEST, {
             title: 'Location Reload Newest',
-            description: 'Sets the location of the forced newest reload.<br>None: Don\'t show<br>Bulk: Next to "Bulk Buy"<br>Sort: Next to sorting<br>Center: In the center<br>Left: Left most position.'
+            description: 'Sets the location of the forced newest reload.<br>None: Don\'t show<br>Bulk: Next to "Bulk Buy"<br>Sort: Next to sorting<br>Center: In the center<br>Left: Left most position.',
+            tags: {
+                addedIn: '2.1.5'
+            }
         }, [
             {
                 displayText: 'None',
@@ -535,7 +579,10 @@ module Options {
         // Settings.COLOR_SCHEME
         normalSettings += await createMultiInputOption(Settings.COLOR_SCHEME, {
             title: 'Color Scheme',
-            description: 'Color Scheme for whatever theme you want (Dark-Theme by default)'
+            description: 'Color Scheme for whatever theme you want (Dark-Theme by default)',
+            tags: {
+                addedIn: '2.1.3'
+            }
         }, 'color', [
             'Background',
             'Background Hover',
@@ -547,7 +594,10 @@ module Options {
         if (!await getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
             normalSettings += createButtonOption(Settings.ALLOW_EXTENSION_REQUESTS, {
                 title: 'Allow Extension Requests',
-                description: 'Allow BuffUtility to make Buff requests within its context.<br>This is potentially very dangerous, so unless there is a reason, and you are aware of the consequences: <b>DO NOT ENABLE THIS</b>'
+                description: 'Allow BuffUtility to make Buff requests within its context.<br>This is potentially very dangerous, so unless there is a reason, and you are aware of the consequences: <b>DO NOT ENABLE THIS</b>',
+                tags: {
+                    addedIn: '2.2.2'
+                }
             }, 'sendAllowExtensionRequests');
         }
 
@@ -558,7 +608,8 @@ module Options {
             title: 'Favourite Bargain',
             description: 'Show the "Bargain" feature on favourites.',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.6'
             }
         });
 
@@ -568,7 +619,8 @@ module Options {
             description: 'Adjust the "Popular" tab in the market page, adding some features.<br><small>* Setting will be removed and become default eventually.</small>',
             tags: {
                 isExperimental: true,
-                csgoOnly: true
+                csgoOnly: true,
+                addedIn: '2.1.8'
             }
         });
 
@@ -577,7 +629,8 @@ module Options {
             title: 'Currency Fetch Notification',
             description: 'Show toast notification when currency rates were updated, happens once a day.<br><small>* Setting will be merged into "Show Toast on Action" eventually.</small>',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.6'
             }
         });
 
@@ -588,7 +641,8 @@ module Options {
                 description: 'This will check the bargain status on favourites, to adjust the buttons accordingly, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
                 tags: {
                     isExperimental: true,
-                    requiresRequest: true
+                    requiresRequest: true,
+                    addedIn: '2.2.2'
                 }
             });
 
@@ -598,7 +652,8 @@ module Options {
                 description: 'This will add a price history to the header of item pages, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
                 tags: {
                     isExperimental: true,
-                    requiresRequest: true
+                    requiresRequest: true,
+                    addedIn: '2.2.2'
                 }
             }, [
                 {
@@ -621,7 +676,8 @@ module Options {
                 description: 'This will pre fetch the SP% on listings so you wont have to manually hover over it, HOWEVER this is somewhat dangerous, as it will push API requests that are normally uncommon, use with caution. Setting will stay experimental until a better alternative is possibly discovered.',
                 tags: {
                     isExperimental: true,
-                    requiresRequest: true
+                    requiresRequest: true,
+                    addedIn: '2.2.3'
                 }
             });
         }
@@ -631,7 +687,8 @@ module Options {
             title: 'Adjust Market Currency',
             description: 'Adjust shown market currency to selected currency.',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.8'
             }
         });
 
@@ -640,7 +697,8 @@ module Options {
             title: 'Format Currency',
             description: 'If set, will format numbers.<br>e.g. given 1234.56 will turn into 1,234.56',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.8'
             }
         });
 
@@ -650,7 +708,8 @@ module Options {
             description: 'Adjust the "Shop" pages. This adds features such as the share link and !gen/!gengl.<br><small>* Setting will be removed with and become default eventually.</small>',
             tags: {
                 isExperimental: true,
-                csgoOnly: true
+                csgoOnly: true,
+                addedIn: '2.1.8'
             }
         });
 
@@ -660,7 +719,8 @@ module Options {
             description: 'Adjust the "Share" pages. This adds the ability to find the listing directly from the share link.',
             tags: {
                 isExperimental: true,
-                csgoOnly: true
+                csgoOnly: true,
+                addedIn: '2.1.8'
             }
         });
 
@@ -669,7 +729,8 @@ module Options {
             title: 'Allow bulk buy',
             description: 'Allow the bulk buy function to be used on the web version of Buff',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.8'
             }
         });
 
@@ -678,7 +739,8 @@ module Options {
             title: 'Bargain Calculator',
             description: 'Gives you the ability to quickly bargain by doing the math for you.<br><code>&gt; minimum + ( ( listing - minimum ) * percentage )</code> is used to calculate the bargain price.',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.9'
             }
         });
 
@@ -686,7 +748,8 @@ module Options {
             title: 'Bargain Calculator Default',
             description: 'Sets the default percentage value.<br>Allowed range is 1 to 99.<br>While you can set it outside the range, the value will be clamped between 1 and 99.',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.9'
             }
         }, 'number', await getSetting(Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT));
 
@@ -695,7 +758,8 @@ module Options {
             title: 'Show Listing Date',
             description: 'Show an item\'s listing date in the market page.<br>Time zone differences are already considered and rounded towards full hours.',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.9'
             }
         });
 
@@ -704,7 +768,8 @@ module Options {
             title: 'Adjust Trade Records',
             description: 'Adjust the "Trade Records" tab for an items page, showing things such as currency conversion, and difference to reference price.',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.1.9'
             }
         });
 
@@ -713,7 +778,8 @@ module Options {
             title: 'Show Souvenir Teams',
             description: 'Utilize the attributes field in market listings and favorites to display the teams of a souvenir package.',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -721,7 +787,8 @@ module Options {
             title: 'Preferred Payment Methods',
             description: 'This will gray out the Buy/Bargain button if the listing does not support any of your selected preferred payment methods.',
             tags: {
-                isExperimental: true
+                isExperimental: true,
+                addedIn: '2.2.3'
             }
         }, [
             'BUFF balance-Alipay',
@@ -738,7 +805,8 @@ module Options {
             title: 'History Page Navigation',
             description: 'Have many thousands of pages in your Market History? Ever wish you could jump to page 100? With this setting you can.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -747,7 +815,8 @@ module Options {
             title: 'History Page Navigation Size',
             description: 'Wan\'t more than 10 items per page? Like on the sell order, this setting makes 10, 30 and 100 items per page available.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.2.2'
             }
         }, [
             {
@@ -769,7 +838,8 @@ module Options {
             title: 'Calculate BuyOrder Summary',
             description: 'Shows the buy order summary, total per buy order, max buy order you can place, and how much has been placed.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.1.9'
             }
         });
 
@@ -778,7 +848,8 @@ module Options {
             title: 'BuyOrder Cancel Confirmation',
             description: 'Hate accidentally cancelling a buy order? Well no more! Now you get asked... once.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.1.9'
             }
         });
 
@@ -787,7 +858,8 @@ module Options {
             title: 'BuyOrder Scrolling',
             description: 'Hate how it takes up the whole page? Now the content height gets reduced to 50vh, and a scrollbar shows instead. This also adds a search field next to the Name header to quickly look for buy-orders.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.2.1'
             }
         });
 
@@ -796,7 +868,8 @@ module Options {
             title: 'Steam Graph - Show Years',
             description: 'Display the year in the Steam Median Sales graph.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.1.9'
             }
         });
 
@@ -805,7 +878,8 @@ module Options {
             title: 'Steam Graph - Show Volume',
             description: 'Display the volume as additional series in the Steam Median Sales graph.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.1.9'
             }
         });
 
@@ -814,7 +888,8 @@ module Options {
             title: 'Steam Graph - Cumulate Recent Volume',
             description: 'Instead of displaying the recent days volume hourly, it cumulates it together like other days.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -830,7 +905,8 @@ module Options {
             description: 'Add a quick button to open the buff.163 sale page for the specified item.',
             tags: {
                 csgoOnly: true,
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.1.9'
             }
         });
 
@@ -839,7 +915,8 @@ module Options {
             title: 'Hide Account Details',
             description: 'Blurs the billing information panel.',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.2.1'
             }
         });
 
@@ -848,7 +925,8 @@ module Options {
             title: 'Collapse Account Details',
             description: 'Hiding them not enough? You would like the modal to collapse them to?',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.2.3'
             }
         });
 
@@ -857,7 +935,8 @@ module Options {
             title: 'Merge Active Listings',
             description: 'Merges active listings by price and date',
             tags: {
-                steamOnly: true
+                steamOnly: true,
+                addedIn: '2.2.1'
             }
         });
 
@@ -868,7 +947,8 @@ module Options {
             title: 'MODULE_ADJUST_FAVOURITES',
             description: 'Adjustments in the Buff favourites<br>Active on:<br><code>[.*]buff.163.com/user-center/bookmark/sell_order*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -877,7 +957,8 @@ module Options {
             title: 'MODULE_ADJUST_LISTINGS',
             description: 'Adjustments in the Buff listing view<br>Active on:<br><code>[.*]buff.163.com/goods/*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -886,7 +967,8 @@ module Options {
             title: 'MODULE_ADJUST_MARKET',
             description: 'Adjustments in the Buff market view<br>Active on:<br><code>[.*]buff.163.com/market/*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -895,7 +977,8 @@ module Options {
             title: 'MODULE_ADJUST_SALES',
             description: 'Adjustments in the Buff sales view<br>Active on:<br><code>[.*]buff.163.com/market/sell_order/on_sale*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -904,7 +987,8 @@ module Options {
             title: 'MODULE_ADJUST_SETTINGS',
             description: '<u>Deprecated</u> Adjustments in the Buff settings view<br>Active on:<br><code>[.*]buff.163.com/user-center/profile</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -913,7 +997,8 @@ module Options {
             title: 'MODULE_ADJUST_SHARE',
             description: '<u>Deprecated</u> Adjustments in the Buff share view<br>Active on:<br><code>[.*]buff.163.com/market/m/item_detail?*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -922,7 +1007,8 @@ module Options {
             title: 'MODULE_ADJUST_SHOP',
             description: 'Adjustments in the Buff shop view<br>Active on:<br><code>[.*]buff.163.com/shop*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -931,7 +1017,8 @@ module Options {
             title: 'MODULE_PSE_LISTINGS',
             description: 'Adjustments in the Steam listing view<br>Active on:<br><code>[.*]steamcommunity.com/market/listings/*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -940,7 +1027,8 @@ module Options {
             title: 'MODULE_PSE_MARKET',
             description: 'Adjustments in the Steam market view<br>Active on:<br><code>[.*]steamcommunity.com/market</code><br><code>[.*]steamcommunity.com/market/</code><br><code>[.*]steamcommunity.com/market?*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 
@@ -949,7 +1037,8 @@ module Options {
             title: 'MODULE_PSE_TRANSFORMGRAPH',
             description: 'Adjustments to the Steam sales graph<br>Active on:<br><code>[.*]steamcommunity.com/market/listings/*</code>',
             tags: {
-                isModule: true
+                isModule: true,
+                addedIn: '2.2.2'
             }
         });
 

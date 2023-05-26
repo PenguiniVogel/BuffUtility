@@ -75,6 +75,13 @@
             background: var(--color-dark-shadow);
         }
 
+        nav #version-container {
+            color: var(--color-light);
+            background: var(--color-dark-shadow);
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
         input[type="checkbox"] {
             cursor: pointer;
         }
@@ -187,6 +194,12 @@
             font-size: 80%;
         }
 
+        .setting-description ul {
+            padding-inline-start: 40px;
+            margin-block-start: 5px;
+            margin-block-end: 5px;
+        }
+
         .setting-description.action {
             user-select: none;
             padding-top: 5px;
@@ -244,6 +257,7 @@
             <e style="background: var(--color-dark-shadow);">
                 <button id="reset-all" class="reset-all">Reset All</button>
                 <button id="show-modules" class="reset-all">Modules</button>
+                <e id="version-container"></e>
             </e>
         </div>
     </nav>
