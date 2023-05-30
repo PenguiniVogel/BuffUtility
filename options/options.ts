@@ -668,7 +668,7 @@ module Options {
                     displayText: '30 Days',
                     value: ExtensionSettings.PriceHistoryRange.MONTHLY
                 }
-            ], await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
+            ], await ExtensionSettings.getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY));
 
             // Settings.EXPERIMENTAL_FETCH_LISTING_SPP
             experimentalSettings += await createCheckboxOption(Settings.EXPERIMENTAL_FETCH_LISTING_SPP, {

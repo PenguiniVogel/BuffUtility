@@ -184,7 +184,7 @@ module ExtensionSettings {
         MODULE_PSE_TRANSFORMGRAPH = 'module_pse_transformgraph',
     }
 
-    type SettingsTypes = {
+    type InternalSettingsTypes = {
         [Settings.VERSION]: string;
         [Settings.SELECTED_CURRENCY]: string;
         [Settings.CUSTOM_CURRENCY_RATE]: number;
@@ -203,7 +203,7 @@ module ExtensionSettings {
         [Settings.SHOW_TOAST_ON_ACTION]: boolean;
         [Settings.LISTING_OPTIONS]: boolean[];
         [Settings.SHOW_FLOAT_BAR]: boolean;
-        [Settings.COLOR_LISTINGS]: [boolean, boolean];
+        [Settings.COLOR_LISTINGS]: boolean[];
         [Settings.DATA_PROTECTION]: boolean;
         [Settings.COLOR_SCHEME]: string[];
         [Settings.USE_SCHEME]: boolean;
@@ -263,34 +263,75 @@ module ExtensionSettings {
         [Settings.MODULE_PSE_TRANSFORMGRAPH]: boolean;
     }
 
+    // this type holds settings types which change from their internal stored format
     type SettingsTypesTransformed = {
+        [Settings.COLOR_LISTINGS]: [boolean, boolean];
         [Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS]: number[]
     };
 
-    type SETTINGS_REQUIRE_REQUESTS = Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS | Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY | Settings.EXPERIMENTAL_FETCH_LISTING_SPP;
+    // this type omits the transformed setting keys from the internal structure to correctly propagate it
+    type ReturnSettingsTypes = Omit<InternalSettingsTypes, keyof SettingsTypesTransformed> & SettingsTypesTransformed;
 
-    type SETTINGS_TRANSFORMING = Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS;
+    const requireRequestSettings: Settings[] = [
+        Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS,
+        Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY,
+        Settings.EXPERIMENTAL_FETCH_LISTING_SPP
+    ];
 
-    const enum InternalStructureTransform {
+    const enum InternalSettingExportTransform {
         NONE = 0,
         BOOLEAN = 1,
         BOOLEAN_ARRAY = 2
     }
 
     type InternalSetting<T extends Settings> = {
-        value?: SettingsTypes[T],
+        /**
+         * This will always hold the internal format value
+         */
+        value?: InternalSettingsTypes[T],
+        /**
+         * If this setting has been loaded
+         */
         resolved?: boolean,
-        transformedValue?: any,
-        readonly default: SettingsTypes[T],
-        readonly allowedValues?: SettingsTypes[T][],
+        /**
+         * This will hold the transformed value
+         */
+        transformedValue?: ReturnSettingsTypes[T],
+        /**
+         * The default value this setting should take if invalid or unset
+         */
+        readonly default: InternalSettingsTypes[T],
+        /**
+         * A list of allowed values in cases where they need to be restricted
+         */
+        readonly allowedValues?: InternalSettingsTypes[T][],
+        /**
+         * The export key where the value is stored, sort of like a memory address
+         */
         readonly export: string,
-        readonly validator: (key: Settings, value: any) => any
-    } & (SettingsTypes[T] extends boolean ? {
-        readonly transform: InternalStructureTransform.BOOLEAN
-    } : SettingsTypes[T] extends boolean[] ? {
-        readonly transform: InternalStructureTransform.BOOLEAN_ARRAY
+        /**
+         * The validator this setting should use
+         */
+        readonly validator: (key: T, value: any) => InternalSettingsTypes[T],
+        /**
+         * The transform function to translate the stored value type into the return type
+         */
+        readonly transformFunction?: (value: InternalSettingsTypes[T]) => ReturnSettingsTypes[T]
+    } & (InternalSettingsTypes[T] extends boolean ? {
+        /**
+         * This setting is a boolean and will be appropriately transformed into 0 or 1 to save data
+         */
+        readonly exportTransform: InternalSettingExportTransform.BOOLEAN
+    } : InternalSettingsTypes[T] extends boolean[] ? {
+        /**
+         * This setting is a boolean array and will be appropriately transformed, see {@link Util.exportBooleansToBytes}
+         */
+        readonly exportTransform: InternalSettingExportTransform.BOOLEAN_ARRAY
     } : {
-        readonly transform?: InternalStructureTransform.NONE
+        /**
+         * This setting requires no export handing, property is optional
+         */
+        readonly exportTransform?: InternalSettingExportTransform.NONE
     });
     
     type InternalSettingStructure = {
@@ -321,13 +362,13 @@ module ExtensionSettings {
         [Settings.CAN_EXPAND_SCREENSHOTS]: {
             default: false,
             export: '0x6',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPAND_SCREENSHOTS_BACKDROP]: {
             default: false,
             export: '0x7',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.DIFFERENCE_DOMINATOR]: {
@@ -342,7 +383,7 @@ module ExtensionSettings {
         [Settings.APPLY_STEAM_TAX]: {
             default: false,
             export: '0x9',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.LISTING_DIFFERENCE_STYLE]: {
@@ -421,31 +462,31 @@ module ExtensionSettings {
         [Settings.SHOW_TOAST_ON_ACTION]: {
             default: false,
             export: '0x17',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.LISTING_OPTIONS]: {
             default: [true, true, true, true, false, false, false],
             export: '0x18',
-            transform: InternalStructureTransform.BOOLEAN_ARRAY,
+            exportTransform: InternalSettingExportTransform.BOOLEAN_ARRAY,
             validator: validateBooleanArray
         },
         [Settings.SHOW_FLOAT_BAR]: {
             default: true,
             export: '0x19',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.COLOR_LISTINGS]: {
             default: [false, false],
             export: '0x20',
-            transform: InternalStructureTransform.BOOLEAN_ARRAY,
+            exportTransform: InternalSettingExportTransform.BOOLEAN_ARRAY,
             validator: validateBooleanArray
         },
         [Settings.DATA_PROTECTION]: {
             default: true,
             export: '0x21',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.COLOR_SCHEME]: {
@@ -456,7 +497,7 @@ module ExtensionSettings {
         [Settings.USE_SCHEME]: {
             default: false,
             export: '0x23',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.LOCATION_RELOAD_NEWEST]: {
@@ -477,25 +518,25 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ALLOW_FAVOURITE_BARGAIN]: {
             default: true,
             export: '2x1',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_POPULAR]: {
             default: false,
             export: '2x2',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_NOTIFICATION]: {
             default: false,
             export: '2x3',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_FAVOURITE_BARGAIN_STATUS]: {
             default: false,
             export: '2x4',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY]: {
@@ -511,37 +552,37 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_ADJUST_MARKET_CURRENCY]: {
             default: false,
             export: '2x6',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FORMAT_CURRENCY]: {
             default: false,
             export: '2x7',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_SHOP]: {
             default: true,
             export: '2x8',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_SHARE]: {
             default: true,
             export: '2x9',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ALLOW_BULK_BUY]: {
             default: false,
             export: '2x10',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN]: {
             default: false,
             export: '2x11',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_AUTOMATIC_BARGAIN_DEFAULT]: {
@@ -552,32 +593,62 @@ module ExtensionSettings {
         [Settings.EXPERIMENTAL_SHOW_LISTING_DATE]: {
             default: false,
             export: '2x12',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_ADJUST_TRADE_RECORDS]: {
             default: true,
             export: '2x14',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_SHOW_SOUVENIR_TEAMS]: {
             default: false,
             export: '2x15',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_FETCH_LISTING_SPP]: {
             default: false,
             export: '2x16',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS]: {
             default: [true, true, true, true, true],
             export: '2x17',
-            transform: InternalStructureTransform.BOOLEAN_ARRAY,
-            validator: validateBooleanArray
+            exportTransform: InternalSettingExportTransform.BOOLEAN_ARRAY,
+            validator: validateBooleanArray,
+            transformFunction(values) {
+                let r: number[] = [];
+
+                // BUFF balance-Alipay
+                if (values[0]) {
+                    r.push(3);
+                }
+
+                // Alipay - Credit card
+                if (values[1]) {
+                    r.push(10);
+                }
+
+                // BUFF Balance-Bank Card
+                if (values[2]) {
+                    r.push(1);
+                }
+
+                // WeChat Pay
+                if (values[3]) {
+                    r.push(6);
+                }
+
+                // WeChat Split Payment
+                if (values[4]) {
+                    r.push(18);
+                }
+
+                return r;
+            }
         },
 
         // Misc
@@ -585,7 +656,7 @@ module ExtensionSettings {
         [Settings.ALLOW_EXTENSION_REQUESTS]: {
             default: false,
             export: '3x1',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
 
@@ -594,7 +665,7 @@ module ExtensionSettings {
         [Settings.PSE_ADVANCED_PAGE_NAVIGATION]: {
             default: false,
             export: '9x1',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_ADVANCED_PAGE_NAVIGATION_SIZE]: {
@@ -605,67 +676,67 @@ module ExtensionSettings {
         [Settings.PSE_CALCULATE_BUYORDER_SUMMARY]: {
             default: false,
             export: '9x2',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_BUYORDER_CANCEL_CONFIRMATION]: {
             default: true,
             export: '9x3',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_BUYORDER_SCROLLING]: {
             default: false,
             export: '9x4',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_GRAPH_SHOW_YEARS]: {
             default: true,
             export: '9x5',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_GRAPH_SHOW_VOLUME]: {
             default: false,
             export: '9x6',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_FORCE_ITEM_ACTIVITY]: {
             default: false,
             export: '9x7',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_ADD_VIEW_ON_BUFF]: {
             default: false,
             export: '9x8',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_HIDE_ACCOUNT_DETAILS]: {
             default: false,
             export: '9x9',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_MERGE_ACTIVE_LISTINGS]: {
             default: false,
             export: '9x10',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_GRAPH_CUMULATE_RECENT]: {
             default: false,
             export: '9x12',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.PSE_COLLAPSE_ACCOUNT_DETAILS]: {
             default: false,
             export: '9x13',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
 
@@ -674,97 +745,62 @@ module ExtensionSettings {
         [Settings.MODULE_ADJUST_FAVOURITES]: {
             default: true,
             export: 'Mx0',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_ADJUST_LISTINGS]: {
             default: true,
             export: 'Mx1',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_ADJUST_MARKET]: {
             default: true,
             export: 'Mx2',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_ADJUST_SALES]: {
             default: true,
             export: 'Mx3',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_ADJUST_SETTINGS]: {
             default: true,
             export: 'Mx4',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_ADJUST_SHARE]: {
             default: true,
             export: 'Mx5',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_ADJUST_SHOP]: {
             default: true,
             export: 'Mx6',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_PSE_LISTINGS]: {
             default: true,
             export: 'Mx7',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_PSE_MARKET]: {
             default: true,
             export: 'Mx8',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
         [Settings.MODULE_PSE_TRANSFORMGRAPH]: {
             default: true,
             export: 'Mx10',
-            transform: InternalStructureTransform.BOOLEAN,
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
-        }
-    };
-
-    const INTERNAL_TRANSFORMERS: {
-        [key in SETTINGS_TRANSFORMING]: (input: SettingsTypes[key]) => SettingsTypesTransformed[key]
-    } = {
-        [Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS]: (input) => {
-            let r = [];
-
-            // BUFF balance-Alipay
-            if (input[0]) {
-                r.push(3);
-            }
-
-            // Alipay - Credit card
-            if (input[1]) {
-                r.push(10);
-            }
-
-            // BUFF Balance-Bank Card
-            if (input[2]) {
-                r.push(1);
-            }
-
-            // WeChat Pay
-            if (input[3]) {
-                r.push(6);
-            }
-
-            // WeChat Split Payment
-            if (input[4]) {
-                r.push(18);
-            }
-
-            return r;
         }
     };
 
@@ -829,7 +865,7 @@ module ExtensionSettings {
         return _validateBoolean(value) ?? <boolean>INTERNAL_SETTINGS[key].default;
     }
 
-    function validateBooleanArray(key: Settings, value: any): boolean[] {
+    function validateBooleanArray<T extends Settings>(key: T, value: any): boolean[] {
         checkTypeValidation(key, 'object');
 
         value = value ?? INTERNAL_SETTINGS[key].default;
@@ -882,8 +918,28 @@ module ExtensionSettings {
      * @param setting The value of the setting to get
      * @returns The value from the specified setting, return type is determined by passed setting
      */
-    export async function getSetting<T extends Settings, R extends SettingsTypes[T]>(setting: T): Promise<R> {
+    export async function getSetting<T extends Settings, R extends ReturnSettingsTypes[T]>(setting: T): Promise<R> {
+        let forceDefault = false;
+        if (isRequireRequestSettings(setting)) {
+            // if we can't read require-request settings, return their default
+            if (!await _internal_getSetting(Settings.ALLOW_EXTENSION_REQUESTS)) {
+                forceDefault = true;
+            }
+        }
+
+        return await _internal_getSetting(setting, forceDefault);
+    }
+
+    /**
+     * The internal setting resolver
+     *
+     * @param setting
+     * @param forceDefault
+     * @private
+     */
+    async function _internal_getSetting<T extends Settings, R extends ReturnSettingsTypes[T]>(setting: T, forceDefault: boolean = false): Promise<R> {
         return await new Promise<R>((resolve, _) => {
+            const start = Date.now();
             let internal: InternalSetting<any> = INTERNAL_SETTINGS[setting];
 
             // setting doesnt exist
@@ -895,36 +951,58 @@ module ExtensionSettings {
 
             // if setting has been resolved (loaded) already, return value
             if (internal.resolved) {
-                // DEBUG && console.debug(`[BuffUtility] Loading already resolved setting ${setting} ->`, internal.value);
-                resolve(internal.value);
+                resolve(internal.transformedValue ?? internal.value);
                 return;
             }
 
             BrowserInterface.Storage.get<any>(internal.export).then(value => {
                 let newValue = value;
-                switch (internal.transform ?? InternalStructureTransform.NONE) {
-                    case InternalStructureTransform.NONE:
+                switch (internal.exportTransform ?? InternalSettingExportTransform.NONE) {
+                    case InternalSettingExportTransform.NONE:
                         break;
-                    case InternalStructureTransform.BOOLEAN:
+                    case InternalSettingExportTransform.BOOLEAN:
                         // changed, only import 0 -> false and 1 -> true, anything else set to null
                         // to ensure validator takes default and doesn't set it to false outright
                         newValue = value === 0 || value === 1 ? value == 1 : null;
                         break;
-                    case InternalStructureTransform.BOOLEAN_ARRAY:
+                    case InternalSettingExportTransform.BOOLEAN_ARRAY:
                         newValue = Util.importBooleansFromBytes(value);
                         break;
                 }
 
-                let validator = internal.validator ?? ((_, value) => value);
-                internal.value = validator(setting, newValue);
+                // if default is forced, use default, otherwise validate
+                // yeah ternary operators ugly bla bla, I don't like if trees either
+                internal.value = forceDefault ?
+                    internal.default : (
+                        internal.validator == null ?
+                            newValue : internal.validator(setting, newValue)
+                    );
+
+                let debugMessage = [`[BuffUtility] Resolved setting ${setting} (${internal.export}):`, value, '->', internal.value, forceDefault ? '(Forced Default)' : ''];
+
+                if (internal.transformFunction != null) {
+                    internal.transformedValue = internal.transformFunction(internal.value);
+
+                    debugMessage.push('transformed -> ', internal.transformedValue);
+                }
 
                 internal.resolved = true;
 
-                DEBUG && console.debug(`[BuffUtility] Resolved setting ${setting} (${internal.export}):`, value, '->', internal.value);
+                DEBUG && console.debug(...debugMessage);
 
-                resolve(internal.value);
+                resolve(internal.transformedValue ?? internal.value);
             });
         });
+    }
+
+    /**
+     * Check if setting is a require-request one
+     *
+     * @param setting
+     * @private
+     */
+    function isRequireRequestSettings(setting: Settings): boolean {
+        return setting in requireRequestSettings;
     }
 
     /**
@@ -934,7 +1012,7 @@ module ExtensionSettings {
      * @param setting The specified setting to update
      * @param newValue The new value of the setting
      */
-    export function setSetting<T extends Settings, V extends SettingsTypes[T]>(setting: T, newValue: any | V): void {
+    export function setSetting<T extends Settings, V extends InternalSettingsTypes[T]>(setting: T, newValue: any | V): void {
         if (!(setting in INTERNAL_SETTINGS)) {
             console.debug(`[BuffUtility] Tried setting value for '${setting}', but that setting does not exist.`);
             return;
@@ -987,14 +1065,14 @@ module ExtensionSettings {
         }
 
         let exportValue: any = null;
-        switch (internal.transform ?? InternalStructureTransform.NONE) {
-            case InternalStructureTransform.NONE:
+        switch (internal.exportTransform ?? InternalSettingExportTransform.NONE) {
+            case InternalSettingExportTransform.NONE:
                 exportValue = internal.value;
                 break;
-            case InternalStructureTransform.BOOLEAN:
+            case InternalSettingExportTransform.BOOLEAN:
                 exportValue = internal.value == true ? 1 : 0;
                 break;
-            case InternalStructureTransform.BOOLEAN_ARRAY:
+            case InternalSettingExportTransform.BOOLEAN_ARRAY:
                 exportValue = Util.exportBooleansToBytes(<boolean[]>internal.value);
                 break;
         }
@@ -1002,34 +1080,6 @@ module ExtensionSettings {
         BrowserInterface.Storage.set({
             [internal.export]: exportValue
         }).then(_ => DEBUG && console.debug('[BuffUtility] Wrote setting:', setting, `(${internal.export})`, '->', exportValue));
-    }
-
-    /**
-     * Get a setting that falls within require request
-     *
-     * @param setting
-     */
-    export async function getRequestSetting<T extends SETTINGS_REQUIRE_REQUESTS, R extends SettingsTypes[T]>(setting: T): Promise<R> {
-        const canRequest = await getSetting(Settings.ALLOW_EXTENSION_REQUESTS);
-        if (canRequest) {
-            return await getSetting(<Settings><unknown>setting);
-        }
-
-        return <R><unknown>INTERNAL_SETTINGS[<Settings><unknown>setting].default;
-    }
-
-    /**
-     * Get a transforming setting value
-     *
-     * @param setting
-     */
-    export async function getTransformSetting<T extends SETTINGS_TRANSFORMING, R extends SettingsTypesTransformed[T]>(setting: T): Promise<R> {
-        if (INTERNAL_SETTINGS[setting].transformedValue == null) {
-            let transformFunction = INTERNAL_TRANSFORMERS[setting];
-            INTERNAL_SETTINGS[setting].transformedValue = transformFunction != null ? <R><unknown>transformFunction(await getSetting(setting)) : null;
-        }
-
-        return <R>INTERNAL_SETTINGS[setting].transformedValue;
     }
 
     // --- upgrade ~2.1.7 -> 2.1.8+

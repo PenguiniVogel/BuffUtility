@@ -5,7 +5,6 @@ module Adjust_Listings {
     // imports
     import Settings = ExtensionSettings.Settings;
     import getSetting = ExtensionSettings.getSetting;
-    import getRequestSetting = ExtensionSettings.getRequestSetting;
 
     // module
 
@@ -126,7 +125,7 @@ module Adjust_Listings {
             }
         }
 
-        if (!document.querySelector('span.buffutility-pricerange') && await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
+        if (!document.querySelector('span.buffutility-pricerange') && await ExtensionSettings.getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
 
             adjustHeaderListings();
@@ -138,7 +137,7 @@ module Adjust_Listings {
      */
     async function adjustHeaderListings(): Promise<void> {
         // default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
-        const days = await ExtensionSettings.getRequestSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
+        const days = await ExtensionSettings.getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
         const goods_id = document.querySelector('div.detail-cont div.add-bookmark').getAttribute('data-target-id');
 
         // skip to prevent doubles
@@ -411,7 +410,7 @@ module Adjust_Listings {
                     wearContainer.append(aDetail);
                 }
 
-                if (await getRequestSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP) && dataRow.asset_info.info.stickers.length > 0) {
+                if (await getSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP) && dataRow.asset_info.info.stickers.length > 0) {
                     let stickerAssetInfos = await extractAssetInfos(null, `c_${dataRow.id}`);
                     if (stickerAssetInfos == null) {
                         let response = await fetch(`https://buff.163.com/market/item_detail?appid=730&game=csgo&classid=${dataRow.asset_info.classid}&instanceid=${dataRow.asset_info.instanceid}&sell_order_id=${dataRow.id}&origin=selling-list&assetid=${dataRow.asset_info.assetid}&contextid=2`);
@@ -519,7 +518,7 @@ module Adjust_Listings {
             let paymentMethods = (<HTMLElement>priceContainer.querySelectorAll('div').item(1))?.outerHTML ?? '';
             priceContainer.innerHTML = (newHTML + paymentMethods);
 
-            const preferredPaymentMethods = await ExtensionSettings.getTransformSetting(Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS);
+            const preferredPaymentMethods = await ExtensionSettings.getSetting(Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS);
             let aBuy = row.querySelector('td a.btn-buy-order[data-asset-info]');
             let aBargain = dataRow.can_bargain ? row.querySelector('td a.bargain[data-asset-info]') : null;
 
@@ -768,7 +767,7 @@ module Adjust_Listings {
 
     async function addSingleListingSP(data: ParsedAssetInfo, settingContext?: Settings): Promise<void> {
         // they were pre-fetched, don't bother executing on hover
-        if (settingContext != Settings.EXPERIMENTAL_FETCH_LISTING_SPP && await getRequestSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP)) {
+        if (settingContext != Settings.EXPERIMENTAL_FETCH_LISTING_SPP && await getSetting(Settings.EXPERIMENTAL_FETCH_LISTING_SPP)) {
             return;
         }
 
