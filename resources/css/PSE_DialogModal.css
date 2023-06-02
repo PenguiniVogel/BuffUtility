@@ -1,0 +1,29 @@
+/* pse dialog */
+dialog#pse_cancel_buyorder_dialog::backdrop {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.pse_newmodal {
+    font-family: "Motiva Sans", Sans-serif;
+    font-weight: normal;
+    background: radial-gradient(circle at top left, rgba(74, 81, 92, 0.4) 0%, rgba(75, 81, 92, 0) 60%), #25282e;
+}
+
+.pse_newmodal_header {
+    padding: 0px 0px 0px 0px;
+    text-align: left;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: unset;
+    text-transform: unset;
+    flex-shrink: 0;
+}
+
+.pse_newmodal_content {
+    overflow: auto;
+    word-wrap: break-word;
+    padding: 20px;
+    font-size: 14px;
+    color: #acb2b8;
+}

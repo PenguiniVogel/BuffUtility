@@ -125,7 +125,7 @@ module Adjust_Listings {
             }
         }
 
-        if (!document.querySelector('span.buffutility-pricerange') && await ExtensionSettings.getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
+        if (!document.querySelector('span.buffutility-pricerange') && await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY) > ExtensionSettings.PriceHistoryRange.OFF) {
             console.debug('[BuffUtility] Adjust_Listings (header)');
 
             adjustHeaderListings();
@@ -137,7 +137,7 @@ module Adjust_Listings {
      */
     async function adjustHeaderListings(): Promise<void> {
         // default price trend ranges: 7 oder 30 days (with observer benefit 180 days also possible)
-        const days = await ExtensionSettings.getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
+        const days = await getSetting(Settings.EXPERIMENTAL_FETCH_ITEM_PRICE_HISTORY);
         const goods_id = document.querySelector('div.detail-cont div.add-bookmark').getAttribute('data-target-id');
 
         // skip to prevent doubles
@@ -518,7 +518,7 @@ module Adjust_Listings {
             let paymentMethods = (<HTMLElement>priceContainer.querySelectorAll('div').item(1))?.outerHTML ?? '';
             priceContainer.innerHTML = (newHTML + paymentMethods);
 
-            const preferredPaymentMethods = await ExtensionSettings.getSetting(Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS);
+            const preferredPaymentMethods = await getSetting(Settings.EXPERIMENTAL_PREFERRED_PAYMENT_METHODS);
             let aBuy = row.querySelector('td a.btn-buy-order[data-asset-info]');
             let aBargain = dataRow.can_bargain ? row.querySelector('td a.bargain[data-asset-info]') : null;
 
@@ -563,6 +563,20 @@ module Adjust_Listings {
 
         if (updated_preview > 0) {
             console.debug('[BuffUtility] Preview adjusted for', updated_preview, `element${updated_preview == 1 ? '.' : 's.'}`, 'type:', await getSetting(Settings.EXPAND_TYPE) == 0 ? 'PREVIEW' : 'INSPECT');
+        }
+
+        if (await getSetting(Settings.EXPERIMENTAL_SELL_ORDER_SCROLLING) && window.location.href.indexOf('bu_no_frame=true') == -1) {
+            // const footer = <HTMLElement>document.querySelector('body > div.footer');
+            // const detailCont = <HTMLElement>document.querySelector('body div.l_Layout div.detail-tab-cont');
+            //
+            // detailCont.style['overflow'] = 'hidden auto';
+            // detailCont.style['max-height'] = `calc(${window.getComputedStyle(detailCont).minHeight} + ${window.getComputedStyle(footer).height} - 10px)`;
+            //
+            // const iframe = document.createElement('iframe');
+            //
+            // document.body.append(iframe);
+            //
+            // iframe.src = `https://buff.163.com/goods/${goodsInfo.goods_id}?bu_no_frame=true#page_num=2`;
         }
     }
 

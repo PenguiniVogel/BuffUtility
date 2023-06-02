@@ -112,7 +112,6 @@ module ExtensionSettings {
     };
 
     export const enum Settings {
-        VERSION = 'version',
         SELECTED_CURRENCY = 'selected_currency',
         CUSTOM_CURRENCY_RATE = 'custom_currency_rate',
         CUSTOM_CURRENCY_NAME = 'custom_currency_name',
@@ -179,13 +178,13 @@ module ExtensionSettings {
         MODULE_ADJUST_SETTINGS = 'module_adjust_settings',
         MODULE_ADJUST_SHARE = 'module_adjust_share',
         MODULE_ADJUST_SHOP = 'module_adjust_shop',
+        MODULE_PSE_SETTINGS = 'module_pse_settings',
         MODULE_PSE_LISTINGS = 'module_pse_listings',
         MODULE_PSE_MARKET = 'module_pse_market',
         MODULE_PSE_TRANSFORMGRAPH = 'module_pse_transformgraph',
     }
 
     type InternalSettingsTypes = {
-        [Settings.VERSION]: string;
         [Settings.SELECTED_CURRENCY]: string;
         [Settings.CUSTOM_CURRENCY_RATE]: number;
         [Settings.CUSTOM_CURRENCY_NAME]: string;
@@ -258,6 +257,7 @@ module ExtensionSettings {
         [Settings.MODULE_ADJUST_SETTINGS]: boolean;
         [Settings.MODULE_ADJUST_SHARE]: boolean;
         [Settings.MODULE_ADJUST_SHOP]: boolean;
+        [Settings.MODULE_PSE_SETTINGS]: boolean;
         [Settings.MODULE_PSE_LISTINGS]: boolean;
         [Settings.MODULE_PSE_MARKET]: boolean;
         [Settings.MODULE_PSE_TRANSFORMGRAPH]: boolean;
@@ -339,11 +339,6 @@ module ExtensionSettings {
     }
 
     const INTERNAL_SETTINGS: InternalSettingStructure = {
-        [Settings.VERSION]: {
-            default: '2.1.8',
-            export: '0x0',
-            validator: validateNotNull
-        },
         [Settings.SELECTED_CURRENCY]: {
             default: 'USD',
             export: '0x1',
@@ -784,6 +779,12 @@ module ExtensionSettings {
             exportTransform: InternalSettingExportTransform.BOOLEAN,
             validator: validateBoolean
         },
+        [Settings.MODULE_PSE_SETTINGS]: {
+            default: false,
+            export: 'Mx11',
+            exportTransform: InternalSettingExportTransform.BOOLEAN,
+            validator: validateBoolean
+        },
         [Settings.MODULE_PSE_LISTINGS]: {
             default: true,
             export: 'Mx7',
@@ -804,7 +805,11 @@ module ExtensionSettings {
         }
     };
 
-    // validate the export keys to make sure one doesn't get used twice
+    /**
+     * validate the export keys to make sure one doesn't get used twice
+     *
+     * @private
+     */
     function checkInternalSettings(): void {
         const keys = Object.keys(INTERNAL_SETTINGS);
         let usedExports: string[] = [];
@@ -812,7 +817,7 @@ module ExtensionSettings {
             let internal: InternalSetting<any> = INTERNAL_SETTINGS[key];
 
             if (usedExports.indexOf(internal.export) > -1) {
-                console.error(`[BuffUtility] Export key ${internal.export} for ${key} has already been defined, please check.`);
+                console.error(`[BuffUtility] Export key ${internal.export} for ${key} has already been defined, please change.`);
             }
 
             usedExports.push(internal.export);
@@ -823,12 +828,27 @@ module ExtensionSettings {
 
     // func validators
 
+    /**
+     * Validates the input type against the specified setting type, if a mismatch is detected, it will log a waning
+     *
+     * @param key
+     * @param targetType
+     * @private
+     */
     function checkTypeValidation(key: Settings, targetType: string): void {
         if (!(typeof INTERNAL_SETTINGS[key].default == targetType)) {
             console.warn(`[BuffUtility] Tried validating ${key} as ${targetType}, should be validated as ${typeof INTERNAL_SETTINGS[key].default}`);
         }
     }
 
+    /**
+     * Validates the value to make sure it is not null,
+     * if the validation fails, it will return the setting default
+     *
+     * @param key
+     * @param value
+     * @private
+     */
     function validateNotNull(key: Settings, value: any): any {
         if (value == null) {
             return INTERNAL_SETTINGS[key].default;
@@ -837,34 +857,66 @@ module ExtensionSettings {
         }
     }
 
+    /**
+     * Validates a number, it makes sure the input value is finite and not NaN or null,
+     * if validation fails, it will return the setting default
+     *
+     * @param key
+     * @param value
+     * @private
+     */
     function validateNumber(key: Settings, value: any): number {
         checkTypeValidation(key, 'number');
 
-        if (!isFinite(+value) || +value == null) {
+        const iValue = +value;
+
+        if (!isFinite(iValue) || isNaN(iValue) || value == null) {
             return <number>INTERNAL_SETTINGS[key].default;
         } else {
-            return +value;
+            return iValue;
         }
     }
 
+    /**
+     * This takes two valid input types, if the input is type boolean, it will return the given value back,
+     * if the input value is a string, it will return a test of <code>value.toLowerCase() == 'true'</code>.
+     * If validation fails, it will return <code>null</code>, this <b>IS</b> intentional.
+     *
+     * @param value
+     * @private
+     */
     function _validateBoolean(value: any): boolean {
         if (typeof value == 'boolean') {
             return value;
         }
 
         if (typeof value == 'string') {
-            return value == 'true';
+            return value.toLowerCase() == 'true';
         }
 
         return null;
     }
 
+    /**
+     * Validates a boolean, for validation specification see {@link _validateBoolean}
+     *
+     * @param key
+     * @param value
+     * @private
+     */
     function validateBoolean(key: Settings, value: any): boolean {
         checkTypeValidation(key, 'boolean');
 
         return _validateBoolean(value) ?? <boolean>INTERNAL_SETTINGS[key].default;
     }
 
+    /**
+     * Validates an array of booleans, for individual validation specification see {@link _validateBoolean}
+     *
+     * @param key
+     * @param value
+     * @private
+     */
     function validateBooleanArray<T extends Settings>(key: T, value: any): boolean[] {
         checkTypeValidation(key, 'object');
 
@@ -878,16 +930,36 @@ module ExtensionSettings {
         return r;
     }
 
+    /**
+     * Validates a hex color matching <code>#[0-9a-f]{6}</code> if validation fails it will return <code>null</code>
+     *
+     * @param value
+     * @private
+     */
     function _validateColor(value: any): string {
         return /#[0-9a-f]{6}/i.test(value) ? value : null;
     }
 
+    /**
+     * Validates a hex color, for validation specification see {@link _validateColor}
+     *
+     * @param key
+     * @param value
+     * @private
+     */
     function validateColor(key: Settings, value: any): string {
         checkTypeValidation(key, 'string');
 
         return _validateColor(value) ?? <string>INTERNAL_SETTINGS[key].default;
     }
 
+    /**
+     * Validates a hex color array, for individual validation, see {@link _validateColor} specification
+     *
+     * @param key
+     * @param value
+     * @private
+     */
     function validateColorArray(key: Settings, value: any): string[] {
         value = value ?? INTERNAL_SETTINGS[key].default;
 
@@ -899,6 +971,14 @@ module ExtensionSettings {
         return r;
     }
 
+    /**
+     * Validates property values, this checks the input value against the allowed values, if present, it passes
+     * otherwise it will fail and use the default
+     *
+     * @param key
+     * @param value
+     * @private
+     */
     function validatePropertyValue(key: Settings, value: any): any {
         const internal: InternalSetting<any> = INTERNAL_SETTINGS[key];
         const allowedValues: any[] = internal.allowedValues;
@@ -1086,6 +1166,7 @@ module ExtensionSettings {
 
     /**
      * @deprecated
+     * @private
      */
     function _load217(): void {
         let tempSettings = Util.tryParseJson(Cookie.read(GlobalConstants.BUFF_UTILITY_SETTINGS));
@@ -1099,7 +1180,7 @@ module ExtensionSettings {
 
             console.debug('[BuffUtility] Finished migrating Settings from ~2.1.6 to 2.1.8+');
 
-            Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, '0', 0);
+            Cookie.write(GlobalConstants.BUFF_UTILITY_SETTINGS, '0', -1);
         }
     }
 

@@ -19,7 +19,8 @@ module Options {
             steamOnly?: boolean,
             requiresRequest?: boolean,
             isModule?: boolean,
-            addedIn?: string
+            addedIn?: string,
+            isLegacy?: boolean
         }
     }
 
@@ -92,6 +93,10 @@ module Options {
 
             if (tags.isModule) {
                 tagString += '<li>- <u style="color: #fffdfd; background: #006447; padding: 1px; border: 1px solid #eee;">Module</u></li>';
+            }
+
+            if (tags.isLegacy) {
+                tagString += '<li>- <u style="color: #c99eff;" title="This feature is no longer actively maintained, if problems arise, it won\'t be fixed.">☂ Legacy</u></li>';
             }
 
             return `${tagString}</ul>`;
@@ -806,6 +811,7 @@ module Options {
             description: 'Have many thousands of pages in your Market History? Ever wish you could jump to page 100? With this setting you can.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.2.2'
             }
         });
@@ -816,6 +822,7 @@ module Options {
             description: 'Wan\'t more than 10 items per page? Like on the sell order, this setting makes 10, 30 and 100 items per page available.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.2.2'
             }
         }, [
@@ -839,6 +846,7 @@ module Options {
             description: 'Shows the buy order summary, total per buy order, max buy order you can place, and how much has been placed.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.1.9'
             }
         });
@@ -849,6 +857,7 @@ module Options {
             description: 'Hate accidentally cancelling a buy order? Well no more! Now you get asked... once.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.1.9'
             }
         });
@@ -859,6 +868,7 @@ module Options {
             description: 'Hate how it takes up the whole page? Now the content height gets reduced to 50vh, and a scrollbar shows instead. This also adds a search field next to the Name header to quickly look for buy-orders.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.2.1'
             }
         });
@@ -869,6 +879,7 @@ module Options {
             description: 'Display the year in the Steam Median Sales graph.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.1.9'
             }
         });
@@ -879,6 +890,7 @@ module Options {
             description: 'Display the volume as additional series in the Steam Median Sales graph.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.1.9'
             }
         });
@@ -889,15 +901,10 @@ module Options {
             description: 'Instead of displaying the recent days volume hourly, it cumulates it together like other days.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.2.2'
             }
         });
-
-        // Settings.PSE_FORCE_ITEM_ACTIVITY TODO
-        // pseSettings += await createCheckboxOption(Settings.PSE_FORCE_ITEM_ACTIVITY, {
-        //     title: 'Force Item Activity',
-        //     description: ''
-        // });
 
         // Settings.PSE_ADD_VIEW_ON_BUFF
         pseSettings += await createCheckboxOption(Settings.PSE_ADD_VIEW_ON_BUFF, {
@@ -906,6 +913,7 @@ module Options {
             tags: {
                 csgoOnly: true,
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.1.9'
             }
         });
@@ -916,6 +924,7 @@ module Options {
             description: 'Blurs the billing information panel.',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.2.1'
             }
         });
@@ -926,6 +935,7 @@ module Options {
             description: 'Hiding them not enough? You would like the modal to collapse them to?',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.2.3'
             }
         });
@@ -936,6 +946,7 @@ module Options {
             description: 'Merges active listings by price and date',
             tags: {
                 steamOnly: true,
+                isLegacy: true,
                 addedIn: '2.2.1'
             }
         });
@@ -1009,6 +1020,16 @@ module Options {
             tags: {
                 isModule: true,
                 addedIn: '2.2.2'
+            }
+        });
+
+        // Settings.MODULE_PSE_SETTINGS
+        modulesSettings += await createCheckboxOption(Settings.MODULE_PSE_SETTINGS, {
+            title: 'PSE Settings Page',
+            description: 'Show the PSE Settings Tab',
+            tags: {
+                isModule: true,
+                addedIn: '2.2.4'
             }
         });
 
@@ -1137,8 +1158,14 @@ module Options {
             };
         });
 
+        const showPSESettings = await getSetting(Settings.MODULE_PSE_SETTINGS);
+
         // add events [data-page]
         (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-page]')).forEach(element => {
+            if (showPSESettings && element.getAttribute('data-page') == 'pse') {
+                element.style['display'] = '';
+            }
+
             element.onclick = () => {
                 let selfPage = element.getAttribute('data-page');
                 (<NodeListOf<HTMLElement>>document.querySelectorAll('[data-page]')).forEach(_page => {
