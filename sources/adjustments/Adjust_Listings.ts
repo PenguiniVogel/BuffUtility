@@ -480,7 +480,8 @@ module Adjust_Listings {
                             Util.buildHTML('div', {
                                 class: 'f_12px',
                                 style: {
-                                    'color': priceDiff < 0 ? GlobalConstants.COLOR_GOOD : GlobalConstants.COLOR_BAD
+                                    'color': priceDiff < 0 ? GlobalConstants.COLOR_GOOD : GlobalConstants.COLOR_BAD,
+                                    'display': (listingStyle == ExtensionSettings.ListingDifferenceStyle.NONE) ? 'none' : 'block'
                                 },
                                 attributes: {
                                     'title': priceDiffEx
