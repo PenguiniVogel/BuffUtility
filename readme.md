@@ -8,8 +8,8 @@ Get it for:
 
 ---
 
-**You have issues or a suggestion, but don't use or have a GitHub account?** <br/>
-No worries! We now have a [support discord](https://discord.gg/yeYuuKZxbP).
+**You have issues or a suggestion?** <br/>
+Please open a issue, if possible with elaborated details / reproduction procedures.
 
 ---
 
