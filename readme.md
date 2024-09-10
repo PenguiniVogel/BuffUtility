@@ -1,5 +1,10 @@
 ## BuffUtility V2
 
+Hello there, this project is now Archived.
+Thank you to everyone who installed and used BuffUtility.
+
+---
+
 Get it for:
 * Chrome [here](https://chrome.google.com/webstore/detail/buff-utility/gfjnmalnjjmjahaddeaamlkeliginpaf)
 * Firefox [here](https://addons.mozilla.org/en-US/firefox/addon/buff-utility/)
